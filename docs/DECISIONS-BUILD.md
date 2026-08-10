@@ -241,7 +241,7 @@ How it is built, and why each part is there:
   what buys strength; "one capital, one symbol" produces Password1! and is no
   longer recommended by NCSC or NIST.
 
-Verified by `scripts/auth-smoke.mjs` — 22 checks, all passing, including
+Verified by `app/e2e/auth-smoke.mjs` — 22 checks, all passing, including
 revocation of a pre-change session, rejection of a tampered signature, refusal
 to redirect off-site after sign-in, and lockout after 7 wrong guesses.
 
