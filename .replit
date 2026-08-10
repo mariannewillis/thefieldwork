@@ -1,0 +1,36 @@
+# Replit configuration — thefieldwork
+#
+# The app lives in app/, not at the repo root, so every command cd's there.
+#
+# DEPLOYMENT TARGET IS "vm" (Reserved VM) ON PURPOSE — see below. Do not switch
+# it to autoscale.
+
+modules = ["nodejs-22"]
+run = "cd app && npm run dev"
+
+[nix]
+channel = "stable-24_11"
+
+# ── Deployment ───────────────────────────────────────────────────────────────
+# deploymentTarget = "vm" means ONE always-on instance with a real filesystem.
+#
+# Autoscale would be cheaper and is the usual default, but it is WRONG for this
+# app: Next's ISR cache is per-instance. On autoscale a page Marianne publishes
+# would appear on some requests and not others depending on which instance
+# served them, and the cache resets on every scale event. "I published it and
+# it's not showing" is the worst bug to explain to a client, and it would be
+# intermittent — the hardest kind to diagnose.
+#
+# One instance is also right-sized: this is a sole practitioner's site.
+[deployment]
+deploymentTarget = "vm"
+build = ["sh", "-c", "cd app && npm ci && npm run build"]
+run = ["sh", "-c", "cd app && npm run start"]
+
+# Next binds the port Replit provides via $PORT (see app/package.json start).
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[env]
+NODE_ENV = "production"

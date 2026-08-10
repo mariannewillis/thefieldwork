@@ -264,25 +264,21 @@ export default function HomePage() {
         </div>
 
         <footer className="crown__foot">
-          <picture>
-            <source
-              type="image/avif"
-              srcSet={`/media/${crown.footPlate.src}-1200.avif 1200w, /media/${crown.footPlate.src}-2400.avif 2400w`}
-              sizes="100vw"
-            />
-            <source
-              type="image/webp"
-              srcSet={`/media/${crown.footPlate.src}-1200.webp 1200w, /media/${crown.footPlate.src}-2400.webp 2400w`}
-              sizes="100vw"
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="crown__foot-plate"
-              src={`/media/${crown.footPlate.src}-2400.jpg`}
-              alt={crown.footPlate.alt}
-              loading="lazy"
-            />
-          </picture>
+          {/* MUST be a direct child of .crown__foot and MUST carry the class.
+              The stylesheet lays the footer out with
+                .crown__foot > :not(.crown__foot-plate) { position: relative; z-index: 1 }
+              so any wrapper element here is caught by that rule, becomes the
+              positioning context, and collapses this inset:0 image to zero
+              height. A <picture> wrapper did exactly that — the plate vanished.
+              Bare <img> with the JPEG: 0.24MB rather than 0.09MB for the AVIF,
+              which is the price of not fighting the approved stylesheet. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="crown__foot-plate"
+            src={`/media/${crown.footPlate.src}-2400.jpg`}
+            alt={crown.footPlate.alt}
+            loading="lazy"
+          />
           <a
             className="crown__foot__brand"
             href="/"
