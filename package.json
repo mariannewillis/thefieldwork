@@ -1,28 +1,17 @@
 {
-  "name": "thefieldwork-v5",
-  "version": "0.0.0",
+  "name": "thefieldwork",
+  "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@9.12.0",
+  "description": "The Field Work — aura healing practice site and admin portal. The Next.js app lives in app/.",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
-    "test": "turbo run test",
-    "ui-kit:validate-consumer": "tsx packages/ui-kit/scripts/validate-consumer.ts 'apps/*/src/**/*.{ts,tsx,js,jsx}'"
-  },
-  "devDependencies": {
-    "glob": "^11.0.0",
-    "tsx": "^4.19.2",
-    "turbo": "^2.3.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "bcrypt",
-      "esbuild",
-      "sharp",
-      "bufferutil",
-      "utf-8-validate"
-    ]
+    "dev": "npm --prefix app run dev",
+    "build": "npm --prefix app run build",
+    "start": "npm --prefix app run start",
+    "lint": "npm --prefix app run lint",
+    "typecheck": "npm --prefix app run typecheck",
+    "install:app": "npm --prefix app ci"
   }
 }

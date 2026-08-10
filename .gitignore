@@ -70,3 +70,14 @@ docs/_results/
 docs/_flow-interactions-*.json
 docs/screens/_results/
 docs/_integration-decision-brief.md
+
+# factory scaffolding that is not part of the product and misleads tooling
+pnpm-workspace.yaml
+turbo.json
+
+# agentflow factory tooling — not part of the product
+CLAUDE.md
+AGENTS.md
+app/CLAUDE.md
+app/AGENTS.md
+companion/
