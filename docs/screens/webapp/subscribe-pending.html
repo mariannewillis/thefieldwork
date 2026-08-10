@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Check your email — The Field Work</title>
+    <meta
+      name="description"
+      content="Confirmation link sent. What to look for, how long it takes, and why this page will not resend it."
+    />
+    <link
+      rel="stylesheet"
+      href="../../../packages/ui-kit/src/styles/globals.css"
+    />
+
+    <!-- preview-bootstrap.html inlined verbatim (packages/ui-kit/src/styles/preview-bootstrap.html) -->
+    <style id="kit-tokens">
+      /**
+       * @repo/ui-kit — tokens.css
+       * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
+       *
+       * DARK-DEFAULT (see src/tokens/README.md before touching this file).
+       * :root already carries the dark/near-black values — there is no light-mode
+       * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
+       * of :root, kept only because the approved mockups literally set
+       * data-theme="dark" on <html> and the Tailwind config's darkMode selector
+       * references it — not because a second theme exists.
+       */
+
+      :root,
+      [data-theme="dark"] {
+        color-scheme: dark;
+
+        /* ---- color.neutral ---- */
+        --color-neutral-50: #fbf3f1;
+        --color-neutral-100: #e6dcdc;
+        --color-neutral-200: #d8bfc9;
+        --color-neutral-300: #b0a3a8;
+        --color-neutral-400: #95868d;
+        --color-neutral-500: #8e6a82;
+        --color-neutral-600: #64515d;
+        --color-neutral-700: #4e3a48;
+        --color-neutral-800: #3b2635;
+        --color-neutral-900: #260f20;
+        --color-neutral-950: #160712;
+
+        /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
+        --color-accent-50: #fbeff6;
+        --color-accent-100: #f7d9eb;
+        --color-accent-200: #f2badb;
+        --color-accent-300: #ed91c7;
+        --color-accent-400: #e75aac;
+        --color-accent-500: #c2187a;
+        --color-accent-600: #a51266;
+        --color-accent-700: #870d50;
+        --color-accent-800: #67093b;
+        --color-accent-900: #4b062a;
+        --color-accent-950: #2f041a;
+
+        /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
+        --color-secondary-500: #e9c87e;
+        --color-secondary-600: #c99a3f;
+
+        /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
+        --color-highlight-300: #f8c9bf;
+        --color-highlight-500: #f5876f;
+
+        /* ---- color.semantic ---- */
+        --color-success: #6fcb99;
+        --color-warning: #e9c87e;
+        --color-danger: #f58a80;
+        --color-info: #e9c87e;
+
+        /* ---- color.surface ---- */
+        --color-surface-base: #160712;
+        --color-surface-raised: #260f20;
+        --color-surface-overlay: #1e0a1ce6;
+        --color-surface-inverted: #fbf3f1;
+
+        /* ---- color.text ---- */
+        --color-text-primary: #fbf3f1;
+        --color-text-secondary: #d8bfc9;
+        --color-text-tertiary: #8e6a82;
+        --color-text-inverted: #1e0a1c;
+
+        /* ---- color.border ---- */
+        --color-border-subtle: #4e3a48;
+        --color-border-default: #8e6a82;
+        --color-border-strong: #b0a3a8;
+
+        /* ---- color.pool (the inverted-context family — see README) ---- */
+        --color-pool-surface: #fbf3f1;
+        --color-pool-text: #1e0a1c;
+        --color-pool-text-secondary: #5a4356;
+        --color-pool-border: #8a7285;
+        --color-pool-danger: #a3221a;
+        --color-pool-success: #0f6b3d;
+
+        /* ---- typography.fontFamily ---- */
+        --font-family-sans:
+          "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-family-mono:
+          "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+        --font-family-display: "Cormorant Garamond", Georgia, serif;
+
+        /* ---- typography.fontSize ---- */
+        --font-size-xs: 15px;
+        --font-size-sm: 17px;
+        --font-size-md: 18px;
+        --font-size-lg: 19px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 36px;
+        --font-size-5xl: 48px;
+        --font-size-6xl: 64px;
+
+        /* ---- typography.fontWeight ---- */
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* ---- typography.lineHeight ---- */
+        --line-height-tight: 1.05;
+        --line-height-snug: 1.2;
+        --line-height-normal: 1.6;
+        --line-height-relaxed: 1.7;
+
+        /* ---- typography.letterSpacing ---- */
+        --letter-spacing-tight: -0.005em;
+        --letter-spacing-normal: 0em;
+        --letter-spacing-wide: 0.18em;
+
+        /* ---- spacing ---- */
+        --spacing-0: 0px;
+        --spacing-0_5: 2px;
+        --spacing-1: 4px;
+        --spacing-2: 8px;
+        --spacing-3: 12px;
+        --spacing-4: 16px;
+        --spacing-5: 20px;
+        --spacing-6: 24px;
+        --spacing-8: 32px;
+        --spacing-10: 40px;
+        --spacing-12: 48px;
+        --spacing-16: 64px;
+        --spacing-20: 80px;
+        --spacing-24: 96px;
+
+        /* ---- radius (the direction uses --radius-none everywhere except a true
+           circle avatar, which uses --radius-full — see README §Shape law) ---- */
+        --radius-none: 0px;
+        --radius-sm: 2px;
+        --radius-md: 4px;
+        --radius-lg: 8px;
+        --radius-xl: 12px;
+        --radius-2xl: 16px;
+        --radius-full: 9999px;
+
+        /* ---- shadow (unused by this direction — kept for schema completeness) --- */
+        --shadow-xs: none;
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+        --shadow-xl: none;
+
+        /* ---- motion ---- */
+        --motion-duration-instant: 80ms;
+        --motion-duration-fast: 120ms;
+        --motion-duration-normal: 150ms;
+        --motion-duration-slow: 220ms;
+        --motion-duration-slower: 320ms;
+        --motion-duration-ambient: 24000ms;
+        --motion-easing-linear: linear;
+        --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+        --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
+        --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
+        --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* ---- zIndex ---- */
+        --z-base: 0;
+        --z-dropdown: 1000;
+        --z-sticky: 1100;
+        --z-overlay: 1200;
+        --z-modal: 1300;
+        --z-toast: 1400;
+        --z-tooltip: 1500;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: ["class", '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              neutral: {
+                50: "var(--color-neutral-50)",
+                100: "var(--color-neutral-100)",
+                200: "var(--color-neutral-200)",
+                300: "var(--color-neutral-300)",
+                400: "var(--color-neutral-400)",
+                500: "var(--color-neutral-500)",
+                600: "var(--color-neutral-600)",
+                700: "var(--color-neutral-700)",
+                800: "var(--color-neutral-800)",
+                900: "var(--color-neutral-900)",
+                950: "var(--color-neutral-950)",
+              },
+              accent: {
+                50: "var(--color-accent-50)",
+                100: "var(--color-accent-100)",
+                200: "var(--color-accent-200)",
+                300: "var(--color-accent-300)",
+                400: "var(--color-accent-400)",
+                500: "var(--color-accent-500)",
+                600: "var(--color-accent-600)",
+                700: "var(--color-accent-700)",
+                800: "var(--color-accent-800)",
+                900: "var(--color-accent-900)",
+                950: "var(--color-accent-950)",
+              },
+              secondary: {
+                500: "var(--color-secondary-500)",
+                600: "var(--color-secondary-600)",
+              },
+              highlight: {
+                300: "var(--color-highlight-300)",
+                500: "var(--color-highlight-500)",
+              },
+              success: "var(--color-success)",
+              warning: "var(--color-warning)",
+              danger: "var(--color-danger)",
+              info: "var(--color-info)",
+              surface: {
+                base: "var(--color-surface-base)",
+                raised: "var(--color-surface-raised)",
+                overlay: "var(--color-surface-overlay)",
+                inverted: "var(--color-surface-inverted)",
+              },
+              text: {
+                primary: "var(--color-text-primary)",
+                secondary: "var(--color-text-secondary)",
+                tertiary: "var(--color-text-tertiary)",
+                inverted: "var(--color-text-inverted)",
+              },
+              border: {
+                subtle: "var(--color-border-subtle)",
+                DEFAULT: "var(--color-border-default)",
+                strong: "var(--color-border-strong)",
+              },
+              pool: {
+                surface: "var(--color-pool-surface)",
+                text: "var(--color-pool-text)",
+                "text-secondary": "var(--color-pool-text-secondary)",
+                border: "var(--color-pool-border)",
+                danger: "var(--color-pool-danger)",
+                success: "var(--color-pool-success)",
+              },
+            },
+            fontFamily: {
+              sans: "var(--font-family-sans)",
+              mono: "var(--font-family-mono)",
+              display: "var(--font-family-display)",
+            },
+            fontSize: {
+              xs: "var(--font-size-xs)",
+              sm: "var(--font-size-sm)",
+              md: "var(--font-size-md)",
+              lg: "var(--font-size-lg)",
+              xl: "var(--font-size-xl)",
+              "2xl": "var(--font-size-2xl)",
+              "3xl": "var(--font-size-3xl)",
+              "4xl": "var(--font-size-4xl)",
+              "5xl": "var(--font-size-5xl)",
+              "6xl": "var(--font-size-6xl)",
+            },
+            fontWeight: {
+              regular: "var(--font-weight-regular)",
+              medium: "var(--font-weight-medium)",
+              semibold: "var(--font-weight-semibold)",
+              bold: "var(--font-weight-bold)",
+            },
+            lineHeight: {
+              tight: "var(--line-height-tight)",
+              snug: "var(--line-height-snug)",
+              normal: "var(--line-height-normal)",
+              relaxed: "var(--line-height-relaxed)",
+            },
+            letterSpacing: {
+              tight: "var(--letter-spacing-tight)",
+              normal: "var(--letter-spacing-normal)",
+              wide: "var(--letter-spacing-wide)",
+            },
+            spacing: {
+              0.5: "var(--spacing-0_5)",
+              1: "var(--spacing-1)",
+              2: "var(--spacing-2)",
+              3: "var(--spacing-3)",
+              4: "var(--spacing-4)",
+              5: "var(--spacing-5)",
+              6: "var(--spacing-6)",
+              8: "var(--spacing-8)",
+              10: "var(--spacing-10)",
+              12: "var(--spacing-12)",
+              16: "var(--spacing-16)",
+              20: "var(--spacing-20)",
+              24: "var(--spacing-24)",
+            },
+            borderRadius: {
+              none: "var(--radius-none)",
+              sm: "var(--radius-sm)",
+              DEFAULT: "var(--radius-md)",
+              md: "var(--radius-md)",
+              lg: "var(--radius-lg)",
+              xl: "var(--radius-xl)",
+              "2xl": "var(--radius-2xl)",
+              full: "var(--radius-full)",
+            },
+            boxShadow: {
+              xs: "var(--shadow-xs)",
+              sm: "var(--shadow-sm)",
+              DEFAULT: "var(--shadow-md)",
+              md: "var(--shadow-md)",
+              lg: "var(--shadow-lg)",
+              xl: "var(--shadow-xl)",
+            },
+            transitionDuration: {
+              instant: "var(--motion-duration-instant)",
+              fast: "var(--motion-duration-fast)",
+              DEFAULT: "var(--motion-duration-normal)",
+              normal: "var(--motion-duration-normal)",
+              slow: "var(--motion-duration-slow)",
+              slower: "var(--motion-duration-slower)",
+            },
+            transitionTimingFunction: {
+              linear: "var(--motion-easing-linear)",
+              standard: "var(--motion-easing-standard)",
+              decel: "var(--motion-easing-decel)",
+              accel: "var(--motion-easing-accel)",
+              spring: "var(--motion-easing-spring)",
+            },
+            zIndex: {
+              dropdown: "var(--z-dropdown)",
+              sticky: "var(--z-sticky)",
+              overlay: "var(--z-overlay)",
+              modal: "var(--z-modal)",
+              toast: "var(--z-toast)",
+              tooltip: "var(--z-tooltip)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ═══════════════════════════════════════════════════════════════════
+         subscribe-pending — a small screen doing one job. APPLICATION
+         surface (interface-craft, not the narrative spine): one question
+         only — "did it work, and where do I look" — answered inside a
+         single clearing-plate pool, centred, on a still full-bleed plate
+         (window-last-light: a room waiting for light, which is the whole
+         register this page needs). No resend control anywhere on this
+         screen — the canonical spec (docs/analysis/webapp/screens.json,
+         id: subscribe-pending) states the address is pending and an
+         unconfirmed address receives exactly one email; a resend
+         affordance would contradict that fact, so none is drawn. The
+         expired-link state belongs to subscribe-confirmed.html (its own
+         screens.json entry), not here.
+         ═══════════════════════════════════════════════════════════════════ */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--color-surface-base);
+        overflow-x: hidden;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+      }
+      .plate {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .plate {
+          transition: filter var(--motion-duration-slower)
+            var(--motion-easing-standard);
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    data-kit-layout="FocusedTask"
+    data-screen-id="subscribe-pending"
+    class="font-sans text-text-primary"
+  >
+    <!-- ═══ Minimal header — navigation.header.variant: "minimal",
+         actions: ["nav-home"]. Sticky (not hero-only-absolute like the
+         marketing masthead) because this is a utility screen someone may
+         land on directly from an email client; wayfinding stays on
+         screen rather than disappearing on scroll. Solid chrome fill is
+         UI chrome, not "the ground" — the night-side rule about bare dark
+         governs page backdrop, not a persistent nav bar. ═══ -->
+    <header
+      data-kit-component="Header"
+      data-kit-variant="minimal"
+      class="sticky top-0 z-[3] flex items-center justify-between gap-6 border-b border-border-subtle bg-surface-base/95 px-6 py-4 backdrop-blur-sm sm:px-[var(--spacing-24,6rem)]"
+    >
+      <a
+        data-pattern="wordmark"
+        data-kit-component="Logo"
+        href="/"
+        aria-label="The Field Work — home"
+        class="inline-flex items-center min-h-[44px]"
+      >
+        <img
+          src="../../../assets/brand/logo-horizontal.svg"
+          alt="The Field Work"
+          class="h-[44px] w-auto sm:h-[52px]"
+        />
+      </a>
+
+      <a
+        href="/"
+        data-kit-component="Nav"
+        data-kit-variant="nav-home"
+        class="inline-flex min-h-[44px] items-center gap-2 text-sm text-text-primary no-underline hover:text-secondary-500"
+      >
+        Home
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="h-[14px] w-[14px] shrink-0"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </header>
+
+    <main
+      data-kit-component="Layout"
+      data-kit-variant="content-wrapper"
+      class="relative mx-auto max-w-[1280px]"
+    >
+      <!-- ═══ The screen itself — the live route, populated state. ═══ -->
+      <section
+        data-pattern="clearing-plate"
+        data-anchor="center"
+        class="relative flex min-h-[calc(100svh-73px)] items-center justify-center overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
+      >
+        <img
+          src="../../../assets/images/new/window-last-light.png"
+          alt=""
+          class="plate pointer-events-none"
+          style="filter: brightness(0.48) saturate(1.08) contrast(1.04)"
+        />
+
+        <div
+          data-kit-component="StatusPanel"
+          data-kit-variant="pending"
+          data-state="populated"
+          class="relative z-[2] w-full max-w-[460px] bg-pool-surface px-8 py-10 text-pool-text sm:px-10 sm:py-12"
+        >
+          <p
+            data-pattern="eyebrow"
+            data-variant="marketing-on-pool"
+            class="mb-3 inline-flex items-center gap-2 font-sans text-sm font-semibold uppercase tracking-wide text-accent-500"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="h-[15px] w-[15px] shrink-0"
+            >
+              <rect x="3" y="5" width="18" height="14" />
+              <path d="m3 7 9 6 9-6" />
+            </svg>
+            Confirmation sent
+          </p>
+
+          <h1
+            class="mb-4 font-display text-3xl leading-tight text-pool-text sm:text-4xl"
+          >
+            You're not on the list yet.
+          </h1>
+
+          <p class="mb-1 text-md leading-relaxed text-pool-text">
+            We've sent a confirmation link to
+          </p>
+          <p
+            data-kit-component="StatusPanel"
+            data-kit-variant="address"
+            class="mb-6 border-t border-b border-pool-border/[.22] py-3 font-mono text-sm tabular-nums text-pool-text"
+          >
+            marianne.reader@example.com
+          </p>
+
+          <p class="mb-6 text-md leading-relaxed text-pool-text">
+            Open it to finish joining. Nothing else happens until you do — this
+            address is not on the list yet.
+          </p>
+
+          <div data-kit-component="ProseBlock" class="mb-6">
+            <p
+              class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-pool-text"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="h-[15px] w-[15px] shrink-0"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 3" />
+              </svg>
+              Usually arrives within a few minutes.
+            </p>
+            <p class="text-sm leading-relaxed text-pool-text-secondary">
+              It comes from The Field Work, not a no-reply address, with the
+              subject line "Confirm you want field notes from The Field Work."
+              Check spam or promotions if it hasn't landed.
+            </p>
+          </div>
+
+          <p
+            class="border-t border-pool-border/[.22] pt-4 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+          >
+            This link is sent once, to that address only. Wrong address? Join
+            again with the right one.
+          </p>
+        </div>
+      </section>
+
+      <!-- ═══ Reference states — I-1 state-completeness for engineering
+           handoff. Not part of the live route above; shown here the same
+           way admin-dashboard.html demonstrates "the other states" as
+           labelled siblings on their own dimmed plate. No resend state and
+           no expired-link state are drawn here: the canonical spec forbids
+           the former on this screen, and the latter belongs to
+           subscribe-confirmed.html. What IS applicable to a single-fact
+           status screen: the address arriving unknown (client lost the
+           submitted value), the brief moment while that submission is
+           being confirmed, and the network failing outright. ═══ -->
+      <section
+        data-pattern="clearing-plate"
+        data-variant="admin-panel"
+        class="relative overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
+      >
+        <img
+          src="../../../assets/images/new/aura-field-abstract.png"
+          alt=""
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[.55] [filter:brightness(.42)_saturate(1.04)]"
+        />
+
+        <div class="relative z-[1]">
+          <p
+            data-pattern="eyebrow"
+            data-variant="marketing-on-plate"
+            class="mb-6 font-sans text-sm font-semibold uppercase tracking-wide text-secondary-500"
+          >
+            The other states — for reference, not shown in the live flow
+          </p>
+
+          <div data-pattern="state-panel" class="grid gap-4 sm:grid-cols-3">
+            <!-- Address unknown — the client lost which address was
+                 submitted (a direct load, a refreshed tab, a bookmarked
+                 link). This is this screen's stand-in for "empty": there
+                 is no fact to show, so the copy says so instead of
+                 guessing. -->
+            <article
+              data-state="empty"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="font-mono text-xs uppercase tracking-wide text-accent-500"
+              >
+                Address unknown
+              </p>
+              <p class="mt-2 text-lg font-semibold text-pool-text">
+                Check the inbox for the address you just used.
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-pool-text-secondary">
+                This page can't tell which address you entered. Look for a
+                message from The Field Work with the subject line "Confirm you
+                want field notes from The Field Work."
+              </p>
+            </article>
+
+            <!-- Loading — the brief window while the client confirms the
+                 subscribe-form submission reached the server, before this
+                 screen has anything to state as fact. Flat static blocks,
+                 no shimmer, per this direction's motion budget. -->
+            <article
+              data-state="loading"
+              aria-busy="true"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+              >
+                Loading
+              </p>
+              <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+                <div class="h-[13px] w-[70%] bg-neutral-200/[.14]"></div>
+                <div class="h-[13px] w-[45%] bg-neutral-200/[.14]"></div>
+                <div class="h-[13px] w-[85%] bg-neutral-200/[.14]"></div>
+              </div>
+              <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+                Confirming your submission reached us.
+              </p>
+            </article>
+
+            <!-- Error — the submission could not be confirmed at all
+                 (network failure, not an expired token — that state
+                 belongs to subscribe-confirmed.html). The action offered
+                 is "try again," which re-runs the confirmation check, not
+                 a resend of any email. -->
+            <article
+              data-state="error"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="font-mono text-xs uppercase tracking-wide text-pool-danger"
+              >
+                Error
+              </p>
+              <p class="mt-2 text-lg font-semibold text-pool-danger">
+                Couldn't confirm that reached us.
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-pool-text-secondary">
+                The sign-up may not have gone through. No email may have been
+                sent yet.
+              </p>
+              <a
+                href="#"
+                class="mt-3 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+              >
+                Try again
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- navigation.footer.variant: "hidden" — no site footer on this screen. -->
+  </body>
+</html>

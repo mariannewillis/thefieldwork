@@ -1,0 +1,327 @@
+{
+  "scope": "project",
+  "skills": [
+    {
+      "name": "ascending-beat-scroll",
+      "skillClass": "identity",
+      "layoutMove": true,
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §11 — the home page is SEVEN FIXED NARRATIVE BEATS in a fixed ascending root→crown order, with a data-driven products block between beats 6 and 7"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §5 — beats 2-6 toggle, beats 1 and 7 do not; 'configurable content, fixed design'. §20 — the anti-rainbow default, and 'how a direction expresses the ascent is a design decision made per direction'"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — Squarespace's own prescribed wellness order (Jenani/Anza/Clune/Aurora/Clove) is 'full-bleed soft-focus hero → short mission statement → three-up service cards → practitioner bio → testimonials → booking CTA', followed by 5 of 6 researched sites, and it contains NO slot for reassurance and no slot for 'what this is not'"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 3 (Long Dusk) — the ascent taken literally as the page ground itself, travelling plum-900 at Beat 1 to blush at Beat 7"
+        }
+      ],
+      "appliesTo": [
+        "landing",
+        "home",
+        "products-block",
+        "beat-root",
+        "beat-sacral",
+        "beat-solar-plexus",
+        "beat-heart",
+        "beat-throat",
+        "beat-third-eye",
+        "beat-crown"
+      ],
+      "activationKeywords": [
+        "ascent",
+        "beat",
+        "scroll",
+        "chakra",
+        "root",
+        "crown"
+      ],
+      "precedence": "supersede-generic",
+      "body": "# Ascending beat scroll — bespoke identity composition for The Fieldwork\n\n## Intent\n\nThe home page is not a set of sections; it is one climb. `brief.md` §11 fixes\nseven narrative beats in a fixed ascending root→crown order — Beat 1 disarms the\nspecific fear (you stay clothed, nobody touches you, nothing is asked of your\nbeliefs), Beat 7 is \"the call to action, at the brightest point of the page,\nresolving the specific thing beat 1 opened\". This skill asks the composition to\ncarry that ascent in the page's own material rather than illustrate it with an\nicon or a colour band. It is this client's candidate escape from the category\ndefault measured in `competitors.md`.\n\n## When it applies\n\n- The **home scroll** only (`hero`, `landing`, `section`, `page-composition`) —\n  the sole surface where the seven beats exist and the only place this axis\n  earns its place.\n- **Open, not governed here**: offering index and detail pages, about, contact,\n  the booking and subscribe forms, and every admin screen. Do not impose a climb\n  on a working surface.\n\n## Composition move\n\n**The axis** — a single vertical ASCENT: seven beats in fixed order, root to\ncrown, in which ONE measurable property rises monotonically across the whole\nscroll and never reverses. Choose the property per direction — ground luminance,\ntype scale, vertical air, or image openness — then hold it. The page ends at its\nbrightest, most open point, and the call to action sits there.\n\n**The category default it supersedes** — instead of Squarespace's own prescribed\nwellness order, near-identical across Jenani / Anza / Clune / Aurora / Clove and\nfollowed by 5 of the 6 researched sites: _full-bleed soft-focus hero photograph →\nshort mission statement → three-up service cards → practitioner bio →\ntestimonials → booking CTA_. That template is a set of independent boxes with no\ndirection of travel, and it has no slot for reassurance (Beat 1) and no slot for\n\"what this is not\" (Beat 5) — the two beats this client's honesty depends on.\n\n## Do\n\n- Make the ascent **structural, not thematic**: with the copy removed, the shape\n  of the page should still read as a climb. `styles.md` Style 3 (Long Dusk) is\n  the literal case — a split ground travelling `#1E0A1C` plum-900 at Beat 1 to\n  `#FBF3F1` blush at Beat 7.\n- **Anchor the two fixed ends hardest.** Beats 1 and 7 have no visibility toggle\n  (brief §5 — \"a page with no reassurance and no call to action is not a page\").\n  Beat 1 is the most enclosed point, Beat 7 the most open.\n- **Survive a missing rung.** Beats 2–6 can be hidden by the owner (brief §5,\n  \"Hiding is not deleting\"), so depend on the direction of travel — never on\n  exactly seven steps or on equal step sizes.\n- Keep the **products block between beats 6 and 7** (brief §11) in its own\n  register: the transformation, then how to get it, then the ask. It is not one\n  of the seven beats and should not be dressed as one.\n- **Render the climb statically.** It must be whole in a screenshot with no JS.\n  The category's entire motion vocabulary is a scroll fade-in and a testimonial\n  carousel (`competitors.md`); an ascent that exists only while scrolling is not\n  a composition.\n\n## Don't\n\n- **No seven-colour chakra band or rainbow gradient.** brief §20 names the\n  rainbow chakra chart as the measured category cliché; at most one true chakra\n  hue per beat as a small accent, never a full band.\n- **Don't let the beats become seven independent full-viewport mini-pages.**\n  Seven boxes each complete in itself is a section catalogue, not an arc.\n- **Don't let the products block reimport the template.** If it uses cards, they\n  belong to the ascent's register at that height — not a three-up service-card\n  grid dropped in.\n- **Don't reverse or plateau** the chosen property mid-scroll to \"add variety\".\n  One direction of travel, or none.\n\n## This axis is a CANDIDATE, not a law\n\nThis skill was authored during `/analyze`, before the creative-director wrote a\nsingle direction. Its whole job is to name this client's escape from the category\ndefault above. A direction's own `layoutArchetype` OVERRIDES this axis wherever\nthe two conflict, and a direction that derives a different composition from its\n`governingIdea` is CORRECT to do so, not in violation. brief §20 says exactly\nthis: the ascent itself is a §11 requirement, but \"_how_ a direction expresses\nthe ascent is a design decision made per direction and chosen at Gate 2.\"\n\n## Citations\n\n- brief: seven fixed narrative beats in a fixed ascending root→crown order, the\n  products block between beats 6 and 7, and Beat 7's CTA \"at the brightest point\n  of the page, resolving the specific thing beat 1 opened\" (brief.md §11)\n- brief: beats 2–6 toggle, beats 1 and 7 do not; \"configurable content, fixed\n  design\" (brief.md §5) — plus the anti-rainbow default and \"_how_ a direction\n  expresses the ascent is a design decision made per direction\" (brief.md §20)\n- competitor: Squarespace's prescribed wellness order, followed by 5 of 6 sites,\n  with no reassurance slot and no \"what this is not\" slot; motion default = a\n  scroll fade-in and a carousel (competitors.md §The Category Template)\n- differentiation-move: styles.md Style 3 \"Long Dusk\" — the ascent taken\n  literally as the page ground itself, plum-900 at Beat 1 to blush at Beat 7",
+      "origin": "authored",
+      "path": ".claude/skills/design/ascending-beat-scroll/SKILL.md"
+    },
+    {
+      "name": "the-answered-question",
+      "skillClass": "identity",
+      "layoutMove": false,
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §3 — 'the specific thing they are too embarrassed to ask is whether they will have to take their clothes off. So they close the tab. Not because they decided against it — because nobody answered the question they couldn't ask.'"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §11 — beat 1 (Root) 'Answer the unasked question… Always visible.'; beat 7 (Crown) 'resolving the specific thing beat 1 opened.'; beat 4 'Empathy first, credentials second.'"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §15 — '≥80% of test visitors, unprompted, can state that they keep their clothes on and are not touched, after one scroll.'"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §2 audience note — 'Skews 35–65. Assume reading glasses are somewhere else in the house.' (the legibility floor for beat 1)"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — measured: the strings clothed / undress / touch / hands-off / believe appear ZERO times on the homepage of all six researched practitioner and studio sites. Blossom Reiki answers all three well but buries it on a second-click /faq/."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the compositional default 'full-bleed soft-focus hero photograph → short mission statement → three-up service cards', followed by 5 of 6 sites: 'No slot for reassurance.'"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — NHS 'What happens at your appointment', verbatim: 'You'll need to undress, behind a screen, from the waist down.' Flat, procedural, unembarrassed; second person, 8–17 word sentences, discomfort admitted rather than denied. Plus its structural warning — the parent page defers 'what happens' four links down."
+        },
+        {
+          "source": "asset",
+          "ref": "asset-inventory.json — assets/images/aura-two-people.png: hands hovering above a SEATED, FULLY CLOTHED person. The reassurance is available as a photograph, not only as a sentence."
+        }
+      ],
+      "appliesTo": [
+        "landing",
+        "home",
+        "beat-root",
+        "beat-crown",
+        "home-page",
+        "beat-editor-card"
+      ],
+      "activationKeywords": ["reassurance", "clothed", "first-timer", "hero"],
+      "precedence": "supersede-generic",
+      "body": "# The Answered Question — bespoke identity for The Field Work\n\n## Intent\n\nThe first thing this page does is answer the question the visitor is too\nembarrassed to ask: do I undress, am I touched, must I believe something. Not in\nan FAQ. Not below the fold. FIRST, in plain declarative sentences, with the\nphotograph carrying the same fact in parallel so it survives a skim by someone\nwho reads nothing.\n\nThis is the project's single largest competitive position, and it is measured\nrather than asserted: across all six researched practitioner/studio homepages the\nstrings `clothed` / `undress` / `touch` / `hands-off` / `believe` appear **zero\ntimes**. The one site that answers all three well buries it on a second-click\n`/faq/`. The brief's own functional success metric is ≥80% unprompted recall\nafter one scroll — this skill is the lever on it.\n\nThe register to borrow is public-health editorial, inverted: the NHS must tell\nyou that you WILL undress; this client gets to tell you that you will NOT.\n\n## When it applies\n\n- Home **beat 1 (Root)** — primary and non-negotiable. The first viewport.\n- The **beat 7 (Crown)** CTA, which must resolve the specific thing beat 1\n  opened, not a generic \"get in touch\".\n- Any hero or landing surface, and any copy pass on those surfaces, where a\n  first-time visitor arrives cold.\n- NOT admin, dense-data or account surfaces — there is no unasked question there.\n\n## Do\n\n1. **Put all three facts in the first viewport** — clothing, touch, belief — as\n   the first thing an adult reads, ahead of any decorative flourish.\n2. **Write flat and procedural.** Second person, present/future tense, sentences\n   of roughly 8–17 words, no adjectives, no softening, headings phrased as the\n   reader's own question. Admit rather than deny. Illustrative only — the brief's\n   own beat-1 job line, NOT final copy: _\"You stay clothed, nobody touches you,\n   nothing is asked of your beliefs.\"_ The client and the designer own the words;\n   this skill owns the discipline.\n3. **Set it at a size that reads without glasses.** The audience skews 35–65;\n   the brief instructs you to assume the reading glasses are elsewhere in the\n   house. Reassurance rendered as fine print is not reassurance.\n4. **Let the photograph make the same argument.** `aura-two-people.png` shows a\n   seated, FULLY CLOTHED person with the practitioner's hands HOVERING above her\n   shoulders. Any crop that loses the clothed body, or closes the visible gap\n   between hands and shoulders, throws away the parallel proof — check both\n   survive at every breakpoint.\n5. **Close the loop at the Crown.** The CTA answers the thing beat 1 opened, so\n   the reassurance reads as one spine, not as an isolated box near the top.\n\n## Don't\n\n- **Don't ship beat 1 as an atmospheric hero with a tagline.** That is the\n  measured category default (full-bleed soft-focus photograph → short mission\n  statement → three-up cards), and it has no slot for reassurance at all. This\n  skill SUPERSEDES generic hero taste — where `frontend-design` /\n  `design-taste-frontend` want an evocative headline plus subhead, the specific\n  procedural sentences win.\n- **Don't demote it** to an FAQ, an accordion, a \"first-timers\" page, or anything\n  below the fold. That burial is the exact failure measured in the category — and\n  the NHS's own parent page reproduces it by deferring \"what happens\" four links\n  down. First viewport, not a link from it.\n- **Don't soften the facts into euphemism** (\"you'll be completely comfortable\",\n  \"there's nothing to worry about\"). The fact IS the reassurance; a soothing\n  adjective replaces it with nothing.\n- **Don't let procedure kill the warmth, or warmth kill the procedure.** Warmth\n  without the answer is decoration; the answer without warmth is a leaflet. Both\n  are required, in that order.\n- **Don't introduce the practitioner here.** She enters at beat 4, empathy first.\n  Beat 1 belongs entirely to the visitor's question.\n\n## Citations\n\n- brief: §3 problem statement — _\"the specific thing they are too embarrassed to\n  ask is whether they will have to take their clothes off. So they close the tab.\n  Not because they decided against it — because nobody answered the question they\n  couldn't ask.\"_\n- brief: §11 screen catalog, beat 1 (Root) — _\"Answer the unasked question… Names\n  the specific fear and disarms it. Always visible.\"_; beat 7 (Crown) —\n  _\"resolving the specific thing beat 1 opened.\"_\n- brief: §15 success metrics — _\"≥80% of test visitors, unprompted, can state\n  that they keep their clothes on and are not touched, after one scroll.\"_\n- brief: §2 audience note — _\"Skews 35–65. Assume reading glasses are somewhere\n  else in the house.\"_ (the legibility floor)\n- competitor: `competitors.md` headline finding — `clothed` / `undress` / `touch`\n  / `hands-off` / `believe` appear **zero times** on all six researched\n  practitioner/studio homepages; Blossom Reiki answers all three well but on a\n  second-click `/faq/`.\n- competitor: `competitors.md` §The category cliché — the compositional default\n  (_full-bleed soft-focus hero → mission statement → three-up service cards_),\n  followed by 5 of 6 sites, with _\"no slot for reassurance.\"_\n- domain-research: `inspirations.md` §31 — NHS _\"What happens at your\n  appointment\"_, verbatim _\"You'll need to undress, behind a screen, from the\n  waist down.\"_ Flat, procedural, unembarrassed; plus its structural warning (the\n  parent page defers \"what happens\" four links down).\n- asset: `asset-inventory.json` — `assets/images/aura-two-people.png`,\n  _\"hands hovering above the shoulders of a seated, fully clothed woman\"_;\n  briefRole _\"Answers the unasked question (clothed, untouched) visually.\"_",
+      "origin": "authored",
+      "path": ".claude/skills/design/the-answered-question/SKILL.md"
+    },
+    {
+      "name": "night-side-emanation",
+      "skillClass": "identity",
+      "layoutMove": false,
+      "citations": [
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — the radiating-field mark; eleven sampled colours with computed contrast on BOTH ground families: gold #E9C87E 10.89:1 on plum-800 vs 1.47:1 on blush; magenta-deep #C2187A 5.18:1 on blush vs 3.10:1 on plum-800 (2.82:1 plum-700); magenta #D6338A fails AA body on both; rose #E85D9B 5.41:1 on plum-800; derived #8A6A22 4.61:1 on blush; WCAG 2.2 SC 1.4.11 3:1 non-text floor measured against the adjacent colour"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — 'Night-side rather than daylight… rather than like a spa brochure'; 'never the soft-focus lavender register the category defaults to'; aura-hands-between is the most-reproduced image in the category and is reserve, not hero; accessibility floor = WCAG 2.2 AA verified by computed contrast"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — measured: 5 of 6 sites are near-white/cream with exactly one warm earth/metallic accent (#E1CCBE, #AB8041, #BFAD99, #EFE3B8, #533537, #7FA200). Dark grounds: 1 of 6, and that one (Othership #372338) is a US bathhouse, not a UK energy-healing practice. 'Not one competitor in the set uses magenta or a gold→magenta gradient.'"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 (Field Emanation) — 'a gold→magenta radial emanation instead of an acid-yellow flat accent, and stillness instead of Webflow motion'"
+        }
+      ],
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "newsletter",
+        "booking",
+        "documents",
+        "auth",
+        "today",
+        "calendar",
+        "availability",
+        "home-page",
+        "requests",
+        "subscribers",
+        "pictures",
+        "settings",
+        "header",
+        "site-footer",
+        "brand-lockup",
+        "card",
+        "button-primary",
+        "offering-hero",
+        "portrait-figure",
+        "media-tile",
+        "media-grid",
+        "empty-state"
+      ],
+      "activationKeywords": [
+        "emanation",
+        "aura",
+        "field",
+        "gradient",
+        "night",
+        "plum",
+        "gold"
+      ],
+      "precedence": "supersede-generic",
+      "body": "# Night-Side Emanation — bespoke identity for The Field Work\n\n## Intent\n\nThe supplied mark is a radiating field — concentric light running outward from a\ncentre (brief §2). This skill makes that geometry the design's subject: light is\nthe thing, not decoration laid over it. The register is night-side — low light,\nstillness, an adult in a quiet room, \"rather than like a spa brochure\"\n(brief §2). It departs from a measured category norm: 5 of 6 researched sites\nare cream/near-white ground with exactly one warm earth or metallic accent, and\n**not one competitor uses magenta or a gold→magenta gradient**\n(competitors.md). The differentiation move is a\ngold→magenta radial emanation and stillness, instead of an acid flat accent and\nWebflow motion (styles.md Style 1).\n\n## When it applies\n\n- palette · page-ground · background · hero · imagery — wherever a ground\n  colour, a gradient, or one of the commissioned plates is placed.\n- BOTH light-ground and dark-ground directions. Night-side governs the FEELING\n  (still, low-lit, unhurried), not the literal value: a light-ground direction\n  is not disqualified, it just cannot be spa-bright.\n- It does not decide composition; which colour becomes the page ground stays a\n  per-direction decision.\n\n## Do\n\n- **Use the gradient as EMANATION** — light running outward from a centre or an\n  edge, with real falloff. One emanation per screen, placed where the eye should\n  rest; two competing centres cancel each other.\n- **Treat the palette as POSITION-DEPENDENT and verify before use.** Computed\n  figures (WCAG 2.2 relative luminance) from `assets/brand/README.md` — read it\n  rather than trusting a remembered number:\n  - `gold #E9C87E` is a **text** colour on the dark plums (10.89:1 on plum-800\n    `#2B0E28`) and a **non-text** colour on light (1.47:1 on blush, 1.55:1 on\n    ivory — failing AA body *and* the 3:1 large-text *and* non-text floors). On a\n    light ground gold may be a decorative mark, edge or fill; never type, never a\n    functional border, never a focus ring.\n  - `magenta-deep #C2187A` **inverts**: text-safe on light (5.18:1 on blush),\n    fill-only on dark (3.10:1 on plum-800; 2.82:1 on plum-700, where it misses\n    even the 3:1 non-text floor).\n  - `magenta #D6338A` fails AA body on **both** ground families (4.08:1 on\n    blush, 3.93:1 on plum-800). It is not body type anywhere in this system.\n  - `rose #E85D9B` is the dark-ground text-safe pink (5.41:1 on plum-800), but\n    drops to 4.92:1 on plum-700 — so it clears AA body on the darker two only.\n- **Hold non-text to 3:1 against its ADJACENT colour** (WCAG 2.2 SC 1.4.11):\n  borders, rules, focus rings, input outlines, icon strokes — measured against\n  the ground they actually sit on, not against the page. A hairline in any\n  mid-gradient stop will usually miss it. This is the check that gets skipped\n  because it is invisible by eye.\n- **Never set a mid-gradient stop as body text without computing it first**, and\n  state the figure alongside it. If a light direction wants gold *type*, derive\n  a value (`#8A6A22` = 4.61:1 on blush) rather than reusing the artwork's gold.\n- **Let the photography carry the warmth.** The commissioned plates are dark,\n  warm, high-contrast, with gold-to-magenta light in them; a light-ground\n  direction must state how it handles them or it ships a register collision.\n\n## Don't\n\n- **No lavender, mandalas, crystals, chakra wheels, soft-focus serenity, or\n  cupped-hands-around-a-glowing-orb.** The brief names the soft-focus lavender\n  register as the thing this brand must defeat; `aura-hands-between` is the\n  single most-reproduced composition in the category and is reserve, never hero.\n- **Don't use the gradient as a button fill, a diagonal banner, or a rainbow\n  band.** Those are decoration; emanation has a centre and a falloff.\n- **Don't read night-side as \"make everything dark\".** Still and low-lit is the\n  requirement. Spa-bright is the failure.\n- **Don't carry a colour's role across grounds.** This supersedes the generic\n  taste-default \"apply the brand colours consistently\" — consistency here means\n  the same colours doing *different jobs* on different grounds. This exact\n  failure has shipped on this project before; it is invisible to anyone who\n  already knows what the text says, so it must be computed, not reviewed.\n- **Don't reach for the category palette** — a cream ground with one warm earth\n  or metallic accent (measured: `#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`).\n  Where the direction is dark, differentiate from the one dark exemplar\n  (Othership `#372338`, a US bathhouse) on radial emanation and stillness — not\n  on a bright flat accent or a condensed display face.\n\n## Citations\n\n- asset: `assets/brand/README.md` — the radiating-field mark; eleven sampled\n  colours with computed contrast on both ground families (gold 10.89:1 on\n  plum-800 vs 1.47:1 on blush; magenta-deep 5.18:1 on blush vs 3.10:1 on\n  plum-800; magenta fails AA body on both; rose 5.41:1 on plum-800; derived\n  `#8A6A22` 4.61:1 on blush) + the SC 1.4.11 3:1 non-text floor.\n- brief: §2 — \"Night-side rather than daylight — the work happens in low light,\n  in stillness, and the site should feel like that room rather than like a spa\n  brochure\"; \"never the soft-focus lavender register the category defaults to\";\n  `aura-hands-between` (cupped hands around a glowing orb) is reserve, not hero;\n  accessibility floor = WCAG 2.2 AA verified by computed contrast.\n- competitor: `competitors.md` — 5 of 6 sites are near-white/cream with exactly\n  one warm earth/metallic accent (`#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`);\n  dark grounds 1 of 6 and that one (Othership `#372338`) is a US bathhouse, not\n  a UK healer; not one competitor uses magenta or a gold→magenta gradient.\n- differentiation-move: `styles.md` Style 1 (Field Emanation) — \"a gold→magenta\n  radial emanation instead of an acid-yellow flat accent, and stillness instead\n  of Webflow motion\".",
+      "origin": "authored",
+      "path": ".claude/skills/design/night-side-emanation/SKILL.md"
+    },
+    {
+      "name": "plain-declarative-voice",
+      "skillClass": "identity",
+      "layoutMove": false,
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — 'Warm, unhurried, quietly certain… Never clinical, never breathless, never the soft-focus lavender register the category defaults to.' §1 principle 3 — 'Prefer honesty over persuasion where they diverge.'"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §14 — the site must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named condition; beat 5 is the compliance surface as well as the trust surface. §11 beat 5 (Throat). §15 — the ≥80% unprompted-recall metric. §20.1 — the practitioner's name and years are UNVERIFIED; confirm before any copy is written."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Regulatory Baseline — ASA/CAP 'Health: Reiki' permitted claims verbatim (emotional and spiritual effects; relaxing nature, meditative qualities, improved feeling of overall wellbeing and sense of self; professionalism and therapy surroundings); prohibited: physical healing effects absent robust clinical evidence, and discouraging essential medical treatment. Upheld: Allan Sweeney Reiki 2011-07-20; Healing on the Streets – Bath 2013-06-13. Scoreboard: 3 of 6 overclaim, 1 of 6 carries a disclaimer. §The copy default — modality-first and outcome-promising; the brief's voice has no incumbent."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — Mettle Health, verbatim: 'We can't change your situation, but we can help you live with it.' Leads with the refusal; names the pain in the visitor's own words."
+        }
+      ],
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "newsletter",
+        "booking",
+        "documents",
+        "home-page",
+        "prose-block",
+        "purpose-section",
+        "beat-throat",
+        "detail-fact-list",
+        "empty-state",
+        "error-state",
+        "inline-notice",
+        "confirmation-panel",
+        "hold-notice",
+        "privacy-notice-link",
+        "consent-checkbox",
+        "button-primary",
+        "button-secondary",
+        "beat-editor-card"
+      ],
+      "activationKeywords": ["voice", "copy", "tone", "claims", "honesty"],
+      "precedence": "supersede-generic",
+      "body": "# Plain declarative voice — bespoke identity for The Field Work\n\n## Intent\n\nWrite what happens, not what it will do for them. This is **simultaneously a\ncraft rule and this project's legal position**, and it must be treated as both.\nThe UK CAP Code (enforced by the ASA) restricts health-outcome claims for\ntherapies without robust evidence; energy healing has no accepted clinical\nevidence base, so the site describes what happens, what people report, and what\nthe practitioner does — and does not promise outcomes (brief §14).\n\nThat constraint is not a tax, it is the opening. Category research found the copy\ndefault is either clinical-explanatory or breathless-transformational with\nnothing in between; 3 of 6 practitioner sites make a claim needing\nsubstantiation, 1 of 6 carries a disclaimer. Plain declarative speech is\ntherefore the unoccupied register **and** the compliant one — and the sceptical,\ncurious adult this brand speaks to can feel the difference (brief §2, §1.3).\n\n## When it applies\n\nEvery word: headlines, body, CTA labels, form helper text, empty states, alt\ntext, and admin copy the owner will imitate. Highest stakes on `home` beat 5 —\n\"what this is not\", the compliance surface and the trust surface at once (brief\n§11, §14) — plus `about` and every service description. Placeholder copy\nincluded: **no lorem, ever.** The proposition is that a real person is speaking.\n\n## Do\n\n- **Work the PERMITTED zone deliberately — don't hedge to nothing.** ASA/CAP\n  \"Health: Reiki\" expressly permits claims about the emotional and spiritual\n  effects of the therapy, its relaxing nature, its meditative qualities, an\n  improvement in a feeling of overall wellbeing and an improved sense of self,\n  and about the practitioner's professionalism and the therapy surroundings.\n  \"Health: Healing therapy\" adds spiritual and emotional comfort and support\n  during illness, grief and stress. A real, usable vocabulary — use it.\n- **Describe procedure, room and hour.** What happens, in what order, how long\n  it lasts, what you wear, whether anyone touches you. Concrete nouns, short\n  sentences, no adjective stacks.\n- **Lead with the refusal where a refusal is honest.** Mettle Health opens with\n  what it cannot do — _\"We can't change your situation, but we can help you live\n  with it.\"_ Take the move: state the limit first, then the offer. It buys more\n  trust than another testimonial would.\n- **Report, don't promise.** Attribute experience to the person who had it\n  (\"people describe…\"). \"What it will do for you\" is a claim; \"what happens, and\n  what people report\" is description.\n- **Spend the specificity budget on the unasked question.** _Illustrative only:_\n  \"You keep your clothes on. Nobody touches you.\" beats \"a safe, welcoming\n  space\" — and brief §15 makes it measurable: ≥80% of test visitors should be\n  able to state that fact unprompted after one scroll.\n- **Treat credentials as UNWRITTEN until confirmed.** The practitioner's name\n  and her years practising and teaching are explicitly unverified (brief §20).\n  Never assert them in copy. Use a visibly marked placeholder and flag it for\n  client confirmation before that surface ships.\n\n## Don't\n\n- **Breathless transformation** — \"heal your life\", \"release your blocks\",\n  \"step into your power\". The register the brief bans by name (§2: never\n  breathless).\n- **The clinical-explanatory modality lecture** — _\"Reiki is a Japanese\n  technique for…\"_. Measured as a category default in the competitor set; also\n  banned by §2 (never clinical).\n- **The outcome-adjective list** — \"Confident, Happy, Calm, Relaxed, Loved,\n  Safe.\" A promise wearing a word cloud.\n- **Any named medical condition, and any treat / cure / diagnose / prevent /\n  alleviate verb** — physical or psychological. Two upheld ASA rulings are on\n  point: Allan Sweeney Reiki (20 July 2011 — ADHD, back pain, depression,\n  cancer) and Healing on the Streets, Bath (13 June 2013).\n- **Anything that could discourage essential medical treatment.** CAP is\n  explicit; both upheld rulings turned on it. A visible \"complementary, not a\n  substitute for medical care\" statement is required (brief §14).\n- **The soft-focus lavender wellness register** — and equally the generic \"warm,\n  friendly, benefit-led\" default of the shipped taste skills.\n  `precedence: supersede-generic`: where a generic heuristic asks for a benefit\n  headline or an emotional promise, **this skill wins.**\n\n## Citations\n\n- brief: §2 Voice — \"Never clinical, never breathless, never the soft-focus lavender register the category defaults to.\"\n- brief: §1.3 — \"Prefer honesty over persuasion where they diverge… Naming what the work is _not_ buys more trust than one more testimonial would.\"\n- brief: §14 — \"must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named medical condition\"; beat 5 is \"the compliance surface as well as the trust surface\"; complementary-not-a-substitute statement required.\n- brief: §11 beat 5 (Throat) — \"What this is not. Not therapy, not medicine, not a replacement for either.\"\n- brief: §15 — \"≥80% of test visitors, unprompted, can state that they keep their clothes on and are not touched, after one scroll.\"\n- brief: §20.1 — practitioner's name + years \"have not been verified with the client. Confirm before any copy is written.\"\n- competitor: competitors.md §Regulatory Baseline — ASA/CAP \"Health: Reiki\" + \"Health: Healing therapy\" permitted/prohibited lists verbatim; upheld rulings Allan Sweeney (2011-07-20), Healing on the Streets – Bath (2013-06-13); scoreboard 3-of-6 overclaim, 1-of-6 disclaimer.\n- competitor: competitors.md §The copy default — modality-first / outcome-promising (\"Confident, Happy, Calm, Relaxed, Loved, Safe\"); the brief's voice \"has no incumbent.\"\n- domain-research: inspirations.md Insp. 14 Mettle Health — \"We can't change your situation, but we can help you live with it.\"",
+      "origin": "authored",
+      "path": ".claude/skills/design/plain-declarative-voice/SKILL.md"
+    },
+    {
+      "name": "dated-things-are-typeset",
+      "skillClass": "technique",
+      "layoutMove": false,
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §12 — the products block renders live Courses, Workshops and Services at equal billing with real dates and prices; §11 — index pages must design the empty state (zero workshops on day one); §5 — capacity shown as information, never a live seat count; §6 — the Carrier's dealbreaker is 'a price that only appears after you make contact'"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — 3 of 6 practitioner/studio sites publish no price at all; Re:Mind's /book-class schedule returned 'No results found' to a static fetch because Momence renders it client-side; third-party booking widgets break the surface visibly"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — Metrograph: date as section header, showtimes as standalone tappable anchors; Barbican (instructive failure): dates absent from cards, pushed into date-range filters; Le Cinéma Club: the empty-state answer; plus inline honest availability + run-span typesetting"
+        }
+      ],
+      "appliesTo": [
+        "offerings",
+        "booking",
+        "calendar",
+        "requests",
+        "today",
+        "products-block",
+        "offering-card",
+        "offering-row",
+        "offering-summary-card",
+        "session-list",
+        "session-list-item",
+        "session-count-badge",
+        "slot-picker",
+        "slot-option",
+        "price-tag",
+        "date-badge",
+        "calendar-month-grid",
+        "calendar-week-grid",
+        "calendar-block-chip",
+        "booking-row",
+        "hold-timer",
+        "data-table",
+        "list-item"
+      ],
+      "activationKeywords": [
+        "date",
+        "schedule",
+        "listing",
+        "price",
+        "slot",
+        "calendar"
+      ],
+      "precedence": "augment-generic",
+      "body": "# Dated things are typeset — bespoke technique for The Fieldwork\n\n## Intent\n\nA schedule is content, not chrome. The category hides it: 3 of 6 measured\npractitioner/studio sites publish no price at all, and Re:Mind's `/book-class`\nschedule returned \"No results found\" to a static fetch because Momence renders it\nclient-side (competitors.md). This project's trust position is the opposite — the\nCarrier persona names \"a price that only appears after you make contact\" as the\nthing that breaks their day (brief.md §6), and the products block renders live\nCourses, Workshops and Services at equal billing with real dates and prices\n(brief.md §12). So the listing is typeset as the primary content, on the\nrepertory-cinema model: the DATE is the section header, each time beneath it a\nstandalone anchor. The mechanics below are transferable to any dated, priced,\nbookable thing; the necessity is this client's.\n\n## When it applies\n\n- Products block · the three index pages · offering detail · the course session\n  list · the service free-slot picker.\n- Anywhere a card would otherwise carry a date, a duration, a capacity or a fee.\n- Not on prose surfaces (about, privacy) — they have no rows to align.\n\n## Do\n\n1. **Date as a section header at display scale; each offering under it a\n   standalone line.** Group chronologically, set the date on the display ramp\n   (\"Saturday 25 July\"), and make each time/offering beneath it a discrete\n   tappable target — a rule-separated row, not a rectangle with a shadow. This\n   solves scan-by-time and scan-by-event in one layout (inspirations.md Insp. 22,\n   Metrograph).\n2. **State the price. Always, on the listing, not only on detail.** In the same\n   typographic voice as everything else — a fee is a fact, not a badge. No \"from\",\n   no \"enquire\", no price behind a form (competitors.md §\"Publish the price on the\n   page\").\n3. **Tabular lining figures, set explicitly** — `font-variant-numeric:\ntabular-nums lining-nums` on every date, time, duration, capacity and price, and\n   align columns of figures on their numerals. Choose a body face that actually\n   ships them (inspirations.md §type pairings). A column of times that doesn't\n   align cannot be scanned, which defeats the whole move.\n4. **Equal billing across offering kinds.** One register, one price list, one\n   surface. Distinguish kinds by their DATA — a span with n sessions inside it, a\n   single dated point, a bookable duration — never by giving one kind a richer\n   card (brief.md §12; Insp. 26 run-span typesetting).\n5. **Design the empty state as a first-class target.** Organise the surface around\n   \"what is on now\" so it degrades gracefully to one item, or none: a plain\n   sentence naming what is coming and one route to ask, at the same type scale as\n   a populated row. A grid with one card in it looks broken; a programme with one\n   entry does not (brief.md §11 \"zero workshops on day one\"; Insp. 29).\n6. **Render every date, time and price server-side, in the initial HTML.** A\n   schedule that only exists after JavaScript does not exist for a crawler, a slow\n   connection, or assistive tech. A client fetch may refresh a slot's live\n   availability; it must never be what puts the date on the page (competitors.md\n   §\"Server-render the schedule\").\n\n## Don't\n\n- **Don't push dates behind filters or a separate calendar view.** Replace the\n  filter-first affordance with an already-sorted chronological list carrying the\n  date on every row — Barbican demotes chronology to theme filters and the visitor\n  who came for a date can't find one (Insp. 25).\n- **Don't wrap listings in shadowed, rounded, image-topped cards.** Replace the\n  card with a typographic row: date header, title, one small metadata line\n  (duration · format · price), a rule. The container is the type, not a box.\n- **Don't write \"contact for pricing\", \"POA\", or \"places\" without a figure.**\n  Replace with the actual number; where capacity genuinely can't be promised, use\n  an honest inline phrase (\"Places available\" / \"Limited places\") stated as\n  information, never a live seat count (brief.md §5; Insp. 23).\n- **Don't let a third-party booking widget typeset the schedule.** It arrives with\n  its own type, figures, radii and motion and breaks the surface visibly\n  (competitors.md §\"Third-party booking widget\"). Own the picker and set it in the\n  same rows as everything above it.\n- **Don't animate a slot into existence.** Replace transition-in with an immediate,\n  non-animated state change on selection; a held slot's countdown is text, not a\n  spinner (inspirations.md §motion — Slot selection).\n\n## Citations\n\n- brief: products block renders live Courses, Workshops and Services at equal\n  billing with real dates and prices; publishing a workshop makes it appear with\n  no second edit (brief.md §12)\n- brief: index pages must design the empty state — zero workshops on day one and\n  the page must still be worth landing on (brief.md §11); capacity shown as\n  information, never a live seat count (brief.md §5)\n- brief: the Carrier's dealbreaker — \"a price that only appears after you make\n  contact\"; the Returner's task — scan upcoming dates in under a minute (brief.md §6)\n- competitor: 3 of 6 sites publish no price; Re:Mind's client-rendered schedule\n  returned \"No results found\" to a static fetch (competitors.md §Cross-cutting)\n- domain-research: Metrograph — date as section header, showtimes as standalone\n  tappable anchors (Insp. 22); Barbican — dates absent from cards, pushed into\n  filters (Insp. 25); Le Cinéma Club — the empty-state answer (Insp. 29)",
+      "origin": "authored",
+      "path": ".claude/skills/design/dated-things-are-typeset/SKILL.md"
+    },
+    {
+      "name": "stillness-as-motion-budget",
+      "skillClass": "technique",
+      "layoutMove": false,
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — the register is 'unhurried'; §12 — the optional star field is decorative only, never carries content, and is suppressed under prefers-reduced-motion; §2 accessibility floor — every motion has a reduced-motion fallback that keeps the composition whole"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the motion default across the researched set is a scroll fade-in plus a testimonial carousel, and no site in the set uses motion as meaning. Othership is the one motion-rich exemplar and its volume would break this brief's voice."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 — 'makes the emanation, not a fade-in, the only motion on the page, at a 12-second drift the eye barely registers'"
+        }
+      ],
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "booking",
+        "newsletter",
+        "today",
+        "calendar",
+        "pictures",
+        "header",
+        "nav-drawer",
+        "side-menu",
+        "toast",
+        "skeleton",
+        "confirm-dialog",
+        "destructive-guard-modal",
+        "send-guard-modal",
+        "publish-bar",
+        "offering-hero",
+        "media-tile",
+        "beat-root",
+        "beat-crown"
+      ],
+      "activationKeywords": [
+        "motion",
+        "animation",
+        "transition",
+        "reduced-motion",
+        "stillness"
+      ],
+      "precedence": "augment-generic",
+      "body": "# Stillness as motion budget — bespoke technique for The Fieldwork\n\n## Intent\n\nTreat motion as a fixed budget with exactly one line item. The whole allowance\ngoes to a single slow move that MEANS something; everything else on the page\nholds still. The researched category spends its motion on scroll fade-ins and a\ntestimonial carousel and gets nothing back — no site in the set uses motion as\nmeaning. The one motion-rich exemplar is loud in a way that would break a brand\nwhose stated register is \"unhurried, quietly certain.\" So the differentiating\nmove is not more motion or better motion: it is arithmetic. One move, slow\nenough to read as atmosphere rather than as effect, on a page that is otherwise\nstill.\n\n## When it applies\n\n- Any motion, transition, hero treatment, or ambient/background effect, on any surface.\n- Marketing and application surfaces alike. On dense-data, settings, or form\n  surfaces the budget is zero, not one.\n\n## Do\n\n- **Pick ONE move and spend the whole budget on it.** It expresses the concept\n  rather than decorating it. Ambient drift is measured in seconds, not\n  milliseconds — a ~12-second cycle the eye barely registers is the target, not\n  a 400ms ease.\n- **Go slower than feels right.** If a movement reads as an effect, it is\n  already too fast. Halve the speed and re-judge.\n- **Keep the one move decorative-only.** It never carries content, never encodes\n  state, and is never the only way to learn something.\n- **Author every motion `prefers-reduced-motion`-first, and check the still\n  frame is a FINISHED composition** — not the animated one with a hole in it. If\n  disabling the animation leaves an empty region, a blank panel, or a missing\n  focal element, the motion was load-bearing and the design is wrong. Fix the\n  composition, don't re-enable the motion.\n- **Functional micro-transitions are exempt from the budget but subject to the\n  ceiling** — focus rings, hover state change, open/close of a disclosure. Under\n  ~200ms, never elaborated into a flourish.\n\n## Don't — the static-render prohibition (HARD)\n\n**NEVER gate content behind `opacity: 0` plus an IntersectionObserver, a\nscroll-reveal library, or any JS-driven entrance.** Not on any element, not\n\"just the hero\", not with a fallback timer. This is a prohibition, not a\npreference.\n\n**The page must render WHOLE in a static screenshot, with no JavaScript executed\nand no scrolling.** Every element sits at final opacity and final position in\nthe delivered HTML/CSS. Motion is a progressive enhancement applied to\nalready-visible content — never a condition of seeing it.\n\nTwo reasons, both hard. It is the accessibility floor: content that requires JS\nplus a scroll to appear is content some people never get. And it is a\nmockup-safety rule: `lint-mockup-safe.mjs` enforces it mechanically, and a\nviolation makes the page render blank or half-empty to a static judge. **This\nexact regression has shipped on this project's predecessors** — sections present\nin the markup, invisible in review.\n\nAlso don't:\n\n- **No scroll-triggered fade-ins, reveals, or staggered entrances.** The category\n  default, and the thing the prohibition above exists to kill.\n- **No carousels, parallax stacks, marquees, or hover flourishes.** Each is a\n  second thing moving; with two moving things neither is the signature.\n- **Don't let motion substitute for composition.** If the layout only works once\n  things have animated in, the layout is the bug.\n\n## Precedence\n\n`augment-generic` — layers a hard budget ceiling and the static-render\nprohibition on top of generic frontend / design-taste motion guidance. Where\ngeneric taste suggests scroll reveals or entrance animation, this skill wins.\n\n## Citations\n\n- `brief`: \"Warm, unhurried, quietly certain\" (brief.md §2 Voice) — the register\n  that a motion-rich treatment would break.\n- `brief`: \"Every motion has a `prefers-reduced-motion` fallback that leaves the\n  composition whole\" (brief.md §2 Accessibility floor) — the intact-fallback rule.\n- `brief`: the optional ambient field \"is decorative only... suppressed under\n  `prefers-reduced-motion`\" (brief.md §12) — motion never carries content.\n- `competitor`: \"The motion default — a scroll fade-in and a testimonial\n  carousel. Nothing else. No site in the set uses motion as meaning.\"\n  (competitors.md §The Category Template) — the default this supersedes.\n- `competitor`: the one motion-rich exemplar \"is also loud in a way that would\n  break this brief's 'unhurried, quietly certain' voice — take the courage, not\n  the volume\" (competitors.md §Competitor 6) — why volume is not the answer.\n- `differentiation-move`: \"makes the emanation — not a fade-in — the only motion\n  on the page, at a 12-second drift the eye barely registers\" (styles.md Style 1)\n  — the one-move budget and its timing.\n- `craft-rule`: C-5 static-review-safe + C-7 `prefers-reduced-motion`\n  (`.claude/rules/awwwards-craft-checklist.md`).",
+      "origin": "authored",
+      "path": ".claude/skills/design/stillness-as-motion-budget/SKILL.md"
+    }
+  ]
+}

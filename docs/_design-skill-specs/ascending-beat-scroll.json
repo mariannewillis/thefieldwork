@@ -1,0 +1,23 @@
+{
+  "name": "ascending-beat-scroll",
+  "skillClass": "identity",
+  "layoutMove": true,
+  "precedence": "supersede-generic",
+  "appliesTo": ["hero", "landing", "section", "page-composition"],
+  "activationKeywords": ["ascent", "beat", "scroll", "chakra", "root", "crown"],
+  "citations": [
+    {
+      "source": "brief",
+      "ref": "brief.md §11 — the home page is SEVEN FIXED NARRATIVE BEATS in a fixed ascending root→crown order, with a data-driven products block between beats 6 and 7"
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md §The Category Template — Squarespace's own prescribed wellness order (Jenani/Anza/Clune/Aurora/Clove) is 'full-bleed soft-focus hero → short mission statement → three-up service cards → practitioner bio → testimonials → booking CTA', followed by 5 of 6 researched sites, and it contains NO slot for reassurance and no slot for 'what this is not'"
+    },
+    {
+      "source": "differentiation-move",
+      "ref": "styles.md Style 3 (Long Dusk) — the ascent taken literally as the page ground itself, travelling plum-900 at Beat 1 to blush at Beat 7"
+    }
+  ],
+  "body": "COMPOSITION AXIS: a single vertical ASCENT of seven named beats, root to crown, in which some measurable property rises monotonically across the whole scroll — luminance, or scale, or openness, or all three. The page ENDS at its brightest and most open point, where the call to action sits. INSTEAD OF the category's hero→3-up-cards→testimonials→CTA skeleton, which is a stack of independent boxes with no direction of travel. The ascent is the layout, not a theme applied to a layout: if you removed the copy, the shape of the page should still read as a climb. Beats are steps in one arc, never seven mini-pages — a landing that reads as seven independent sections has lost the spine even when every section is present. The products block sits between beats 6 and 7 deliberately: the visitor sees the transformation, then how to get it, then is asked. Beats 2-6 can be hidden by the owner, so the ascent must survive a missing rung — never depend on an exact count, only on the direction of travel. DO NOT express the ascent as a rainbow: the seven-colour chakra chart is the measured category cliché."
+}

@@ -1,0 +1,74 @@
+{
+  "version": "1.0",
+  "seededAt": "2026-08-08T18:38:01.806Z",
+  "updatedAt": "2026-08-08T23:46:11.531Z",
+  "concept": {
+    "governingIdea": "The room is dark and there is one clearing of light in it the exact size of a seated person, and everything this site has to say is said from inside that clearing — while the practitioner's hands stay at its edge and never cross.",
+    "signatureMove": "One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary: not a rule, not a stroke, not a line of type, and not the practitioner's hands, which enter the frame at the pool's edge in the plate and stop there. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.",
+    "layoutArchetype": "Near-black throughout, with one hard-edged clearing of blush light cut into a full-bleed plate per viewport; all reading happens on the light inside that clearing, the dark around it is never bare because it is always the photograph, and each beat the clearing holds fewer elements and more air than the beat before it.",
+    "narrativeSpineDigest": "open wound: The thing you cannot ask is not whether it works. It is whether you will have to take your clothes off, and whether a stranger is going to put her hands on you, and you have closed four tabs this month at exactly the moment you understood that the page was never going to say. → closed loop: The Crown answers the caption the first pool made. The hands never came in, the edge held for the whole hour, and the request now sits on open light with the same four words printed beneath it. What is being asked for is an hour in the clearing — not a belief, and not your clothes off.",
+    "interfaceCraftEmphasis": "I-2 one primary action per screen made structural rather than stylistic: the clearing contains exactly ONE primary control, always, on every admin screen — so the answer to 'what do I do here' is permanently 'the thing in the light', and she learns it once and never relearns it.; I-4 progressive disclosure BY the edge, which is the lever that decides whether she can run this: the 80% path is whatever is lit, and everything rare — availability rules, publish scope, bulk actions, CSV export, hold duration — lives outside the pool at 15px and comes into the light on intent. It is how a nine-field settings screen stops looking like software to someone who is not comfortable with software (brief §6).; I-1 state-completeness with day one designed FIRST: the empty merged calendar, the zero-workshop index and the empty booking queue are each a clearing holding one sentence and one control, so a brand-new practice's admin looks composed rather than broken — brief §11's explicit requirement that a page with zero workshops is still worth landing on.; I-6 affordance legibility on a two-value system a non-technical owner can state out loud: anything on the light is operable, anything on the plate is information. The irreversible guards — send to N confirmed subscribers, delete an offering three newsletters reference — state the exact count and the exact consequence inside their own clearing, before the control rather than after it.",
+    "excludes": [
+      "NOTHING CROSSES THE POOL'S BOUNDARY — the binding rule, and it is simultaneously the concept and the typographic fix. No rule, arc, stroke, divider or line of type may touch or span the edge; every element is wholly inside the light or wholly outside it, and type keeps a 32px clear band inside the boundary. Strokes and words never meet here because they never occupy the same region — which is the parent territory's arcs-through-paragraphs failure made structurally impossible.",
+      "No bare dark. Every pixel outside a clearing carries a plate at reduced luminance — the dark is photographic, always, everywhere. A flat black region is a failed render rather than restraint, and this territory has none on any screen including the admin.",
+      "No second clearing per viewport. Two pools cancel each other and the concept dies with them: one pool, and it is where the eye goes.",
+      "No scrim, tint or overlay laid over a plate to make type sit on it. If a word needs the picture darkened in order to be read, that word belongs in the clearing instead — which is what the clearing is for.",
+      "No drop shadow, no card, no rounded rectangle, no three-up grid. The edge of the light is the only boundary in the entire system, and adding a second kind of boundary would make the first one ordinary.",
+      "Body 18px inside the pool, 17px minimum anywhere, plate-side captions 15px and never smaller. Gold #E9C87E is barred INSIDE the pool (1.47:1) and magenta-deep #C2187A is barred OUTSIDE it (3.45:1) — each colour belongs to one side of the edge and crossing is a contrast failure as well as a concept failure."
+    ]
+  },
+  "seeded": [
+    "governingIdea",
+    "signatureMove",
+    "layoutArchetype",
+    "narrativeSpineDigest",
+    "interfaceCraftEmphasis",
+    "excludes"
+  ],
+  "carryRecords": [
+    {
+      "phase": "mockups",
+      "expected": [
+        "governingIdea",
+        "signatureMove",
+        "layoutArchetype",
+        "narrativeSpineDigest",
+        "interfaceCraftEmphasis",
+        "excludes"
+      ],
+      "expressed": [
+        "governingIdea",
+        "signatureMove",
+        "layoutArchetype",
+        "narrativeSpineDigest",
+        "interfaceCraftEmphasis",
+        "excludes"
+      ],
+      "dropped": [],
+      "artifacts": {},
+      "at": "2026-08-08T18:38:01.884Z"
+    },
+    {
+      "phase": "screens",
+      "expected": [
+        "governingIdea",
+        "signatureMove",
+        "layoutArchetype",
+        "narrativeSpineDigest",
+        "interfaceCraftEmphasis",
+        "excludes"
+      ],
+      "expressed": [
+        "governingIdea",
+        "signatureMove",
+        "layoutArchetype",
+        "narrativeSpineDigest",
+        "interfaceCraftEmphasis",
+        "excludes"
+      ],
+      "dropped": [],
+      "artifacts": {},
+      "at": "2026-08-08T23:46:11.531Z"
+    }
+  ]
+}

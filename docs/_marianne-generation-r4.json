@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2026-08-08T13:21:57.305Z",
+  "model": "nano_banana_2",
+  "round": 4,
+  "results": [
+    {
+      "id": "work-wide-the-room",
+      "aspect": "16:9",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\work-wide-the-room.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "work-close-hands",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\work-close-hands.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "work-down-the-body",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\work-down-the-body.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "work-vertical-pool",
+      "aspect": "2:3",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\work-vertical-pool.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "work-her-face-absorbed",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\work-her-face-absorbed.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "WhatsApp Image 2026-08-07 at 17.09.54.jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "chair-with-her-coat",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\chair-with-her-coat.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.45.48.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "table-linen-close",
+      "aspect": "16:9",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\table-linen-close.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.45.48.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "the-doorway-lit",
+      "aspect": "2:3",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\the-doorway-lit.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.46.47.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "her-hands-at-rest",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\her-hands-at-rest.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.39.40.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "window-last-light",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\window-last-light.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.46.47.jpeg", "TheFileWork.png"],
+      "credits": 2
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "the-answered-question",
+  "skillClass": "identity",
+  "precedence": "supersede-generic",
+  "appliesTo": ["hero", "beat-1", "landing", "copy"],
+  "activationKeywords": ["reassurance", "clothed", "first-timer", "hero"],
+  "citations": [
+    {
+      "source": "brief",
+      "ref": "brief.md §3 — 'the specific thing they are too embarrassed to ask is whether they will have to take their clothes off. So they close the tab. Not because they decided against it — because nobody answered the question they couldn't ask.'"
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md — measured: the strings clothed / undress / touch / hands-off / believe appear ZERO times on the homepage of all six researched practitioner and studio sites. The one site that answers all three questions well (Blossom Reiki) buries it on a second-click /faq/ page."
+    },
+    {
+      "source": "domain-research",
+      "ref": "inspirations.md — NHS 'What happens at your appointment', verbatim: 'You'll need to undress, behind a screen, from the waist down.' The register to invert: flat, procedural, unembarrassed."
+    },
+    {
+      "source": "asset",
+      "ref": "asset-inventory.json — aura-two-people.png: practitioner's hands hovering above a SEATED, FULLY CLOTHED person. The reassurance is available as a photograph, not only as a sentence."
+    }
+  ],
+  "body": "The first thing this page does is answer the question the visitor is too embarrassed to ask: do I undress, am I touched, must I believe something. Not in an FAQ. Not below the fold. FIRST. State it as plain fact in short declarative sentences — 'You stay dressed. Nobody touches you. Nothing is asked of your beliefs.' — and let the image carry the same fact in parallel, so it survives a skim by someone who reads nothing. This is the project's single largest competitive position: nobody in the category does it, and the brief's own success metric is that ≥80% of visitors can state it unprompted after one scroll. Consequences for composition: beat 1 cannot be a mood-setting atmospheric hero with a tagline. It must contain legible, specific, procedural sentences at a size an adult reads first. Warmth without this is decoration; this without warmth is a leaflet. Both are required, in that order."
+}

@@ -1,0 +1,28 @@
+{
+  "name": "stillness-as-motion-budget",
+  "skillClass": "technique",
+  "precedence": "augment-generic",
+  "appliesTo": ["motion", "transition", "hero", "background"],
+  "activationKeywords": [
+    "motion",
+    "animation",
+    "transition",
+    "reduced-motion",
+    "stillness"
+  ],
+  "citations": [
+    {
+      "source": "brief",
+      "ref": "brief.md §2 — the register is 'unhurried'; §12 — the optional star field is decorative only, never carries content, and is suppressed under prefers-reduced-motion; §2 accessibility floor — every motion has a reduced-motion fallback that keeps the composition whole"
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md §The Category Template — the motion default across the researched set is a scroll fade-in plus a testimonial carousel, and no site in the set uses motion as meaning. Othership is the one motion-rich exemplar and its volume would break this brief's voice."
+    },
+    {
+      "source": "differentiation-move",
+      "ref": "styles.md Style 1 — 'makes the emanation, not a fade-in, the only motion on the page, at a 12-second drift the eye barely registers'"
+    }
+  ],
+  "body": "Spend the entire motion budget on ONE slow move that means something — most naturally the emanation's drift or the ascent's light — and spend nothing on anything else. No scroll-triggered fade-ins, no carousels, no parallax stacks, no hover flourishes competing for attention. Slower than feels right: this brand's whole claim is stillness, so if a movement reads as an effect it is already too fast. HARD CONSTRAINT, and it is a mockup-safety rule as much as an accessibility one: content must never be gated behind opacity:0 plus an IntersectionObserver. The page must render WHOLE in a static screenshot with no JavaScript and no scrolling — motion is a progressive enhancement on already-visible content, never a condition of seeing it. Every motion needs a prefers-reduced-motion fallback that leaves the composition intact rather than merely disabling the animation and leaving a hole."
+}

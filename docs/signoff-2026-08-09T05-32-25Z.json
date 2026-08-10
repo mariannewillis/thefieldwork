@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "signedAt": "2026-08-09T05:32:25Z",
+  "clientName": "David Morgan (operator)",
+  "approved": true,
+  "comments": "Gate 4 approved by the operator in-session, not via the viewer form. Provenance: the operator wrote, verbatim, \"I approve, record the sign-off and run /architect\", immediately after directing \"apply the nav fix then I will sign off\" and the fix being applied and verified. Recorded as operator-attested rather than a viewer submission; no signature was fabricated.\n\nKNOWN STATE AT SIGN-OFF (the operator was shown all of this before approving):\n- visual-review marks 29 of 33 screens fail. That headline overstates it: 15 findings were already fixed post-review (evidence in report.json.postReviewFixes) and 24 are the type.size-count deviation the operator elected to keep, because flattening a 5-12 size editorial scale to 4 would destroy the type-as-structure composition approved at Gate 2.\n- Genuinely outstanding at sign-off: 22x mobile.touch-target-size (standalone action links 18-36px against a 44px minimum), 2 missing empty states on index screens, admin-dashboard calendar overflowing 390px, and a hardcoded rgba() dialog backdrop on 9 admin screens.\n- 2 of 20 flows ship on the v1.0 breadcrumb fallback (flow-18, flow-19) because no clickable path exists between their declared screens.\n- The landing page nav gap found during this stage (17 outbound routes were 0) was fixed and re-verified before sign-off.",
+  "screensApproved": 33,
+  "screensManifestHash": "sha256:eea1fc17eca2d750f958900ad50b7754544179e6d0e6480b667d9fd52c76f09c",
+  "visualReviewReportHash": "sha256:c6c35f17998409adcdbff2f768b48b034ead22f547ce9ccc19bd613c82a26083",
+  "uiKitVersion": "0.1.0-tokens-only",
+  "coverageWarnings": [
+    "flow-18 and flow-19 lack interactions[] — synthesizer falls back to screen-breadcrumb specs",
+    "22 outstanding mobile.touch-target-size findings carried into build"
+  ]
+}

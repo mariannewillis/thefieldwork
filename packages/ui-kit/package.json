@@ -1,0 +1,18 @@
+{
+  "name": "@repo/ui-kit",
+  "version": "0.1.0-tokens-only",
+  "private": true,
+  "main": "./src/tokens/tokens.json",
+  "exports": {
+    "./styles/globals.css": "./src/styles/globals.css",
+    "./styles/fonts.css": "./src/styles/fonts.css",
+    "./styles/preview-bootstrap.html": "./src/styles/preview-bootstrap.html",
+    "./tokens/tokens.json": "./src/tokens/tokens.json",
+    "./tokens/tokens.css": "./src/tokens/tokens.css"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.5",
+    "class-variance-authority": "^0.7.1"
+  }
+}

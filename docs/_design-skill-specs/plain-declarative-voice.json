@@ -1,0 +1,26 @@
+{
+  "name": "plain-declarative-voice",
+  "skillClass": "identity",
+  "precedence": "supersede-generic",
+  "appliesTo": ["copy", "headline", "body-text", "cta", "beat-5"],
+  "activationKeywords": ["voice", "copy", "tone", "claims", "honesty"],
+  "citations": [
+    {
+      "source": "brief",
+      "ref": "brief.md §2 — 'Warm, unhurried, quietly certain. Speaks to an adult who is sceptical and curious at the same time. Never clinical, never breathless, never the soft-focus lavender register the category defaults to.' §1 principle 3 — 'Prefer honesty over persuasion where they diverge.'"
+    },
+    {
+      "source": "brief",
+      "ref": "brief.md §14 — CAP Code / ASA: the site must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named condition. Beat 5 is the compliance surface as well as the trust surface."
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md §Regulatory Baseline — 3 of 6 sites make claims requiring substantiation ('the immune system to regenerate', 'can manifest as a range of distressing physical and mental symptoms'); only 1 of 6 carries any medical disclaimer. Two upheld ASA rulings on point."
+    },
+    {
+      "source": "domain-research",
+      "ref": "inspirations.md — Mettle Health, verbatim: 'We can't change your situation, but we can help you live with it.' Leads with the refusal; names the pain in the visitor's own words."
+    }
+  ],
+  "body": "Write what happens, not what it will do for them. Describe the room, the hour, the hands that do not land — concretely, in short sentences an adult reads without wincing. Never promise an outcome, never name a condition, never imply treatment: that is simultaneously the legal position and the most credible copy available, because the category is saturated with overclaim and a visitor can feel the difference. Lead with the refusal where a refusal is honest ('this is not therapy, and it is not medicine, and it does not replace either') — it buys more trust than another testimonial would. Banned registers: breathless transformation ('heal your life', 'release your blocks'), clinical-explanatory modality lectures ('Reiki is a Japanese technique for...'), and the outcome-adjective list ('Confident, Happy, Calm, Relaxed, Loved, Safe'). No lorem, ever — this brand's whole proposition is that a real person is speaking. Specificity is the lever: 'you keep your clothes on' beats 'a safe, welcoming space' every time."
+}

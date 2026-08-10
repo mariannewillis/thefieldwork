@@ -1,0 +1,172 @@
+/**
+ * @repo/ui-kit — tokens.css
+ * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
+ *
+ * DARK-DEFAULT (see README.md before touching this file).
+ * :root already carries the dark/near-black values — there is no light-mode
+ * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
+ * of :root, kept only because the approved mockups literally set
+ * data-theme="dark" on <html> and the Tailwind config's darkMode selector
+ * references it — not because a second theme exists.
+ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ---- color.neutral ---- */
+  --color-neutral-50: #fbf3f1;
+  --color-neutral-100: #e6dcdc;
+  --color-neutral-200: #d8bfc9;
+  --color-neutral-300: #b0a3a8;
+  --color-neutral-400: #95868d;
+  --color-neutral-500: #8e6a82;
+  --color-neutral-600: #64515d;
+  --color-neutral-700: #4e3a48;
+  --color-neutral-800: #3b2635;
+  --color-neutral-900: #260f20;
+  --color-neutral-950: #160712;
+
+  /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
+  --color-accent-50: #fbeff6;
+  --color-accent-100: #f7d9eb;
+  --color-accent-200: #f2badb;
+  --color-accent-300: #ed91c7;
+  --color-accent-400: #e75aac;
+  --color-accent-500: #c2187a;
+  --color-accent-600: #a51266;
+  --color-accent-700: #870d50;
+  --color-accent-800: #67093b;
+  --color-accent-900: #4b062a;
+  --color-accent-950: #2f041a;
+
+  /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
+  --color-secondary-500: #e9c87e;
+  --color-secondary-600: #c99a3f;
+
+  /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
+  --color-highlight-300: #f8c9bf;
+  --color-highlight-500: #f5876f;
+
+  /* ---- color.semantic ---- */
+  --color-success: #6fcb99;
+  --color-warning: #e9c87e;
+  --color-danger: #f58a80;
+  --color-info: #e9c87e;
+
+  /* ---- color.surface ---- */
+  --color-surface-base: #160712;
+  --color-surface-raised: #260f20;
+  --color-surface-overlay: #1e0a1ce6;
+  --color-surface-inverted: #fbf3f1;
+
+  /* ---- color.text ---- */
+  --color-text-primary: #fbf3f1;
+  --color-text-secondary: #d8bfc9;
+  --color-text-tertiary: #8e6a82;
+  --color-text-inverted: #1e0a1c;
+
+  /* ---- color.border ---- */
+  --color-border-subtle: #4e3a48;
+  --color-border-default: #8e6a82;
+  --color-border-strong: #b0a3a8;
+
+  /* ---- color.pool (the inverted-context family — see README) ---- */
+  --color-pool-surface: #fbf3f1;
+  --color-pool-text: #1e0a1c;
+  --color-pool-text-secondary: #5a4356;
+  --color-pool-border: #8a7285;
+  --color-pool-danger: #a3221a;
+  --color-pool-success: #0f6b3d;
+
+  /* ---- typography.fontFamily ---- */
+  --font-family-sans:
+    "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono:
+    "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+  --font-family-display: "Cormorant Garamond", Georgia, serif;
+
+  /* ---- typography.fontSize ---- */
+  --font-size-xs: 15px;
+  --font-size-sm: 17px;
+  --font-size-md: 18px;
+  --font-size-lg: 19px;
+  --font-size-xl: 21px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 36px;
+  --font-size-5xl: 48px;
+  --font-size-6xl: 64px;
+
+  /* ---- typography.fontWeight ---- */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ---- typography.lineHeight ---- */
+  --line-height-tight: 1.05;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.7;
+
+  /* ---- typography.letterSpacing ---- */
+  --letter-spacing-tight: -0.005em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.18em;
+
+  /* ---- spacing ---- */
+  --spacing-0: 0px;
+  --spacing-0_5: 2px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+
+  /* ---- radius (the direction uses --radius-none everywhere except a true
+     circle avatar, which uses --radius-full — see README §Shape law) ---- */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* ---- shadow (unused by this direction — kept for schema completeness) --- */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+
+  /* ---- motion ---- */
+  --motion-duration-instant: 80ms;
+  --motion-duration-fast: 120ms;
+  --motion-duration-normal: 150ms;
+  --motion-duration-slow: 220ms;
+  --motion-duration-slower: 320ms;
+  --motion-duration-ambient: 24000ms;
+  --motion-easing-linear: linear;
+  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
+  --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
+  --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- zIndex ---- */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-toast: 1400;
+  --z-tooltip: 1500;
+}

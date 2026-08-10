@@ -1,0 +1,532 @@
+## Direction "the-lit-clearing" — execute THIS concept (concept-first, layout DERIVED from it):
+- Governing idea: The room is dark and there is one clearing of light in it the exact size of a seated person, and everything this site has to say is said from inside that clearing — while the practitioner's hands stay at its edge and never cross.
+- Signature move (realize ONE, fully — not scattered effects): One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary: not a rule, not a stroke, not a line of type, and not the practitioner's hands, which enter the frame at the pool's edge in the plate and stop there. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.
+- Layout archetype (derive the composition from this; REFUSE the category default): Near-black throughout, with one hard-edged clearing of blush light cut into a full-bleed plate per viewport; all reading happens on the light inside that clearing, the dark around it is never bare because it is always the photograph, and each beat the clearing holds fewer elements and more air than the beat before it.
+- Excludes (this design REFUSES): NOTHING CROSSES THE POOL'S BOUNDARY — the binding rule, and it is simultaneously the concept and the typographic fix. No rule, arc, stroke, divider or line of type may touch or span the edge; every element is wholly inside the light or wholly outside it, and type keeps a 32px clear band inside the boundary. Strokes and words never meet here because they never occupy the same region — which is the parent territory's arcs-through-paragraphs failure made structurally impossible.; No bare dark. Every pixel outside a clearing carries a plate at reduced luminance — the dark is photographic, always, everywhere. A flat black region is a failed render rather than restraint, and this territory has none on any screen including the admin.; No second clearing per viewport. Two pools cancel each other and the concept dies with them: one pool, and it is where the eye goes.; No scrim, tint or overlay laid over a plate to make type sit on it. If a word needs the picture darkened in order to be read, that word belongs in the clearing instead — which is what the clearing is for.; No drop shadow, no card, no rounded rectangle, no three-up grid. The edge of the light is the only boundary in the entire system, and adding a second kind of boundary would make the first one ordinary.; Body 18px inside the pool, 17px minimum anywhere, plate-side captions 15px and never smaller. Gold #E9C87E is barred INSIDE the pool (1.47:1) and magenta-deep #C2187A is barred OUTSIDE it (3.45:1) — each colour belongs to one side of the edge and crossing is a contrast failure as well as a concept failure.
+- Surface = APPLICATION → the narrative spine does NOT apply (category error on a utility screen). Apply INTERFACE-CRAFT (.claude/rules/interface-craft-checklist.md; I-1..I-6):
+    this territory's emphasis: I-2 one primary action per screen made structural rather than stylistic: the clearing contains exactly ONE primary control, always, on every admin screen — so the answer to 'what do I do here' is permanently 'the thing in the light', and she learns it once and never relearns it.; I-4 progressive disclosure BY the edge, which is the lever that decides whether she can run this: the 80% path is whatever is lit, and everything rare — availability rules, publish scope, bulk actions, CSV export, hold duration — lives outside the pool at 15px and comes into the light on intent. It is how a nine-field settings screen stops looking like software to someone who is not comfortable with software (brief §6).; I-1 state-completeness with day one designed FIRST: the empty merged calendar, the zero-workshop index and the empty booking queue are each a clearing holding one sentence and one control, so a brand-new practice's admin looks composed rather than broken — brief §11's explicit requirement that a page with zero workshops is still worth landing on.; I-6 affordance legibility on a two-value system a non-technical owner can state out loud: anything on the light is operable, anything on the plate is information. The irreversible guards — send to N confirmed subscribers, delete an offering three newsletters reference — state the exact count and the exact consequence inside their own clearing, before the control rather than after it.
+    REQUIRED: state-completeness (empty/loading/error/populated/overflow), one primary action, scan hierarchy in <2s, density-done-right, legible affordances.
+
+## INTERFACE CRAFT (application surface — RUN THE METHOD, do not merely satisfy the checklist): READ AND FOLLOW `.claude/skills/interface-craft/SKILL.md` top to bottom. It is a PROCEDURE, not a list. A critique checklist tells you whether a screen is right; it never tells you what to do first, and screens authored from the checklist alone ship correct, legible, and dead.
+
+THE HONESTY CONTRACT OUTRANKS EVERYTHING BELOW: draw ONLY observed values — never interpolate, never smooth, never extrapolate. Sparse observations demand marks or a step function, never a fitted curve. A gap in the data is information. Stale is a state, not an error. Engagement NEVER licenses inventing data the product does not have.
+
+MANDATORY (graded by `interface-craft-reviewer` on the rendered screenshot — an Opus judge, blind):
+1. NAME THE SCREEN'S ONE QUESTION, then make its answer the loudest object on the surface. If the answer is not unmistakable in <2s, the hierarchy failed.
+2. REAL IMAGERY ON THE ENTRY AND FEATURE SURFACES. A working surface with zero photographs reads as a wireframe of itself and FAILS the atmosphere floor (calibrated: the known-bad fixture is a placeless dark board). A dark theme is not atmosphere; a palette is not a place. Deep interior forms and settings pages owe no photograph.
+3. DRAW THE DATA'S OWN DRAMATIC SHAPE, ONCE, AT FEATURE SCALE — from observed values only. If the data has a shape (a collapse, a streak, an outlier) and it is left distributed across uniform cells for the reader to reconstruct, that is the spreadsheet, however handsome the cells.
+4. ONE STATIC SIGNATURE MOVE that reads in a still screenshot with no JS, and that SERVES LEGIBILITY. If it does not help someone read the screen faster, it is garnish — cut it.
+5. DESIGN EVERY STATE (I-1), including your domain's own (stale, withdrawn, expired, denied). RESTRAINT MAY CUT DECORATION; IT MAY NEVER CUT A STATE — deleting a domain state is lying by omission to the person having the worst day.
+
+Then cut the weakest 10% and keep exactly ONE detail that rewards close attention. Permission and restraint ship as one instruction.
+
+## Project design skills (apply these — they SUPERSEDE generic taste where they conflict):
+The project design skill SUPERSEDES the generic frontend-design / design-taste-frontend taste where they conflict.
+
+### [supersede-generic] night-side-emanation
+# Night-Side Emanation — bespoke identity for The Field Work
+
+## Intent
+
+The supplied mark is a radiating field — concentric light running outward from a
+centre (brief §2). This skill makes that geometry the design's subject: light is
+the thing, not decoration laid over it. The register is night-side — low light,
+stillness, an adult in a quiet room, "rather than like a spa brochure"
+(brief §2). It departs from a measured category norm: 5 of 6 researched sites
+are cream/near-white ground with exactly one warm earth or metallic accent, and
+**not one competitor uses magenta or a gold→magenta gradient**
+(competitors.md). The differentiation move is a
+gold→magenta radial emanation and stillness, instead of an acid flat accent and
+Webflow motion (styles.md Style 1).
+
+## When it applies
+
+- palette · page-ground · background · hero · imagery — wherever a ground
+  colour, a gradient, or one of the commissioned plates is placed.
+- BOTH light-ground and dark-ground directions. Night-side governs the FEELING
+  (still, low-lit, unhurried), not the literal value: a light-ground direction
+  is not disqualified, it just cannot be spa-bright.
+- It does not decide composition; which colour becomes the page ground stays a
+  per-direction decision.
+
+## Do
+
+- **Use the gradient as EMANATION** — light running outward from a centre or an
+  edge, with real falloff. One emanation per screen, placed where the eye should
+  rest; two competing centres cancel each other.
+- **Treat the palette as POSITION-DEPENDENT and verify before use.** Computed
+  figures (WCAG 2.2 relative luminance) from `assets/brand/README.md` — read it
+  rather than trusting a remembered number:
+  - `gold #E9C87E` is a **text** colour on the dark plums (10.89:1 on plum-800
+    `#2B0E28`) and a **non-text** colour on light (1.47:1 on blush, 1.55:1 on
+    ivory — failing AA body *and* the 3:1 large-text *and* non-text floors). On a
+    light ground gold may be a decorative mark, edge or fill; never type, never a
+    functional border, never a focus ring.
+  - `magenta-deep #C2187A` **inverts**: text-safe on light (5.18:1 on blush),
+    fill-only on dark (3.10:1 on plum-800; 2.82:1 on plum-700, where it misses
+    even the 3:1 non-text floor).
+  - `magenta #D6338A` fails AA body on **both** ground families (4.08:1 on
+    blush, 3.93:1 on plum-800). It is not body type anywhere in this system.
+  - `rose #E85D9B` is the dark-ground text-safe pink (5.41:1 on plum-800), but
+    drops to 4.92:1 on plum-700 — so it clears AA body on the darker two only.
+- **Hold non-text to 3:1 against its ADJACENT colour** (WCAG 2.2 SC 1.4.11):
+  borders, rules, focus rings, input outlines, icon strokes — measured against
+  the ground they actually sit on, not against the page. A hairline in any
+  mid-gradient stop will usually miss it. This is the check that gets skipped
+  because it is invisible by eye.
+- **Never set a mid-gradient stop as body text without computing it first**, and
+  state the figure alongside it. If a light direction wants gold *type*, derive
+  a value (`#8A6A22` = 4.61:1 on blush) rather than reusing the artwork's gold.
+- **Let the photography carry the warmth.** The commissioned plates are dark,
+  warm, high-contrast, with gold-to-magenta light in them; a light-ground
+  direction must state how it handles them or it ships a register collision.
+
+## Don't
+
+- **No lavender, mandalas, crystals, chakra wheels, soft-focus serenity, or
+  cupped-hands-around-a-glowing-orb.** The brief names the soft-focus lavender
+  register as the thing this brand must defeat; `aura-hands-between` is the
+  single most-reproduced composition in the category and is reserve, never hero.
+- **Don't use the gradient as a button fill, a diagonal banner, or a rainbow
+  band.** Those are decoration; emanation has a centre and a falloff.
+- **Don't read night-side as "make everything dark".** Still and low-lit is the
+  requirement. Spa-bright is the failure.
+- **Don't carry a colour's role across grounds.** This supersedes the generic
+  taste-default "apply the brand colours consistently" — consistency here means
+  the same colours doing *different jobs* on different grounds. This exact
+  failure has shipped on this project before; it is invisible to anyone who
+  already knows what the text says, so it must be computed, not reviewed.
+- **Don't reach for the category palette** — a cream ground with one warm earth
+  or metallic accent (measured: `#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`).
+  Where the direction is dark, differentiate from the one dark exemplar
+  (Othership `#372338`, a US bathhouse) on radial emanation and stillness — not
+  on a bright flat accent or a condensed display face.
+
+## Citations
+
+- asset: `assets/brand/README.md` — the radiating-field mark; eleven sampled
+  colours with computed contrast on both ground families (gold 10.89:1 on
+  plum-800 vs 1.47:1 on blush; magenta-deep 5.18:1 on blush vs 3.10:1 on
+  plum-800; magenta fails AA body on both; rose 5.41:1 on plum-800; derived
+  `#8A6A22` 4.61:1 on blush) + the SC 1.4.11 3:1 non-text floor.
+- brief: §2 — "Night-side rather than daylight — the work happens in low light,
+  in stillness, and the site should feel like that room rather than like a spa
+  brochure"; "never the soft-focus lavender register the category defaults to";
+  `aura-hands-between` (cupped hands around a glowing orb) is reserve, not hero;
+  accessibility floor = WCAG 2.2 AA verified by computed contrast.
+- competitor: `competitors.md` — 5 of 6 sites are near-white/cream with exactly
+  one warm earth/metallic accent (`#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`);
+  dark grounds 1 of 6 and that one (Othership `#372338`) is a US bathhouse, not
+  a UK healer; not one competitor uses magenta or a gold→magenta gradient.
+- differentiation-move: `styles.md` Style 1 (Field Emanation) — "a gold→magenta
+  radial emanation instead of an acid-yellow flat accent, and stillness instead
+  of Webflow motion".
+### [supersede-generic] plain-declarative-voice
+# Plain declarative voice — bespoke identity for The Field Work
+
+## Intent
+
+Write what happens, not what it will do for them. This is **simultaneously a
+craft rule and this project's legal position**, and it must be treated as both.
+The UK CAP Code (enforced by the ASA) restricts health-outcome claims for
+therapies without robust evidence; energy healing has no accepted clinical
+evidence base, so the site describes what happens, what people report, and what
+the practitioner does — and does not promise outcomes (brief §14).
+
+That constraint is not a tax, it is the opening. Category research found the copy
+default is either clinical-explanatory or breathless-transformational with
+nothing in between; 3 of 6 practitioner sites make a claim needing
+substantiation, 1 of 6 carries a disclaimer. Plain declarative speech is
+therefore the unoccupied register **and** the compliant one — and the sceptical,
+curious adult this brand speaks to can feel the difference (brief §2, §1.3).
+
+## When it applies
+
+Every word: headlines, body, CTA labels, form helper text, empty states, alt
+text, and admin copy the owner will imitate. Highest stakes on `home` beat 5 —
+"what this is not", the compliance surface and the trust surface at once (brief
+§11, §14) — plus `about` and every service description. Placeholder copy
+included: **no lorem, ever.** The proposition is that a real person is speaking.
+
+## Do
+
+- **Work the PERMITTED zone deliberately — don't hedge to nothing.** ASA/CAP
+  "Health: Reiki" expressly permits claims about the emotional and spiritual
+  effects of the therapy, its relaxing nature, its meditative qualities, an
+  improvement in a feeling of overall wellbeing and an improved sense of self,
+  and about the practitioner's professionalism and the therapy surroundings.
+  "Health: Healing therapy" adds spiritual and emotional comfort and support
+  during illness, grief and stress. A real, usable vocabulary — use it.
+- **Describe procedure, room and hour.** What happens, in what order, how long
+  it lasts, what you wear, whether anyone touches you. Concrete nouns, short
+  sentences, no adjective stacks.
+- **Lead with the refusal where a refusal is honest.** Mettle Health opens with
+  what it cannot do — _"We can't change your situation, but we can help you live
+  with it."_ Take the move: state the limit first, then the offer. It buys more
+  trust than another testimonial would.
+- **Report, don't promise.** Attribute experience to the person who had it
+  ("people describe…"). "What it will do for you" is a claim; "what happens, and
+  what people report" is description.
+- **Spend the specificity budget on the unasked question.** _Illustrative only:_
+  "You keep your clothes on. Nobody touches you." beats "a safe, welcoming
+  space" — and brief §15 makes it measurable: ≥80% of test visitors should be
+  able to state that fact unprompted after one scroll.
+- **Treat credentials as UNWRITTEN until confirmed.** The practitioner's name
+  and her years practising and teaching are explicitly unverified (brief §20).
+  Never assert them in copy. Use a visibly marked placeholder and flag it for
+  client confirmation before that surface ships.
+
+## Don't
+
+- **Breathless transformation** — "heal your life", "release your blocks",
+  "step into your power". The register the brief bans by name (§2: never
+  breathless).
+- **The clinical-explanatory modality lecture** — _"Reiki is a Japanese
+  technique for…"_. Measured as a category default in the competitor set; also
+  banned by §2 (never clinical).
+- **The outcome-adjective list** — "Confident, Happy, Calm, Relaxed, Loved,
+  Safe." A promise wearing a word cloud.
+- **Any named medical condition, and any treat / cure / diagnose / prevent /
+  alleviate verb** — physical or psychological. Two upheld ASA rulings are on
+  point: Allan Sweeney Reiki (20 July 2011 — ADHD, back pain, depression,
+  cancer) and Healing on the Streets, Bath (13 June 2013).
+- **Anything that could discourage essential medical treatment.** CAP is
+  explicit; both upheld rulings turned on it. A visible "complementary, not a
+  substitute for medical care" statement is required (brief §14).
+- **The soft-focus lavender wellness register** — and equally the generic "warm,
+  friendly, benefit-led" default of the shipped taste skills.
+  `precedence: supersede-generic`: where a generic heuristic asks for a benefit
+  headline or an emotional promise, **this skill wins.**
+
+## Citations
+
+- brief: §2 Voice — "Never clinical, never breathless, never the soft-focus lavender register the category defaults to."
+- brief: §1.3 — "Prefer honesty over persuasion where they diverge… Naming what the work is _not_ buys more trust than one more testimonial would."
+- brief: §14 — "must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named medical condition"; beat 5 is "the compliance surface as well as the trust surface"; complementary-not-a-substitute statement required.
+- brief: §11 beat 5 (Throat) — "What this is not. Not therapy, not medicine, not a replacement for either."
+- brief: §15 — "≥80% of test visitors, unprompted, can state that they keep their clothes on and are not touched, after one scroll."
+- brief: §20.1 — practitioner's name + years "have not been verified with the client. Confirm before any copy is written."
+- competitor: competitors.md §Regulatory Baseline — ASA/CAP "Health: Reiki" + "Health: Healing therapy" permitted/prohibited lists verbatim; upheld rulings Allan Sweeney (2011-07-20), Healing on the Streets – Bath (2013-06-13); scoreboard 3-of-6 overclaim, 1-of-6 disclaimer.
+- competitor: competitors.md §The copy default — modality-first / outcome-promising ("Confident, Happy, Calm, Relaxed, Loved, Safe"); the brief's voice "has no incumbent."
+- domain-research: inspirations.md Insp. 14 Mettle Health — "We can't change your situation, but we can help you live with it."
+### [augment-generic] dated-things-are-typeset
+# Dated things are typeset — bespoke technique for The Fieldwork
+
+## Intent
+
+A schedule is content, not chrome. The category hides it: 3 of 6 measured
+practitioner/studio sites publish no price at all, and Re:Mind's `/book-class`
+schedule returned "No results found" to a static fetch because Momence renders it
+client-side (competitors.md). This project's trust position is the opposite — the
+Carrier persona names "a price that only appears after you make contact" as the
+thing that breaks their day (brief.md §6), and the products block renders live
+Courses, Workshops and Services at equal billing with real dates and prices
+(brief.md §12). So the listing is typeset as the primary content, on the
+repertory-cinema model: the DATE is the section header, each time beneath it a
+standalone anchor. The mechanics below are transferable to any dated, priced,
+bookable thing; the necessity is this client's.
+
+## When it applies
+
+- Products block · the three index pages · offering detail · the course session
+  list · the service free-slot picker.
+- Anywhere a card would otherwise carry a date, a duration, a capacity or a fee.
+- Not on prose surfaces (about, privacy) — they have no rows to align.
+
+## Do
+
+1. **Date as a section header at display scale; each offering under it a
+   standalone line.** Group chronologically, set the date on the display ramp
+   ("Saturday 25 July"), and make each time/offering beneath it a discrete
+   tappable target — a rule-separated row, not a rectangle with a shadow. This
+   solves scan-by-time and scan-by-event in one layout (inspirations.md Insp. 22,
+   Metrograph).
+2. **State the price. Always, on the listing, not only on detail.** In the same
+   typographic voice as everything else — a fee is a fact, not a badge. No "from",
+   no "enquire", no price behind a form (competitors.md §"Publish the price on the
+   page").
+3. **Tabular lining figures, set explicitly** — `font-variant-numeric:
+tabular-nums lining-nums` on every date, time, duration, capacity and price, and
+   align columns of figures on their numerals. Choose a body face that actually
+   ships them (inspirations.md §type pairings). A column of times that doesn't
+   align cannot be scanned, which defeats the whole move.
+4. **Equal billing across offering kinds.** One register, one price list, one
+   surface. Distinguish kinds by their DATA — a span with n sessions inside it, a
+   single dated point, a bookable duration — never by giving one kind a richer
+   card (brief.md §12; Insp. 26 run-span typesetting).
+5. **Design the empty state as a first-class target.** Organise the surface around
+   "what is on now" so it degrades gracefully to one item, or none: a plain
+   sentence naming what is coming and one route to ask, at the same type scale as
+   a populated row. A grid with one card in it looks broken; a programme with one
+   entry does not (brief.md §11 "zero workshops on day one"; Insp. 29).
+6. **Render every date, time and price server-side, in the initial HTML.** A
+   schedule that only exists after JavaScript does not exist for a crawler, a slow
+   connection, or assistive tech. A client fetch may refresh a slot's live
+   availability; it must never be what puts the date on the page (competitors.md
+   §"Server-render the schedule").
+
+## Don't
+
+- **Don't push dates behind filters or a separate calendar view.** Replace the
+  filter-first affordance with an already-sorted chronological list carrying the
+  date on every row — Barbican demotes chronology to theme filters and the visitor
+  who came for a date can't find one (Insp. 25).
+- **Don't wrap listings in shadowed, rounded, image-topped cards.** Replace the
+  card with a typographic row: date header, title, one small metadata line
+  (duration · format · price), a rule. The container is the type, not a box.
+- **Don't write "contact for pricing", "POA", or "places" without a figure.**
+  Replace with the actual number; where capacity genuinely can't be promised, use
+  an honest inline phrase ("Places available" / "Limited places") stated as
+  information, never a live seat count (brief.md §5; Insp. 23).
+- **Don't let a third-party booking widget typeset the schedule.** It arrives with
+  its own type, figures, radii and motion and breaks the surface visibly
+  (competitors.md §"Third-party booking widget"). Own the picker and set it in the
+  same rows as everything above it.
+- **Don't animate a slot into existence.** Replace transition-in with an immediate,
+  non-animated state change on selection; a held slot's countdown is text, not a
+  spinner (inspirations.md §motion — Slot selection).
+
+## Citations
+
+- brief: products block renders live Courses, Workshops and Services at equal
+  billing with real dates and prices; publishing a workshop makes it appear with
+  no second edit (brief.md §12)
+- brief: index pages must design the empty state — zero workshops on day one and
+  the page must still be worth landing on (brief.md §11); capacity shown as
+  information, never a live seat count (brief.md §5)
+- brief: the Carrier's dealbreaker — "a price that only appears after you make
+  contact"; the Returner's task — scan upcoming dates in under a minute (brief.md §6)
+- competitor: 3 of 6 sites publish no price; Re:Mind's client-rendered schedule
+  returned "No results found" to a static fetch (competitors.md §Cross-cutting)
+- domain-research: Metrograph — date as section header, showtimes as standalone
+  tappable anchors (Insp. 22); Barbican — dates absent from cards, pushed into
+  filters (Insp. 25); Le Cinéma Club — the empty-state answer (Insp. 29)
+### [augment-generic] stillness-as-motion-budget
+# Stillness as motion budget — bespoke technique for The Fieldwork
+
+## Intent
+
+Treat motion as a fixed budget with exactly one line item. The whole allowance
+goes to a single slow move that MEANS something; everything else on the page
+holds still. The researched category spends its motion on scroll fade-ins and a
+testimonial carousel and gets nothing back — no site in the set uses motion as
+meaning. The one motion-rich exemplar is loud in a way that would break a brand
+whose stated register is "unhurried, quietly certain." So the differentiating
+move is not more motion or better motion: it is arithmetic. One move, slow
+enough to read as atmosphere rather than as effect, on a page that is otherwise
+still.
+
+## When it applies
+
+- Any motion, transition, hero treatment, or ambient/background effect, on any surface.
+- Marketing and application surfaces alike. On dense-data, settings, or form
+  surfaces the budget is zero, not one.
+
+## Do
+
+- **Pick ONE move and spend the whole budget on it.** It expresses the concept
+  rather than decorating it. Ambient drift is measured in seconds, not
+  milliseconds — a ~12-second cycle the eye barely registers is the target, not
+  a 400ms ease.
+- **Go slower than feels right.** If a movement reads as an effect, it is
+  already too fast. Halve the speed and re-judge.
+- **Keep the one move decorative-only.** It never carries content, never encodes
+  state, and is never the only way to learn something.
+- **Author every motion `prefers-reduced-motion`-first, and check the still
+  frame is a FINISHED composition** — not the animated one with a hole in it. If
+  disabling the animation leaves an empty region, a blank panel, or a missing
+  focal element, the motion was load-bearing and the design is wrong. Fix the
+  composition, don't re-enable the motion.
+- **Functional micro-transitions are exempt from the budget but subject to the
+  ceiling** — focus rings, hover state change, open/close of a disclosure. Under
+  ~200ms, never elaborated into a flourish.
+
+## Don't — the static-render prohibition (HARD)
+
+**NEVER gate content behind `opacity: 0` plus an IntersectionObserver, a
+scroll-reveal library, or any JS-driven entrance.** Not on any element, not
+"just the hero", not with a fallback timer. This is a prohibition, not a
+preference.
+
+**The page must render WHOLE in a static screenshot, with no JavaScript executed
+and no scrolling.** Every element sits at final opacity and final position in
+the delivered HTML/CSS. Motion is a progressive enhancement applied to
+already-visible content — never a condition of seeing it.
+
+Two reasons, both hard. It is the accessibility floor: content that requires JS
+plus a scroll to appear is content some people never get. And it is a
+mockup-safety rule: `lint-mockup-safe.mjs` enforces it mechanically, and a
+violation makes the page render blank or half-empty to a static judge. **This
+exact regression has shipped on this project's predecessors** — sections present
+in the markup, invisible in review.
+
+Also don't:
+
+- **No scroll-triggered fade-ins, reveals, or staggered entrances.** The category
+  default, and the thing the prohibition above exists to kill.
+- **No carousels, parallax stacks, marquees, or hover flourishes.** Each is a
+  second thing moving; with two moving things neither is the signature.
+- **Don't let motion substitute for composition.** If the layout only works once
+  things have animated in, the layout is the bug.
+
+## Precedence
+
+`augment-generic` — layers a hard budget ceiling and the static-render
+prohibition on top of generic frontend / design-taste motion guidance. Where
+generic taste suggests scroll reveals or entrance animation, this skill wins.
+
+## Citations
+
+- `brief`: "Warm, unhurried, quietly certain" (brief.md §2 Voice) — the register
+  that a motion-rich treatment would break.
+- `brief`: "Every motion has a `prefers-reduced-motion` fallback that leaves the
+  composition whole" (brief.md §2 Accessibility floor) — the intact-fallback rule.
+- `brief`: the optional ambient field "is decorative only... suppressed under
+  `prefers-reduced-motion`" (brief.md §12) — motion never carries content.
+- `competitor`: "The motion default — a scroll fade-in and a testimonial
+  carousel. Nothing else. No site in the set uses motion as meaning."
+  (competitors.md §The Category Template) — the default this supersedes.
+- `competitor`: the one motion-rich exemplar "is also loud in a way that would
+  break this brief's 'unhurried, quietly certain' voice — take the courage, not
+  the volume" (competitors.md §Competitor 6) — why volume is not the answer.
+- `differentiation-move`: "makes the emanation — not a fade-in — the only motion
+  on the page, at a 12-second drift the eye barely registers" (styles.md Style 1)
+  — the one-move budget and its timing.
+- `craft-rule`: C-5 static-review-safe + C-7 `prefers-reduced-motion`
+  (`.claude/rules/awwwards-craft-checklist.md`).
+
+================================================================================
+# REBUILD THE ADMIN DASHBOARD AS A PORTAL, NOT A WEBSITE
+
+TARGET FILE (rewrite in place):
+  projects/thefieldwork-v5/docs/mockups/the-lit-clearing-3-1/admin/admin-dashboard.html
+
+## The operator's verdict, and why he is right
+
+He wrote: *"it looks like another website instead of an admin portal"*.
+
+That is a structural fact, not a taste call. The current file is built from three
+`<section class="relative overflow-hidden lg:min-h-[1000px]">` blocks — full-
+viewport marketing beats. Half the first viewport is a full-bleed photograph of a
+face. The words sit in a centred blush pool at display scale. Navigation is a row
+of text links. It is the landing page's grammar applied to a dashboard.
+
+It also contradicts the project's own spec. `docs/analysis/admin/screens.json`
+declares, for this app:
+
+- `sidemenu.visible: true` with eleven items —
+  today · calendar · requests · home-page · offerings · pictures · newsletter ·
+  subscribers · documents · availability · settings
+- `header.variant: "admin"` with actions — view-site · unpublished-changes ·
+  account-menu
+- every one of its 16 screens is `surface: "application"`
+
+The current mockup ships none of that navigation model.
+
+## The reference to match STRUCTURALLY
+
+  projects/thefieldwork-v3/docs/mockups/the-lit-interior-v2/admin/admin-dashboard.html
+
+READ IT. Match its INFORMATION ARCHITECTURE and DENSITY, not its palette. What it
+gets right, and what you must reproduce:
+
+- A persistent left sidebar rail: the brand mark small at the top, then the nav
+  items as icon + label rows, the active row marked, and a count badge on the
+  item that has outstanding work (its Bookings row carries a `3`).
+- A slim utility bar across the top of the content area: the date, the time and
+  the timezone on the left; "View site ↗" and an account chip reading the
+  practitioner's name and role on the right.
+- A content column that starts working immediately — a short orienting line, then
+  the triage list. No hero. No full-bleed imagery. No viewport-height sections.
+- The triage list is the heart of it: each row is a real piece of outstanding
+  work with the actual numbers on it (an overdue balance with the amount, who
+  owes it, what they booked, what was paid and when), a machine reference where
+  one exists (a Stripe payment-intent or refund ID printed in mono), and ONE
+  clear action per row.
+- Below the triage, the week — a calendar strip with what is actually booked.
+- Density: roughly 3,300px of page carrying a lot of facts, versus the current
+  4,500px carrying very few.
+
+## Keep the-lit-clearing's IDENTITY — this is not a re-skin of the reference
+
+The visual world stays exactly as the approved landing page:
+
+- Ground: plum `#160712`, raised surface `#260F20`.
+- Clearings: blush `#FBF3F1` panels carrying plum ink. On the admin surface these
+  become PANELS — the working surface of the portal — not one hero pool.
+- Display type: Cormorant Garamond, used sparingly and at a working size (a
+  single page title, the big numbers in the triage rows). Body: Source Sans 3 at
+  17-18px. Machine references and tabular figures: Azeret Mono.
+- Accent rules are CONTEXT-LOCKED and this is load-bearing for legibility:
+  magenta `#C2187A` is POOL-ONLY (3.45:1 on the dark plate fails; 5.18:1 inside a
+  blush panel passes). Gold `#E9C87E` is PLATE-ONLY (10.89:1 on dark; 1.47:1 in a
+  panel fails). Use gold for labels on the dark chrome, magenta for emphasis and
+  actions inside panels. Never swap them.
+- Hard edges throughout — the direction excludes border-radius, box-shadow and
+  cards. Rows are separated by hairline rules, not by cards. The one sanctioned
+  curve on the whole design is a true circle for an avatar.
+- Logo: `assets/brand/logo-horizontal.svg` in the sidebar head, referenced as an
+  `<img>`. Never redrawn.
+
+## What the application surface CHANGES about the concept
+
+The landing page's governing idea — one clearing of light per viewport, opening
+as you scroll — is a MARKETING device. On a portal it is a category error, and
+the direction's own `signatureMoveScope` decides how far it travels. Here:
+
+- There is no one-clearing-per-viewport rule. A dashboard legitimately shows
+  several panels at once.
+- There is no growth ladder. Panels are sized by what they hold.
+- There is no full-bleed photography behind the working surface. The dark ground
+  may carry a very low-luminance plate for atmosphere at the page edges, but
+  never behind data.
+- The concept survives as the EDGE: hard-cut blush panels on a dark plum ground,
+  nothing crossing a panel boundary, the same ink discipline. That is the family
+  resemblance to the landing page — not the hero device.
+
+## The interface-craft levers this screen must satisfy
+
+- **State-completeness** — the triage list needs its empty state designed too
+  ("nothing needs you tonight"), not just the populated one.
+- **One primary action per row, and one for the screen** — the eye must find the
+  thing to do in under two seconds.
+- **Scan hierarchy** — the single most important datum (how many things need her
+  tonight, and the oldest one) readable at a glance before any prose.
+- **Density done right** — this is a working surface; it should feel closer to a
+  ledger than to a brochure. Data-ink over chrome.
+- **Affordance legibility** — actions look like actions; the destructive ones are
+  guarded.
+- **Progressive disclosure** — the detail lives behind the row, not dumped on it.
+
+## Content — use REAL, PLAUSIBLE data in her voice
+
+Invent nothing generic. This is a UK energy-healing practitioner's back office:
+booking requests against named offerings with real dates and prices drawn from
+the landing page's schedule (Aura Healing: Foundations £480 six evenings; The
+Hour, Explained £45; Reading the Field £95; one-to-one sessions £95/£75/£60), a
+balance owed, a refund in flight, an unanswered enquiry, this week's calendar.
+Names should read as real clients, not Lorem placeholders.
+
+## Constraints that still bind
+
+- Static-render safe: renders whole in a screenshot, no JS gating, no
+  `opacity:0` + IntersectionObserver.
+- Tailwind Play CDN script + inline `tailwind.config` in `<head>`;
+  `data-theme="dark"` on `<html>`.
+- No type below 17px except tabular/mono metadata at 15px minimum.
+- No `marianne-altar-light.png` (garbled text), nothing from
+  `assets/images/new/_rejected/`.
+- Every `<img src>` must resolve to a real file.
+
+## Self-verify before reporting
+
+Confirm: a persistent sidebar exists with all eleven declared items and an active
+state; the admin header carries view-site, unpublished-changes and account-menu;
+there are no `min-h-[...]` viewport-height sections; there is no full-bleed
+photograph behind the working area; the page is meaningfully DENSER than the file
+you replaced; Tailwind bootstrap and `data-theme` survive; every image resolves;
+the file closes with `</html>`.
+
+Report what you changed structurally, the density before/after, and how you kept
+the-lit-clearing's identity while dropping its marketing grammar. NO HTML in your
+response text.

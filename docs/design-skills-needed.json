@@ -1,0 +1,290 @@
+{
+  "projectSlug": "thefieldwork-v5",
+  "skills": [
+    {
+      "name": "ascending-beat-scroll",
+      "skillClass": "identity",
+      "layoutMove": true,
+      "precedence": "supersede-generic",
+      "appliesTo": [
+        "landing",
+        "home",
+        "products-block",
+        "beat-root",
+        "beat-sacral",
+        "beat-solar-plexus",
+        "beat-heart",
+        "beat-throat",
+        "beat-third-eye",
+        "beat-crown"
+      ],
+      "activationKeywords": [
+        "ascent",
+        "beat",
+        "scroll",
+        "chakra",
+        "root",
+        "crown"
+      ],
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §11 — the home page is SEVEN FIXED NARRATIVE BEATS in a fixed ascending root→crown order, with a data-driven products block between beats 6 and 7"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — Squarespace's own prescribed wellness order (Jenani/Anza/Clune/Aurora/Clove) is 'full-bleed soft-focus hero → short mission statement → three-up service cards → practitioner bio → testimonials → booking CTA', followed by 5 of 6 researched sites, and it contains NO slot for reassurance and no slot for 'what this is not'"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 3 (Long Dusk) — the ascent taken literally as the page ground itself, travelling plum-900 at Beat 1 to blush at Beat 7"
+        }
+      ],
+      "body": "COMPOSITION AXIS: a single vertical ASCENT of seven named beats, root to crown, in which some measurable property rises monotonically across the whole scroll — luminance, or scale, or openness, or all three. The page ENDS at its brightest and most open point, where the call to action sits. INSTEAD OF the category's hero→3-up-cards→testimonials→CTA skeleton, which is a stack of independent boxes with no direction of travel. The ascent is the layout, not a theme applied to a layout: if you removed the copy, the shape of the page should still read as a climb. Beats are steps in one arc, never seven mini-pages — a landing that reads as seven independent sections has lost the spine even when every section is present. The products block sits between beats 6 and 7 deliberately: the visitor sees the transformation, then how to get it, then is asked. Beats 2-6 can be hidden by the owner, so the ascent must survive a missing rung — never depend on an exact count, only on the direction of travel. DO NOT express the ascent as a rainbow: the seven-colour chakra chart is the measured category cliché."
+    },
+    {
+      "name": "the-answered-question",
+      "skillClass": "identity",
+      "precedence": "supersede-generic",
+      "appliesTo": [
+        "landing",
+        "home",
+        "beat-root",
+        "beat-crown",
+        "home-page",
+        "beat-editor-card"
+      ],
+      "activationKeywords": ["reassurance", "clothed", "first-timer", "hero"],
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §3 — 'the specific thing they are too embarrassed to ask is whether they will have to take their clothes off. So they close the tab. Not because they decided against it — because nobody answered the question they couldn't ask.'"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — measured: the strings clothed / undress / touch / hands-off / believe appear ZERO times on the homepage of all six researched practitioner and studio sites. The one site that answers all three questions well (Blossom Reiki) buries it on a second-click /faq/ page."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — NHS 'What happens at your appointment', verbatim: 'You'll need to undress, behind a screen, from the waist down.' The register to invert: flat, procedural, unembarrassed."
+        },
+        {
+          "source": "asset",
+          "ref": "asset-inventory.json — aura-two-people.png: practitioner's hands hovering above a SEATED, FULLY CLOTHED person. The reassurance is available as a photograph, not only as a sentence."
+        }
+      ],
+      "body": "The first thing this page does is answer the question the visitor is too embarrassed to ask: do I undress, am I touched, must I believe something. Not in an FAQ. Not below the fold. FIRST. State it as plain fact in short declarative sentences — 'You stay dressed. Nobody touches you. Nothing is asked of your beliefs.' — and let the image carry the same fact in parallel, so it survives a skim by someone who reads nothing. This is the project's single largest competitive position: nobody in the category does it, and the brief's own success metric is that ≥80% of visitors can state it unprompted after one scroll. Consequences for composition: beat 1 cannot be a mood-setting atmospheric hero with a tagline. It must contain legible, specific, procedural sentences at a size an adult reads first. Warmth without this is decoration; this without warmth is a leaflet. Both are required, in that order."
+    },
+    {
+      "name": "night-side-emanation",
+      "skillClass": "identity",
+      "precedence": "supersede-generic",
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "newsletter",
+        "booking",
+        "documents",
+        "auth",
+        "today",
+        "calendar",
+        "availability",
+        "home-page",
+        "requests",
+        "subscribers",
+        "pictures",
+        "settings",
+        "header",
+        "site-footer",
+        "brand-lockup",
+        "card",
+        "button-primary",
+        "offering-hero",
+        "portrait-figure",
+        "media-tile",
+        "media-grid",
+        "empty-state"
+      ],
+      "activationKeywords": [
+        "emanation",
+        "aura",
+        "field",
+        "gradient",
+        "night",
+        "plum",
+        "gold"
+      ],
+      "citations": [
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — the mark is a radiating field, concentric light running outward from a centre; eleven sampled colours with computed contrast, gold #E9C87E measuring 10.89:1 on plum-800 and 1.47:1 on blush"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — 'Night-side rather than daylight — the work happens in low light, in stillness, and the site should feel like that room rather than like a spa brochure.'"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — measured: 5 of 6 researched sites are near-white/cream with exactly one warm earth or metallic accent (#E1CCBE, #AB8041, #BFAD99, #EFE3B8, #7FA200). Dark grounds: 1 of 6, and that one (Othership #372338) is a US bathhouse, not a UK healer. NOT ONE competitor uses magenta or a gold→magenta gradient."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 (Field Emanation) — 'a gold→magenta radial emanation instead of an acid-yellow flat accent, and stillness instead of Webflow motion'"
+        }
+      ],
+      "body": "The brand is an emanating field, so light is the subject, not the decoration. When this project uses its gradient it uses it as EMANATION — light running outward from a centre or an edge, with real falloff — never as a button fill, a diagonal banner, or a rainbow band. One emanation per screen, placed where the eye should rest; two competing centres cancel each other. Register is night-side: low light, stillness, an adult in a quiet room. Explicitly NOT the category's cream-and-terracotta spa brochure, and explicitly NOT lavender, mandalas, crystals, chakra wheels, or soft-focus serenity. Where the direction is light-ground rather than dark, night-side still governs the FEELING — still, low-lit, unhurried — rather than the literal value. HARD CONSTRAINT: the palette is position-dependent and computationally verified. Gold is a text colour on dark (10.89:1 on plum-800) and a non-text colour on light (1.47:1 on blush). Magenta-deep #C2187A inverts: text-safe on light (5.18:1), fill-only on dark (3.10:1). Never place a mid-gradient stop as body text without computing it first — this exact failure is invisible to anyone who already knows what the text says, and it has shipped on this project before."
+    },
+    {
+      "name": "plain-declarative-voice",
+      "skillClass": "identity",
+      "precedence": "supersede-generic",
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "newsletter",
+        "booking",
+        "documents",
+        "home-page",
+        "prose-block",
+        "purpose-section",
+        "beat-throat",
+        "detail-fact-list",
+        "empty-state",
+        "error-state",
+        "inline-notice",
+        "confirmation-panel",
+        "hold-notice",
+        "privacy-notice-link",
+        "consent-checkbox",
+        "button-primary",
+        "button-secondary",
+        "beat-editor-card"
+      ],
+      "activationKeywords": ["voice", "copy", "tone", "claims", "honesty"],
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — 'Warm, unhurried, quietly certain. Speaks to an adult who is sceptical and curious at the same time. Never clinical, never breathless, never the soft-focus lavender register the category defaults to.' §1 principle 3 — 'Prefer honesty over persuasion where they diverge.'"
+        },
+        {
+          "source": "brief",
+          "ref": "brief.md §14 — CAP Code / ASA: the site must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named condition. Beat 5 is the compliance surface as well as the trust surface."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Regulatory Baseline — 3 of 6 sites make claims requiring substantiation ('the immune system to regenerate', 'can manifest as a range of distressing physical and mental symptoms'); only 1 of 6 carries any medical disclaimer. Two upheld ASA rulings on point."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — Mettle Health, verbatim: 'We can't change your situation, but we can help you live with it.' Leads with the refusal; names the pain in the visitor's own words."
+        }
+      ],
+      "body": "Write what happens, not what it will do for them. Describe the room, the hour, the hands that do not land — concretely, in short sentences an adult reads without wincing. Never promise an outcome, never name a condition, never imply treatment: that is simultaneously the legal position and the most credible copy available, because the category is saturated with overclaim and a visitor can feel the difference. Lead with the refusal where a refusal is honest ('this is not therapy, and it is not medicine, and it does not replace either') — it buys more trust than another testimonial would. Banned registers: breathless transformation ('heal your life', 'release your blocks'), clinical-explanatory modality lectures ('Reiki is a Japanese technique for...'), and the outcome-adjective list ('Confident, Happy, Calm, Relaxed, Loved, Safe'). No lorem, ever — this brand's whole proposition is that a real person is speaking. Specificity is the lever: 'you keep your clothes on' beats 'a safe, welcoming space' every time."
+    },
+    {
+      "name": "dated-things-are-typeset",
+      "skillClass": "technique",
+      "precedence": "augment-generic",
+      "appliesTo": [
+        "offerings",
+        "booking",
+        "calendar",
+        "requests",
+        "today",
+        "products-block",
+        "offering-card",
+        "offering-row",
+        "offering-summary-card",
+        "session-list",
+        "session-list-item",
+        "session-count-badge",
+        "slot-picker",
+        "slot-option",
+        "price-tag",
+        "date-badge",
+        "calendar-month-grid",
+        "calendar-week-grid",
+        "calendar-block-chip",
+        "booking-row",
+        "hold-timer",
+        "data-table",
+        "list-item"
+      ],
+      "activationKeywords": [
+        "date",
+        "schedule",
+        "listing",
+        "price",
+        "slot",
+        "calendar"
+      ],
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §12 — the products block renders live Courses, Workshops and Services at equal billing with real dates and prices; publishing a workshop makes it appear with no second edit"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — 3 of 6 sites publish no price at all and Re:Mind's schedule returns 'No results found' to a static fetch because Momence renders it client-side; the brief's Carrier persona names 'a price that only appears after you make contact' as what breaks their day"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md — Metrograph calendar: date as section header, showtimes as standalone tappable anchors. Solves the products block and the slot picker in one layout."
+        }
+      ],
+      "body": "Dates and prices are the content, so typeset them as content rather than hiding them in cards. The repertory-cinema pattern: the DATE is a section header at display scale, and each time or offering under it is a standalone, tappable line — not a rectangle with a shadow. Prices are stated, always, in the same typographic voice as everything else; a price behind an enquiry is a category failure this project exists to reject. Give the three offering kinds genuinely equal billing: one register, one price list, one surface. Practical rules: right-align or tabular-align numerals so a column of times and fees scans; use a real tabular-figures setting rather than hoping; make the empty state worth landing on, because a new practitioner has zero workshops on day one and that is most of her first month. Render dates server-side — a schedule that only exists after JavaScript does not exist for a crawler, a slow connection, or assistive tech."
+    },
+    {
+      "name": "stillness-as-motion-budget",
+      "skillClass": "technique",
+      "precedence": "augment-generic",
+      "appliesTo": [
+        "landing",
+        "offerings",
+        "practice",
+        "booking",
+        "newsletter",
+        "today",
+        "calendar",
+        "pictures",
+        "header",
+        "nav-drawer",
+        "side-menu",
+        "toast",
+        "skeleton",
+        "confirm-dialog",
+        "destructive-guard-modal",
+        "send-guard-modal",
+        "publish-bar",
+        "offering-hero",
+        "media-tile",
+        "beat-root",
+        "beat-crown"
+      ],
+      "activationKeywords": [
+        "motion",
+        "animation",
+        "transition",
+        "reduced-motion",
+        "stillness"
+      ],
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "brief.md §2 — the register is 'unhurried'; §12 — the optional star field is decorative only, never carries content, and is suppressed under prefers-reduced-motion; §2 accessibility floor — every motion has a reduced-motion fallback that keeps the composition whole"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the motion default across the researched set is a scroll fade-in plus a testimonial carousel, and no site in the set uses motion as meaning. Othership is the one motion-rich exemplar and its volume would break this brief's voice."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 — 'makes the emanation, not a fade-in, the only motion on the page, at a 12-second drift the eye barely registers'"
+        }
+      ],
+      "body": "Spend the entire motion budget on ONE slow move that means something — most naturally the emanation's drift or the ascent's light — and spend nothing on anything else. No scroll-triggered fade-ins, no carousels, no parallax stacks, no hover flourishes competing for attention. Slower than feels right: this brand's whole claim is stillness, so if a movement reads as an effect it is already too fast. HARD CONSTRAINT, and it is a mockup-safety rule as much as an accessibility one: content must never be gated behind opacity:0 plus an IntersectionObserver. The page must render WHOLE in a static screenshot with no JavaScript and no scrolling — motion is a progressive enhancement on already-visible content, never a condition of seeing it. Every motion needs a prefers-reduced-motion fallback that leaves the composition intact rather than merely disabling the animation and leaving a hole."
+    }
+  ]
+}

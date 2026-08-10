@@ -1,0 +1,69 @@
+{
+  "extractedFrom": [
+    "docs/mockups/the-lit-clearing-3-1/webapp/home.html",
+    "docs/mockups/the-lit-clearing-3-1/admin/admin-dashboard.html"
+  ],
+  "signatureMoveScope": "kit-pattern",
+  "signatureMove": "One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.",
+  "patterns": [
+    {
+      "slug": "wordmark",
+      "file": "packages/ui-kit/src/patterns/_extracted/wordmark.html",
+      "instances": 2,
+      "note": "hero masthead lockup + admin sidebar rail lockup; both wrap the user-supplied assets/brand/logo-horizontal.svg verbatim"
+    },
+    {
+      "slug": "eyebrow",
+      "file": "packages/ui-kit/src/patterns/_extracted/eyebrow.html",
+      "instances": 12,
+      "note": "canonical shape is the admin mono/xs/gold variant; a marketing sans/sm variant (on-pool accent-500, on-plate gold) is also captured"
+    },
+    {
+      "slug": "offering-row",
+      "file": "packages/ui-kit/src/patterns/_extracted/offering-row.html",
+      "instances": 9,
+      "note": "the ledger row — date left / price right on one baseline, hairline rule ABOVE the row; 9 rows across the 3 offering-columns on the Dates & prices section"
+    },
+    {
+      "slug": "offering-column",
+      "file": "packages/ui-kit/src/patterns/_extracted/offering-column.html",
+      "instances": 3,
+      "note": "one pool per offering group (Courses / Workshops / Services), each containing a stack of offering-row"
+    },
+    {
+      "slug": "clearing-plate",
+      "file": "packages/ui-kit/src/patterns/_extracted/clearing-plate.html",
+      "instances": 8,
+      "note": "THE SIGNATURE MOVE (signatureMoveScope: kit-pattern) — every one of the 8 webapp viewport beats is a clearing-plate composition; the admin reuses the same pool-on-dimmed-photograph shape for its triage panels"
+    },
+    {
+      "slug": "sidebar-nav-row",
+      "file": "packages/ui-kit/src/patterns/_extracted/sidebar-nav-row.html",
+      "instances": 11,
+      "note": "the admin rail's 11 nav items; default / hover / current(inverted-to-pool) states captured"
+    },
+    {
+      "slug": "triage-row",
+      "file": "packages/ui-kit/src/patterns/_extracted/triage-row.html",
+      "instances": 4,
+      "note": "the 'Needs you today' queue — kicker + headline + meta + mono machine reference + one action; the single most-urgent row gets the primary-Button + hold-bar variant"
+    },
+    {
+      "slug": "state-panel",
+      "file": "packages/ui-kit/src/patterns/_extracted/state-panel.html",
+      "instances": 5,
+      "note": "the full I-1 state-completeness contract in one file: empty, loading, error, stale, overflow — all five as siblings on the admin dashboard"
+    }
+  ],
+  "canonicalTablePatternsNotPresent": [
+    "stat-tile",
+    "trust-bar",
+    "hero-badge",
+    "service-pillar-card",
+    "case-study-card",
+    "testimonial-block",
+    "marquee-strip",
+    "social-proof-row"
+  ],
+  "warnings": []
+}

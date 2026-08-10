@@ -1,0 +1,735 @@
+{
+  "version": "3.0",
+  "generatedAt": "2026-08-06T22:30:00Z",
+  "app": {
+    "appId": "thefieldwork-webapp",
+    "appName": "The Field Work",
+    "appType": "webapp",
+    "layoutSkill": "webapp",
+    "defaultNavigation": {
+      "header": {
+        "variant": "standard",
+        "actions": [
+          "nav-services",
+          "nav-workshops",
+          "nav-courses",
+          "nav-about",
+          "nav-contact",
+          "cta-request-a-place"
+        ]
+      },
+      "footer": {
+        "variant": "hidden"
+      },
+      "sidemenu": {
+        "visible": false
+      }
+    },
+    "screens": [
+      {
+        "id": "home",
+        "file": "home.html",
+        "routePattern": "/",
+        "name": "Home",
+        "description": "The whole proposition in one scroll: seven fixed narrative beats in fixed ascending order (root to crown), with a live products block between beats 6 and 7.",
+        "section": "landing",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "transparent",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "beat-root",
+          "beat-sacral",
+          "beat-solar-plexus",
+          "beat-heart",
+          "beat-throat",
+          "beat-third-eye",
+          "products-block",
+          "offering-card",
+          "beat-crown",
+          "button-primary",
+          "empty-state",
+          "site-footer"
+        ],
+        "icons": ["menu", "arrow-right", "calendar", "clock", "mail", "x"],
+        "flows": [
+          "answer-the-unasked-question",
+          "book-a-service",
+          "reserve-a-workshop-place",
+          "commit-to-a-course",
+          "contact-without-a-form",
+          "join-the-newsletter"
+        ]
+      },
+      {
+        "id": "services-index",
+        "file": "services-index.html",
+        "routePattern": "/services",
+        "name": "Services",
+        "description": "Every active one-to-one service with its duration and price, published on the page rather than behind an enquiry.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-card",
+          "price-tag",
+          "button-secondary",
+          "empty-state",
+          "error-state",
+          "skeleton",
+          "site-footer"
+        ],
+        "icons": ["menu", "clock", "arrow-right", "chevron-right", "mail"],
+        "flows": ["answer-the-unasked-question", "book-a-service"]
+      },
+      {
+        "id": "service-detail",
+        "file": "service-detail.html",
+        "routePattern": "/services/:slug",
+        "name": "Service",
+        "description": "One one-to-one service in full — what happens in the room, how long it takes, what it costs — with a single primary action: request a place.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-hero",
+          "detail-fact-list",
+          "price-tag",
+          "button-primary",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": ["menu", "clock", "calendar", "arrow-right", "chevron-left"],
+        "flows": ["answer-the-unasked-question", "book-a-service"]
+      },
+      {
+        "id": "workshops-index",
+        "file": "workshops-index.html",
+        "routePattern": "/workshops",
+        "name": "Workshops",
+        "description": "Every upcoming single dated group event with its date, venue and price; past-dated workshops have already dropped out.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-card",
+          "date-badge",
+          "price-tag",
+          "empty-state",
+          "error-state",
+          "skeleton",
+          "site-footer"
+        ],
+        "icons": [
+          "menu",
+          "calendar",
+          "map-pin",
+          "arrow-right",
+          "chevron-right"
+        ],
+        "flows": ["reserve-a-workshop-place"]
+      },
+      {
+        "id": "workshop-detail",
+        "file": "workshop-detail.html",
+        "routePattern": "/workshops/:slug",
+        "name": "Workshop",
+        "description": "One dated group event in full, showing capacity as information and never as a live seat count.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-hero",
+          "date-badge",
+          "detail-fact-list",
+          "price-tag",
+          "button-primary",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": [
+          "menu",
+          "calendar",
+          "clock",
+          "map-pin",
+          "users",
+          "arrow-right"
+        ],
+        "flows": ["reserve-a-workshop-place"]
+      },
+      {
+        "id": "courses-index",
+        "file": "courses-index.html",
+        "routePattern": "/courses",
+        "name": "Courses",
+        "description": "Every active course — a series of sessions sold as one unit — at equal billing with services and workshops.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-card",
+          "session-count-badge",
+          "price-tag",
+          "empty-state",
+          "error-state",
+          "skeleton",
+          "site-footer"
+        ],
+        "icons": ["menu", "calendar", "layers", "arrow-right", "chevron-right"],
+        "flows": ["commit-to-a-course"]
+      },
+      {
+        "id": "course-detail",
+        "file": "course-detail.html",
+        "routePattern": "/courses/:slug",
+        "name": "Course",
+        "description": "One course in full with every session listed and dated — the sessions are information, never separately bookable affordances.",
+        "section": "offerings",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "offering-hero",
+          "session-list",
+          "session-list-item",
+          "detail-fact-list",
+          "price-tag",
+          "button-primary",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": [
+          "menu",
+          "calendar",
+          "clock",
+          "map-pin",
+          "layers",
+          "users",
+          "arrow-right"
+        ],
+        "flows": ["commit-to-a-course"]
+      },
+      {
+        "id": "about",
+        "file": "about.html",
+        "routePattern": "/about",
+        "name": "About",
+        "description": "The practitioner at length from SiteSettings bio and credentials — empathy first, credentials second.",
+        "section": "practice",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "portrait-figure",
+          "prose-block",
+          "credential-list",
+          "button-secondary",
+          "site-footer"
+        ],
+        "icons": ["menu", "arrow-right", "mail"],
+        "flows": ["answer-the-unasked-question", "contact-without-a-form"]
+      },
+      {
+        "id": "contact",
+        "file": "contact.html",
+        "routePattern": "/contact",
+        "name": "Contact",
+        "description": "Direct contact details from SiteSettings for people who will not use a form — deliberately carries no general-purpose contact form.",
+        "section": "practice",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "contact-detail-list",
+          "prose-block",
+          "button-primary",
+          "site-footer"
+        ],
+        "icons": ["menu", "mail", "phone", "instagram", "arrow-right"],
+        "flows": ["contact-without-a-form"]
+      },
+      {
+        "id": "privacy-notice",
+        "file": "privacy-notice.html",
+        "routePattern": "/privacy",
+        "name": "Privacy notice",
+        "description": "What is collected, why, how long it is kept, who it is shared with and how to request erasure — the booking purpose and the newsletter purpose stated separately, in plain prose rather than a legal wall.",
+        "section": "practice",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "prose-block",
+          "purpose-section",
+          "detail-fact-list",
+          "button-secondary",
+          "site-footer"
+        ],
+        "icons": ["menu", "shield", "mail", "arrow-right"],
+        "flows": [
+          "book-a-service",
+          "reserve-a-workshop-place",
+          "commit-to-a-course",
+          "join-the-newsletter"
+        ]
+      },
+      {
+        "id": "booking-request",
+        "file": "booking-request.html",
+        "routePattern": "/book/:kind/:slug",
+        "name": "Request a place",
+        "description": "Name, email, optional phone and message against a named offering — and, for services only, a live free-slot picker whose chosen slot places a self-expiring hold.",
+        "section": "booking",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["back-to-offering"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "offering-summary-card",
+          "slot-picker",
+          "slot-option",
+          "skeleton",
+          "form-input",
+          "form-textarea",
+          "inline-validation",
+          "button-primary",
+          "empty-state",
+          "error-state",
+          "privacy-notice-link",
+          "site-footer"
+        ],
+        "icons": [
+          "chevron-left",
+          "calendar",
+          "clock",
+          "loader",
+          "alert-circle",
+          "check",
+          "mail",
+          "phone"
+        ],
+        "flows": [
+          "book-a-service",
+          "reserve-a-workshop-place",
+          "commit-to-a-course"
+        ]
+      },
+      {
+        "id": "booking-confirmation",
+        "file": "booking-confirmation.html",
+        "routePattern": "/book/thanks/:ref",
+        "name": "Request received",
+        "description": "What happens next and when to expect a human reply — and for services, the held time stated plainly along with the fact that it is held rather than booked; keyed by an unguessable non-sequential ref, noindex and no-store, showing the visitor their own submission and nothing else.",
+        "section": "booking",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["nav-home"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "confirmation-panel",
+          "hold-notice",
+          "detail-fact-list",
+          "button-secondary",
+          "site-footer"
+        ],
+        "icons": ["check-circle", "clock", "calendar", "mail", "arrow-right"],
+        "flows": [
+          "book-a-service",
+          "reserve-a-workshop-place",
+          "commit-to-a-course"
+        ]
+      },
+      {
+        "id": "subscribe",
+        "file": "subscribe.html",
+        "routePattern": "/subscribe",
+        "name": "Subscribe",
+        "description": "Newsletter sign-up with an explicit unticked consent checkbox in its own wording; ALSO serves /subscribe/:formSlug (the named forms of §12 — same screen, different framing copy and optionally an attached Document, with bare /subscribe as the default form), because routePattern carries one string and this screen has two routes.",
+        "section": "newsletter",
+        "surface": "marketing",
+        "navigation": {
+          "header": {
+            "variant": "standard",
+            "actions": [
+              "nav-services",
+              "nav-workshops",
+              "nav-courses",
+              "nav-about",
+              "nav-contact",
+              "cta-request-a-place"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "nav-drawer",
+          "form-input",
+          "consent-checkbox",
+          "document-offer-card",
+          "inline-validation",
+          "button-primary",
+          "error-state",
+          "privacy-notice-link",
+          "site-footer"
+        ],
+        "icons": [
+          "menu",
+          "mail",
+          "file-text",
+          "check",
+          "alert-circle",
+          "arrow-right"
+        ],
+        "flows": ["join-the-newsletter"]
+      },
+      {
+        "id": "subscribe-pending",
+        "file": "subscribe-pending.html",
+        "routePattern": "/subscribe/check-email",
+        "name": "Check your email",
+        "description": "Says plainly that nothing has been joined yet and the address is only pending — and deliberately offers no resend, because an unconfirmed address receives exactly one email and nothing else.",
+        "section": "newsletter",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["nav-home"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": ["header", "status-panel", "prose-block", "site-footer"],
+        "icons": ["mail", "clock", "arrow-right"],
+        "flows": ["join-the-newsletter"]
+      },
+      {
+        "id": "subscribe-confirmed",
+        "file": "subscribe-confirmed.html",
+        "routePattern": "/subscribe/confirm/:token",
+        "name": "Subscription confirmed",
+        "description": "The double opt-in landing where a pending address becomes mailable and any attached document is delivered — with calm already-confirmed and expired-token states.",
+        "section": "newsletter",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["nav-home"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "status-panel",
+          "document-offer-card",
+          "button-primary",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": [
+          "check-circle",
+          "file-text",
+          "download",
+          "alert-circle",
+          "arrow-right"
+        ],
+        "flows": ["join-the-newsletter", "retrieve-a-document"]
+      },
+      {
+        "id": "unsubscribe",
+        "file": "unsubscribe.html",
+        "routePattern": "/unsubscribe/:token",
+        "name": "Unsubscribed",
+        "description": "One click from any issue with no login and no questionnaire — the removal has already happened on arrival, so the screen's primary action is effectively none.",
+        "section": "newsletter",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["nav-home"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "status-panel",
+          "prose-block",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": ["check-circle", "alert-circle", "mail", "arrow-right"],
+        "flows": ["leave-the-list"]
+      },
+      {
+        "id": "document-download",
+        "file": "document-download.html",
+        "routePattern": "/downloads/:slug",
+        "name": "Download",
+        "description": "A stored PDF served through an application route — public documents download directly, subscriber-only documents require a signed link and explain what to do when it has expired.",
+        "section": "documents",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": ["nav-home"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "header",
+          "document-panel",
+          "button-primary",
+          "skeleton",
+          "error-state",
+          "site-footer"
+        ],
+        "icons": [
+          "file-text",
+          "download",
+          "clock",
+          "alert-circle",
+          "arrow-right"
+        ],
+        "flows": ["join-the-newsletter", "retrieve-a-document"]
+      }
+    ]
+  }
+}

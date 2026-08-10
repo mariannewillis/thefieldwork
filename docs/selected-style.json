@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "styleId": "the-lit-clearing",
+  "styleName": "the-lit-clearing",
+  "selectedAt": "2026-08-08T18:38:01.726Z",
+  "selectedBy": "pick-style",
+  "dials": {
+    "design_variance": 8,
+    "motion_intensity": 3,
+    "visual_density": 4
+  },
+  "iconLibrary": "phosphor",
+  "appsCovered": ["webapp", "admin"],
+  "mockupsManifest": "docs/mockups/the-lit-clearing-3-1/manifest.json",
+  "nanobananaUsed": true,
+  "directionRef": "the-lit-clearing",
+  "governingIdea": "The room is dark and there is one clearing of light in it the exact size of a seated person, and everything this site has to say is said from inside that clearing — while the practitioner's hands stay at its edge and never cross.",
+  "signatureMove": "One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary: not a rule, not a stroke, not a line of type, and not the practitioner's hands, which enter the frame at the pool's edge in the plate and stop there. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.",
+  "signatureMoveScope": "kit-pattern",
+  "layoutArchetype": "Near-black throughout, with one hard-edged clearing of blush light cut into a full-bleed plate per viewport; all reading happens on the light inside that clearing, the dark around it is never bare because it is always the photograph, and each beat the clearing holds fewer elements and more air than the beat before it.",
+  "toneRegister": "held clearing — near-black all around, and everything that matters read from inside one pool of light",
+  "interfaceCraftEmphasis": [
+    "I-2 one primary action per screen made structural rather than stylistic: the clearing contains exactly ONE primary control, always, on every admin screen — so the answer to 'what do I do here' is permanently 'the thing in the light', and she learns it once and never relearns it.",
+    "I-4 progressive disclosure BY the edge, which is the lever that decides whether she can run this: the 80% path is whatever is lit, and everything rare — availability rules, publish scope, bulk actions, CSV export, hold duration — lives outside the pool at 15px and comes into the light on intent. It is how a nine-field settings screen stops looking like software to someone who is not comfortable with software (brief §6).",
+    "I-1 state-completeness with day one designed FIRST: the empty merged calendar, the zero-workshop index and the empty booking queue are each a clearing holding one sentence and one control, so a brand-new practice's admin looks composed rather than broken — brief §11's explicit requirement that a page with zero workshops is still worth landing on.",
+    "I-6 affordance legibility on a two-value system a non-technical owner can state out loud: anything on the light is operable, anything on the plate is information. The irreversible guards — send to N confirmed subscribers, delete an offering three newsletters reference — state the exact count and the exact consequence inside their own clearing, before the control rather than after it."
+  ],
+  "paletteSource": "derived",
+  "palette": {
+    "primary": "#C2187A",
+    "secondary": "#E9C87E",
+    "accent": "#F5876F",
+    "background": "#160712",
+    "surface": "#260F20",
+    "textPrimary": "#FBF3F1",
+    "textSecondary": "#D8BFC9",
+    "error": "#F58A80",
+    "success": "#6FCB99"
+  },
+  "typography": {
+    "headingFont": "Cormorant Garamond",
+    "bodyFont": "Source Sans 3",
+    "monoFont": "Azeret Mono"
+  }
+}

@@ -1,0 +1,784 @@
+## Direction "the-lit-clearing" — execute THIS concept (concept-first, layout DERIVED from it):
+- Governing idea: The room is dark and there is one clearing of light in it the exact size of a seated person, and everything this site has to say is said from inside that clearing — while the practitioner's hands stay at its edge and never cross.
+- Signature move (realize ONE, fully — not scattered effects): One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary: not a rule, not a stroke, not a line of type, and not the practitioner's hands, which enter the frame at the pool's edge in the plate and stop there. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.
+- Layout archetype (derive the composition from this; REFUSE the category default): Near-black throughout, with one hard-edged clearing of blush light cut into a full-bleed plate per viewport; all reading happens on the light inside that clearing, the dark around it is never bare because it is always the photograph, and each beat the clearing holds fewer elements and more air than the beat before it.
+- Excludes (this design REFUSES): NOTHING CROSSES THE POOL'S BOUNDARY — the binding rule, and it is simultaneously the concept and the typographic fix. No rule, arc, stroke, divider or line of type may touch or span the edge; every element is wholly inside the light or wholly outside it, and type keeps a 32px clear band inside the boundary. Strokes and words never meet here because they never occupy the same region — which is the parent territory's arcs-through-paragraphs failure made structurally impossible.; No bare dark. Every pixel outside a clearing carries a plate at reduced luminance — the dark is photographic, always, everywhere. A flat black region is a failed render rather than restraint, and this territory has none on any screen including the admin.; No second clearing per viewport. Two pools cancel each other and the concept dies with them: one pool, and it is where the eye goes.; No scrim, tint or overlay laid over a plate to make type sit on it. If a word needs the picture darkened in order to be read, that word belongs in the clearing instead — which is what the clearing is for.; No drop shadow, no card, no rounded rectangle, no three-up grid. The edge of the light is the only boundary in the entire system, and adding a second kind of boundary would make the first one ordinary.; Body 18px inside the pool, 17px minimum anywhere, plate-side captions 15px and never smaller. Gold #E9C87E is barred INSIDE the pool (1.47:1) and magenta-deep #C2187A is barred OUTSIDE it (3.45:1) — each colour belongs to one side of the edge and crossing is a contrast failure as well as a concept failure.
+- Surface = MARKETING → drive the scroll with the NARRATIVE SPINE (.claude/rules/narrative-spine-model.md; enforce R-1..R-5):
+    open wound: The thing you cannot ask is not whether it works. It is whether you will have to take your clothes off, and whether a stranger is going to put her hands on you, and you have closed four tabs this month at exactly the moment you understood that the page was never going to say.
+    open loop: A woman is sitting in the light with her coat still on, and there is a pair of hands at the edge of it that have not come in. Four words underneath: nothing crosses this edge. Whose rule is that, and does it hold for the whole hour?  → closed-loop CTA: The Crown answers the caption the first pool made. The hands never came in, the edge held for the whole hour, and the request now sits on open light with the same four words printed beneath it. What is being asked for is an hour in the clearing — not a belief, and not your clothes off. (the CTA MUST pay off the open loop — R-1)
+    staircase beats (change register each, no dead air — R-2): Root — the clearing at the size of one seated person: aura-two-people full-bleed in near-black with the pool cut around the chair, three flat sentences and a four-word caption on the light. Dense and close: six elements in the pool. → Sacral — register change to a wide low pool over aura-light-in-a-room: five elements, one long paragraph at near-voice about what the hour is like from inside the chair, nothing else lit. → Solar plexus — register change to type as the entire content of the light: four verbs at 88px stacked in one pool with nothing else in it whatsoever — clearing, charging, repairing, restructuring — the plate visible all the way around them. → Heart — register change to the smallest clearing on the site: her face, one paragraph, one 15px line of training. Four elements. → Throat — register change AND an inversion: what this is not is the one beat set OUTSIDE the light, in blush type on the bare plate, with that beat's pool sitting empty beside it. The honesty is the one thing the light is not asked to carry, and it is the detail that rewards attention. → Third eye — register change back into a wide pool holding one named before-and-after paragraph and nothing else at all. Two elements. → Products — register change to a schedule on the light: three offering kinds at equal billing as rule-separated rows with real dates and prices in tabular figures, in the widest pool yet, still one column and still no cards. → Crown — the clearing has opened past all four edges and the page is light: one sentence, one control, two elements, and the plate survives only in the corners.
+    transformation: Before: someone who has had a practitioner's contact page open in another tab since March and has never scrolled it to the bottom, because she is waiting for a sentence that never comes. After: someone who spent an hour in a chair with her coat over the back of it, who can say exactly what happened and exactly what did not, and who found the whole thing considerably less strange than the version she had been imagining for six months. Nothing was cured. The bracing was.
+
+## CREATIVE UNLOCK (full — this is a marketing/ambition surface): You are PERMITTED and EXPECTED to go past the safe, literal reading. Find the deeper visual idea this concept DEMANDS and COMMIT to the ONE signature move FULLY — type as structure, the layout IS the concept (not a template with the concept painted on). RESTRAINT IS THE LEVER, not an afterthought: cut the weakest 10%, include exactly ONE detail that rewards close attention (not ten), and stay mockup-safe (renders whole in a static screenshot — no opacity:0 scroll-reveal, respect prefers-reduced-motion). 'Apply all the craft' regressed the v2 output — commit to ONE move and EDIT the rest.
+
+MANDATORY (feat-106 — permission alone shipped ~3/10; these are NOT optional, graded by mockup-craft-reviewer on the rendered screenshot):
+1. REAL ART-DIRECTED IMAGERY, PLACED. A full-bleed or hero-anchoring photograph/visual that carries the emotional register — never an empty {{HERO}} marker, never a CSS tone-block as final imagery. An imageless hero reads as a wireframe and fails brand-fit + composition.
+2. THE SIGNATURE MOVE MUST READ IN A STATIC SCREENSHOT. The judge + the operator see a still PNG, not motion. Make the ONE move a STATIC composition (a drawn shape, a structural device, a typographic event) — motion (typing, scroll-reveal) is invisible when graded and does not count.
+3. DRAMATIC DISPLAY-TYPE SCALE + REJECT THE GENERIC SAAS SKELETON. The display type is large and is part of the composition; the page is NOT hero→3 stat numbers→3-up feature cards→2 testimonials→CTA band. Derive the composition from the concept's layoutArchetype.
+
+## Project design skills (apply these — they SUPERSEDE generic taste where they conflict):
+The project design skill SUPERSEDES the generic frontend-design / design-taste-frontend taste where they conflict.
+COMPOSITION OWNERSHIP: the direction's layoutArchetype owns this screen's composition. ascending-beat-scroll contributes invariants only.
+
+### [supersede-generic] the-answered-question
+# The Answered Question — bespoke identity for The Field Work
+
+## Intent
+
+The first thing this page does is answer the question the visitor is too
+embarrassed to ask: do I undress, am I touched, must I believe something. Not in
+an FAQ. Not below the fold. FIRST, in plain declarative sentences, with the
+photograph carrying the same fact in parallel so it survives a skim by someone
+who reads nothing.
+
+This is the project's single largest competitive position, and it is measured
+rather than asserted: across all six researched practitioner/studio homepages the
+strings `clothed` / `undress` / `touch` / `hands-off` / `believe` appear **zero
+times**. The one site that answers all three well buries it on a second-click
+`/faq/`. The brief's own functional success metric is ≥80% unprompted recall
+after one scroll — this skill is the lever on it.
+
+The register to borrow is public-health editorial, inverted: the NHS must tell
+you that you WILL undress; this client gets to tell you that you will NOT.
+
+## When it applies
+
+- Home **beat 1 (Root)** — primary and non-negotiable. The first viewport.
+- The **beat 7 (Crown)** CTA, which must resolve the specific thing beat 1
+  opened, not a generic "get in touch".
+- Any hero or landing surface, and any copy pass on those surfaces, where a
+  first-time visitor arrives cold.
+- NOT admin, dense-data or account surfaces — there is no unasked question there.
+
+## Do
+
+1. **Put all three facts in the first viewport** — clothing, touch, belief — as
+   the first thing an adult reads, ahead of any decorative flourish.
+2. **Write flat and procedural.** Second person, present/future tense, sentences
+   of roughly 8–17 words, no adjectives, no softening, headings phrased as the
+   reader's own question. Admit rather than deny. Illustrative only — the brief's
+   own beat-1 job line, NOT final copy: _"You stay clothed, nobody touches you,
+   nothing is asked of your beliefs."_ The client and the designer own the words;
+   this skill owns the discipline.
+3. **Set it at a size that reads without glasses.** The audience skews 35–65;
+   the brief instructs you to assume the reading glasses are elsewhere in the
+   house. Reassurance rendered as fine print is not reassurance.
+4. **Let the photograph make the same argument.** `aura-two-people.png` shows a
+   seated, FULLY CLOTHED person with the practitioner's hands HOVERING above her
+   shoulders. Any crop that loses the clothed body, or closes the visible gap
+   between hands and shoulders, throws away the parallel proof — check both
+   survive at every breakpoint.
+5. **Close the loop at the Crown.** The CTA answers the thing beat 1 opened, so
+   the reassurance reads as one spine, not as an isolated box near the top.
+
+## Don't
+
+- **Don't ship beat 1 as an atmospheric hero with a tagline.** That is the
+  measured category default (full-bleed soft-focus photograph → short mission
+  statement → three-up cards), and it has no slot for reassurance at all. This
+  skill SUPERSEDES generic hero taste — where `frontend-design` /
+  `design-taste-frontend` want an evocative headline plus subhead, the specific
+  procedural sentences win.
+- **Don't demote it** to an FAQ, an accordion, a "first-timers" page, or anything
+  below the fold. That burial is the exact failure measured in the category — and
+  the NHS's own parent page reproduces it by deferring "what happens" four links
+  down. First viewport, not a link from it.
+- **Don't soften the facts into euphemism** ("you'll be completely comfortable",
+  "there's nothing to worry about"). The fact IS the reassurance; a soothing
+  adjective replaces it with nothing.
+- **Don't let procedure kill the warmth, or warmth kill the procedure.** Warmth
+  without the answer is decoration; the answer without warmth is a leaflet. Both
+  are required, in that order.
+- **Don't introduce the practitioner here.** She enters at beat 4, empathy first.
+  Beat 1 belongs entirely to the visitor's question.
+
+## Citations
+
+- brief: §3 problem statement — _"the specific thing they are too embarrassed to
+  ask is whether they will have to take their clothes off. So they close the tab.
+  Not because they decided against it — because nobody answered the question they
+  couldn't ask."_
+- brief: §11 screen catalog, beat 1 (Root) — _"Answer the unasked question… Names
+  the specific fear and disarms it. Always visible."_; beat 7 (Crown) —
+  _"resolving the specific thing beat 1 opened."_
+- brief: §15 success metrics — _"≥80% of test visitors, unprompted, can state
+  that they keep their clothes on and are not touched, after one scroll."_
+- brief: §2 audience note — _"Skews 35–65. Assume reading glasses are somewhere
+  else in the house."_ (the legibility floor)
+- competitor: `competitors.md` headline finding — `clothed` / `undress` / `touch`
+  / `hands-off` / `believe` appear **zero times** on all six researched
+  practitioner/studio homepages; Blossom Reiki answers all three well but on a
+  second-click `/faq/`.
+- competitor: `competitors.md` §The category cliché — the compositional default
+  (_full-bleed soft-focus hero → mission statement → three-up service cards_),
+  followed by 5 of 6 sites, with _"no slot for reassurance."_
+- domain-research: `inspirations.md` §31 — NHS _"What happens at your
+  appointment"_, verbatim _"You'll need to undress, behind a screen, from the
+  waist down."_ Flat, procedural, unembarrassed; plus its structural warning (the
+  parent page defers "what happens" four links down).
+- asset: `asset-inventory.json` — `assets/images/aura-two-people.png`,
+  _"hands hovering above the shoulders of a seated, fully clothed woman"_;
+  briefRole _"Answers the unasked question (clothed, untouched) visually."_
+### [supersede-generic] night-side-emanation
+# Night-Side Emanation — bespoke identity for The Field Work
+
+## Intent
+
+The supplied mark is a radiating field — concentric light running outward from a
+centre (brief §2). This skill makes that geometry the design's subject: light is
+the thing, not decoration laid over it. The register is night-side — low light,
+stillness, an adult in a quiet room, "rather than like a spa brochure"
+(brief §2). It departs from a measured category norm: 5 of 6 researched sites
+are cream/near-white ground with exactly one warm earth or metallic accent, and
+**not one competitor uses magenta or a gold→magenta gradient**
+(competitors.md). The differentiation move is a
+gold→magenta radial emanation and stillness, instead of an acid flat accent and
+Webflow motion (styles.md Style 1).
+
+## When it applies
+
+- palette · page-ground · background · hero · imagery — wherever a ground
+  colour, a gradient, or one of the commissioned plates is placed.
+- BOTH light-ground and dark-ground directions. Night-side governs the FEELING
+  (still, low-lit, unhurried), not the literal value: a light-ground direction
+  is not disqualified, it just cannot be spa-bright.
+- It does not decide composition; which colour becomes the page ground stays a
+  per-direction decision.
+
+## Do
+
+- **Use the gradient as EMANATION** — light running outward from a centre or an
+  edge, with real falloff. One emanation per screen, placed where the eye should
+  rest; two competing centres cancel each other.
+- **Treat the palette as POSITION-DEPENDENT and verify before use.** Computed
+  figures (WCAG 2.2 relative luminance) from `assets/brand/README.md` — read it
+  rather than trusting a remembered number:
+  - `gold #E9C87E` is a **text** colour on the dark plums (10.89:1 on plum-800
+    `#2B0E28`) and a **non-text** colour on light (1.47:1 on blush, 1.55:1 on
+    ivory — failing AA body *and* the 3:1 large-text *and* non-text floors). On a
+    light ground gold may be a decorative mark, edge or fill; never type, never a
+    functional border, never a focus ring.
+  - `magenta-deep #C2187A` **inverts**: text-safe on light (5.18:1 on blush),
+    fill-only on dark (3.10:1 on plum-800; 2.82:1 on plum-700, where it misses
+    even the 3:1 non-text floor).
+  - `magenta #D6338A` fails AA body on **both** ground families (4.08:1 on
+    blush, 3.93:1 on plum-800). It is not body type anywhere in this system.
+  - `rose #E85D9B` is the dark-ground text-safe pink (5.41:1 on plum-800), but
+    drops to 4.92:1 on plum-700 — so it clears AA body on the darker two only.
+- **Hold non-text to 3:1 against its ADJACENT colour** (WCAG 2.2 SC 1.4.11):
+  borders, rules, focus rings, input outlines, icon strokes — measured against
+  the ground they actually sit on, not against the page. A hairline in any
+  mid-gradient stop will usually miss it. This is the check that gets skipped
+  because it is invisible by eye.
+- **Never set a mid-gradient stop as body text without computing it first**, and
+  state the figure alongside it. If a light direction wants gold *type*, derive
+  a value (`#8A6A22` = 4.61:1 on blush) rather than reusing the artwork's gold.
+- **Let the photography carry the warmth.** The commissioned plates are dark,
+  warm, high-contrast, with gold-to-magenta light in them; a light-ground
+  direction must state how it handles them or it ships a register collision.
+
+## Don't
+
+- **No lavender, mandalas, crystals, chakra wheels, soft-focus serenity, or
+  cupped-hands-around-a-glowing-orb.** The brief names the soft-focus lavender
+  register as the thing this brand must defeat; `aura-hands-between` is the
+  single most-reproduced composition in the category and is reserve, never hero.
+- **Don't use the gradient as a button fill, a diagonal banner, or a rainbow
+  band.** Those are decoration; emanation has a centre and a falloff.
+- **Don't read night-side as "make everything dark".** Still and low-lit is the
+  requirement. Spa-bright is the failure.
+- **Don't carry a colour's role across grounds.** This supersedes the generic
+  taste-default "apply the brand colours consistently" — consistency here means
+  the same colours doing *different jobs* on different grounds. This exact
+  failure has shipped on this project before; it is invisible to anyone who
+  already knows what the text says, so it must be computed, not reviewed.
+- **Don't reach for the category palette** — a cream ground with one warm earth
+  or metallic accent (measured: `#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`).
+  Where the direction is dark, differentiate from the one dark exemplar
+  (Othership `#372338`, a US bathhouse) on radial emanation and stillness — not
+  on a bright flat accent or a condensed display face.
+
+## Citations
+
+- asset: `assets/brand/README.md` — the radiating-field mark; eleven sampled
+  colours with computed contrast on both ground families (gold 10.89:1 on
+  plum-800 vs 1.47:1 on blush; magenta-deep 5.18:1 on blush vs 3.10:1 on
+  plum-800; magenta fails AA body on both; rose 5.41:1 on plum-800; derived
+  `#8A6A22` 4.61:1 on blush) + the SC 1.4.11 3:1 non-text floor.
+- brief: §2 — "Night-side rather than daylight — the work happens in low light,
+  in stillness, and the site should feel like that room rather than like a spa
+  brochure"; "never the soft-focus lavender register the category defaults to";
+  `aura-hands-between` (cupped hands around a glowing orb) is reserve, not hero;
+  accessibility floor = WCAG 2.2 AA verified by computed contrast.
+- competitor: `competitors.md` — 5 of 6 sites are near-white/cream with exactly
+  one warm earth/metallic accent (`#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`);
+  dark grounds 1 of 6 and that one (Othership `#372338`) is a US bathhouse, not
+  a UK healer; not one competitor uses magenta or a gold→magenta gradient.
+- differentiation-move: `styles.md` Style 1 (Field Emanation) — "a gold→magenta
+  radial emanation instead of an acid-yellow flat accent, and stillness instead
+  of Webflow motion".
+### [supersede-generic] plain-declarative-voice
+# Plain declarative voice — bespoke identity for The Field Work
+
+## Intent
+
+Write what happens, not what it will do for them. This is **simultaneously a
+craft rule and this project's legal position**, and it must be treated as both.
+The UK CAP Code (enforced by the ASA) restricts health-outcome claims for
+therapies without robust evidence; energy healing has no accepted clinical
+evidence base, so the site describes what happens, what people report, and what
+the practitioner does — and does not promise outcomes (brief §14).
+
+That constraint is not a tax, it is the opening. Category research found the copy
+default is either clinical-explanatory or breathless-transformational with
+nothing in between; 3 of 6 practitioner sites make a claim needing
+substantiation, 1 of 6 carries a disclaimer. Plain declarative speech is
+therefore the unoccupied register **and** the compliant one — and the sceptical,
+curious adult this brand speaks to can feel the difference (brief §2, §1.3).
+
+## When it applies
+
+Every word: headlines, body, CTA labels, form helper text, empty states, alt
+text, and admin copy the owner will imitate. Highest stakes on `home` beat 5 —
+"what this is not", the compliance surface and the trust surface at once (brief
+§11, §14) — plus `about` and every service description. Placeholder copy
+included: **no lorem, ever.** The proposition is that a real person is speaking.
+
+## Do
+
+- **Work the PERMITTED zone deliberately — don't hedge to nothing.** ASA/CAP
+  "Health: Reiki" expressly permits claims about the emotional and spiritual
+  effects of the therapy, its relaxing nature, its meditative qualities, an
+  improvement in a feeling of overall wellbeing and an improved sense of self,
+  and about the practitioner's professionalism and the therapy surroundings.
+  "Health: Healing therapy" adds spiritual and emotional comfort and support
+  during illness, grief and stress. A real, usable vocabulary — use it.
+- **Describe procedure, room and hour.** What happens, in what order, how long
+  it lasts, what you wear, whether anyone touches you. Concrete nouns, short
+  sentences, no adjective stacks.
+- **Lead with the refusal where a refusal is honest.** Mettle Health opens with
+  what it cannot do — _"We can't change your situation, but we can help you live
+  with it."_ Take the move: state the limit first, then the offer. It buys more
+  trust than another testimonial would.
+- **Report, don't promise.** Attribute experience to the person who had it
+  ("people describe…"). "What it will do for you" is a claim; "what happens, and
+  what people report" is description.
+- **Spend the specificity budget on the unasked question.** _Illustrative only:_
+  "You keep your clothes on. Nobody touches you." beats "a safe, welcoming
+  space" — and brief §15 makes it measurable: ≥80% of test visitors should be
+  able to state that fact unprompted after one scroll.
+- **Treat credentials as UNWRITTEN until confirmed.** The practitioner's name
+  and her years practising and teaching are explicitly unverified (brief §20).
+  Never assert them in copy. Use a visibly marked placeholder and flag it for
+  client confirmation before that surface ships.
+
+## Don't
+
+- **Breathless transformation** — "heal your life", "release your blocks",
+  "step into your power". The register the brief bans by name (§2: never
+  breathless).
+- **The clinical-explanatory modality lecture** — _"Reiki is a Japanese
+  technique for…"_. Measured as a category default in the competitor set; also
+  banned by §2 (never clinical).
+- **The outcome-adjective list** — "Confident, Happy, Calm, Relaxed, Loved,
+  Safe." A promise wearing a word cloud.
+- **Any named medical condition, and any treat / cure / diagnose / prevent /
+  alleviate verb** — physical or psychological. Two upheld ASA rulings are on
+  point: Allan Sweeney Reiki (20 July 2011 — ADHD, back pain, depression,
+  cancer) and Healing on the Streets, Bath (13 June 2013).
+- **Anything that could discourage essential medical treatment.** CAP is
+  explicit; both upheld rulings turned on it. A visible "complementary, not a
+  substitute for medical care" statement is required (brief §14).
+- **The soft-focus lavender wellness register** — and equally the generic "warm,
+  friendly, benefit-led" default of the shipped taste skills.
+  `precedence: supersede-generic`: where a generic heuristic asks for a benefit
+  headline or an emotional promise, **this skill wins.**
+
+## Citations
+
+- brief: §2 Voice — "Never clinical, never breathless, never the soft-focus lavender register the category defaults to."
+- brief: §1.3 — "Prefer honesty over persuasion where they diverge… Naming what the work is _not_ buys more trust than one more testimonial would."
+- brief: §14 — "must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named medical condition"; beat 5 is "the compliance surface as well as the trust surface"; complementary-not-a-substitute statement required.
+- brief: §11 beat 5 (Throat) — "What this is not. Not therapy, not medicine, not a replacement for either."
+- brief: §15 — "≥80% of test visitors, unprompted, can state that they keep their clothes on and are not touched, after one scroll."
+- brief: §20.1 — practitioner's name + years "have not been verified with the client. Confirm before any copy is written."
+- competitor: competitors.md §Regulatory Baseline — ASA/CAP "Health: Reiki" + "Health: Healing therapy" permitted/prohibited lists verbatim; upheld rulings Allan Sweeney (2011-07-20), Healing on the Streets – Bath (2013-06-13); scoreboard 3-of-6 overclaim, 1-of-6 disclaimer.
+- competitor: competitors.md §The copy default — modality-first / outcome-promising ("Confident, Happy, Calm, Relaxed, Loved, Safe"); the brief's voice "has no incumbent."
+- domain-research: inspirations.md Insp. 14 Mettle Health — "We can't change your situation, but we can help you live with it."
+### [augment-generic] dated-things-are-typeset
+# Dated things are typeset — bespoke technique for The Fieldwork
+
+## Intent
+
+A schedule is content, not chrome. The category hides it: 3 of 6 measured
+practitioner/studio sites publish no price at all, and Re:Mind's `/book-class`
+schedule returned "No results found" to a static fetch because Momence renders it
+client-side (competitors.md). This project's trust position is the opposite — the
+Carrier persona names "a price that only appears after you make contact" as the
+thing that breaks their day (brief.md §6), and the products block renders live
+Courses, Workshops and Services at equal billing with real dates and prices
+(brief.md §12). So the listing is typeset as the primary content, on the
+repertory-cinema model: the DATE is the section header, each time beneath it a
+standalone anchor. The mechanics below are transferable to any dated, priced,
+bookable thing; the necessity is this client's.
+
+## When it applies
+
+- Products block · the three index pages · offering detail · the course session
+  list · the service free-slot picker.
+- Anywhere a card would otherwise carry a date, a duration, a capacity or a fee.
+- Not on prose surfaces (about, privacy) — they have no rows to align.
+
+## Do
+
+1. **Date as a section header at display scale; each offering under it a
+   standalone line.** Group chronologically, set the date on the display ramp
+   ("Saturday 25 July"), and make each time/offering beneath it a discrete
+   tappable target — a rule-separated row, not a rectangle with a shadow. This
+   solves scan-by-time and scan-by-event in one layout (inspirations.md Insp. 22,
+   Metrograph).
+2. **State the price. Always, on the listing, not only on detail.** In the same
+   typographic voice as everything else — a fee is a fact, not a badge. No "from",
+   no "enquire", no price behind a form (competitors.md §"Publish the price on the
+   page").
+3. **Tabular lining figures, set explicitly** — `font-variant-numeric:
+tabular-nums lining-nums` on every date, time, duration, capacity and price, and
+   align columns of figures on their numerals. Choose a body face that actually
+   ships them (inspirations.md §type pairings). A column of times that doesn't
+   align cannot be scanned, which defeats the whole move.
+4. **Equal billing across offering kinds.** One register, one price list, one
+   surface. Distinguish kinds by their DATA — a span with n sessions inside it, a
+   single dated point, a bookable duration — never by giving one kind a richer
+   card (brief.md §12; Insp. 26 run-span typesetting).
+5. **Design the empty state as a first-class target.** Organise the surface around
+   "what is on now" so it degrades gracefully to one item, or none: a plain
+   sentence naming what is coming and one route to ask, at the same type scale as
+   a populated row. A grid with one card in it looks broken; a programme with one
+   entry does not (brief.md §11 "zero workshops on day one"; Insp. 29).
+6. **Render every date, time and price server-side, in the initial HTML.** A
+   schedule that only exists after JavaScript does not exist for a crawler, a slow
+   connection, or assistive tech. A client fetch may refresh a slot's live
+   availability; it must never be what puts the date on the page (competitors.md
+   §"Server-render the schedule").
+
+## Don't
+
+- **Don't push dates behind filters or a separate calendar view.** Replace the
+  filter-first affordance with an already-sorted chronological list carrying the
+  date on every row — Barbican demotes chronology to theme filters and the visitor
+  who came for a date can't find one (Insp. 25).
+- **Don't wrap listings in shadowed, rounded, image-topped cards.** Replace the
+  card with a typographic row: date header, title, one small metadata line
+  (duration · format · price), a rule. The container is the type, not a box.
+- **Don't write "contact for pricing", "POA", or "places" without a figure.**
+  Replace with the actual number; where capacity genuinely can't be promised, use
+  an honest inline phrase ("Places available" / "Limited places") stated as
+  information, never a live seat count (brief.md §5; Insp. 23).
+- **Don't let a third-party booking widget typeset the schedule.** It arrives with
+  its own type, figures, radii and motion and breaks the surface visibly
+  (competitors.md §"Third-party booking widget"). Own the picker and set it in the
+  same rows as everything above it.
+- **Don't animate a slot into existence.** Replace transition-in with an immediate,
+  non-animated state change on selection; a held slot's countdown is text, not a
+  spinner (inspirations.md §motion — Slot selection).
+
+## Citations
+
+- brief: products block renders live Courses, Workshops and Services at equal
+  billing with real dates and prices; publishing a workshop makes it appear with
+  no second edit (brief.md §12)
+- brief: index pages must design the empty state — zero workshops on day one and
+  the page must still be worth landing on (brief.md §11); capacity shown as
+  information, never a live seat count (brief.md §5)
+- brief: the Carrier's dealbreaker — "a price that only appears after you make
+  contact"; the Returner's task — scan upcoming dates in under a minute (brief.md §6)
+- competitor: 3 of 6 sites publish no price; Re:Mind's client-rendered schedule
+  returned "No results found" to a static fetch (competitors.md §Cross-cutting)
+- domain-research: Metrograph — date as section header, showtimes as standalone
+  tappable anchors (Insp. 22); Barbican — dates absent from cards, pushed into
+  filters (Insp. 25); Le Cinéma Club — the empty-state answer (Insp. 29)
+### [augment-generic] stillness-as-motion-budget
+# Stillness as motion budget — bespoke technique for The Fieldwork
+
+## Intent
+
+Treat motion as a fixed budget with exactly one line item. The whole allowance
+goes to a single slow move that MEANS something; everything else on the page
+holds still. The researched category spends its motion on scroll fade-ins and a
+testimonial carousel and gets nothing back — no site in the set uses motion as
+meaning. The one motion-rich exemplar is loud in a way that would break a brand
+whose stated register is "unhurried, quietly certain." So the differentiating
+move is not more motion or better motion: it is arithmetic. One move, slow
+enough to read as atmosphere rather than as effect, on a page that is otherwise
+still.
+
+## When it applies
+
+- Any motion, transition, hero treatment, or ambient/background effect, on any surface.
+- Marketing and application surfaces alike. On dense-data, settings, or form
+  surfaces the budget is zero, not one.
+
+## Do
+
+- **Pick ONE move and spend the whole budget on it.** It expresses the concept
+  rather than decorating it. Ambient drift is measured in seconds, not
+  milliseconds — a ~12-second cycle the eye barely registers is the target, not
+  a 400ms ease.
+- **Go slower than feels right.** If a movement reads as an effect, it is
+  already too fast. Halve the speed and re-judge.
+- **Keep the one move decorative-only.** It never carries content, never encodes
+  state, and is never the only way to learn something.
+- **Author every motion `prefers-reduced-motion`-first, and check the still
+  frame is a FINISHED composition** — not the animated one with a hole in it. If
+  disabling the animation leaves an empty region, a blank panel, or a missing
+  focal element, the motion was load-bearing and the design is wrong. Fix the
+  composition, don't re-enable the motion.
+- **Functional micro-transitions are exempt from the budget but subject to the
+  ceiling** — focus rings, hover state change, open/close of a disclosure. Under
+  ~200ms, never elaborated into a flourish.
+
+## Don't — the static-render prohibition (HARD)
+
+**NEVER gate content behind `opacity: 0` plus an IntersectionObserver, a
+scroll-reveal library, or any JS-driven entrance.** Not on any element, not
+"just the hero", not with a fallback timer. This is a prohibition, not a
+preference.
+
+**The page must render WHOLE in a static screenshot, with no JavaScript executed
+and no scrolling.** Every element sits at final opacity and final position in
+the delivered HTML/CSS. Motion is a progressive enhancement applied to
+already-visible content — never a condition of seeing it.
+
+Two reasons, both hard. It is the accessibility floor: content that requires JS
+plus a scroll to appear is content some people never get. And it is a
+mockup-safety rule: `lint-mockup-safe.mjs` enforces it mechanically, and a
+violation makes the page render blank or half-empty to a static judge. **This
+exact regression has shipped on this project's predecessors** — sections present
+in the markup, invisible in review.
+
+Also don't:
+
+- **No scroll-triggered fade-ins, reveals, or staggered entrances.** The category
+  default, and the thing the prohibition above exists to kill.
+- **No carousels, parallax stacks, marquees, or hover flourishes.** Each is a
+  second thing moving; with two moving things neither is the signature.
+- **Don't let motion substitute for composition.** If the layout only works once
+  things have animated in, the layout is the bug.
+
+## Precedence
+
+`augment-generic` — layers a hard budget ceiling and the static-render
+prohibition on top of generic frontend / design-taste motion guidance. Where
+generic taste suggests scroll reveals or entrance animation, this skill wins.
+
+## Citations
+
+- `brief`: "Warm, unhurried, quietly certain" (brief.md §2 Voice) — the register
+  that a motion-rich treatment would break.
+- `brief`: "Every motion has a `prefers-reduced-motion` fallback that leaves the
+  composition whole" (brief.md §2 Accessibility floor) — the intact-fallback rule.
+- `brief`: the optional ambient field "is decorative only... suppressed under
+  `prefers-reduced-motion`" (brief.md §12) — motion never carries content.
+- `competitor`: "The motion default — a scroll fade-in and a testimonial
+  carousel. Nothing else. No site in the set uses motion as meaning."
+  (competitors.md §The Category Template) — the default this supersedes.
+- `competitor`: the one motion-rich exemplar "is also loud in a way that would
+  break this brief's 'unhurried, quietly certain' voice — take the courage, not
+  the volume" (competitors.md §Competitor 6) — why volume is not the answer.
+- `differentiation-move`: "makes the emanation — not a fade-in — the only motion
+  on the page, at a 12-second drift the eye barely registers" (styles.md Style 1)
+  — the one-move budget and its timing.
+- `craft-rule`: C-5 static-review-safe + C-7 `prefers-reduced-motion`
+  (`.claude/rules/awwwards-craft-checklist.md`).
+### [supersede-generic] ascending-beat-scroll — COMPOSITION AXIS OVERRIDDEN
+**This skill was authored before any direction existed, so its macro composition is a GUESS. The direction's `layoutArchetype` above OUTRANKS it and owns the composition of this screen. Take this skill's INVARIANTS only — its material rules, treatments, guarantees and prohibitions — and DISCARD any composition, layout, page-structure or "axis" it proposes. Deriving a different composition from the direction is CORRECT, not a violation.**
+# Ascending beat scroll — bespoke identity composition for The Fieldwork
+
+## Intent
+
+The home page is not a set of sections; it is one climb. `brief.md` §11 fixes
+seven narrative beats in a fixed ascending root→crown order — Beat 1 disarms the
+specific fear (you stay clothed, nobody touches you, nothing is asked of your
+beliefs), Beat 7 is "the call to action, at the brightest point of the page,
+resolving the specific thing beat 1 opened". This skill asks the composition to
+carry that ascent in the page's own material rather than illustrate it with an
+icon or a colour band. It is this client's candidate escape from the category
+default measured in `competitors.md`.
+
+## When it applies
+
+- The **home scroll** only (`hero`, `landing`, `section`, `page-composition`) —
+  the sole surface where the seven beats exist and the only place this axis
+  earns its place.
+- **Open, not governed here**: offering index and detail pages, about, contact,
+  the booking and subscribe forms, and every admin screen. Do not impose a climb
+  on a working surface.
+
+## Composition move
+
+**The axis** — a single vertical ASCENT: seven beats in fixed order, root to
+crown, in which ONE measurable property rises monotonically across the whole
+scroll and never reverses. Choose the property per direction — ground luminance,
+type scale, vertical air, or image openness — then hold it. The page ends at its
+brightest, most open point, and the call to action sits there.
+
+**The category default it supersedes** — instead of Squarespace's own prescribed
+wellness order, near-identical across Jenani / Anza / Clune / Aurora / Clove and
+followed by 5 of the 6 researched sites: _full-bleed soft-focus hero photograph →
+short mission statement → three-up service cards → practitioner bio →
+testimonials → booking CTA_. That template is a set of independent boxes with no
+direction of travel, and it has no slot for reassurance (Beat 1) and no slot for
+"what this is not" (Beat 5) — the two beats this client's honesty depends on.
+
+## Do
+
+- Make the ascent **structural, not thematic**: with the copy removed, the shape
+  of the page should still read as a climb. `styles.md` Style 3 (Long Dusk) is
+  the literal case — a split ground travelling `#1E0A1C` plum-900 at Beat 1 to
+  `#FBF3F1` blush at Beat 7.
+- **Anchor the two fixed ends hardest.** Beats 1 and 7 have no visibility toggle
+  (brief §5 — "a page with no reassurance and no call to action is not a page").
+  Beat 1 is the most enclosed point, Beat 7 the most open.
+- **Survive a missing rung.** Beats 2–6 can be hidden by the owner (brief §5,
+  "Hiding is not deleting"), so depend on the direction of travel — never on
+  exactly seven steps or on equal step sizes.
+- Keep the **products block between beats 6 and 7** (brief §11) in its own
+  register: the transformation, then how to get it, then the ask. It is not one
+  of the seven beats and should not be dressed as one.
+- **Render the climb statically.** It must be whole in a screenshot with no JS.
+  The category's entire motion vocabulary is a scroll fade-in and a testimonial
+  carousel (`competitors.md`); an ascent that exists only while scrolling is not
+  a composition.
+
+## Don't
+
+- **No seven-colour chakra band or rainbow gradient.** brief §20 names the
+  rainbow chakra chart as the measured category cliché; at most one true chakra
+  hue per beat as a small accent, never a full band.
+- **Don't let the beats become seven independent full-viewport mini-pages.**
+  Seven boxes each complete in itself is a section catalogue, not an arc.
+- **Don't let the products block reimport the template.** If it uses cards, they
+  belong to the ascent's register at that height — not a three-up service-card
+  grid dropped in.
+- **Don't reverse or plateau** the chosen property mid-scroll to "add variety".
+  One direction of travel, or none.
+
+## This axis is a CANDIDATE, not a law
+
+This skill was authored during `/analyze`, before the creative-director wrote a
+single direction. Its whole job is to name this client's escape from the category
+default above. A direction's own `layoutArchetype` OVERRIDES this axis wherever
+the two conflict, and a direction that derives a different composition from its
+`governingIdea` is CORRECT to do so, not in violation. brief §20 says exactly
+this: the ascent itself is a §11 requirement, but "_how_ a direction expresses
+the ascent is a design decision made per direction and chosen at Gate 2."
+
+## Citations
+
+- brief: seven fixed narrative beats in a fixed ascending root→crown order, the
+  products block between beats 6 and 7, and Beat 7's CTA "at the brightest point
+  of the page, resolving the specific thing beat 1 opened" (brief.md §11)
+- brief: beats 2–6 toggle, beats 1 and 7 do not; "configurable content, fixed
+  design" (brief.md §5) — plus the anti-rainbow default and "_how_ a direction
+  expresses the ascent is a design decision made per direction" (brief.md §20)
+- competitor: Squarespace's prescribed wellness order, followed by 5 of 6 sites,
+  with no reassurance slot and no "what this is not" slot; motion default = a
+  scroll fade-in and a carousel (competitors.md §The Category Template)
+- differentiation-move: styles.md Style 3 "Long Dusk" — the ascent taken
+  literally as the page ground itself, plum-900 at Beat 1 to blush at Beat 7
+
+================================================================================
+# YOU ARE AUTHORING ONE OF FIVE VARIATIONS ON "the-lit-clearing-3"
+
+The operator LIKES this direction — the widening aperture — and has asked for five
+further explorations of it. Four other agents are authoring the other four right
+now. Your job is to keep what he likes, fix what is broken, and make YOUR variant
+unmistakably its own composition.
+
+Your target file already contains the base page (the-lit-clearing-3), copied
+verbatim. Rewrite it into your variant. Touch no other folder.
+
+## WHAT HE LIKES — KEEP IT
+
+The governing move: the clearing of light STARTS the size of a seated person and
+GROWS at every beat until it consumes the viewport. The room opens around someone
+who arrived braced. Keep this. It is why he chose this direction.
+
+## THE OPERATOR'S OWN LIST OF WHAT IS WRONG — verbatim, all must be fixed
+
+He wrote: *"centering white boxes - having an equal amount of text in boxes and
+text in white overlaying images, making sure boxes dont cut into faces, having
+some positioned right atm they all align left, we have background image after
+background image nothing cleanly seperates them, huge white box with CTA feels
+out of whack and immediately the white footer follows"*
+
+Read as six requirements:
+
+- **F-1 POSITION.** Every clearing on the base is anchored to the SAME left
+  gutter, so the page is a stack of left-aligned boxes. Vary the horizontal
+  position deliberately — some right, some centred — per your variant's own
+  scheme. This must be a system, not random scatter.
+- **F-2 BALANCE OF VOICE.** The base is all-or-nothing: most beats put every word
+  inside a box, then one beat dumps a long paragraph in cream directly onto a
+  photograph. Strike a deliberate, roughly EQUAL balance between words spoken
+  from inside the clearing and words set on the plate — and make the choice mean
+  something each time, rather than being an accident.
+- **F-3 NEVER CUT A FACE.** On the base's Heart beat the white box lands squarely
+  across Marianne's forehead and hairline — her face is the subject of that beat
+  and the box amputates it. No clearing may overlap a face, a pair of working
+  hands, or any subject the photograph is actually about. Place the box in the
+  negative space the photograph offers, and set `object-position` deliberately so
+  that negative space is where you need it.
+- **F-4 SEPARATE THE PLATES.** The base runs full-bleed photograph straight into
+  full-bleed photograph with a hard horizontal butt-join between them — it reads
+  as a seam or a glitch, not a designed edge. Give consecutive plates a
+  deliberate separation device. Your variant brief names which one.
+- **F-5 THE CTA IS OUT OF WHACK.** The base's final clearing is enormous and
+  mostly empty — the button sits top-left with hundreds of pixels of dead white
+  beneath it. Resolve it: either fill it deliberately or size it to its content.
+- **F-6 TWO WHITES IN A ROW.** The CTA's white field ends, a ~15px dark strip
+  follows, and then the FOOTER is another large white field. Two big pale areas
+  separated by a sliver reads as a mistake. Solve the CTA-to-footer transition as
+  one designed move — the page must not end on an accidental-looking double-white.
+
+## TWO MORE DEFECTS FOUND IN REVIEW — also fix these
+
+- **F-7 THE EMPTY BOX BUG (worst single defect).** On the base's "What this is
+  not" beat there is a completely EMPTY white rectangle, while that beat's
+  paragraph — the trust-critical one about not being therapy or medicine — is set
+  in small cream type directly on a photograph of hands, at the lowest contrast
+  on the page. This is the root of F-2. Put that copy INSIDE a clearing in plum
+  ink. It is the paragraph most likely to decide a booking and it is currently the
+  hardest thing on the page to read.
+- **F-8 THE GROWTH IS NOT ACTUALLY MONOTONIC.** Measured on the base, the
+  clearing widths run 227 → 360 → 456 → **414** → [beat 5 exits the mechanism] →
+  671 → 761 → 831. Beat 4 comes back 42px NARROWER than beat 3, which is visible
+  because both share a left edge. The one signature move this direction has is
+  broken in the middle. Every beat must be measurably wider than the one before
+  it, with no exceptions and no reversals. If a beat needs less room than its
+  position allows, cut its content — never the rule.
+- **F-9 THE SCHEDULE IS A 3-UP GRID.** The base repeats a strict three-across
+  grid with identically-sized apertures and identical label→title→body→price
+  stacks. The direction bans three-up grids outright, and uniform apertures read
+  as a product catalogue rather than holes cut in light. Vary the aperture sizes
+  and break the rhythm. Also: the widest clearing on the page currently carries
+  BY FAR the most elements, which inverts the direction's own rule that each beat
+  holds fewer elements and more air than the last.
+- **F-10 THE FOOTER HAS NO PHOTOGRAPH.** It is a completely flat pale field. The
+  direction requires every pixel outside a clearing to carry a plate at reduced
+  luminance. A flat region is a failed render.
+
+## INVARIANTS — unchanged from the direction
+
+- Near-black throughout; outside a clearing there is always a PHOTOGRAPH.
+- All reading inside a clearing is plum ink on blush. Where you deliberately set
+  words on the plate instead (F-2), they must be genuinely legible — this
+  audience is 35–65 and the brief says to assume the reading glasses are in
+  another room. Small low-contrast cream on a busy photograph is not legible.
+- NOTHING CROSSES A CLEARING'S BOUNDARY — no rule, stroke, divider or line of
+  type may touch or span the edge.
+- NO drop shadow, NO card, NO rounded rectangle, NO three-up grid.
+- Body 18px inside a clearing, 17px minimum anywhere, plate-side captions 15px
+  and never smaller. The base sets body as low as 13px — raise it.
+- MOCKUP-SAFE: judged from a STATIC full-page screenshot, no JS, no scroll.
+  Never `opacity:0` + IntersectionObserver.
+- Keep the Tailwind bootstrap `<script>` + inline `tailwind.config` in `<head>`
+  and `data-theme` on `<html>`. Removing either renders the page unstyled.
+- Keep the logo as an `<img>`; never redraw it.
+- The eight beats and their order survive. Their composition is what changes.
+- Authored client copy is real client voice — preserve it, re-cut it to fit, and
+  write new copy only in the same plain declarative register. Never lorem.
+- Every schedule item keeps a picture, a real date, and a price in tabular figures.
+
+## IMAGERY — exact relative paths (four `..` hops from your home.html)
+
+REAL PHOTOGRAPHS:
+  ../../../../assets/images/new/work-wide-the-room.png    16:9 she works, hands hovering, visible gap, her real room behind
+  ../../../../assets/images/new/work-close-hands.png      3:2 her hands hovering; the hand's SHADOW falls on the cover
+  ../../../../assets/images/new/work-down-the-body.png    3:2 over her shoulder, down the resting client
+  ../../../../assets/images/new/marianne-hands-at-the-edge.png  3:2 her working against deep plum
+  ../../../../assets/images/new/marianne-portrait-in-the-light.png  3:2 HER FACE — never cover it with a box
+  ../../../../assets/images/new/marianne-room-aglow.png   16:9 her attic room at dusk, no people
+  ../../../../assets/images/new/chair-with-her-coat.png   3:2 coat over a chair, bag on the floor
+  ../../../../assets/images/new/window-last-light.png     3:2 window at dusk, cold blue meeting warm gold
+
+ABSTRACT PLATES (no human subject):
+  ../../../../assets/images/new/aura-field-abstract.png
+  ../../../../assets/images/new/aura-hands-between.png
+  ../../../../assets/images/new/aura-light-in-a-room.png
+  ../../../../assets/images/new/aura-seated-figure.png
+
+FORBIDDEN: `marianne-altar-light.png` (AI-garbled text) and anything under
+`assets/images/new/_rejected/`.
+
+## PROCEDURE
+
+READ `.claude/skills/mockup-craft/SKILL.md` top to bottom and FOLLOW it. Then read
+your target file. Then rewrite it.
+
+## SELF-VERIFY — read the file back and confirm
+
+Every `<img src>` resolves; no forbidden assets; Tailwind bootstrap + config +
+`data-theme` present; no `opacity:0`+IntersectionObserver; no lorem/TODO; no
+font-size below 17px except plate-side captions at 15px; every schedule item has
+a picture AND a price; the file closes with `</html>`; **and state the measured
+width of the clearing at each of the eight beats in your report so the monotonic
+growth can be checked without re-rendering.**
+
+Return ONLY a short status summary — how you solved F-1 to F-10, plus that list
+of eight widths. NO HTML in your response text.
+
+================================================================================
+# YOUR VARIANT — the-lit-clearing-3-4 · SPOKEN FROM THE LIGHT, SPOKEN FROM THE ROOM
+
+TARGET: projects/thefieldwork-v5/docs/mockups/the-lit-clearing-3-4/webapp/home.html
+
+## Your lead answer to F-2 (balance of text in boxes vs text on images)
+
+This variant makes the operator's balance point the governing idea. The page
+alternates, strictly and visibly, between two ways of speaking:
+
+- **From the light** — the beat's words sit inside the clearing, plum ink on
+  blush, quiet and close. These are the beats about what actually happens: the
+  procedure, the hour, the practicalities.
+- **From the room** — the beat's words are set directly on the plate, in blush,
+  at DISPLAY SCALE, large enough to read across a room. These are the beats that
+  make a claim: what this is, what this is not, what changes.
+
+The alternation is one-for-one down the page, so the balance is exactly equal, and
+each beat's mode is chosen by what that beat is DOING rather than by convenience.
+That is the fix for the base's failure, where one beat dumped a long grey
+paragraph onto a photograph because it had run out of box.
+
+**The hard rule for the room-voice beats:** they are DISPLAY type — few words,
+large, high contrast. Never a paragraph of small cream text on a busy photograph.
+If a beat's copy is too long to set at display scale on the plate, it belongs in
+a clearing instead. Choose the plate crop for each room-voice beat so the type
+lands on the darkest, calmest region of the photograph.
+
+## Your answer to F-1 (everything aligns left) and F-3 (boxes cut faces)
+
+The light-voice clearings alternate left / right down the page — never twice on
+the same side. The room-voice type is positioned wherever that photograph's
+empty space actually is, which will naturally vary. Since the room-voice beats put
+no box on the image at all, they carry zero risk of cutting a face; concentrate
+your F-3 care on the light-voice beats, and on the portrait beat put the clearing
+firmly beside her, never across her.
+
+## Your answer to F-4 (plates run together)
+
+Because the two voices alternate, consecutive beats already look different. Sharpen
+it: let every light-voice beat sit on a plate that is DARKER (lower luminance) and
+every room-voice beat sit on a plate that is BRIGHTER, so the page pulses dark,
+bright, dark, bright as it descends. Consecutive photographs are then separated by
+a clear change in tone rather than butting together at the same luminance. That
+pulse is your ONE signature move.
+
+## Your answer to F-5 and F-6 (CTA, then a second white)
+
+The final beat is a ROOM-VOICE beat — the biggest type on the page, set on the
+plate, no box at all — with the control beneath it. So the page's widest "clearing"
+turns out to be no clearing: the light has opened so completely that the words are
+simply in the room. That removes the huge empty white box entirely. The footer
+then follows in small blush type on the same plate. There is no second white
+field, and F-6 is resolved by elimination.

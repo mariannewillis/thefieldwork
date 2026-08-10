@@ -1,0 +1,86 @@
+{
+  "gradedAt": "2026-08-07",
+  "wave": "v2 — the five-direction shortlist for the client presentation",
+  "threshold": 6,
+  "note": "the-mark-is-the-grid's LANDING was graded against a STALE render (the fix agent returned after the PNG was taken). Its two reported stroke-crossings were re-checked by the parent at 2x on the re-rendered file and are CLEAN — the SVG-mask arc-breaking works. Its landing score below is the stale grade; treat the stroke verdict as superseded.",
+  "landings": [
+    {
+      "name": "the-room-you-are-standing-in",
+      "overall": 8,
+      "verdict": "pass",
+      "strokeCrossesText": false,
+      "note": "Recommended by the landing judge. Clean of strokes, no dead fields, warmth and certainty in the same page."
+    },
+    {
+      "name": "nothing-lit-from-the-front",
+      "overall": 7.5,
+      "verdict": "pass",
+      "strokeCrossesText": false,
+      "note": "Mechanically the cleanest. Best single line in the set: 'Not therapy. / Not medicine. / Not a belief test. / Saying this loses me bookings.'"
+    },
+    {
+      "name": "the-mark-is-the-grid",
+      "overall": 6.5,
+      "verdict": "fail-STALE",
+      "strokeCrossesText": "false (parent re-verified at 2x on the fixed render; the grade was against the pre-fix PNG)",
+      "note": "Price column fixed as the operator asked. Outstanding real criticism: the page narrates its own geometry to the visitor ('THE ONE STRAIGHT EDGE ON THIS PAGE')."
+    },
+    {
+      "name": "the-lit-clearing",
+      "overall": 5.5,
+      "verdict": "fail",
+      "strokeCrossesText": false,
+      "note": "An empty white panel beside 'Not therapy' and a formless dark band both read as failed renders."
+    },
+    {
+      "name": "the-surveyed-field",
+      "overall": 4,
+      "verdict": "fail",
+      "strokeCrossesText": true,
+      "note": "Fails the operator's blocker in four places INCLUDING the price column. Worst: its KEY legend places marks ON the words 'clothed / no contact / no belief required' so they read as STRIKETHROUGHS — the page appears to cross out its own reassurance."
+    }
+  ],
+  "adminDashboards": [
+    {
+      "name": "the-mark-is-the-grid",
+      "overall": 8,
+      "verdict": "pass",
+      "honestyViolations": [],
+      "note": "RECOMMENDED by the interface judge. The only screen showing a whole business that still resolves in 2s to one sentence and one magenta button with a person's name on it."
+    },
+    {
+      "name": "the-room-you-are-standing-in",
+      "overall": 8,
+      "verdict": "pass",
+      "honestyViolations": [],
+      "note": "Most complete tool; hold chart verifiable against its own midnight marker; 'nothing between the bars is measured and nothing is guessed'. Confirm and Decline weigh the same — a real defect, since Decline irreversibly releases a slot."
+    },
+    {
+      "name": "the-lit-clearing",
+      "overall": 8,
+      "verdict": "pass",
+      "honestyViolations": [],
+      "note": "Clearest primary action and warmest atmosphere; discloses its own staleness ('times were worked out when this page opened, at 09.14'). Missing a loading state and the day-one zero-offerings state."
+    },
+    {
+      "name": "nothing-lit-from-the-front",
+      "overall": 7,
+      "verdict": "pass",
+      "honestyViolations": [],
+      "note": "Most rigorous honesty: zeros shown as zeros with a count time, colour always redundant with text, whole page stamped 'read at 09:12'. Undercut by six identically-weighted buttons and a hero count ('four holding') its own cards contradict."
+    },
+    {
+      "name": "the-surveyed-field",
+      "overall": 6,
+      "verdict": "pass",
+      "honestyViolations": [],
+      "note": "The most honest object in the set — it refuses to draw a mark for an unheld request. But it ships a KEY LEGEND of four mark types and three ring types: the visitor must learn a notation before acting, which is the client's literal stated breaking condition (brief §6)."
+    }
+  ],
+  "systemicFindings": [
+    "ROOT CAUSE FOUND: `.claude/agents/ui-designer.md` grants `tools: Read, Write, Bash, Grep, Glob` — NO Edit. Every other authoring agent has it. A designer iterating on a 50KB HTML file must re-emit the whole file to fix three lines, which exhausts maxTurns:30. Six agents in this wave were cut off DURING or just before applying fixes they had already correctly diagnosed. The single agent that finished comfortably in wave 1 was the one that never iterated — and it scored 3. The tool grant selects against the behaviour that produces quality.",
+    "STALE-RENDER HAZARD: a craft grade is only valid against the PNG that was rendered from the CURRENT file. One landing was graded against a superseded render and its verdict was wrong. Re-render immediately before grading, and compare mtimes.",
+    "RESOLUTION LIMIT: full-page 1440px renders reach a vision judge ~4x downsampled, which is below the resolution needed to confirm a 1px hairline lying on a glyph. The judge stated this honestly rather than guessing. Settle stroke-over-text questions with a geometric DOM check plus 2x crops, not with a full-page screenshot.",
+    "MAKING A CONSTRAINT INTO THE CONCEPT MAXIMISES ITS SURFACE AREA: the-surveyed-field was authored so that 'every ring breaks around any word' WAS the governing idea, and it failed that rule harder than any other direction. A territory with no arcs cannot misplace one."
+  ]
+}

@@ -1,0 +1,100 @@
+/**
+ * @repo/ui-kit — fonts.css
+ * Self-hosted @font-face declarations for the-lit-clearing's three families.
+ * Per assets.md §Web Performance Rule 1 (self-host, don't link Google Fonts)
+ * and Rule 0 (no display face may be text-subsetted — the owner edits every
+ * heading on this site, so full latin + latin-ext is mandatory even on the
+ * display face).
+ *
+ * Files referenced below are expected at packages/ui-kit/src/styles/fonts/
+ * (Fontsource-sourced woff2, variable where available, axes clamped to what
+ * this direction actually uses). Acquisition is the full asset-download wave
+ * (see SKILL.md "Full asset-download wave"); this file declares the contract
+ * those downloaded files must satisfy.
+ */
+
+/* ── Cormorant Garamond — display only, never body/UI/label/admin ──────────
+   Google ships static cuts for this family member (assets.md §979 flags this
+   for verification at acquisition time). Weights shipped: 300, 400, 500, 600
+   + italic 400 — matching the approved mockup's own Google Fonts request
+   (`ital,wght@0,300;0,400;0,500;0,600;1,400`). The approved mockup uses 400
+   successfully at display sizes only (23px+); never ship it below
+   typography.fontSize.2xl (24px). */
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("./fonts/cormorant-garamond/cormorant-garamond-latin-400-normal.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+20A3-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("./fonts/cormorant-garamond/cormorant-garamond-latin-400-italic.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("./fonts/cormorant-garamond/cormorant-garamond-latin-500-normal.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  src: url("./fonts/cormorant-garamond/cormorant-garamond-latin-600-normal.woff2")
+    format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Source Sans 3 — body, the legibility-floor workhorse ───────────────────
+   Ships as a variable font; clamped to the weight range this direction uses.
+   Matches the approved mockup's request
+   (`Source+Sans+3:wght@300;400;500;600`). Preload this file on the public
+   route — it is the body face used on every screen. */
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("./fonts/source-sans-3/source-sans-3-latin-wght.woff2")
+    format("woff2-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("./fonts/source-sans-3/source-sans-3-latin-italic-wght.woff2")
+    format("woff2-variations");
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Azeret Mono — admin figures + plate-side mono captions ─────────────────
+   Admin-only per assets.md's mono-lazy-load convention: never referenced on
+   the public route's critical path. Weights 400 + 500 match the approved
+   admin mockup's own request (`Azeret+Mono:wght@400;500`). */
+@font-face {
+  font-family: "Azeret Mono";
+  src: url("./fonts/azeret-mono/azeret-mono-latin-400-normal.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Azeret Mono";
+  src: url("./fonts/azeret-mono/azeret-mono-latin-500-normal.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

@@ -1,0 +1,13 @@
+{
+  "fingerprint": "sha256:5d43c858d9236988d59af1d067bc5ece2bdad5dc0cec4753f796ad07822daa9e",
+  "generatedAt": "2026-08-08",
+  "skill": "/stylesheet",
+  "resolvedInputs": {
+    "selectedStyle": "docs/selected-style.json",
+    "directionRef": "the-lit-clearing",
+    "winningMockup": "docs/mockups/the-lit-clearing-3-1",
+    "iconLibrary": "phosphor",
+    "appsCovered": ["webapp", "admin"]
+  },
+  "note": "Agnostic surface only. /stylesheet-primitives writes its own complementary fingerprint."
+}

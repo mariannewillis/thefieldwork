@@ -1,0 +1,72 @@
+# NOTE: .gitignore does NOT support trailing comments on a pattern line.
+# `docs/mockups/   # 229 MB` is a literal pattern including the spaces and the
+# hash, and matches nothing. Comments live on their own lines only.
+
+# ── dependencies + build output ──────────────────────────────────────────────
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# ── secrets ──────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env*.local
+!.env.example
+
+# ── local dev artefacts ──────────────────────────────────────────────────────
+.storage/
+*.log
+.DS_Store
+Thumbs.db
+.tmp-rings/
+pipeline/
+contexts/
+
+# ── design-stage artefacts: REGENERABLE and large ────────────────────────────
+# The factory's working output, not the product. 229 MB of rejected direction
+# variants, 125 MB of review screenshots, 54 MB of craft renders. Regenerate
+# from the factory if ever needed.
+docs/mockups/
+docs/visual-review/
+docs/_screen-craft/
+docs/_screen-craft-render.json
+docs/_mockup-craft-render.json
+docs/_dispatch/
+
+# ── image MASTERS ────────────────────────────────────────────────────────────
+# The generated brand images at source resolution — 106 MB, averaging 6.7 MB
+# each. Too large for git and NOT what is served: the app serves the optimised
+# derivatives in app/public/media/ (5.3 MB, 95% smaller — DECISIONS-BUILD D-6).
+#
+# KEEP THE MASTERS SAFE ELSEWHERE. They are the only source for re-deriving at
+# another size, and they cannot be regenerated identically — they came from a
+# generative model. Object storage or a backup drive, not here.
+assets/images/
+
+# ── factory tooling that is not part of the product ──────────────────────────
+.claude/
+schemas/
+plans/
+scripts/
+justfile
+mcp-defaults-design.json
+brief-template.md
+brief.manifest.json
+
+# the brand marks ARE committed — small vectors, load-bearing
+!assets/brand/
+!assets/brand/**
+
+# session scratch/debug artefacts
+docs/_craft-tmp/
+docs/_*.png
+docs/_tmp*
+.tmp-scratch/
+_tmp_*
+docs/_results/
+docs/_flow-interactions-*.json
+docs/screens/_results/
+docs/_integration-decision-brief.md

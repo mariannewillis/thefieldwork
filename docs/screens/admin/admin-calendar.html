@@ -1,0 +1,2103 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Calendar — The Field Work admin</title>
+    <meta
+      name="description"
+      content="One merged calendar for Marianne — confirmed bookings, pending holds, published courses and workshops, and her own blocked time, each shown as its own kind of block. Nothing is ever projected forward; every block is a booking that actually exists."
+    />
+
+    <link
+      rel="stylesheet"
+      href="../../../packages/ui-kit/src/styles/globals.css"
+    />
+
+    <!-- preview-bootstrap.html — inlined verbatim (packages/ui-kit/src/styles/preview-bootstrap.html) -->
+    <style id="kit-tokens">
+      /**
+       * @repo/ui-kit — tokens.css
+       * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
+       *
+       * DARK-DEFAULT (see src/tokens/README.md before touching this file).
+       * :root already carries the dark/near-black values — there is no light-mode
+       * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
+       * of :root, kept only because the approved mockups literally set
+       * data-theme="dark" on <html> and the Tailwind config's darkMode selector
+       * references it — not because a second theme exists.
+       */
+
+      :root,
+      [data-theme="dark"] {
+        color-scheme: dark;
+
+        /* ---- color.neutral ---- */
+        --color-neutral-50: #fbf3f1;
+        --color-neutral-100: #e6dcdc;
+        --color-neutral-200: #d8bfc9;
+        --color-neutral-300: #b0a3a8;
+        --color-neutral-400: #95868d;
+        --color-neutral-500: #8e6a82;
+        --color-neutral-600: #64515d;
+        --color-neutral-700: #4e3a48;
+        --color-neutral-800: #3b2635;
+        --color-neutral-900: #260f20;
+        --color-neutral-950: #160712;
+
+        /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
+        --color-accent-50: #fbeff6;
+        --color-accent-100: #f7d9eb;
+        --color-accent-200: #f2badb;
+        --color-accent-300: #ed91c7;
+        --color-accent-400: #e75aac;
+        --color-accent-500: #c2187a;
+        --color-accent-600: #a51266;
+        --color-accent-700: #870d50;
+        --color-accent-800: #67093b;
+        --color-accent-900: #4b062a;
+        --color-accent-950: #2f041a;
+
+        /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
+        --color-secondary-500: #e9c87e;
+        --color-secondary-600: #c99a3f;
+
+        /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
+        --color-highlight-300: #f8c9bf;
+        --color-highlight-500: #f5876f;
+
+        /* ---- color.semantic ---- */
+        --color-success: #6fcb99;
+        --color-warning: #e9c87e;
+        --color-danger: #f58a80;
+        --color-info: #e9c87e;
+
+        /* ---- color.surface ---- */
+        --color-surface-base: #160712;
+        --color-surface-raised: #260f20;
+        --color-surface-overlay: #1e0a1ce6;
+        --color-surface-inverted: #fbf3f1;
+
+        /* ---- color.text ---- */
+        --color-text-primary: #fbf3f1;
+        --color-text-secondary: #d8bfc9;
+        --color-text-tertiary: #8e6a82;
+        --color-text-inverted: #1e0a1c;
+
+        /* ---- color.border ---- */
+        --color-border-subtle: #4e3a48;
+        --color-border-default: #8e6a82;
+        --color-border-strong: #b0a3a8;
+
+        /* ---- color.pool (the inverted-context family — see README) ---- */
+        --color-pool-surface: #fbf3f1;
+        --color-pool-text: #1e0a1c;
+        --color-pool-text-secondary: #5a4356;
+        --color-pool-border: #8a7285;
+        --color-pool-danger: #a3221a;
+        --color-pool-success: #0f6b3d;
+
+        /* ---- typography.fontFamily ---- */
+        --font-family-sans:
+          "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-family-mono:
+          "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+        --font-family-display: "Cormorant Garamond", Georgia, serif;
+
+        /* ---- typography.fontSize ---- */
+        --font-size-xs: 15px;
+        --font-size-sm: 17px;
+        --font-size-md: 18px;
+        --font-size-lg: 19px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 36px;
+        --font-size-5xl: 48px;
+        --font-size-6xl: 64px;
+
+        /* ---- typography.fontWeight ---- */
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* ---- typography.lineHeight ---- */
+        --line-height-tight: 1.05;
+        --line-height-snug: 1.2;
+        --line-height-normal: 1.6;
+        --line-height-relaxed: 1.7;
+
+        /* ---- typography.letterSpacing ---- */
+        --letter-spacing-tight: -0.005em;
+        --letter-spacing-normal: 0em;
+        --letter-spacing-wide: 0.18em;
+
+        /* ---- spacing ---- */
+        --spacing-0: 0px;
+        --spacing-0_5: 2px;
+        --spacing-1: 4px;
+        --spacing-2: 8px;
+        --spacing-3: 12px;
+        --spacing-4: 16px;
+        --spacing-5: 20px;
+        --spacing-6: 24px;
+        --spacing-8: 32px;
+        --spacing-10: 40px;
+        --spacing-12: 48px;
+        --spacing-16: 64px;
+        --spacing-20: 80px;
+        --spacing-24: 96px;
+
+        /* ---- radius (the direction uses --radius-none everywhere except a true
+           circle avatar, which uses --radius-full — see README §Shape law) ---- */
+        --radius-none: 0px;
+        --radius-sm: 2px;
+        --radius-md: 4px;
+        --radius-lg: 8px;
+        --radius-xl: 12px;
+        --radius-2xl: 16px;
+        --radius-full: 9999px;
+
+        /* ---- shadow (unused by this direction — kept for schema completeness) --- */
+        --shadow-xs: none;
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+        --shadow-xl: none;
+
+        /* ---- motion ---- */
+        --motion-duration-instant: 80ms;
+        --motion-duration-fast: 120ms;
+        --motion-duration-normal: 150ms;
+        --motion-duration-slow: 220ms;
+        --motion-duration-slower: 320ms;
+        --motion-duration-ambient: 24000ms;
+        --motion-easing-linear: linear;
+        --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+        --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
+        --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
+        --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* ---- zIndex ---- */
+        --z-base: 0;
+        --z-dropdown: 1000;
+        --z-sticky: 1100;
+        --z-overlay: 1200;
+        --z-modal: 1300;
+        --z-toast: 1400;
+        --z-tooltip: 1500;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: ["class", '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              neutral: {
+                50: "var(--color-neutral-50)",
+                100: "var(--color-neutral-100)",
+                200: "var(--color-neutral-200)",
+                300: "var(--color-neutral-300)",
+                400: "var(--color-neutral-400)",
+                500: "var(--color-neutral-500)",
+                600: "var(--color-neutral-600)",
+                700: "var(--color-neutral-700)",
+                800: "var(--color-neutral-800)",
+                900: "var(--color-neutral-900)",
+                950: "var(--color-neutral-950)",
+              },
+              accent: {
+                50: "var(--color-accent-50)",
+                100: "var(--color-accent-100)",
+                200: "var(--color-accent-200)",
+                300: "var(--color-accent-300)",
+                400: "var(--color-accent-400)",
+                500: "var(--color-accent-500)",
+                600: "var(--color-accent-600)",
+                700: "var(--color-accent-700)",
+                800: "var(--color-accent-800)",
+                900: "var(--color-accent-900)",
+                950: "var(--color-accent-950)",
+              },
+              secondary: {
+                500: "var(--color-secondary-500)",
+                600: "var(--color-secondary-600)",
+              },
+              highlight: {
+                300: "var(--color-highlight-300)",
+                500: "var(--color-highlight-500)",
+              },
+              success: "var(--color-success)",
+              warning: "var(--color-warning)",
+              danger: "var(--color-danger)",
+              info: "var(--color-info)",
+              surface: {
+                base: "var(--color-surface-base)",
+                raised: "var(--color-surface-raised)",
+                overlay: "var(--color-surface-overlay)",
+                inverted: "var(--color-surface-inverted)",
+              },
+              text: {
+                primary: "var(--color-text-primary)",
+                secondary: "var(--color-text-secondary)",
+                tertiary: "var(--color-text-tertiary)",
+                inverted: "var(--color-text-inverted)",
+              },
+              border: {
+                subtle: "var(--color-border-subtle)",
+                DEFAULT: "var(--color-border-default)",
+                strong: "var(--color-border-strong)",
+              },
+              pool: {
+                surface: "var(--color-pool-surface)",
+                text: "var(--color-pool-text)",
+                "text-secondary": "var(--color-pool-text-secondary)",
+                border: "var(--color-pool-border)",
+                danger: "var(--color-pool-danger)",
+                success: "var(--color-pool-success)",
+              },
+            },
+            fontFamily: {
+              sans: "var(--font-family-sans)",
+              mono: "var(--font-family-mono)",
+              display: "var(--font-family-display)",
+            },
+            fontSize: {
+              xs: "var(--font-size-xs)",
+              sm: "var(--font-size-sm)",
+              md: "var(--font-size-md)",
+              lg: "var(--font-size-lg)",
+              xl: "var(--font-size-xl)",
+              "2xl": "var(--font-size-2xl)",
+              "3xl": "var(--font-size-3xl)",
+              "4xl": "var(--font-size-4xl)",
+              "5xl": "var(--font-size-5xl)",
+              "6xl": "var(--font-size-6xl)",
+            },
+            fontWeight: {
+              regular: "var(--font-weight-regular)",
+              medium: "var(--font-weight-medium)",
+              semibold: "var(--font-weight-semibold)",
+              bold: "var(--font-weight-bold)",
+            },
+            lineHeight: {
+              tight: "var(--line-height-tight)",
+              snug: "var(--line-height-snug)",
+              normal: "var(--line-height-normal)",
+              relaxed: "var(--line-height-relaxed)",
+            },
+            letterSpacing: {
+              tight: "var(--letter-spacing-tight)",
+              normal: "var(--letter-spacing-normal)",
+              wide: "var(--letter-spacing-wide)",
+            },
+            spacing: {
+              0.5: "var(--spacing-0_5)",
+              1: "var(--spacing-1)",
+              2: "var(--spacing-2)",
+              3: "var(--spacing-3)",
+              4: "var(--spacing-4)",
+              5: "var(--spacing-5)",
+              6: "var(--spacing-6)",
+              8: "var(--spacing-8)",
+              10: "var(--spacing-10)",
+              12: "var(--spacing-12)",
+              16: "var(--spacing-16)",
+              20: "var(--spacing-20)",
+              24: "var(--spacing-24)",
+            },
+            borderRadius: {
+              none: "var(--radius-none)",
+              sm: "var(--radius-sm)",
+              DEFAULT: "var(--radius-md)",
+              md: "var(--radius-md)",
+              lg: "var(--radius-lg)",
+              xl: "var(--radius-xl)",
+              "2xl": "var(--radius-2xl)",
+              full: "var(--radius-full)",
+            },
+            boxShadow: {
+              xs: "var(--shadow-xs)",
+              sm: "var(--shadow-sm)",
+              DEFAULT: "var(--shadow-md)",
+              md: "var(--shadow-md)",
+              lg: "var(--shadow-lg)",
+              xl: "var(--shadow-xl)",
+            },
+            transitionDuration: {
+              instant: "var(--motion-duration-instant)",
+              fast: "var(--motion-duration-fast)",
+              DEFAULT: "var(--motion-duration-normal)",
+              normal: "var(--motion-duration-normal)",
+              slow: "var(--motion-duration-slow)",
+              slower: "var(--motion-duration-slower)",
+            },
+            transitionTimingFunction: {
+              linear: "var(--motion-easing-linear)",
+              standard: "var(--motion-easing-standard)",
+              decel: "var(--motion-easing-decel)",
+              accel: "var(--motion-easing-accel)",
+              spring: "var(--motion-easing-spring)",
+            },
+            zIndex: {
+              dropdown: "var(--z-dropdown)",
+              sticky: "var(--z-sticky)",
+              overlay: "var(--z-overlay)",
+              modal: "var(--z-modal)",
+              toast: "var(--z-toast)",
+              tooltip: "var(--z-tooltip)",
+            },
+          },
+        },
+      };
+    </script>
+    <!-- /preview-bootstrap.html -->
+
+    <style>
+      .main-field {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 42%;
+        filter: brightness(0.42) saturate(1.04);
+        opacity: 0.55;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .tab {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid var(--color-secondary-500);
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible,
+      .on-pool input:focus-visible {
+        outline: 2px solid var(--color-accent-500);
+      }
+      .skel {
+        background: var(--color-text-secondary);
+        opacity: 0.14;
+      }
+      dialog[data-kit-component="TimeBlockSheet"] {
+        border: none;
+      }
+      dialog[data-kit-component="TimeBlockSheet"]::backdrop {
+        background: rgba(10, 3, 9, 0.6);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    data-kit-layout="AppShell"
+    data-screen-id="admin-calendar"
+    class="bg-surface-base text-text-primary font-sans"
+  >
+    <a
+      href="#month-h"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-5 focus:top-5 focus:z-tooltip bg-secondary-500 px-5 py-3 text-sm font-semibold text-text-inverted"
+      >Skip to the calendar</a
+    >
+
+    <div class="flex min-h-screen">
+      <!-- ================= SIDE MENU ================= -->
+      <aside
+        data-kit-component="SideMenu"
+        class="relative hidden lg:flex w-[256px] shrink-0 flex-col gap-7 px-5 py-7 overflow-hidden"
+        aria-label="Admin sections"
+      >
+        <div class="relative z-10 flex flex-col gap-7 h-full">
+          <a
+            data-pattern="wordmark"
+            data-variant="rail"
+            href="/admin"
+            aria-label="The Field Work admin — Today"
+            class="block w-full min-h-[44px]"
+          >
+            <img
+              src="../../../assets/brand/logo-horizontal.svg"
+              alt="The Field Work"
+              width="440"
+              height="120"
+              class="h-auto w-full"
+            />
+          </a>
+          <p
+            data-pattern="eyebrow"
+            class="font-mono text-xs uppercase tracking-wide text-secondary-500 -mt-4"
+          >
+            Admin
+          </p>
+
+          <nav
+            data-pattern="sidebar-nav-row"
+            data-kit-component="Nav"
+            aria-label="Admin"
+            class="relative flex flex-col gap-0.5"
+          >
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1" />
+                <rect x="14" y="3" width="7" height="5" rx="1" />
+                <rect x="14" y="12" width="7" height="9" rx="1" />
+                <rect x="3" y="16" width="7" height="5" rx="1" />
+              </svg>
+              Today
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="active"
+              href="/admin/calendar"
+              aria-current="page"
+              class="flex min-h-[46px] items-center gap-3 bg-surface-inverted px-3.5 text-sm font-bold text-text-inverted no-underline"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="17" rx="2" />
+                <path d="M8 2v4M16 2v4M3 10h18" />
+              </svg>
+              Calendar
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/bookings"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"
+                />
+              </svg>
+              Requests
+              <span class="ml-auto font-mono text-xs text-secondary-500"
+                >2</span
+              >
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/page"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 3v5h5" />
+                <path d="m9.5 15.5 1-1 3-3 1.5 1.5-3 3-1 1H9.5v-1.5Z" />
+              </svg>
+              Home page
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/offerings"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+                <path d="m3 12 9 5 9-5" />
+                <path d="m3 17 9 5 9-5" />
+              </svg>
+              Offerings
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/media"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <circle cx="9" cy="10" r="2" />
+                <path d="m3 17 5-4 4 3 3-2 6 5" />
+              </svg>
+              Pictures
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/newsletters"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="m2 7 10 6 10-6" />
+              </svg>
+              Newsletter
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/subscribers"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Subscribers
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/documents"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 3v5h5" />
+                <path d="M9 13h6M9 17h4" />
+              </svg>
+              Documents
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/availability"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+              Availability
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/settings"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.9 13.6a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7h-.2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.2-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"
+                />
+              </svg>
+              Settings
+            </a>
+          </nav>
+
+          <p
+            class="mt-auto font-mono text-xs leading-relaxed text-text-secondary"
+          >
+            Signed in as Marianne<br />Owner &middot; session ends 2 Sep
+          </p>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN COLUMN ================= -->
+      <div class="min-w-0 flex-1">
+        <!-- ============ UTILITY BAR ============ -->
+        <header
+          data-kit-component="Header"
+          data-kit-variant="admin"
+          class="sticky top-0 z-sticky flex flex-wrap items-center justify-between gap-4 bg-surface-base px-6 lg:px-11 py-5 border-b border-border/40"
+        >
+          <div class="flex items-center gap-3 lg:hidden">
+            <img
+              src="../../../assets/brand/logo-horizontal.svg"
+              alt="The Field Work"
+              width="300"
+              height="82"
+              class="h-[26px] w-auto"
+            />
+          </div>
+          <p class="font-mono text-xs tracking-wide text-text-secondary">
+            THURSDAY 6 AUGUST &middot; 09:14 &middot; EUROPE/LONDON
+          </p>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span
+              class="flex items-center gap-2 font-mono text-xs text-success"
+            >
+              <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+              All changes published
+            </span>
+            <a
+              data-kit-component="Link"
+              data-kit-variant="on-dark"
+              class="flex items-center gap-1.5 text-sm font-medium text-secondary-500 underline decoration-secondary-500 transition-colors duration-fast hover:text-text-primary hover:decoration-text-primary"
+              href="/"
+            >
+              View site
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M14 4h6v6" />
+                <path d="M20 4 10 14" />
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+              </svg>
+            </a>
+            <button
+              type="button"
+              data-kit-component="Menu"
+              data-kit-variant="account"
+              class="flex items-center gap-2.5 transition-colors duration-fast"
+              aria-haspopup="menu"
+              aria-expanded="false"
+            >
+              <span
+                data-kit-component="Avatar"
+                data-kit-size="sm"
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-500 font-mono text-xs font-bold text-text-inverted"
+                aria-hidden="true"
+                >M</span
+              >
+              <span class="text-left">
+                <span class="block text-sm font-semibold text-text-primary"
+                  >Marianne</span
+                >
+                <span class="block text-xs text-text-secondary">Owner</span>
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-3.5 w-3.5 text-text-secondary"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <main id="main" class="relative px-6 lg:px-11 pb-14">
+          <img
+            src="../../../assets/images/new/aura-field-abstract.png"
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[.55] [object-position:50%_42%] [filter:brightness(.42)_saturate(1.04)]"
+          />
+          <div class="relative z-10 max-w-[1280px] mx-auto">
+            <!-- ============ THE ONE QUESTION ============ -->
+            <section class="pt-8 pb-1" aria-labelledby="greeting">
+              <p
+                data-pattern="eyebrow"
+                class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+              >
+                Calendar
+              </p>
+              <h1
+                id="greeting"
+                data-kit-component="Heading"
+                data-kit-variant="display"
+                class="font-display font-normal text-3xl sm:text-4xl text-text-primary mt-3 leading-tight"
+              >
+                Four hours of the coming week are already booked.<br />
+                <span class="text-success">Wednesday 12th is wide open.</span>
+              </h1>
+              <p class="mt-3 max-w-[64ch] text-sm text-text-secondary">
+                One calendar holds courses, workshops, one-to-one sessions and
+                the time you have kept for yourself. Nothing here is projected
+                forward — every block below is a booking that actually exists.
+              </p>
+            </section>
+
+            <!-- ============ TOOLBAR — month nav + the one primary control ============ -->
+            <div
+              data-pattern="clearing-plate"
+              data-variant="admin-panel"
+              class="on-pool bg-pool-surface text-pool-text mt-8 flex flex-wrap items-center justify-between gap-4 px-5 sm:px-7 py-4 sm:py-5"
+            >
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  aria-label="Previous month"
+                  class="t flex h-9 w-9 items-center justify-center text-pool-text-secondary transition-colors duration-fast hover:text-pool-text"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path d="m15 6-6 6 6 6" />
+                  </svg>
+                </button>
+                <h2
+                  id="month-h"
+                  class="font-display text-xl sm:text-2xl text-pool-text"
+                >
+                  August 2026
+                </h2>
+                <button
+                  type="button"
+                  aria-label="Next month"
+                  class="t flex h-9 w-9 items-center justify-center text-pool-text-secondary transition-colors duration-fast hover:text-pool-text"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path d="m9 6 6 6-6 6" />
+                  </svg>
+                </button>
+                <a
+                  href="#this-week"
+                  class="t ml-1 flex items-center gap-1.5 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="4" width="18" height="17" />
+                    <path d="M8 2v4M16 2v4M3 10h18" />
+                    <path d="M8 14h.01M12 14h.01M16 14h.01" />
+                  </svg>
+                  Jump to today
+                </a>
+              </div>
+              <button
+                type="button"
+                data-kit-component="Button"
+                data-kit-variant="primary"
+                data-kit-size="md"
+                aria-haspopup="dialog"
+                class="t flex items-center gap-2 bg-accent-500 px-8 py-4 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <rect x="4" y="10" width="16" height="10" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                </svg>
+                Block time
+              </button>
+            </div>
+
+            <!-- ============ MONTH GRID — calendar-month-grid ============ -->
+            <section class="mt-6" aria-labelledby="month-h">
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="CalendarMonthGrid"
+                class="on-pool bg-pool-surface text-pool-text px-5 sm:px-7 py-6 sm:py-7"
+              >
+                <!-- legend — the four kinds, distinguished by weight and rule, never colour alone -->
+                <div
+                  class="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs uppercase tracking-wide text-pool-text-secondary pb-4 border-b border-pool-border/[.22]"
+                >
+                  <span class="flex items-center gap-2">
+                    <span
+                      class="h-2.5 w-2.5 bg-pool-text"
+                      aria-hidden="true"
+                    ></span>
+                    Confirmed
+                  </span>
+                  <span class="flex items-center gap-2">
+                    <span
+                      class="h-2.5 w-2.5 border border-pool-text"
+                      aria-hidden="true"
+                    ></span>
+                    Pending hold
+                  </span>
+                  <span class="flex items-center gap-2">
+                    <span
+                      class="h-2.5 w-2.5 border-b-2 border-pool-text-secondary"
+                      aria-hidden="true"
+                    ></span>
+                    Course or workshop
+                  </span>
+                  <span class="flex items-center gap-2">
+                    <span
+                      class="h-2.5 w-2.5 bg-pool-danger"
+                      aria-hidden="true"
+                    ></span>
+                    Personal
+                  </span>
+                </div>
+
+                <!-- weekday header -->
+                <div
+                  class="mt-4 grid grid-cols-7 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >
+                  <p>Mon</p>
+                  <p>Tue</p>
+                  <p>Wed</p>
+                  <p>Thu</p>
+                  <p>Fri</p>
+                  <p>Sat</p>
+                  <p>Sun</p>
+                </div>
+
+                <!-- 42-cell grid, Mon 27 Jul – Sun 6 Sep -->
+                <div
+                  class="mt-2 grid grid-cols-7 border-r border-b border-pool-border/[.22]"
+                >
+                  <!-- Row: 27 Jul – 2 Aug -->
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px] opacity-40"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      27
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px] opacity-40"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      28
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px] opacity-40"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      29
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px] opacity-40"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      30
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px] opacity-40"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      31
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      1
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      2
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+
+                  <!-- Row: 3 – 9 Aug -->
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">3</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">4</p>
+                    <div class="mt-1">
+                      <p
+                        data-pattern="clearing-plate"
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="derived"
+                        class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                      >
+                        19:00 Foundations
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">5</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-2 border-pool-text p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">6</p>
+                    <p
+                      class="mt-1 font-mono text-xs uppercase tracking-wide text-pool-text"
+                    >
+                      Today
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">7</p>
+                    <div class="mt-1 flex flex-col gap-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        10:00 N. Brandt
+                      </p>
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        14:00 O. Marsh
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      8
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      9
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+
+                  <!-- Row: 10 – 16 Aug -->
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">10</p>
+                    <p
+                      data-kit-component="CalendarBlockChip"
+                      data-kit-variant="personal"
+                      class="mt-1 flex items-center gap-1 text-xs font-semibold text-pool-danger w-fit"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3 w-3 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <rect x="4" y="10" width="16" height="10" />
+                        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                      </svg>
+                      Personal
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">11</p>
+                    <div class="mt-1 flex flex-col gap-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        10:00 A. Rowe
+                      </p>
+                    </div>
+                    <div class="mt-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="derived"
+                        class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                      >
+                        19:00 Foundations
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">12</p>
+                    <p class="mt-1 text-xs font-semibold text-pool-success">
+                      Fully open
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">13</p>
+                    <div class="mt-1 flex flex-col gap-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        10:00 G. Halloran
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">14</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      15
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      16
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+
+                  <!-- Row: 17 – 23 Aug -->
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">17</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">18</p>
+                    <div class="mt-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="derived"
+                        class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                      >
+                        19:00 Foundations
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">19</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">20</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">21</p>
+                    <p
+                      data-kit-component="CalendarBlockChip"
+                      data-kit-variant="hold"
+                      class="tab mt-1 flex items-center gap-1 border border-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-text w-fit"
+                    >
+                      <svg
+                        data-kit-component="HoldTimer"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3 w-3 shrink-0 text-accent-500"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 2h4M12 6v4l3 2" />
+                        <circle cx="12" cy="13" r="8" />
+                      </svg>
+                      14:00 hold
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">22</p>
+                    <div class="mt-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="derived"
+                        class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                      >
+                        10&ndash;16 Grounding
+                      </p>
+                      <p class="mt-1 text-xs text-pool-text-secondary">
+                        6 of 10 booked
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      23
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+
+                  <!-- Row: 24 – 30 Aug -->
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">24</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">25</p>
+                    <div class="mt-1 flex flex-col gap-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        10:00 J. Otieno
+                      </p>
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="confirmed"
+                        class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                      >
+                        13:00 R. Ferreira
+                      </p>
+                      <a
+                        href="/admin/calendar/2026-08-25"
+                        class="t text-xs font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                        >+1 more</a
+                      >
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">26</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">27</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">28</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      29
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      30
+                    </p>
+                    <p class="mt-1 text-xs text-pool-text-secondary">
+                      Not open
+                    </p>
+                  </div>
+
+                  <!-- Row: 31 Aug – 6 Sep -->
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px]"
+                  >
+                    <p class="tab text-xs font-semibold text-pool-text">31</p>
+                  </div>
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      1
+                    </p>
+                    <div class="mt-1">
+                      <p
+                        data-kit-component="CalendarBlockChip"
+                        data-kit-variant="derived"
+                        class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                      >
+                        19:00 Foundations
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      2
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      3
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      4
+                    </p>
+                  </div>
+                  <div
+                    class="border-t border-l border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      5
+                    </p>
+                    <a
+                      href="/admin/calendar/2026-09-05"
+                      class="t mt-1 block text-xs font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+                      >6 bookings</a
+                    >
+                  </div>
+                  <div
+                    class="border-t border-l border-r border-b border-pool-border/[.22] p-2 min-h-[100px] opacity-70"
+                  >
+                    <p
+                      class="tab text-xs font-semibold text-pool-text-secondary"
+                    >
+                      6
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ HOW A DERIVED BLOCK EXPLAINS ITSELF ============ -->
+            <section class="mt-10" aria-labelledby="explainer-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="explainer-h"
+                  class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+                >
+                  Why a derived block is there
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  What she sees when she opens Tuesday 18 August&rsquo;s course
+                  session
+                </p>
+              </div>
+
+              <article
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="DerivedBlockExplainer"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-6 sm:py-7 mt-4"
+              >
+                <p
+                  class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >
+                  Derived from a published course
+                </p>
+                <p class="font-display text-xl sm:text-2xl text-pool-text mt-2">
+                  19:00&ndash;21:00 is held by Aura Healing: Foundations.
+                </p>
+                <p class="mt-2 text-sm text-pool-text-secondary max-w-[58ch]">
+                  Six evenings, Tuesdays from 4 August, published on the Courses
+                  page. This time repeats on the calendar for as long as the
+                  course is published — it did not need to be booked separately.
+                </p>
+                <p class="mt-2 text-sm text-pool-text-secondary max-w-[58ch]">
+                  Blocking personal time here isn&rsquo;t possible while the
+                  course is running. Unpublishing or moving the course frees the
+                  slot; a booking already held against it does not disappear on
+                  its own.
+                </p>
+                <a
+                  href="/admin/offerings/foundations"
+                  class="t mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 15l6-6" />
+                    <path d="M13 5l1.5-1.5a4 4 0 1 1 5.5 5.5L18.5 10.5" />
+                    <path d="M11 19l-1.5 1.5a4 4 0 1 1-5.5-5.5L5.5 13.5" />
+                  </svg>
+                  Open Aura Healing: Foundations
+                </a>
+              </article>
+            </section>
+
+            <!-- ============ THIS WEEK — calendar-week-grid, the data's own shape ============ -->
+            <section class="mt-12" aria-labelledby="week-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="this-week"
+                  class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+                >
+                  <span id="week-h"
+                    >This week &middot; Fri 7 &ndash; Thu 13 August</span
+                  >
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  One calendar &middot; sessions, courses, workshops, your own
+                  time off
+                </p>
+              </div>
+
+              <p class="mt-3 max-w-[70ch] text-sm text-text-secondary">
+                You are open 24 hours across the week and 4 are already booked.
+                Wednesday 12 August is the only day with nothing on it at all.
+              </p>
+
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="CalendarWeekGrid"
+                class="on-pool bg-pool-surface text-pool-text mt-4 px-5 sm:px-7 py-6"
+              >
+                <div class="overflow-x-auto">
+                  <div class="grid min-w-[880px] grid-cols-7 gap-x-4">
+                    <!-- Fri 7 — booked 1h45 of 6h open -->
+                    <div>
+                      <p class="tab text-sm font-semibold text-pool-text">
+                        Fri
+                        <span class="font-normal text-pool-text-secondary"
+                          >7</span
+                        >
+                      </p>
+                      <div
+                        class="relative mt-2 h-16 w-full bg-pool-border/[.15]"
+                      >
+                        <div
+                          class="absolute inset-x-0 bottom-0 bg-pool-text"
+                          style="height: 19px"
+                        ></div>
+                      </div>
+                      <p class="tab mt-1 text-xs text-pool-text-secondary">
+                        1h45 booked
+                      </p>
+                      <div
+                        class="mt-3 flex flex-col gap-1.5 border-t border-pool-border/[.22] pt-2"
+                      >
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="confirmed"
+                          class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                        >
+                          10:00 Naledi Brandt
+                        </p>
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="confirmed"
+                          class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                        >
+                          14:00 Owen Marsh
+                        </p>
+                      </div>
+                      <p class="tab mt-2 text-xs text-pool-text-secondary">
+                        4h 15m free
+                      </p>
+                    </div>
+                    <!-- Sat 8 — closed -->
+                    <div>
+                      <p
+                        class="tab text-sm font-semibold text-pool-text-secondary"
+                      >
+                        Sat <span class="font-normal">8</span>
+                      </p>
+                      <div class="mt-2 h-2 w-full bg-pool-border/[.15]"></div>
+                      <p class="mt-1 text-xs text-pool-text-secondary">
+                        Not open
+                      </p>
+                      <div class="mt-3 border-t border-pool-border/[.22] pt-2">
+                        <p class="text-xs text-pool-text-secondary">Not open</p>
+                      </div>
+                    </div>
+                    <!-- Sun 9 — closed -->
+                    <div>
+                      <p
+                        class="tab text-sm font-semibold text-pool-text-secondary"
+                      >
+                        Sun <span class="font-normal">9</span>
+                      </p>
+                      <div class="mt-2 h-2 w-full bg-pool-border/[.15]"></div>
+                      <p class="mt-1 text-xs text-pool-text-secondary">
+                        Not open
+                      </p>
+                      <div class="mt-3 border-t border-pool-border/[.22] pt-2">
+                        <p class="text-xs text-pool-text-secondary">Not open</p>
+                      </div>
+                    </div>
+                    <!-- Mon 10 — personal block -->
+                    <div>
+                      <p class="tab text-sm font-semibold text-pool-text">
+                        Mon
+                        <span class="font-normal text-pool-text-secondary"
+                          >10</span
+                        >
+                      </p>
+                      <div class="mt-2 h-2 w-full bg-pool-danger/[.35]"></div>
+                      <p class="mt-1 text-xs font-semibold text-pool-danger">
+                        Personal
+                      </p>
+                      <div
+                        class="mt-3 flex flex-col gap-1.5 border-t border-pool-border/[.22] pt-2"
+                      >
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="personal"
+                          class="flex items-center gap-1 text-xs font-semibold text-pool-danger"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-3 w-3 shrink-0"
+                            aria-hidden="true"
+                          >
+                            <rect x="4" y="10" width="16" height="10" />
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                          </svg>
+                          Personal — practice closed
+                        </p>
+                      </div>
+                    </div>
+                    <!-- Tue 11 — booked 1h30 of 6h open -->
+                    <div>
+                      <p class="tab text-sm font-semibold text-pool-text">
+                        Tue
+                        <span class="font-normal text-pool-text-secondary"
+                          >11</span
+                        >
+                      </p>
+                      <div
+                        class="relative mt-2 h-16 w-full bg-pool-border/[.15]"
+                      >
+                        <div
+                          class="absolute inset-x-0 bottom-0 bg-pool-text"
+                          style="height: 16px"
+                        ></div>
+                      </div>
+                      <p class="tab mt-1 text-xs text-pool-text-secondary">
+                        1h30 booked
+                      </p>
+                      <div
+                        class="mt-3 flex flex-col gap-1.5 border-t border-pool-border/[.22] pt-2"
+                      >
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="confirmed"
+                          class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                        >
+                          10:00 Aditi Rowe &middot; first session
+                        </p>
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="derived"
+                          class="border-b-2 border-pool-text-secondary pb-0.5 text-xs font-mono uppercase tracking-wide text-pool-text-secondary"
+                        >
+                          19:00 Foundations
+                        </p>
+                      </div>
+                      <p class="tab mt-2 text-xs text-pool-text-secondary">
+                        4h 30m free
+                      </p>
+                    </div>
+                    <!-- Wed 12 — fully open -->
+                    <div>
+                      <p class="tab text-sm font-semibold text-pool-text">
+                        Wed
+                        <span class="font-normal text-pool-text-secondary"
+                          >12</span
+                        >
+                      </p>
+                      <div
+                        class="relative mt-2 h-16 w-full border border-pool-success bg-pool-border/[.15]"
+                      ></div>
+                      <p class="mt-1 text-xs font-semibold text-pool-success">
+                        Fully open
+                      </p>
+                      <div class="mt-3 border-t border-pool-border/[.22] pt-2">
+                        <p class="text-xs font-semibold text-pool-success">
+                          Fully open
+                        </p>
+                      </div>
+                      <p class="tab mt-2 text-xs text-pool-text-secondary">
+                        6h free
+                      </p>
+                    </div>
+                    <!-- Thu 13 — booked 45m of 6h open -->
+                    <div>
+                      <p class="tab text-sm font-semibold text-pool-text">
+                        Thu
+                        <span class="font-normal text-pool-text-secondary"
+                          >13</span
+                        >
+                      </p>
+                      <div
+                        class="relative mt-2 h-16 w-full bg-pool-border/[.15]"
+                      >
+                        <div
+                          class="absolute inset-x-0 bottom-0 bg-pool-text"
+                          style="height: 8px"
+                        ></div>
+                      </div>
+                      <p class="tab mt-1 text-xs text-pool-text-secondary">
+                        45m booked
+                      </p>
+                      <div
+                        class="mt-3 flex flex-col gap-1.5 border-t border-pool-border/[.22] pt-2"
+                      >
+                        <p
+                          data-kit-component="CalendarBlockChip"
+                          data-kit-variant="confirmed"
+                          class="tab bg-pool-text px-1.5 py-0.5 text-xs font-semibold text-pool-surface w-fit"
+                        >
+                          10:00 Grace Halloran &middot; follow-up
+                        </p>
+                      </div>
+                      <p class="tab mt-2 text-xs text-pool-text-secondary">
+                        5h 15m free
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="tab mt-5 text-xs text-pool-text-secondary">
+                  24h open this week &middot; 4h booked &middot; 20h free —
+                  counted from the working pattern (Tue&ndash;Fri, Mon by
+                  arrangement, 10:00&ndash;16:00) minus what is already on the
+                  calendar.
+                </p>
+                <p class="mt-2 text-sm text-pool-text-secondary max-w-[70ch]">
+                  Nothing here is projected forward — every block above is a
+                  booking that actually exists.
+                </p>
+              </div>
+            </section>
+
+            <!-- ============ THE OTHER STATES — same primitive, different situations ============ -->
+            <section class="mt-12" aria-labelledby="states-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="states-h"
+                  class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+                >
+                  Calendar &mdash; the other states
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  The same grid, holding a different situation
+                </p>
+              </div>
+
+              <div class="mt-4 grid gap-4 lg:grid-cols-2 items-start">
+                <div class="grid gap-4">
+                  <!-- EMPTY -->
+                  <article
+                    data-pattern="state-panel"
+                    data-state="empty"
+                    data-kit-component="EmptyState"
+                    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-7 py-7"
+                  >
+                    <p
+                      class="font-mono text-xs uppercase tracking-wide text-accent-500"
+                    >
+                      Empty &middot; December 2026
+                    </p>
+                    <p class="text-xl font-semibold text-pool-text mt-2">
+                      Nothing is booked yet.
+                    </p>
+                    <p
+                      class="mt-2 text-sm text-pool-text-secondary max-w-[42rem]"
+                    >
+                      No courses or workshops are published for December, and
+                      one-to-one sessions are not open this far out. The pattern
+                      is there — Tuesday to Friday, 10:00 to 16:00 — waiting for
+                      something to fill it.
+                    </p>
+                    <a
+                      href="/admin/availability"
+                      class="t inline-block mt-4 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                      >Open availability</a
+                    >
+                  </article>
+
+                  <!-- OVERFLOW -->
+                  <article
+                    data-state="overflow"
+                    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-7 py-6"
+                  >
+                    <p
+                      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                    >
+                      Overflow
+                    </p>
+                    <p class="tab text-lg font-semibold text-pool-text mt-2">
+                      Saturday 5 September has 6 bookings
+                    </p>
+                    <p
+                      class="mt-2 text-sm text-pool-text-secondary max-w-[46ch]"
+                    >
+                      Showing the first 3 in the grid. Open the day to see the
+                      rest.
+                    </p>
+                    <a
+                      href="/admin/calendar/2026-09-05"
+                      class="t inline-block mt-2 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                      >Open Saturday 5 September</a
+                    >
+                  </article>
+                </div>
+
+                <div class="grid gap-4">
+                  <!-- LOADING -->
+                  <article
+                    data-state="loading"
+                    data-kit-component="Skeleton"
+                    aria-busy="true"
+                    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-7 py-6"
+                  >
+                    <p
+                      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                    >
+                      Loading
+                    </p>
+                    <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+                      <div class="skel h-[13px] w-[34%]"></div>
+                      <div
+                        class="skel h-[30px] w-[58%]"
+                        style="opacity: 0.22"
+                      ></div>
+                      <div class="skel h-[13px] w-[82%]"></div>
+                      <div class="skel h-[13px] w-[64%]"></div>
+                    </div>
+                    <p class="font-mono text-xs text-pool-text-secondary mt-4">
+                      The grid keeps its shape and stays at rest until the
+                      bookings arrive. Nothing pulses; nothing pretends to be a
+                      date.
+                    </p>
+                  </article>
+
+                  <!-- ERROR -->
+                  <article
+                    data-state="error"
+                    data-kit-component="ErrorState"
+                    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-7 py-6"
+                  >
+                    <p
+                      class="font-mono text-xs uppercase tracking-wide text-pool-danger"
+                    >
+                      Error
+                    </p>
+                    <p class="text-lg font-semibold text-pool-danger mt-2">
+                      Couldn&rsquo;t load the calendar.
+                    </p>
+                    <p class="mt-2 text-sm text-pool-text-secondary">
+                      Bookings and holds may be out of date. Personal time you
+                      have already blocked is still saved — this only affects
+                      what is shown.
+                    </p>
+                    <div class="mt-4 flex flex-wrap items-center gap-4">
+                      <a
+                        href="/admin/calendar"
+                        class="t text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                        >Try again</a
+                      >
+                      <p class="font-mono text-xs text-pool-text-secondary">
+                        Last good read 08:52 &middot; 3 attempts since
+                      </p>
+                    </div>
+                  </article>
+
+                  <!-- STALE -->
+                  <article
+                    data-state="stale"
+                    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-7 py-6"
+                  >
+                    <p
+                      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                    >
+                      Stale
+                    </p>
+                    <p
+                      class="mt-2 text-sm text-pool-text-secondary max-w-[54ch]"
+                    >
+                      Showing what was last confirmed at
+                      <span class="tab text-pool-text">07:40</span>, 1h 34m ago.
+                      A hold that expired since then may still show as pending
+                      until this page refreshes.
+                    </p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+
+        <footer class="px-6 lg:px-11 pb-10">
+          <div
+            class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-border/40 pt-5"
+          >
+            <p class="font-mono text-xs text-text-secondary">The Field Work</p>
+            <p class="font-mono text-xs text-text-secondary">
+              thefieldwork.co.uk
+            </p>
+            <p class="font-mono text-xs text-text-secondary">
+              Private admin &mdash; not visible to the public
+            </p>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ============ BLOCK TIME — the sheet the primary control opens ============ -->
+    <dialog
+      id="block-time-sheet"
+      data-pattern="clearing-plate"
+      data-variant="admin-panel"
+      data-kit-component="TimeBlockSheet"
+      class="bg-pool-surface text-pool-text max-w-[480px] w-full rounded-none shadow-none p-0"
+      aria-labelledby="block-time-title"
+    >
+      <div class="px-8 py-7">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p
+              class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Block time
+            </p>
+            <h2
+              id="block-time-title"
+              class="font-display text-2xl text-pool-text mt-1"
+            >
+              Keep this time for yourself.
+            </h2>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            class="t flex h-9 w-9 shrink-0 items-center justify-center text-pool-text-secondary hover:text-pool-text"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="mt-2 text-sm text-pool-text-secondary max-w-[46ch]">
+          It comes off the calendar the moment you save it. No one can hold a
+          slot inside it, and it never needs publishing.
+        </p>
+
+        <form class="mt-5 flex flex-col gap-4">
+          <div class="grid grid-cols-2 gap-4">
+            <label class="flex flex-col gap-1.5">
+              <span
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >Date</span
+              >
+              <input
+                type="date"
+                value="2026-08-17"
+                class="tab border border-pool-border bg-transparent px-3 py-2.5 text-sm text-pool-text"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >Reason (optional)</span
+              >
+              <input
+                type="text"
+                placeholder="Family, admin, rest"
+                class="border border-pool-border bg-transparent px-3 py-2.5 text-sm text-pool-text placeholder:text-pool-text-secondary"
+              />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <label class="flex flex-col gap-1.5">
+              <span
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >From</span
+              >
+              <input
+                type="time"
+                value="10:00"
+                class="tab border border-pool-border bg-transparent px-3 py-2.5 text-sm text-pool-text"
+              />
+            </label>
+            <label class="flex flex-col gap-1.5">
+              <span
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                >Until</span
+              >
+              <input
+                type="time"
+                value="16:00"
+                class="tab border border-pool-border bg-transparent px-3 py-2.5 text-sm text-pool-text"
+              />
+            </label>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-6">
+            <button
+              type="submit"
+              data-kit-component="Button"
+              data-kit-variant="primary"
+              class="t bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+            >
+              Block this time
+            </button>
+            <button
+              type="button"
+              data-kit-component="Button"
+              data-kit-variant="ghost"
+              class="t text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,266 @@
+{
+  "extractedFrom": [
+    "docs/mockups/the-lit-clearing-3-1/webapp/home.html",
+    "docs/mockups/the-lit-clearing-3-1/admin/admin-dashboard.html"
+  ],
+  "primitives": {
+    "Button": {
+      "default": {
+        "borderRadiusToken": "--radius-none",
+        "tailwindClass": "rounded-none",
+        "paddingToken": "spacing-5 spacing-10",
+        "tailwindPaddingClass": "py-5 px-10",
+        "fontWeightToken": "font-weight-semibold",
+        "tailwindFontWeightClass": "font-semibold",
+        "fontSizeToken": "font-size-sm",
+        "boxShadowToken": "none",
+        "background": "accent-500",
+        "foreground": "surface-inverted (blush)",
+        "hover": {
+          "background": "neutral-900 (swaps to the near-black plate colour — a full colour swap, not a shade-step darken)",
+          "transform": "none observed"
+        }
+      },
+      "variants": [
+        {
+          "name": "primary",
+          "bg": "accent-500",
+          "fg": "surface-inverted",
+          "note": "webapp `.cta` (Ask for an hour) and admin's `Reply to Sena Okafor` triage-row action both use this exact fill"
+        },
+        {
+          "name": "secondary",
+          "note": "no bordered/outline button variant observed on either mockup — secondary actions are ALWAYS the Link pattern (underlined accent text), never a second button fill. Do not invent a bordered Button variant; compose secondary actions as Link."
+        }
+      ],
+      "instancesObserved": 3,
+      "instanceRefs": [
+        "webapp .crown .cta (Ask for an hour)",
+        "admin needs-you article 1 primary button (Reply to Sena Okafor)",
+        "admin utility-bar account-menu button (icon+label, no fill — treat as a Button ghost/icon variant, not primary)"
+      ]
+    },
+    "Card": {
+      "default": {
+        "borderRadiusToken": "--radius-none",
+        "tailwindClass": "rounded-none",
+        "boxShadowToken": "--shadow-md",
+        "tailwindShadowClass": "shadow-none",
+        "background": "pool-surface / surface-inverted (blush)",
+        "foreground": "pool-text / text-inverted (plum ink)",
+        "paddingToken": "spacing-6 spacing-8",
+        "tailwindPaddingClass": "px-6 sm:px-8 py-6 (py-7 on the primary/lead panel)",
+        "note": "this IS the 'pool' — the direction's signature clearing, reused verbatim as the Card default. Zero radius, zero shadow, zero border everywhere; the hard cut edge against the plate/ground IS the elevation cue, not a shadow."
+      },
+      "variants": [
+        {
+          "name": "on-plate",
+          "note": "hero/sacral/method/schedule pools anchor left or right against a full-bleed photographic plate, width governed by --pw not a fixed max-width",
+          "surface": "webapp"
+        },
+        {
+          "name": "on-field",
+          "note": "admin `.pool.on-pool` triage/settled/state articles sit directly on the dimmed .main-field photograph, same flat blush panel",
+          "surface": "admin"
+        }
+      ],
+      "instancesObserved": 16,
+      "instanceRefs": [
+        "webapp: hero__pool, sacral__pool, method__pool, heart__pool, schedule-col x3, turn__pool, crown__pool",
+        "admin: 4 needs-you triage articles, this-week panel, empty/loading/error/stale/overflow state panels"
+      ]
+    },
+    "Input": {
+      "default": "kit-defaults",
+      "instancesObserved": 0,
+      "note": "no <input>/<select>/<textarea> element rendered on either mockup — both are read-surfaces (marketing home page, admin triage dashboard). Fallback to kit defaults; do not invent a shape."
+    },
+    "Textarea": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Select": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Checkbox": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Radio": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Switch": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Slider": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Dialog": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Drawer": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Popover": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Tooltip": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Badge": {
+      "default": "kit-defaults",
+      "instancesObserved": 0,
+      "note": "the admin nav 'Requests · 2' count and the triage kickers are plain mono-coloured text, never a filled/pill container — no true Badge shape observed. Do not invent a pill; when Badge is needed elsewhere, default to bare coloured mono text first, per this direction's restraint (nothing crosses a panel edge, no decorative chrome)."
+    },
+    "Avatar": {
+      "default": {
+        "borderRadiusToken": "--radius-full",
+        "tailwindClass": "rounded-full",
+        "shape": "true circle — object-fit: cover",
+        "note": "the ONLY sanctioned curve in the entire system (README §Shape law). webapp: heart__avatar, object-position 50% 22%, size clamp(140px,14vw,200px). admin: 36px (h-9 w-9) initial-letter avatar, bg-secondary-500 (gold), text ink, font-mono bold."
+      },
+      "variants": [
+        {
+          "name": "photo",
+          "size": "clamp(140px, 14vw, 200px)",
+          "context": "webapp portrait"
+        },
+        {
+          "name": "initial",
+          "size": "36px (h-9 w-9)",
+          "bg": "secondary-500",
+          "context": "admin utility-bar account menu"
+        }
+      ],
+      "instancesObserved": 2
+    },
+    "Separator": {
+      "default": {
+        "form": "hairline border-top, 1px",
+        "colorToken": "border-default / pool-border at low opacity (~0.22–0.4)",
+        "tailwindClass": "border-t border-pool-border/40",
+        "note": "used between ledger rows (webapp offerings) and between page sections in the admin footer — always a single hairline, never a filled divider block."
+      },
+      "instancesObserved": 6
+    },
+    "Tabs": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Accordion": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Skeleton": {
+      "default": {
+        "borderRadiusToken": "--radius-none",
+        "tailwindClass": "rounded-none",
+        "background": "neutral-200 (dim/plate-soft) at opacity 0.14",
+        "tailwindClass_full": "bg-neutral-200/[.14]",
+        "shimmer": "none — flat static blocks, no shimmer animation",
+        "note": "'The panel keeps its shape and stays at rest until the values arrive. Nothing pulses.' Sized to match the real layout: a 15px label bar, a 30px value bar (at 0.22 opacity, one shade lighter to read as the emphasised line), and two 13px body bars."
+      },
+      "instancesObserved": 4
+    },
+    "EmptyState": {
+      "default": {
+        "container": "Card default (pool, rounded-none, no shadow)",
+        "kicker": "mono uppercase 15px, accent-500",
+        "heading": "22px semibold, ink",
+        "body": "17px, ink-soft, max-w ~42rem",
+        "action": "single Link, never a button",
+        "illustration": "none — no illustration/graphic observed; the empty state is text + one action only, consistent with this direction's photograph-carries-the-mood rule (illustration budget is spent on the plate, not inside the pool)"
+      },
+      "instancesObserved": 1,
+      "instanceRefs": ["admin 'Nothing needs you today' panel"]
+    },
+    "Toast": {
+      "default": "kit-defaults",
+      "instancesObserved": 0
+    },
+    "Link": {
+      "default": {
+        "decoration": "underline, 1px thickness, 4px offset",
+        "color": "accent-500 on pool (ink context) / secondary-500 (gold) on plate/dark context",
+        "hover": "on pool: color inverts to ink (plum-900), underline follows; on plate/dark: color/underline shift to text-primary or gold depending on context",
+        "note": "the direction's secondary-action primitive — used far more than a bordered Button (see Button.variants.secondary)"
+      },
+      "instancesObserved": 14
+    },
+    "Nav": {
+      "marketing_masthead": {
+        "context": "webapp home.html — hero only, not persistent across scroll",
+        "position": "absolute, overlays the hero plate (inset: 0 0 auto 0)",
+        "background": "none — sits directly on the dimmed photograph, no bar/backdrop-blur",
+        "logo": "Logo pattern (wordmark+mark), height clamp(74px,6.8vw,104px)",
+        "linkShape": "underlined text links, NOT pill buttons — border-bottom 1px rgba(blush,0.34)",
+        "linkTypography": "17px, 0.02em tracking, blush",
+        "currentPageTreatment": "gold text + gold underline (.nav--now)",
+        "hoverTreatment": "gold text + gold underline",
+        "ctaPresent": false,
+        "note": "5 links (What happens / The hour / What this is not / Dates & prices / Ask for an hour) — the last is a same-styled anchor into the CTA section, not a visually distinct button"
+      },
+      "admin_sidebar_rail": {
+        "context": "admin-dashboard.html — persistent left rail",
+        "width": "256px (w-[256px]), shrink-0, hidden below lg breakpoint",
+        "position": "relative, in normal flex flow (flex min-h-screen), full column height",
+        "background": "transparent — shows the page ground (near-black), no distinct panel fill or border",
+        "structure": "brand lockup (full-width logo) -> 'Admin' gold mono eyebrow -> 11 nav-item rows -> mt-auto signed-in-as footer text",
+        "itemHeight": "min-height 46px",
+        "itemPadding": "0 14px, 12px gap between icon and label",
+        "itemRadius": "--radius-none / rounded-none",
+        "itemTypography": "17px medium, plate-soft (#D8BFC9) default",
+        "itemHover": "background gold at 8% opacity, text -> text-primary",
+        "itemCurrent": "INVERTS to the pool fill — background surface-inverted (blush), text-inverted (ink), font-bold. The active nav row becomes a small pool itself.",
+        "countBadge": "bare gold mono number pushed right via ml-auto — no pill/background, matches Badge.default (unobserved-as-pill)",
+        "itemCount": 11,
+        "icons": "24x24 viewBox, stroke-width 1.6, stroke=currentColor, phosphor-equivalent line icons"
+      },
+      "instancesObserved": 2
+    },
+    "Logo": {
+      "composition": "wordmark+mark",
+      "markShape": "organic gradient-masked silhouette (a leaf/flame form), NOT a simple geometric square or circle — do not simplify to a generic glyph",
+      "markColor": "linear gradient, gold -> coral -> magenta (#F6D9A0 -> #F3C078 -> #F59A73 -> #F0707F -> #E44A8E -> #C2187A), matches the plate-to-pool warmth arc of the whole direction",
+      "wordmark": {
+        "twoTone": true,
+        "line1": "THE FIELD — gold (secondary-500), wide tracking (letter-spacing 4)",
+        "line2": "WORK — magenta/accent (#D6338A, close to accent-400/500), very wide tracking (letter-spacing 52 on the primary lockup, 12 on the compact mark lockup)",
+        "font": "font-display (Cormorant Garamond / Playfair Display fallback)"
+      },
+      "variants": [
+        {
+          "name": "logo-horizontal",
+          "aspect": "440x120",
+          "use": "masthead, admin sidebar brand lockup"
+        },
+        {
+          "name": "logo-primary",
+          "aspect": "300x329",
+          "use": "footer brand mark, stacked"
+        }
+      ],
+      "instancesObserved": 3,
+      "assetPath": "assets/brand/logo-horizontal.svg"
+    },
+    "Hero": {
+      "default": {
+        "structure": "full-bleed photographic <img class=\"plate\"> behind, one hard-edged Card/pool anchored to one edge (left on this hero), masthead overlay on top",
+        "minHeight": "100svh",
+        "poolAlignment": "flex-end (bottom-anchored) x anchor-left (justify-content: flex-start)",
+        "plateFilter": "brightness(0.52) saturate(1.14) contrast(1.05) — the plate is always dimmed at source via filter, never via a scrim overlay div",
+        "motion": "one 24s ease-in-out alternate scale drift (1.045 -> 1.1) on the hero plate ONLY, nowhere else on the page; fully disabled under prefers-reduced-motion"
+      },
+      "instancesObserved": 1
+    }
+  },
+  "shapeLaw": "Zero border-radius everywhere except Avatar (--radius-full, true circle) and pill-shaped nothing else — no rounded-md, no rounded-lg, no rounded-full on buttons/cards/inputs. Zero box-shadow everywhere (all --shadow-* tokens resolve to 'none'); the hard cut edge of the pool against the plate/ground is the only elevation cue this direction uses. Any generated primitive shape that introduces a radius or shadow beyond this law is a misread of the mockups."
+}

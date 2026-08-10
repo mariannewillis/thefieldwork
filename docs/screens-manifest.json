@@ -1,0 +1,245 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-08-09T05:29:17.033Z",
+  "uiKitVersion": "0.1.0-tokens-only",
+  "styleId": "the-lit-clearing",
+  "directionRef": "the-lit-clearing",
+  "totalScreens": 33,
+  "platforms": {
+    "webapp": 17,
+    "admin": 16
+  },
+  "files": [
+    {
+      "path": "docs/screens/admin/admin-availability.html",
+      "platform": "admin",
+      "screenId": "admin-availability",
+      "sha256": "0364d2d307b8cf065ecf1510b0fc0577c0a407098481880cc961cbe3080e6988",
+      "routePattern": "/admin/availability"
+    },
+    {
+      "path": "docs/screens/admin/admin-bookings.html",
+      "platform": "admin",
+      "screenId": "admin-bookings",
+      "sha256": "6fcf3812398c3c04935a1ee47ffe76ead57e54d21dd7114dfe3668ff17d6165d",
+      "routePattern": "/admin/bookings"
+    },
+    {
+      "path": "docs/screens/admin/admin-calendar.html",
+      "platform": "admin",
+      "screenId": "admin-calendar",
+      "sha256": "48d88c0f8c1d3870046470abab3991ad41b18170c1fddb0c9c72ff8dfdb1891f",
+      "routePattern": "/admin/calendar"
+    },
+    {
+      "path": "docs/screens/admin/admin-dashboard.html",
+      "platform": "admin",
+      "screenId": "admin-dashboard",
+      "sha256": "2e87c9c8eeea4714b0acaa77e9d6b2a4018c850accb7870176ddb666e983b1ef",
+      "routePattern": "/admin"
+    },
+    {
+      "path": "docs/screens/admin/admin-documents.html",
+      "platform": "admin",
+      "screenId": "admin-documents",
+      "sha256": "52c5f45f05872f90032ebee5199fe2e927f2b009380f6b386bb895ee50b5bd8e",
+      "routePattern": "/admin/documents"
+    },
+    {
+      "path": "docs/screens/admin/admin-forgot-password.html",
+      "platform": "admin",
+      "screenId": "admin-forgot-password",
+      "sha256": "717ee0bfa8603290687658eae43ca7be1f3b462cb9ea678201cf32a59cccb773",
+      "routePattern": "/admin/forgot-password"
+    },
+    {
+      "path": "docs/screens/admin/admin-landing-sections.html",
+      "platform": "admin",
+      "screenId": "admin-landing-sections",
+      "sha256": "c1ac418d5481ac589ace844aa86277fb44223c9f7c938bfe61e9d3dbdd39375a",
+      "routePattern": "/admin/page"
+    },
+    {
+      "path": "docs/screens/admin/admin-login.html",
+      "platform": "admin",
+      "screenId": "admin-login",
+      "sha256": "fa1b6b915bce782851efc205aa51a6070765335fc84e317794f784cdbf8db160",
+      "routePattern": "/admin/login"
+    },
+    {
+      "path": "docs/screens/admin/admin-media.html",
+      "platform": "admin",
+      "screenId": "admin-media",
+      "sha256": "7e804be54693981c8e07e26ba1562ae5ce9c3564f885849f6a3e44d4e6302bdc",
+      "routePattern": "/admin/media"
+    },
+    {
+      "path": "docs/screens/admin/admin-newsletter-edit.html",
+      "platform": "admin",
+      "screenId": "admin-newsletter-edit",
+      "sha256": "1bded573900131790da743c3bea8c542f32a0cb60bb37beed00979eadf487909",
+      "routePattern": "/admin/newsletters/:id"
+    },
+    {
+      "path": "docs/screens/admin/admin-newsletters.html",
+      "platform": "admin",
+      "screenId": "admin-newsletters",
+      "sha256": "64f7c94068e25c1fdf759585a9e494b8266eea86679e46218fa57198c78bf256",
+      "routePattern": "/admin/newsletters"
+    },
+    {
+      "path": "docs/screens/admin/admin-offering-edit.html",
+      "platform": "admin",
+      "screenId": "admin-offering-edit",
+      "sha256": "bcbe291ff21233fbcacbba12346ecac09f6b1339cf48f9a94637665c093ca9de",
+      "routePattern": "/admin/offerings/:id"
+    },
+    {
+      "path": "docs/screens/admin/admin-offerings.html",
+      "platform": "admin",
+      "screenId": "admin-offerings",
+      "sha256": "bc592e91bd5cd5a6e45e3a80d659df2112cad54a88afb180a823e9dc7372be27",
+      "routePattern": "/admin/offerings"
+    },
+    {
+      "path": "docs/screens/admin/admin-reset-password.html",
+      "platform": "admin",
+      "screenId": "admin-reset-password",
+      "sha256": "64831294e7cbcd01e01feccf3d50ca2d2acf16db4fd85e878f92a02bd3ba9748",
+      "routePattern": "/admin/reset-password/:token"
+    },
+    {
+      "path": "docs/screens/admin/admin-settings.html",
+      "platform": "admin",
+      "screenId": "admin-settings",
+      "sha256": "72f4a4d974c9bd6615dcc22f4b4b99ac21427cb94e99b546f7748a5853b7ca1a",
+      "routePattern": "/admin/settings"
+    },
+    {
+      "path": "docs/screens/admin/admin-subscribers.html",
+      "platform": "admin",
+      "screenId": "admin-subscribers",
+      "sha256": "7da0a748ce509ac3bf0e41579e698b9fba5c611228d7121f37de7daedd538bc6",
+      "routePattern": "/admin/subscribers"
+    },
+    {
+      "path": "docs/screens/webapp/about.html",
+      "platform": "webapp",
+      "screenId": "about",
+      "sha256": "a9cef71908d344fee71044bcca08015304c45551a67e5ae88b53f7c66471f202",
+      "routePattern": "/about"
+    },
+    {
+      "path": "docs/screens/webapp/booking-confirmation.html",
+      "platform": "webapp",
+      "screenId": "booking-confirmation",
+      "sha256": "b74f6a92509647bda2343f1becdb5eef1b3d4df747b7f90b5ba49216ceac1623",
+      "routePattern": "/book/thanks/:ref"
+    },
+    {
+      "path": "docs/screens/webapp/booking-request.html",
+      "platform": "webapp",
+      "screenId": "booking-request",
+      "sha256": "7f55496d41086dbf3dd31b0c0593fcc134f0dda8e0f404962f9947d7b037bbba",
+      "routePattern": "/book/:kind/:slug"
+    },
+    {
+      "path": "docs/screens/webapp/contact.html",
+      "platform": "webapp",
+      "screenId": "contact",
+      "sha256": "c19c396748d91d051da7ce13b8b117464ca7072b927291def8dd4d1a87434cdd",
+      "routePattern": "/contact"
+    },
+    {
+      "path": "docs/screens/webapp/course-detail.html",
+      "platform": "webapp",
+      "screenId": "course-detail",
+      "sha256": "8d7f2d1308669d43e49bca9b824dc61f3a48c084d2950d6c2fa7917660b537d7",
+      "routePattern": "/courses/:slug"
+    },
+    {
+      "path": "docs/screens/webapp/courses-index.html",
+      "platform": "webapp",
+      "screenId": "courses-index",
+      "sha256": "7421e12bc7d47902f85803e7c54ef2aafb34507de376078f53404893e54dc460",
+      "routePattern": "/courses"
+    },
+    {
+      "path": "docs/screens/webapp/document-download.html",
+      "platform": "webapp",
+      "screenId": "document-download",
+      "sha256": "35b7b94b51f831aa05c9ab3d48053f9e4c03db088edcba0c74be0300445d7f71",
+      "routePattern": "/downloads/:slug"
+    },
+    {
+      "path": "docs/screens/webapp/home.html",
+      "platform": "webapp",
+      "screenId": "home",
+      "sha256": "e94547ce7c3bec39685df8a5c7cdfaf4e8db31eb822d11e2ea7e2340f7ec51fc",
+      "routePattern": "/"
+    },
+    {
+      "path": "docs/screens/webapp/privacy-notice.html",
+      "platform": "webapp",
+      "screenId": "privacy-notice",
+      "sha256": "0f99ed494de298d636d31d9b5fc2410c0017f2277d609d606da06e1b75af54eb",
+      "routePattern": "/privacy"
+    },
+    {
+      "path": "docs/screens/webapp/service-detail.html",
+      "platform": "webapp",
+      "screenId": "service-detail",
+      "sha256": "43653ece7dd7d48bf25345c14d8794c257c43f9efcf26aea51caf2dfbdee55d0",
+      "routePattern": "/services/:slug"
+    },
+    {
+      "path": "docs/screens/webapp/services-index.html",
+      "platform": "webapp",
+      "screenId": "services-index",
+      "sha256": "d349634cdf4c88477b5ed04475f6719bd79d3d6823a525812fc80d03a4ac9a52",
+      "routePattern": "/services"
+    },
+    {
+      "path": "docs/screens/webapp/subscribe-confirmed.html",
+      "platform": "webapp",
+      "screenId": "subscribe-confirmed",
+      "sha256": "8934eb15dd33bf7562f271ff4f24674ab0a0d8df126f24d0b1cef7d5f3b5c2d9",
+      "routePattern": "/subscribe/confirm/:token"
+    },
+    {
+      "path": "docs/screens/webapp/subscribe-pending.html",
+      "platform": "webapp",
+      "screenId": "subscribe-pending",
+      "sha256": "0d6c75adde2acefabe3cff02768856fdbd99ed7ab0694d63a8bbfd3d806f7bd8",
+      "routePattern": "/subscribe/check-email"
+    },
+    {
+      "path": "docs/screens/webapp/subscribe.html",
+      "platform": "webapp",
+      "screenId": "subscribe",
+      "sha256": "24a3d955c3df562f55e4152b921db92ede74c7bfcdcad923ccc04fe398712dc9",
+      "routePattern": "/subscribe"
+    },
+    {
+      "path": "docs/screens/webapp/unsubscribe.html",
+      "platform": "webapp",
+      "screenId": "unsubscribe",
+      "sha256": "7ee565759961dca421a77966c8b5059049795e50b5ee93ec5386d185d624d390",
+      "routePattern": "/unsubscribe/:token"
+    },
+    {
+      "path": "docs/screens/webapp/workshop-detail.html",
+      "platform": "webapp",
+      "screenId": "workshop-detail",
+      "sha256": "9886abe5420a90da5d446d7ba96866940a8a5c063557d880cfddbc772865b782",
+      "routePattern": "/workshops/:slug"
+    },
+    {
+      "path": "docs/screens/webapp/workshops-index.html",
+      "platform": "webapp",
+      "screenId": "workshops-index",
+      "sha256": "a1a73eb29c381b378693dca47285eabc981a17e0dbfc756795534d510ceb2909",
+      "routePattern": "/workshops"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-08-08T13:13:40.785Z",
+  "model": "nano_banana_2",
+  "round": 2,
+  "results": [
+    {
+      "id": "marianne-hands-at-the-edge",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-hands-at-the-edge-r2.png",
+      "credits": 2
+    },
+    {
+      "id": "marianne-the-clearing",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-the-clearing-r2.png",
+      "credits": 2
+    },
+    {
+      "id": "marianne-in-her-practice",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-in-her-practice-r2.png",
+      "credits": 2
+    }
+  ]
+}

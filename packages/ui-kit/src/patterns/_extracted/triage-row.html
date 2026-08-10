@@ -1,0 +1,72 @@
+<!--
+  Pattern: triage-row
+  Extracted from: admin-dashboard.html #needs-you article (4 instances)
+  Shape: pool (Card default) containing, top to bottom: a mono uppercase
+  kicker naming the situation + its age/urgency, a display-serif headline
+  stating the fact in plain language, a body paragraph of ink-soft context,
+  an optional mono "machine reference" line (a Stripe id, a received
+  timestamp, a payment progress figure — always tabular-nums font-mono), and
+  exactly ONE action (a Link, occasionally a primary Button on the single
+  most urgent row — see .components-shapes.json Button.instancesObserved).
+-->
+<article
+  data-pattern="triage-row"
+  class="bg-pool-surface text-pool-text px-6 py-6 sm:px-8"
+>
+  <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+    Balance overdue &middot; 8 days
+  </p>
+  <p class="font-display text-3xl font-semibold text-pool-text mt-1.5">
+    &pound;360
+    <span class="text-lg font-normal text-pool-text-secondary"
+      >still owed by Callum Reyes</span
+    >
+  </p>
+  <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+    Aura Healing: Foundations &middot; six evenings from Tue 15 Sep. His
+    &pound;120 deposit paid on 22 July holds his place; the balance was due 29
+    July.
+  </p>
+  <p class="mt-2 font-mono text-xs tabular-nums text-pool-text-secondary">
+    &pound;120 of &pound;480 received &middot; Stripe pi_3PmQ8x&hellip;4kD1
+    &middot; no reminder sent yet
+  </p>
+  <a
+    href="#"
+    class="mt-3 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+  >
+    Send the balance link
+  </a>
+</article>
+
+<!-- Highest-urgency variant: the ONE row on the whole screen allowed a
+     feature-scale graphic (a hold-countdown bar) AND a primary Button
+     instead of a Link — reserved for the single item closest to expiry. -->
+<article
+  data-pattern="triage-row"
+  data-variant="primary"
+  class="bg-pool-surface text-pool-text px-6 py-7 sm:px-8"
+>
+  <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+    Booking request &middot; hold ends today at 10:02
+  </p>
+  <p class="font-display text-2xl sm:text-3xl text-pool-text mt-2">
+    Sena Okafor is waiting on Reading the Field.
+  </p>
+  <p class="mt-2 max-w-[58ch] text-sm text-pool-text-secondary">
+    Sat 24 October, 10:00&ndash;16:00 &middot; &pound;95 &middot; 10 places.
+  </p>
+  <div class="mt-6 flex flex-wrap items-center gap-6">
+    <button
+      type="button"
+      class="bg-accent-500 px-10 py-5 text-sm font-semibold text-surface-inverted transition-colors duration-fast hover:bg-neutral-900"
+    >
+      Reply to Sena Okafor
+    </button>
+    <a
+      href="#"
+      class="text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+      >Open the request</a
+    >
+  </div>
+</article>

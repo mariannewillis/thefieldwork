@@ -1,0 +1,194 @@
+{
+  "canonicalPrimitivesGenerated": 20,
+  "canonicalPatternsGenerated": 12,
+  "canonicalLayoutsGenerated": 5,
+  "customPatternsGenerated": [
+    {
+      "name": "SiteFooter",
+      "source": "site-footer",
+      "screenCount": 17,
+      "platforms": ["webapp"]
+    },
+    {
+      "name": "NavDrawer",
+      "source": "nav-drawer",
+      "screenCount": 11,
+      "platforms": ["webapp"]
+    },
+    {
+      "name": "DefinitionList",
+      "source": "detail-fact-list",
+      "screenCount": 10,
+      "platforms": ["webapp", "admin"],
+      "mergedFrom": [
+        "detail-fact-list",
+        "session-list",
+        "reference-list",
+        "credential-list",
+        "contact-detail-list"
+      ]
+    },
+    {
+      "name": "OfferingCard",
+      "source": "offering-card",
+      "screenCount": 7,
+      "platforms": ["webapp"],
+      "mergedFrom": [
+        "offering-card",
+        "document-offer-card",
+        "offering-summary-card"
+      ]
+    },
+    {
+      "name": "DataRow",
+      "source": "list-item",
+      "screenCount": 7,
+      "platforms": ["admin", "webapp"],
+      "mergedFrom": [
+        "list-item",
+        "offering-row",
+        "booking-row",
+        "subscriber-row",
+        "document-row",
+        "session-list-item"
+      ]
+    },
+    {
+      "name": "PriceTag",
+      "source": "price-tag",
+      "screenCount": 6,
+      "platforms": ["webapp"]
+    },
+    {
+      "name": "StatePanel",
+      "source": "status-panel",
+      "screenCount": 6,
+      "platforms": ["webapp", "admin"],
+      "mergedFrom": [
+        "status-panel",
+        "document-attach",
+        "confirmation-panel",
+        "document-panel"
+      ]
+    },
+    {
+      "name": "MediaLibrary",
+      "source": "media-picker",
+      "screenCount": 5,
+      "platforms": ["admin"],
+      "mergedFrom": ["media-picker", "media-grid", "media-tile"]
+    },
+    {
+      "name": "HoldTimer",
+      "source": "hold-timer",
+      "screenCount": 3,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "PublishBar",
+      "source": "publish-bar",
+      "screenCount": 2,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "StatTile",
+      "source": "stat-tile",
+      "screenCount": 2,
+      "platforms": ["admin"],
+      "mergedFrom": ["stat-tile", "count-stat"]
+    },
+    {
+      "name": "CalendarView",
+      "source": "calendar-month-grid",
+      "screenCount": 2,
+      "platforms": ["admin"],
+      "mergedFrom": ["calendar-month-grid", "calendar-week-grid"]
+    },
+    {
+      "name": "SlotPicker",
+      "source": "slot-picker",
+      "screenCount": 2,
+      "platforms": ["webapp"],
+      "mergedFrom": ["slot-picker", "slot-option"]
+    },
+    {
+      "name": "SetupChecklist",
+      "source": "setup-checklist",
+      "screenCount": 1,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "TimeBlockSheet",
+      "source": "time-block-sheet",
+      "screenCount": 1,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "BeatEditorCard",
+      "source": "beat-editor-card",
+      "screenCount": 1,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "BlockComposer",
+      "source": "block-composer",
+      "screenCount": 1,
+      "platforms": ["admin"]
+    },
+    {
+      "name": "ProductsBlock",
+      "source": "products-block",
+      "screenCount": 1,
+      "platforms": ["webapp"]
+    },
+    {
+      "name": "Figure",
+      "source": "portrait-figure",
+      "screenCount": 1,
+      "platforms": ["webapp"]
+    },
+    {
+      "name": "PurposeSection",
+      "source": "purpose-section",
+      "screenCount": 1,
+      "platforms": ["webapp"]
+    }
+  ],
+  "canonicalUnused": {
+    "primitives": [
+      "Textarea",
+      "Select",
+      "Checkbox",
+      "Radio",
+      "Switch",
+      "Slider",
+      "Dialog",
+      "Drawer",
+      "Popover",
+      "Tooltip",
+      "Badge",
+      "Avatar",
+      "Separator",
+      "Tabs",
+      "Accordion"
+    ],
+    "patterns": [
+      "FormField",
+      "PageHeader",
+      "Breadcrumbs",
+      "SearchCombobox",
+      "CommandPalette",
+      "FileUploader",
+      "Pagination",
+      "Notification"
+    ]
+  },
+  "sourceCatalog": "docs/analysis/shared/components.md",
+  "sourceCatalogTotals": {
+    "uniqueComponents": 80,
+    "totalScreens": 33,
+    "platforms": ["admin", "webapp"]
+  },
+  "regeneratedAt": "2026-08-08",
+  "regeneratedReason": "components.md projectSpecific collapsed 68 -> 20; the earlier plan listed one custom pattern per pre-collapse entry"
+}

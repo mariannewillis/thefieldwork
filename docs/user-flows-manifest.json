@@ -1,0 +1,1473 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-08-09T05:29:31.111Z",
+  "projectName": "thefieldwork-v5",
+  "platforms": ["webapp", "admin"],
+  "uiKitVersion": "0.1.0-tokens-only",
+  "screensManifestHash": "sha256:eea1fc17eca2d750f958900ad50b7754544179e6d0e6480b667d9fd52c76f09c",
+  "visualReviewReportHash": "sha256:c6c35f17998409adcdbff2f768b48b034ead22f547ce9ccc19bd613c82a26083",
+  "flows": [
+    {
+      "id": "flow-1",
+      "slug": "answer-the-unasked-question",
+      "platform": "webapp",
+      "name": "Answer the unasked question",
+      "description": "Decide, from a cold arrival, that this is credible and will not be embarrassing — without having to ask anyone anything.",
+      "primaryPersona": "The Carrier",
+      "steps": [
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        },
+        {
+          "screenId": "about",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/about.html",
+          "route": "/about",
+          "status": "pass",
+          "title": "About"
+        },
+        {
+          "screenId": "services-index",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/services-index.html",
+          "route": "/services",
+          "status": "fail",
+          "title": "Services index"
+        },
+        {
+          "screenId": "service-detail",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/service-detail.html",
+          "route": "/services/:slug",
+          "status": "fail",
+          "title": "Service detail"
+        }
+      ],
+      "seedingTier": "read-only",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Who she is\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Services\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"One-to-one session\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"OfferingHero\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/services/"
+        }
+      ]
+    },
+    {
+      "id": "flow-2",
+      "slug": "book-a-service",
+      "platform": "webapp",
+      "name": "Book a one-to-one service",
+      "description": "Choose a real time from the practitioner's actual calendar, ask for it, and understand exactly what has and has not just happened.",
+      "primaryPersona": "The Carrier (first time) and The Returner (repeat)",
+      "steps": [
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        },
+        {
+          "screenId": "services-index",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/services-index.html",
+          "route": "/services",
+          "status": "fail",
+          "title": "Services index"
+        },
+        {
+          "screenId": "service-detail",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/service-detail.html",
+          "route": "/services/:slug",
+          "status": "fail",
+          "title": "Service detail"
+        },
+        {
+          "screenId": "booking-request",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-request.html",
+          "route": "/book/:kind/:slug",
+          "status": "fail",
+          "title": "Booking request"
+        },
+        {
+          "screenId": "booking-confirmation",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-confirmation.html",
+          "route": "/book/thanks/:ref",
+          "status": "fail",
+          "title": "Booking confirmation"
+        },
+        {
+          "screenId": "privacy-notice",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/privacy-notice.html",
+          "route": "/privacy",
+          "status": "pass",
+          "title": "Privacy notice"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"One-to-one sessions\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"One-to-one session\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "[data-kit-component=\"Button\"][data-kit-variant=\"primary\"][data-kit-size=\"md\"]"
+        },
+        {
+          "kind": "fill",
+          "selector": "#name",
+          "value": "Test User"
+        },
+        {
+          "kind": "fill",
+          "selector": "#email",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Request this place\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"ConfirmationPanel\"][data-kit-variant=\"clearing\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/book/thanks/"
+        },
+        {
+          "kind": "navigate",
+          "to": "/privacy"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "role=heading[name=\"This page says plainly what is collected, and how to have it back.\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/privacy"
+        }
+      ]
+    },
+    {
+      "id": "flow-3",
+      "slug": "reserve-a-workshop-place",
+      "platform": "webapp",
+      "name": "Reserve a place on a dated workshop",
+      "description": "Scan what is on, pick a date, ask for a place — without re-reading the site to find it.",
+      "primaryPersona": "The Returner",
+      "steps": [
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        },
+        {
+          "screenId": "workshops-index",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/workshops-index.html",
+          "route": "/workshops",
+          "status": "fail",
+          "title": "Workshops index"
+        },
+        {
+          "screenId": "workshop-detail",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/workshop-detail.html",
+          "route": "/workshops/:slug",
+          "status": "fail",
+          "title": "Workshop detail"
+        },
+        {
+          "screenId": "booking-request",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-request.html",
+          "route": "/book/:kind/:slug",
+          "status": "fail",
+          "title": "Booking request"
+        },
+        {
+          "screenId": "booking-confirmation",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-confirmation.html",
+          "route": "/book/thanks/:ref",
+          "status": "fail",
+          "title": "Booking confirmation"
+        },
+        {
+          "screenId": "privacy-notice",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/privacy-notice.html",
+          "route": "/privacy",
+          "status": "pass",
+          "title": "Privacy notice"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Workshops\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Reading the Field\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "[data-kit-component=\"Button\"][data-kit-variant=\"primary\"][data-kit-size=\"md\"]"
+        },
+        {
+          "kind": "fill",
+          "selector": "#name",
+          "value": "Test User"
+        },
+        {
+          "kind": "fill",
+          "selector": "#email",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Request this place\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"ConfirmationPanel\"][data-kit-variant=\"clearing\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/book/thanks/"
+        },
+        {
+          "kind": "navigate",
+          "to": "/privacy"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "role=heading[name=\"This page says plainly what is collected, and how to have it back.\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/privacy"
+        }
+      ]
+    },
+    {
+      "id": "flow-4",
+      "slug": "commit-to-a-course",
+      "platform": "webapp",
+      "name": "Commit to a course",
+      "description": "Understand what the whole series commits them to — every date, not just the first — and then ask for a place on it.",
+      "primaryPersona": "The Returner",
+      "steps": [
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        },
+        {
+          "screenId": "courses-index",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/courses-index.html",
+          "route": "/courses",
+          "status": "fail",
+          "title": "Courses index"
+        },
+        {
+          "screenId": "course-detail",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/course-detail.html",
+          "route": "/courses/:slug",
+          "status": "fail",
+          "title": "Course detail"
+        },
+        {
+          "screenId": "booking-request",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-request.html",
+          "route": "/book/:kind/:slug",
+          "status": "fail",
+          "title": "Booking request"
+        },
+        {
+          "screenId": "booking-confirmation",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/booking-confirmation.html",
+          "route": "/book/thanks/:ref",
+          "status": "fail",
+          "title": "Booking confirmation"
+        },
+        {
+          "screenId": "privacy-notice",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/privacy-notice.html",
+          "route": "/privacy",
+          "status": "pass",
+          "title": "Privacy notice"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Courses\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Aura Healing: Foundations\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Request your place\"]"
+        },
+        {
+          "kind": "fill",
+          "selector": "#name",
+          "value": "Test User"
+        },
+        {
+          "kind": "fill",
+          "selector": "#email",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Request this place\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"ConfirmationPanel\"][data-kit-variant=\"clearing\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/book/thanks/"
+        },
+        {
+          "kind": "navigate",
+          "to": "/privacy"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "role=heading[name=\"This page says plainly what is collected, and how to have it back.\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/privacy"
+        }
+      ]
+    },
+    {
+      "id": "flow-5",
+      "slug": "contact-without-a-form",
+      "platform": "webapp",
+      "name": "Get in touch without using a form",
+      "description": "Reach a human directly — because some visitors will not put their name in a box before they have spoken to someone.",
+      "primaryPersona": "The Carrier",
+      "steps": [
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        },
+        {
+          "screenId": "contact",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/contact.html",
+          "route": "/contact",
+          "status": "fail",
+          "title": "Contact"
+        },
+        {
+          "screenId": "about",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/about.html",
+          "route": "/about",
+          "status": "pass",
+          "title": "About"
+        }
+      ],
+      "seedingTier": "read-only",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Ask a question\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Main\"] >> role=link[name=\"About\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "role=heading[name=\"One practitioner. One room. No clinic front.\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/about"
+        }
+      ]
+    },
+    {
+      "id": "flow-6",
+      "slug": "join-the-newsletter",
+      "platform": "webapp",
+      "name": "Join the newsletter",
+      "description": "Get on the list — and, where a document is offered, receive it.",
+      "primaryPersona": "The Carrier who is not ready to book, and The Returner between",
+      "steps": [
+        {
+          "screenId": "subscribe",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/subscribe.html",
+          "route": "/subscribe",
+          "status": "fail",
+          "title": "Subscribe"
+        },
+        {
+          "screenId": "subscribe-pending",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/subscribe-pending.html",
+          "route": "/subscribe/check-email",
+          "status": "fail",
+          "title": "Subscribe pending"
+        },
+        {
+          "screenId": "subscribe-confirmed",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/subscribe-confirmed.html",
+          "route": "/subscribe/confirm/:token",
+          "status": "fail",
+          "title": "Subscribe confirmed"
+        },
+        {
+          "screenId": "document-download",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/document-download.html",
+          "route": "/downloads/:slug",
+          "status": "fail",
+          "title": "Document download"
+        },
+        {
+          "screenId": "privacy-notice",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/privacy-notice.html",
+          "route": "/privacy",
+          "status": "pass",
+          "title": "Privacy notice"
+        },
+        {
+          "screenId": "home",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/home.html",
+          "route": "/",
+          "status": "fail",
+          "title": "Home"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/subscribe"
+        },
+        {
+          "kind": "fill",
+          "selector": "#subscribe-email",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "click",
+          "selector": "#subscribe-consent"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Join the list\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"StatusPanel\"][data-kit-variant=\"pending\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/subscribe/check-email"
+        },
+        {
+          "kind": "navigate",
+          "to": "/subscribe/confirm/:token"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"StatusPanel\"][data-kit-variant=\"confirmed\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Download the guide\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"DocumentPanel\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/downloads/"
+        },
+        {
+          "kind": "navigate",
+          "to": "/privacy"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "role=heading[name=\"This page says plainly what is collected, and how to have it back.\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"The Field Work — home\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#what-happens"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/$"
+        }
+      ]
+    },
+    {
+      "id": "flow-7",
+      "slug": "retrieve-a-document",
+      "platform": "webapp",
+      "name": "Retrieve a document",
+      "description": "Get the PDF.",
+      "primaryPersona": "Existing Subscriber (subscriber-only files) and any visitor",
+      "steps": [
+        {
+          "screenId": "subscribe-confirmed",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/subscribe-confirmed.html",
+          "route": "/subscribe/confirm/:token",
+          "status": "fail",
+          "title": "Subscribe confirmed"
+        },
+        {
+          "screenId": "document-download",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/document-download.html",
+          "route": "/downloads/:slug",
+          "status": "fail",
+          "title": "Document download"
+        }
+      ],
+      "seedingTier": "read-only",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/subscribe/confirm/:token"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Download the guide\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"DocumentPanel\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/downloads/"
+        }
+      ]
+    },
+    {
+      "id": "flow-8",
+      "slug": "leave-the-list",
+      "platform": "webapp",
+      "name": "Leave the list",
+      "description": "Stop receiving the newsletter. Immediately, with no account and no conversation.",
+      "primaryPersona": "Existing Subscriber",
+      "steps": [
+        {
+          "screenId": "unsubscribe",
+          "platform": "webapp",
+          "file": "docs/screens/webapp/unsubscribe.html",
+          "route": "/unsubscribe/:token",
+          "status": "pass",
+          "title": "Unsubscribe"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/unsubscribe/:token"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "[data-kit-component=\"StatusPanel\"][data-kit-variant=\"unsubscribed\"]"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/unsubscribe/"
+        }
+      ]
+    },
+    {
+      "id": "flow-9",
+      "slug": "first-run-setup",
+      "platform": "admin",
+      "name": "First sign-in and first-run setup",
+      "description": "get from a seeded account to a site carrying her details, her working pattern and her words — without her having to know what any of those things are called.",
+      "primaryPersona": "The Practitioner (Owner), day one",
+      "steps": [
+        {
+          "screenId": "admin-login",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-login.html",
+          "route": "/admin/login",
+          "status": "fail",
+          "title": "Admin login"
+        },
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-settings",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-settings.html",
+          "route": "/admin/settings",
+          "status": "fail",
+          "title": "Admin settings"
+        },
+        {
+          "screenId": "admin-availability",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-availability.html",
+          "route": "/admin/availability",
+          "status": "fail",
+          "title": "Admin availability"
+        },
+        {
+          "screenId": "admin-media",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-media.html",
+          "route": "/admin/media",
+          "status": "fail",
+          "title": "Admin media"
+        },
+        {
+          "screenId": "admin-landing-sections",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-landing-sections.html",
+          "route": "/admin/page",
+          "status": "fail",
+          "title": "Admin landing sections"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin/login"
+        },
+        {
+          "kind": "fill",
+          "selector": "#login-email-default",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "fill",
+          "selector": "#login-password-default",
+          "value": "TestPass123!"
+        },
+        {
+          "kind": "click",
+          "selector": "section[data-state=\"default\"] >> role=button[name=\"Sign in\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Settings\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Availability\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Pictures\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Home page\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/page"
+        }
+      ]
+    },
+    {
+      "id": "flow-10",
+      "slug": "publish-a-workshop",
+      "platform": "admin",
+      "name": "Publish a workshop with a date and a price",
+      "description": "a dated, priced workshop live on the public site and blocking her own calendar — in under 5 minutes, with no second edit anywhere. This is the §15 headline task.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-offerings",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-offerings.html",
+          "route": "/admin/offerings",
+          "status": "fail",
+          "title": "Admin offerings"
+        },
+        {
+          "screenId": "admin-offering-edit",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-offering-edit.html",
+          "route": "/admin/offerings/:id",
+          "status": "fail",
+          "title": "Admin offering edit"
+        },
+        {
+          "screenId": "admin-media",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-media.html",
+          "route": "/admin/media",
+          "status": "fail",
+          "title": "Admin media"
+        },
+        {
+          "screenId": "admin-calendar",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-calendar.html",
+          "route": "/admin/calendar",
+          "status": "fail",
+          "title": "Admin calendar"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Offerings\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "section[aria-labelledby=\"greeting\"] >> role=link[name=\"Add an offering\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Pictures\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Calendar\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/calendar"
+        }
+      ]
+    },
+    {
+      "id": "flow-11",
+      "slug": "build-a-course",
+      "platform": "admin",
+      "name": "Build a course out of its sessions",
+      "description": "sell a fixed series of dates as ONE purchase.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-offerings",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-offerings.html",
+          "route": "/admin/offerings",
+          "status": "fail",
+          "title": "Admin offerings"
+        },
+        {
+          "screenId": "admin-offering-edit",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-offering-edit.html",
+          "route": "/admin/offerings/:id",
+          "status": "fail",
+          "title": "Admin offering edit"
+        },
+        {
+          "screenId": "admin-calendar",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-calendar.html",
+          "route": "/admin/calendar",
+          "status": "fail",
+          "title": "Admin calendar"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin/offerings"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Edit Evening Series\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Calendar\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/calendar"
+        }
+      ]
+    },
+    {
+      "id": "flow-12",
+      "slug": "edit-and-publish-a-beat",
+      "platform": "admin",
+      "name": "Change a paragraph and a picture on the home page",
+      "description": "change one beat's words and its image and get it live — in under 3 minutes (§15), with certainty at every moment about whether the public can see it yet.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-landing-sections",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-landing-sections.html",
+          "route": "/admin/page",
+          "status": "fail",
+          "title": "Admin landing sections"
+        },
+        {
+          "screenId": "admin-media",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-media.html",
+          "route": "/admin/media",
+          "status": "fail",
+          "title": "Admin media"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Home page\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Pictures\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/media"
+        }
+      ]
+    },
+    {
+      "id": "flow-13",
+      "slug": "block-personal-time",
+      "platform": "admin",
+      "name": "Block out a personal afternoon",
+      "description": "make Thursday afternoon disappear from what visitors can ask for — in one gesture, in under 30 seconds (§15), without leaving the calendar.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-calendar",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-calendar.html",
+          "route": "/admin/calendar",
+          "status": "fail",
+          "title": "Admin calendar"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin/calendar"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Block time\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#block-time-title"
+        },
+        {
+          "kind": "fill",
+          "selector": "input[placeholder=\"Family, admin, rest\"]",
+          "value": "Personal time"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Block this time\"]"
+        }
+      ]
+    },
+    {
+      "id": "flow-14",
+      "slug": "triage-a-booking",
+      "platform": "admin",
+      "name": "Triage a booking request",
+      "description": "decide on a request before its hold runs out, and have the calendar be true either way.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-bookings",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-bookings.html",
+          "route": "/admin/bookings",
+          "status": "fail",
+          "title": "Admin bookings"
+        },
+        {
+          "screenId": "admin-calendar",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-calendar.html",
+          "route": "/admin/calendar",
+          "status": "fail",
+          "title": "Admin calendar"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=/Requests/]"
+        },
+        {
+          "kind": "click",
+          "selector": "[data-kit-component=\"BookingRow\"]:has-text(\"Ffion Pryce\") >> role=button[name=\"Confirm booking\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Calendar\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/calendar"
+        }
+      ]
+    },
+    {
+      "id": "flow-15",
+      "slug": "set-the-working-pattern",
+      "platform": "admin",
+      "name": "Set the working pattern and the timing rules",
+      "description": "describe when she works ONCE, so the calendar can compute free time forever.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-availability",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-availability.html",
+          "route": "/admin/availability",
+          "status": "fail",
+          "title": "Admin availability"
+        },
+        {
+          "screenId": "admin-calendar",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-calendar.html",
+          "route": "/admin/calendar",
+          "status": "fail",
+          "title": "Admin calendar"
+        },
+        {
+          "screenId": "admin-settings",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-settings.html",
+          "route": "/admin/settings",
+          "status": "fail",
+          "title": "Admin settings"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Availability\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Save changes\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Calendar\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Settings\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#settings-h"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/settings"
+        }
+      ]
+    },
+    {
+      "id": "flow-16",
+      "slug": "write-and-send-an-issue",
+      "platform": "admin",
+      "name": "Write and send an issue",
+      "description": "write something, be sure it is right, and send it to the people who actually said yes — in under 15 minutes (§15).",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-newsletters",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-newsletters.html",
+          "route": "/admin/newsletters",
+          "status": "fail",
+          "title": "Admin newsletters"
+        },
+        {
+          "screenId": "admin-newsletter-edit",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-newsletter-edit.html",
+          "route": "/admin/newsletters/:id",
+          "status": "fail",
+          "title": "Admin newsletter edit"
+        },
+        {
+          "screenId": "admin-documents",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-documents.html",
+          "route": "/admin/documents",
+          "status": "fail",
+          "title": "Admin documents"
+        },
+        {
+          "screenId": "admin-subscribers",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-subscribers.html",
+          "route": "/admin/subscribers",
+          "status": "fail",
+          "title": "Admin subscribers"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Newsletter\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Write an issue\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "role=link[name=\"Attach a document\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Subscribers\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin/subscribers"
+        }
+      ]
+    },
+    {
+      "id": "flow-17",
+      "slug": "look-after-the-list",
+      "platform": "admin",
+      "name": "Look after the list",
+      "description": "know who is actually on the list, and take someone off when they ask her by email.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        },
+        {
+          "screenId": "admin-subscribers",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-subscribers.html",
+          "route": "/admin/subscribers",
+          "status": "fail",
+          "title": "Admin subscribers"
+        }
+      ],
+      "seedingTier": "mutation",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin"
+        },
+        {
+          "kind": "click",
+          "selector": "nav[aria-label=\"Admin\"] >> role=link[name=\"Subscribers\"]"
+        },
+        {
+          "kind": "click",
+          "selector": "[data-kit-component=\"SubscriberRow\"]:has-text(\"Grace Halloran\") >> role=button[name=\"Remove\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#remove-guard"
+        }
+      ]
+    },
+    {
+      "id": "flow-18",
+      "slug": "publish-and-retire-a-document",
+      "platform": "admin",
+      "name": "Publish and retire a document",
+      "description": "put a PDF somewhere it can be attached or offered — and later remove one without breaking anything she has already sent.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-documents",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-documents.html",
+          "route": "/admin/documents",
+          "status": "fail",
+          "title": "Admin documents"
+        },
+        {
+          "screenId": "admin-newsletter-edit",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-newsletter-edit.html",
+          "route": "/admin/newsletters/:id",
+          "status": "fail",
+          "title": "Admin newsletter edit"
+        },
+        {
+          "screenId": "admin-newsletters",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-newsletters.html",
+          "route": "/admin/newsletters",
+          "status": "fail",
+          "title": "Admin newsletters"
+        }
+      ],
+      "seedingTier": "mutation"
+    },
+    {
+      "id": "flow-19",
+      "slug": "add-a-picture",
+      "platform": "admin",
+      "name": "Add a picture she took herself",
+      "description": "get her own photograph into the library and safely onto the site.",
+      "primaryPersona": "The Practitioner (Owner)",
+      "steps": [
+        {
+          "screenId": "admin-media",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-media.html",
+          "route": "/admin/media",
+          "status": "fail",
+          "title": "Admin media"
+        },
+        {
+          "screenId": "admin-landing-sections",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-landing-sections.html",
+          "route": "/admin/page",
+          "status": "fail",
+          "title": "Admin landing sections"
+        },
+        {
+          "screenId": "admin-offering-edit",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-offering-edit.html",
+          "route": "/admin/offerings/:id",
+          "status": "fail",
+          "title": "Admin offering edit"
+        }
+      ],
+      "seedingTier": "mutation"
+    },
+    {
+      "id": "flow-20",
+      "slug": "recover-the-password",
+      "platform": "admin",
+      "name": "Get back in after forgetting the password",
+      "description": "get back into her own admin without calling anyone — the failure mode that actually happens to a sole operator who signs in monthly.",
+      "primaryPersona": "The Practitioner (Owner), returning after weeks away",
+      "steps": [
+        {
+          "screenId": "admin-login",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-login.html",
+          "route": "/admin/login",
+          "status": "fail",
+          "title": "Admin login"
+        },
+        {
+          "screenId": "admin-forgot-password",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-forgot-password.html",
+          "route": "/admin/forgot-password",
+          "status": "pass",
+          "title": "Admin forgot password"
+        },
+        {
+          "screenId": "admin-reset-password",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-reset-password.html",
+          "route": "/admin/reset-password/:token",
+          "status": "fail",
+          "title": "Admin reset password"
+        },
+        {
+          "screenId": "admin-dashboard",
+          "platform": "admin",
+          "file": "docs/screens/admin/admin-dashboard.html",
+          "route": "/admin",
+          "status": "fail",
+          "title": "Admin dashboard"
+        }
+      ],
+      "seedingTier": "read-only",
+      "interactions": [
+        {
+          "kind": "navigate",
+          "to": "/admin/login"
+        },
+        {
+          "kind": "click",
+          "selector": "section[data-state=\"default\"] >> role=link[name=\"Forgotten your password?\"]"
+        },
+        {
+          "kind": "fill",
+          "selector": "#email",
+          "value": "test@example.com"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Send reset link\"]"
+        },
+        {
+          "kind": "navigate",
+          "to": "/admin/reset-password/reset-test-token"
+        },
+        {
+          "kind": "fill",
+          "selector": "#new-password",
+          "value": "TestPass123!"
+        },
+        {
+          "kind": "fill",
+          "selector": "#confirm-password",
+          "value": "TestPass123!"
+        },
+        {
+          "kind": "click",
+          "selector": "role=button[name=\"Set password\"]"
+        },
+        {
+          "kind": "assertVisible",
+          "selector": "#greeting"
+        },
+        {
+          "kind": "assertUrlMatches",
+          "pattern": "^/admin$"
+        }
+      ]
+    }
+  ],
+  "personas": [
+    {
+      "id": "the-practitioner",
+      "name": "The Practitioner (Owner)",
+      "primaryGoal": "Fill her calendar without spending evenings on admin — publish a dated, priced offering and reply to whoever asks, unaided.",
+      "flowIds": [
+        "flow-9",
+        "flow-10",
+        "flow-11",
+        "flow-12",
+        "flow-13",
+        "flow-14",
+        "flow-15",
+        "flow-16",
+        "flow-17",
+        "flow-18",
+        "flow-19",
+        "flow-20"
+      ]
+    },
+    {
+      "id": "the-carrier",
+      "name": "The Carrier",
+      "primaryGoal": "Work out whether this is credible and whether it will be embarrassing — specifically, whether she must undress or be touched.",
+      "flowIds": ["flow-1", "flow-2", "flow-5", "flow-6"]
+    },
+    {
+      "id": "the-returner",
+      "name": "The Returner",
+      "primaryGoal": "Find what's on and request a place in under a minute.",
+      "flowIds": ["flow-2", "flow-3", "flow-4", "flow-6"]
+    }
+  ],
+  "screensCounts": {
+    "total": 33,
+    "pass": 4,
+    "fail": 29,
+    "needs-human-review": 0,
+    "not-reviewed": 0
+  },
+  "schemaVersion": "2.0"
+}

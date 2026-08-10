@@ -1,0 +1,353 @@
+{
+  "version": "1.0",
+  "capabilities": [
+    {
+      "id": "cap-12-seven-beat-home",
+      "source": "brief.md#12",
+      "summary": "Seven-beat home page in a fixed ascending (root→crown) order, content-driven from published LandingSections",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-products-block",
+      "source": "brief.md#12",
+      "summary": "Products block rendering live Courses, Workshops and Services at equal billing with real dates and prices",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-offering-index-detail",
+      "source": "brief.md#12",
+      "summary": "Index and detail pages for each of the three offering kinds",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-course-session-list",
+      "source": "brief.md#12",
+      "summary": "Course detail lists its Sessions with dates",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-booking-request-form",
+      "source": "brief.md#12",
+      "summary": "Booking-request form against any Offering, with spam guard and rate limit",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-slot-picker",
+      "source": "brief.md#12",
+      "summary": "Live free-slot picker for services, computed from the owner's calendar, placing a self-expiring hold on the chosen time",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-booking-emails",
+      "source": "brief.md#12",
+      "summary": "Email acknowledgement to the visitor and email notification to the owner on a booking request",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-newsletter-subscription",
+      "source": "brief.md#12",
+      "summary": "Newsletter subscription with double opt-in and one-click unsubscribe from every issue",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-pdf-downloads",
+      "source": "brief.md#12",
+      "summary": "PDF downloads: public documents direct, subscriber-only documents via signed expiring links",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-about-contact",
+      "source": "brief.md#12",
+      "summary": "About and contact pages",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-privacy-notice",
+      "source": "brief.md#12",
+      "summary": "Privacy notice at /privacy, linked from the footer and from both the booking and subscribe forms, covering the two purposes separately",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-configurable-background",
+      "source": "brief.md#12",
+      "summary": "Configurable page background from a curated set or a plain ground, with an optional sparse procedural star field that is decorative only and suppressed under prefers-reduced-motion",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-wcag-aa-conformance",
+      "source": "brief.md#12",
+      "summary": "Full WCAG 2.2 AA conformance verified by computed contrast, not by eye",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-owner-login",
+      "source": "brief.md#12",
+      "summary": "Single-account login, rate-limited, with emailed password recovery",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-edit-landing-beats",
+      "source": "brief.md#12",
+      "summary": "Edit all seven landing beats: eyebrow, heading, body, image, and a link on the three beats that have one",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-beat-visibility-toggle",
+      "source": "brief.md#12",
+      "summary": "Show/hide beats 2-6; beats 1 and 7 are always visible and cannot be hidden",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-draft-preview-publish",
+      "source": "brief.md#12",
+      "summary": "Draft → preview → publish: edits are never live until published, and preview renders the real page from draft content",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-one-publish-one-scope",
+      "source": "brief.md#12",
+      "summary": "One publish covers both the seven landing beats and SiteSettings, with a confirmation itemising everything going live",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-manage-offerings",
+      "source": "brief.md#12",
+      "summary": "Create, edit, activate and deactivate Services, Workshops and Courses",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-manage-course-sessions",
+      "source": "brief.md#12",
+      "summary": "Add, order and edit a Course's Sessions",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-set-prices",
+      "source": "brief.md#12",
+      "summary": "Set prices per Offering; no price is hard-coded anywhere",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-booking-queue",
+      "source": "brief.md#12",
+      "summary": "Booking-request queue with status transitions",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-media-library",
+      "source": "brief.md#12",
+      "summary": "Media library holding the six supplied plates plus owner uploads",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-upload-auto-processing",
+      "source": "brief.md#12",
+      "summary": "Uploads are auto-processed — cropped to the target ratio for their slot and given a palette treatment so anything the owner adds lands inside the site's visual world",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-alt-text-required",
+      "source": "brief.md#12",
+      "summary": "Alt text is required on every image before it can be used",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-site-settings",
+      "source": "brief.md#12",
+      "summary": "Site settings: contact details, bio, credentials, social links, background selection, and hold duration",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-merged-calendar",
+      "source": "brief.md#12",
+      "summary": "One merged calendar showing confirmed bookings, pending holds, workshop/course sessions and personal blocks, in month and week views",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-auto-block-from-events",
+      "source": "brief.md#12",
+      "summary": "Workshops and course sessions block the calendar automatically on publish and unblock when moved or removed — the owner never blocks her own events by hand",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-personal-time-blocking",
+      "source": "brief.md#12",
+      "summary": "Personal time blocking in one gesture from the calendar itself",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-availability-rules",
+      "source": "brief.md#12",
+      "summary": "A recurring weekly availability pattern, plus buffer, minimum lead time and booking horizon",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-availability-by-subtraction",
+      "source": "brief.md#12",
+      "summary": "Free slots for a service derived by subtraction — never stored, never editable as a list, never able to disagree with the calendar",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-hold-lifecycle",
+      "source": "brief.md#12",
+      "summary": "Hold lifecycle: placed on request, released on decline or expiry, converted on confirm",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-subscribe-form-consent",
+      "source": "brief.md#12",
+      "summary": "Public subscribe form with explicit unticked consent, double opt-in, and a confirmation email",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-one-click-unsubscribe",
+      "source": "brief.md#12",
+      "summary": "One-click unsubscribe via signed token in every issue, no login required",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-suppression-list",
+      "source": "brief.md#12",
+      "summary": "Permanent suppression of unsubscribed and bounced addresses across every send path",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-issue-composition",
+      "source": "brief.md#12",
+      "summary": "Issue composition from a small fixed block set, with an upcoming-offerings block that pulls live dates",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-branding-is-template",
+      "source": "brief.md#12",
+      "summary": "Her branding is the template, not an option — logo, palette, type and footer applied automatically to every issue, including the legally required identification and unsubscribe link",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-test-send",
+      "source": "brief.md#12",
+      "summary": "Test send to herself before any broadcast",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-batched-send",
+      "source": "brief.md#12",
+      "summary": "Batched send with a confirmation naming the exact recipient count",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-subscriber-list",
+      "source": "brief.md#12",
+      "summary": "Subscriber list with status, source, search, CSV export and manual unsubscribe",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-pdf-library",
+      "source": "brief.md#12",
+      "summary": "PDF library with title, description and visibility",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-attach-docs-to-issue",
+      "source": "brief.md#12",
+      "summary": "Attach one or more Documents to a newsletter issue",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-doc-for-subscription",
+      "source": "brief.md#12",
+      "summary": "Offer a Document with a subscribe form as the reason to join",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-signed-doc-links",
+      "source": "brief.md#12",
+      "summary": "Signed, expiring links for subscriber-only documents",
+      "category": "core"
+    },
+    {
+      "id": "cap-12-doc-reference-view",
+      "source": "brief.md#12",
+      "summary": "Reference view before deletion — the owner can see which newsletters and forms reference a document before removing it",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-index-empty-states",
+      "source": "brief.md#11",
+      "summary": "Index screens design their EMPTY state — a new practitioner has zero workshops on day one and the page must still be worth landing on",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-slot-taken-state",
+      "source": "brief.md#11",
+      "summary": "booking-request designs the slot-taken-while-you-were-typing state, preserving already-typed field values",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-confirmation-states-hold",
+      "source": "brief.md#11",
+      "summary": "booking-confirmation states the held time plainly and that it is held rather than booked until the owner replies",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-document-delivered-at-confirm",
+      "source": "brief.md#11",
+      "summary": "subscribe-confirmed delivers an attached Document on confirmation (not on submit), and designs the already-confirmed and expired-token states",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-capacity-is-information",
+      "source": "brief.md#11",
+      "summary": "Offering detail shows capacity as information, never as a live seat count",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-dashboard-expiring-holds",
+      "source": "brief.md#11",
+      "summary": "admin-dashboard surfaces holds that are about to expire, because those are decisions with a deadline",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-derived-blocks-explain",
+      "source": "brief.md#11",
+      "summary": "Tapping a derived session block on the calendar explains where it came from and offers to open the Offering, rather than silently refusing to be edited",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-calendar-states",
+      "source": "brief.md#11",
+      "summary": "admin-calendar designs the empty day-one calendar, a densely booked week, and a day carrying an expired hold",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-unpublished-changes-indicator",
+      "source": "brief.md#11",
+      "summary": "admin-landing-sections shows clearly whether there are unpublished changes",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-send-is-irreversible",
+      "source": "brief.md#11",
+      "summary": "admin-newsletter-edit states that sending is irreversible BEFORE the send, not after, and guards it with a confirmation naming the recipient count",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-confirmed-vs-pending",
+      "source": "brief.md#11",
+      "summary": "admin-subscribers shows the confirmed count distinctly from the pending count, because only one of those is the real audience",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-booking-confirm-converts-hold",
+      "source": "brief.md#11",
+      "summary": "Confirming a booking converts its hold into a confirmed calendar booking; declining releases the slot immediately",
+      "category": "core"
+    },
+    {
+      "id": "cap-11-password-recovery-flow",
+      "source": "brief.md#11",
+      "summary": "Password recovery via a rate-limited, single-use, short-lived emailed link, returning the same response whether or not the address matches",
+      "category": "core"
+    }
+  ]
+}

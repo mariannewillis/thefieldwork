@@ -1,0 +1,249 @@
+{
+  "decidedAt": "2026-08-09",
+  "decidedBy": "/architect step 3-4 (decisions-only dispatch, Opus)",
+  "stack": {
+    "web_framework": "react-next",
+    "web_styling": "tailwind",
+    "mobile_framework": null,
+    "backend_language": "typescript",
+    "backend_framework": null,
+    "orm": "prisma",
+    "database": "postgres",
+    "persistence_layer": "real-db"
+  },
+  "backendShape": {
+    "decision": "nextjs-fullstack",
+    "briefQuote": "§8 \"Vercel for both web surfaces (the owner is the only admin user; there is no scale case for splitting hosting).\"",
+    "reason": "One deployable with two route groups, not two tiers. Public surface is read-mostly ISR with exactly one public write (BookingRequest); admin is dynamic behind a single-account cookie session; the scheduled job is one authenticated route platform cron pulls. Splitting apps/api adds a second deploy target, a second env surface, a cross-origin session-cookie problem and a Dockerfile/compose pair, and buys nothing the brief asks for.",
+    "skips": [
+      "apps/api service — not emitted",
+      "apps/api/Dockerfile — no applicable per-stack template; not emitted",
+      "docker-compose.yml — no second service, and the DB is managed (Neon) not a local container",
+      "dev.mjs runs ONE process on :3000; no api port, no second health wait"
+    ],
+    "moduleBoundary": "§9's modules survive as apps/web/src/server/<module>/ with service + route handler; a route handler may only call its own module's service."
+  },
+  "integrations": [
+    {
+      "category": "content-cms",
+      "deployment": "in-house",
+      "path": "apps/web/src/server/content/",
+      "adminRoute": "/admin/content",
+      "dbTables": [
+        "landing_section",
+        "landing_section_draft",
+        "site_settings",
+        "site_settings_draft"
+      ],
+      "rationale": "Rule 0 — brief specifies in-house. §5 'The admin is not a CMS'; §9's seven-keys-cannot-be-created is an API-level refusal Sanity can only express as editor convention.",
+      "rejected": ["sanity", "mdx-in-repo"]
+    },
+    {
+      "category": "auth",
+      "deployment": "in-house",
+      "path": "apps/web/src/server/auth/",
+      "adminRoute": "/admin/login",
+      "dbTables": ["owner_account", "session", "login_attempt"],
+      "rationale": "Rule 0 — one account, no registration, no OAuth, no MFA signal (§9, §13). Argon2id + httpOnly SameSite=Lax cookie + rate-limited login ≈150 lines.",
+      "rejected": ["clerk", "auth-js"]
+    },
+    {
+      "category": "transactional-email",
+      "deployment": "vendor",
+      "vendor": "resend",
+      "signupUrl": "https://resend.com/signup",
+      "credentialsRequired": [
+        "RESEND_API_KEY",
+        "RESEND_WEBHOOK_SECRET",
+        "EMAIL_FROM"
+      ],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 1 — §8 names it. Rule 4 — Resend Free (3,000/mo, 100/day) is the only free tier covering BOTH lanes at this scale. Port+adapter: project owns send(to,template,data); dev captures to disk, tests mock.",
+      "rejected": ["postmark", "amazon-ses"]
+    },
+    {
+      "category": "bulk-broadcast-email",
+      "deployment": "vendor",
+      "vendor": "resend",
+      "signupUrl": "https://resend.com/signup",
+      "credentialsRequired": ["RESEND_API_KEY"],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 1 — §8 asks for ONE provider across both lanes. §5's lane separation is preserved in-project: Subscriber table is system of record; the suppression gate runs in the broadcast port BEFORE the adapter, so §9's 'never sent to again by any code path' is mechanically true.",
+      "rejected": ["postmark-broadcast-streams", "listmonk"]
+    },
+    {
+      "category": "sending-domain-authentication",
+      "deployment": "in-house",
+      "path": "docs/deployment-checklist.md#sending-domain-authentication",
+      "dbTables": [],
+      "rationale": "Rule 0 — nothing to buy. SPF include + provider DKIM CNAMEs + self-authored DMARC (p=none, rua=) on a dedicated sending subdomain so newsletter reputation cannot contaminate the apex domain. §8 makes this BLOCKING.",
+      "rejected": []
+    },
+    {
+      "category": "email-template-rendering",
+      "deployment": "in-repo",
+      "path": "packages/emails/src/templates/",
+      "dbTables": [],
+      "rationale": "Rule 0 — §12 'Her branding is the template, not an option' is a requirement to REMOVE a capability; committed code states that as architecture rather than policy. React Email (stack is TS/React; renders to string server-side so §17 tests need no runtime; ships no tracking pixel).",
+      "rejected": ["mjml", "vendor-drag-drop-builder"]
+    },
+    {
+      "category": "media-hosting",
+      "deployment": "vendor",
+      "vendor": "cloudflare-r2",
+      "signupUrl": "https://dash.cloudflare.com/sign-up",
+      "credentialsRequired": [
+        "R2_ACCOUNT_ID",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "R2_BUCKET",
+        "R2_PUBLIC_BASE_URL"
+      ],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 3 + rule 4 — all candidates sit behind one in-house port, so the choice is only the deploy adapter. R2: 10GB free, zero egress, no upload cap (vs Supabase Storage 1GB / 50MB max, which a PDF workbook can exceed) and keeps the S3 API so it swaps without rewrite. EU jurisdictional restriction set.",
+      "rejected": ["supabase-storage", "amazon-s3"]
+    },
+    {
+      "category": "image-processing",
+      "deployment": "in-house",
+      "path": "apps/web/src/server/media/process.ts",
+      "adminRoute": "/admin/media",
+      "dbTables": ["media_asset"],
+      "rationale": "Rule 0 — forced by the requirement. Crop-to-ratio is generic; the palette treatment that makes a phone snapshot belong to the plum-and-gold world is bespoke and no vendor ships it (§12, §13). sharp/libvips, processed ONCE at upload.",
+      "rejected": ["cloudinary", "imgproxy"]
+    },
+    {
+      "category": "hosting-deploy",
+      "deployment": "vendor",
+      "vendor": "vercel",
+      "signupUrl": "https://vercel.com/signup",
+      "credentialsRequired": [
+        "VERCEL_TOKEN",
+        "VERCEL_ORG_ID",
+        "VERCEL_PROJECT_ID"
+      ],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 1 — §8 names it. §7's ISR-with-revalidation and §18's E2E-against-preview both depend on Vercel behaviour. Functions pinned to lhr1 beside the Neon London instance.",
+      "rejected": ["cloudflare-workers", "railway", "render", "fly"]
+    },
+    {
+      "category": "managed-postgres",
+      "deployment": "vendor",
+      "vendor": "neon",
+      "signupUrl": "https://console.neon.tech/signup",
+      "credentialsRequired": ["DATABASE_URL", "DIRECT_DATABASE_URL"],
+      "requiredBy": ["build-backend", "deploy"],
+      "requiredNow": true,
+      "rationale": "Rule 1 — brief-named. Rule 3 breaks the Neon/Supabase tie: Neon is plain Postgres pg_dump moves; Supabase's value is the bundle (RLS/Auth/Storage) this project deliberately does not use. Decisive: Neon's pooled/HTTP driver survives serverless connection churn. AWS eu-west-2 London.",
+      "rejected": ["supabase", "host-bundled-postgres"]
+    },
+    {
+      "category": "scheduled-jobs",
+      "deployment": "vendor",
+      "vendor": "vercel-cron",
+      "signupUrl": null,
+      "credentialsRequired": ["CRON_SECRET"],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 0 — in-house logic, platform trigger. §8 'Platform cron is sufficient; there is no queue worth running at this scale.' Route is ordinary authenticated HTTP so the trigger swaps to GH Actions or a Worker in one line.",
+      "rejected": ["cloudflare-workers-cron", "github-actions-schedule"]
+    },
+    {
+      "category": "spam-guard",
+      "deployment": "in-house",
+      "path": "apps/web/src/server/security/spam-guard.ts",
+      "dbTables": ["booking_request", "subscriber"],
+      "rationale": "Rule 0 + rule 2 — §13 demands a method not depending on eyesight or JS, which DISQUALIFIES every widget challenge (Turnstile recorded disqualified so this is not silently re-derived). Honeypot + signed time-trap + server validation + Postgres rate limiter + §14 double opt-in.",
+      "rejected": ["turnstile", "akismet"]
+    },
+    {
+      "category": "rate-limit-store",
+      "deployment": "in-house",
+      "path": "apps/web/src/server/security/rate-limit.ts",
+      "dbTables": ["rate_limit"],
+      "rationale": "Rule 0 — the DB is already in the request path and transactional. A rate_limit(key,window_start,count) upsert satisfies §13 without a second datastore, bill and failure mode. Swept by the same cron that expires holds.",
+      "rejected": ["upstash-redis", "vercel-waf"]
+    },
+    {
+      "category": "rich-text-block-editor",
+      "deployment": "in-house",
+      "path": "apps/web/src/components/admin/block-editor/",
+      "adminRoute": "/admin/content",
+      "dbTables": ["content_block", "content_block_draft"],
+      "rationale": "Rule 0 — structural, not preferential: one of §11's five block types (upcoming-offerings) is a LIVE DATA REFERENCE, not text, and needs a custom node in any rich-text model. §12 means the editor must not offer formatting control anyway.",
+      "rejected": ["tiptap", "lexical"]
+    },
+    {
+      "category": "monitoring",
+      "deployment": "vendor",
+      "vendor": "uptimerobot + healthchecks.io",
+      "signupUrl": "https://uptimerobot.com/signUp",
+      "credentialsRequired": ["HEALTHCHECKS_PING_URL"],
+      "requiredBy": ["deploy"],
+      "requiredNow": false,
+      "rationale": "Rule 1 — §8 is literal: 'platform error reporting plus uptime checks… No custom dashboards.' The one thing you cannot build is an external vantage point. Healthchecks.io added on a separate §13 signal: nothing else detects a cron that silently stopped firing — the expiry route pings it as a dead-man's switch.",
+      "rejected": ["sentry", "betterstack"]
+    }
+  ],
+  "projectGeneratedSecrets": [
+    {
+      "key": "SESSION_SECRET",
+      "how": "32-byte random — `openssl rand -base64 32`",
+      "why": "signs the admin session cookie"
+    },
+    {
+      "key": "FORM_TOKEN_SECRET",
+      "how": "32-byte random",
+      "why": "signs the spam-guard time-trap token"
+    },
+    {
+      "key": "UNSUBSCRIBE_TOKEN_SECRET",
+      "how": "32-byte random",
+      "why": "signs non-expiring unsubscribe links"
+    },
+    {
+      "key": "OWNER_EMAIL",
+      "how": "Marianne's admin sign-in address",
+      "why": "seeds the single owner account"
+    },
+    {
+      "key": "OWNER_PASSWORD_HASH",
+      "how": "argon2id via `pnpm owner:hash` — NEVER a plaintext password in env",
+      "why": "seeds the owner credential"
+    },
+    {
+      "key": "ENABLE_TEST_SEED",
+      "how": "1 in dev/E2E, unset or 0 in production",
+      "why": "gates /api/test/{seed,cleanup,seed-baseline}"
+    }
+  ],
+  "compliance": {
+    "gdpr": true,
+    "notes": [
+      "uk-gdpr — lawful basis differs per purpose: contract-steps for a BookingRequest, consent for the newsletter. Never bundled; a booking form may not carry an implied newsletter opt-in.",
+      "Residency is designed: Neon AWS eu-west-2 (London), Vercel functions lhr1, R2 EU jurisdictional restriction. Resend sending region eu-west-1 (Ireland) — but Resend ACCOUNT METADATA remains US-hosted, so a DPA is required and the privacy notice must name a US processor for email delivery.",
+      "pecr — consent explicit, unbundled, unticked, with evidence (source + confirmed_at) on the subscriber row. Every issue needs one-click unsubscribe, sender identity and a valid postal address. brief §20 Q10 (postal address) is UNRESOLVED and is a hard blocker on the first issue.",
+      "Suppression list is owned absolutely (§9); the gate sits in the broadcast port ahead of the vendor adapter so it survives a vendor swap. Unsubscribed addresses are retained indefinitely BECAUSE suppression is the control — document that basis or it reads as a breach.",
+      "Booking-request retention 24 months is RECOMMENDED but unconfirmed by the client — needs an operator decision before launch. Implement as a deletion sweep on the existing cron.",
+      "no-cookie-consent holds ONLY while the site ships no analytics/advertising cookies. The admin session cookie is strictly necessary and exempt. Any analytics vendor later makes a banner mandatory.",
+      "wcag-2-2-aa verified by COMPUTED contrast, not eyeballed — plum ink on blush pool, and #D8BFC9 secondary on the near-black plate. Admin controls count; the owner uses them too.",
+      "Unsubscribe tokens non-expiring (one-click must work from a two-year-old email); opt-in confirmation tokens expiring. Both signed server-side, neither guessable from an address."
+    ]
+  },
+  "ciProvider": "github-actions",
+  "warnings": [
+    "VERCEL HOBBY IS NON-COMMERCIAL ONLY — she sells sessions, so Hobby's terms exclude this. Budget Vercel Pro $20/mo. Not optional, and it unblocks two brief requirements: Hobby cron fires at most DAILY (useless for §13 hold expiry needing ~15-min granularity) and Hobby log retention is 1 hour vs 1 day on Pro, which is the whole of the 'platform error reporting' the monitoring pick leans on.",
+    "SELF-GENERATED SECRETS APPEAR IN NO INTEGRATION'S credentialsRequired — see projectGeneratedSecrets. Omitting them is the most likely way this architecture ships broken.",
+    "IMAGE UPLOAD IS WHERE THE SERVERLESS SHAPE BITES — Vercel request bodies cap ~4.5MB and a sharp resize of a phone photo is memory-hungry. Do NOT POST the file through a route handler: presigned R2 PUT → browser uploads direct → process route streams it back, re-encodes, writes derivatives, deletes the raw. Build it this way from task one; retrofitting after a 413 is far more expensive.",
+    "PRISMA + SERVERLESS — pooled string for DATABASE_URL, unpooled DIRECT_DATABASE_URL for migrations. PrismaClient as a module-scope singleton guarded on globalThis in dev or Next's HMR exhausts the connection ceiling within minutes of admin work.",
+    "RESEND FREE IS 100/DAY, NOT PER SEND — a newsletter past 100 confirmed subscribers silently fails at the cap. The broadcast port must chunk and record per-recipient send state so a partial issue resumes rather than double-sends.",
+    "SENTRY WAS DECLINED, NOT OVERLOOKED — §8's sentence is the smallest that satisfies the requirement and rule 1 says the brief wins. Reconsider the moment a bug outlives Vercel's log retention or the fix-loop needs a production stack trace. Author the captureError port NOW with a no-op adapter so adopting Sentry touches one file.",
+    "backend_framework IS NULL DELIBERATELY — every downstream stage (/skills-audit --scope=build, /pm, Dockerfile+compose emitters, dev.mjs) must take the SKIP path, not a default. If a compose.yml or apps/api Dockerfile appears in this scaffold, that is the bug-118 regression: delete it, do not fill it in.",
+    "PM MUST NOT SCHEDULE backend-builder — with no backend stack skill it has nothing to dispatch to and fails on lookup. Server-tier tasks belong to web-frontend-builder under react-next. Note it in tasks.yaml so a re-plan does not reintroduce it.",
+    "The newsletter postal address (brief §20 Q10) is unresolved and legally required before the first issue sends. Surface it at the gate-5 drop alongside the API keys — it blocks the same milestone."
+  ]
+}

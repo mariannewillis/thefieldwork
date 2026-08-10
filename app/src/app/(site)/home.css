@@ -1,0 +1,840 @@
+/* Home page styles.
+ *
+ * Lifted VERBATIM from docs/screens/webapp/home.html — the gate-4 approved
+ * composition. Do not restyle here: this file IS the approved design, and the
+ * screens are the reference it must keep matching (docs/DECISIONS-BUILD.md D-1).
+ *
+ * The only edit on extraction was image urls: the mockup referenced
+ * ../../../assets/images/new/*.png (6.7MB masters); the app serves optimised
+ * derivatives from /media/ (D-6).
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+         THE SWINGING WEDGE — variant of "the-lit-clearing-3" — regen 2
+
+         Signature move (unchanged): the clearing GROWS every beat and its
+         horizontal ANCHOR ALTERNATES left/right/left… down the page, settling
+         centred at the Crown. No two consecutive beats share an anchor side.
+
+         Regen-2 fixes: pools now force `width: 100%` up to their clamp() so
+         they actually RENDER at the intended size instead of shrink-wrapping
+         to content (this was silently breaking the monotonic-growth claim and
+         the plate-copy clearance on regen 1). On-plate primary text columns on
+         the two right-anchored plate-set beats (Sacral, Third eye) are bounded
+         by `left` + `right` (not width/max-width) against the SAME --pw custom
+         property the pool itself uses, so the two can never overlap — this is
+         a structural guarantee, not a guessed max-width.
+
+           1 Root         L   clamp(300px,32vw,380px)
+           2 Sacral       R   clamp(360px,38vw,460px)
+           3 Solar plexus L   clamp(420px,44vw,540px)
+           4 Heart        R   clamp(460px,50vw,620px)
+           5 Throat       L   clamp(520px,56vw,700px)
+           6 Third eye    R   clamp(580px,62vw,780px)
+           7 Products     L   clamp(660px,70vw,880px)
+           8 Crown        C   clamp(740px,80vw,940px)
+
+         Monotonic growth is GUARANTEED: every clamp's min, vw-fraction AND max
+         are each strictly greater than the beat before it, so the pointwise
+         clamp() value is strictly larger at every viewport width (proof +
+         reference-width table in the report).
+         ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --plum-900: #160712;
+  --plum-800: #260f20;
+  --blush: #fbf3f1;
+  --gold: #e9c87e;
+  --coral: #f5876f;
+  --magenta-deep: #c2187a;
+  --dim: #d8bfc9;
+
+  --gut: clamp(
+    22px,
+    5.4vw,
+    92px
+  ); /* the page spine every pool anchors to, from either edge */
+  --band: clamp(
+    34px,
+    3.4vw,
+    60px
+  ); /* clear band inside every pool boundary (>32px) */
+  --seam: clamp(
+    18px,
+    2.4vh,
+    34px
+  ); /* the near-black band that separates one plate from the next */
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--plum-900);
+  color: var(--blush);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* ── the plate: every pixel outside a clearing is a photograph ───────────── */
+.beat {
+  position: relative;
+  overflow: hidden;
+  background: var(--plum-900);
+  display: flex;
+  padding-left: var(--gut);
+  padding-right: var(--gut);
+}
+/* The inter-beat plum bands were removed at the operator's request
+         (2026-08-08). --seam survives only as the gap inside the Heart
+         diptych, which separates her portrait frame from the clearing frame. */
+.plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--ox, 50%) var(--oy, 50%);
+  transform: scale(var(--z, 1));
+  transform-origin: var(--tox, 50%) var(--toy, 50%);
+  filter: brightness(var(--b, 0.6)) saturate(1.14) contrast(1.05);
+}
+
+/* ── the pool: hard edge, no radius, no shadow, no border ───────────────── */
+.pool {
+  background: var(--blush);
+  color: var(--plum-900);
+  padding: var(--band);
+  position: relative;
+  z-index: 2;
+  width: 100%; /* forces the pool to actually REACH its max-width instead
+                         of shrink-wrapping to content (regen-2 root-cause fix) */
+}
+.pool a {
+  color: var(--magenta-deep);
+}
+
+/* ── the anchor system — F-1's fix: alternating sides, not a left rail ──── */
+.anchor-left {
+  justify-content: flex-start;
+}
+.anchor-right {
+  justify-content: flex-end;
+}
+
+/* ── type ramp — nothing below 17px anywhere on this page ────────────────── */
+.disp {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+.eyebrow,
+.small {
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 clamp(14px, 1.6vw, 24px);
+  hyphens: none;
+}
+.small {
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 400;
+  margin: 0;
+}
+.ink .eyebrow {
+  color: var(--magenta-deep);
+}
+.onplate .eyebrow,
+.onplate .small {
+  color: var(--gold);
+}
+p {
+  margin: 0;
+}
+.body {
+  font-size: 18px;
+  line-height: 1.62;
+  max-width: 66ch;
+  color: var(
+    --plum-900
+  ); /* explicit — single ink, no inherited ambiguity (fix #4) */
+}
+.body--dark {
+  color: var(--blush);
+}
+.note {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 56ch;
+}
+.ink .note {
+  color: var(--plum-800);
+}
+.plate-note {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--gold);
+  max-width: 46ch;
+  letter-spacing: 0.005em;
+}
+.plate-note--dim {
+  color: var(--dim);
+}
+.num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 17px;
+  color: var(--magenta-deep);
+  text-decoration: none;
+  border-bottom: 1px solid var(--magenta-deep);
+  padding-bottom: 2px;
+}
+.link:hover,
+.link:focus-visible {
+  color: var(--plum-900);
+  border-bottom-color: var(--plum-900);
+}
+
+/* on-plate PRIMARY content — used on the two right-anchored beats whose
+         main words are spoken from the room, not the light (F-2). Bounded by
+         left+right against the beat's own --pw (the pool's exact width), so
+         it structurally CANNOT run under the clearing (fix #1). */
+.onplate-primary {
+  position: absolute;
+  z-index: 2;
+  left: var(--gut);
+  right: calc(var(--gut) + var(--pw) + 44px);
+  max-width: 44ch; /* extra safety cap on very wide viewports */
+}
+.onplate-primary .lead {
+  font-family: var(--font-display), Georgia, serif;
+  color: var(--blush);
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1.16;
+  margin: 0 0 clamp(14px, 1.6vw, 22px);
+}
+.onplate-primary .obody {
+  color: var(--blush);
+  font-size: clamp(18px, 1.3vw, 20px);
+  line-height: 1.6;
+}
+
+/* ═══ SHARED — masthead (hero only) ══════════════════════════════════════ */
+.masthead__logo {
+  height: clamp(46px, 4.6vw, 74px);
+  width: auto;
+  display: block;
+}
+.masthead {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 2.4vw, 32px) var(--gut) 0;
+}
+.masthead img {
+  height: clamp(74px, 6.8vw, 104px);
+  width: auto;
+}
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 2vw, 34px);
+  align-items: center;
+  padding-top: 14px;
+}
+.nav a {
+  color: var(--blush);
+  text-decoration: none;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(251, 243, 241, 0.34);
+  padding-bottom: 3px;
+}
+.nav a:hover,
+.nav a:focus-visible {
+  border-bottom-color: var(--gold);
+  color: var(--gold);
+}
+.nav a.nav--now {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+/* ═══ 1 · ROOT — small, dense, floor-level, LEFT ═════════════════════════ */
+.hero {
+  align-items: flex-end;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-top: clamp(120px, 16vh, 200px);
+  padding-bottom: clamp(48px, 7vh, 96px);
+}
+.hero .pool {
+  max-width: clamp(300px, 32vw, 380px);
+}
+.hero__lines {
+  margin: 0 0 clamp(16px, 1.8vw, 24px);
+}
+.hero__lines span {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(23px, 3.2vw, 32px);
+  line-height: 1.15;
+  color: var(--plum-900);
+  hyphens: none;
+  text-wrap: balance;
+}
+.corner-note {
+  position: absolute;
+  right: var(--gut);
+  bottom: clamp(28px, 4vh, 48px);
+  max-width: 26ch;
+  text-align: right;
+}
+
+/* ═══ 2 · SACRAL — RIGHT pool, primary words on the plate, LEFT ═════════ */
+.sacral {
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  --pw: clamp(360px, 38vw, 460px);
+}
+.sacral .pool {
+  max-width: var(--pw);
+}
+.sacral__pool .disp {
+  font-size: clamp(19px, 1.7vw, 23px);
+  line-height: 1.3;
+  color: var(--plum-900);
+  margin: 0 0 clamp(12px, 1.2vw, 16px);
+}
+.sacral__onplate {
+  top: clamp(90px, 13vh, 160px);
+}
+.sacral__onplate .obody {
+  margin-top: clamp(12px, 1.4vw, 18px);
+}
+
+/* ═══ 3 · SOLAR PLEXUS — LEFT, type is the whole content of the light,
+         nothing else in the pool AND nothing else on the plate (fix #5) ═════ */
+.method {
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.method .pool {
+  max-width: clamp(420px, 44vw, 540px);
+}
+.method__pool span {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(36px, 6vw, 80px);
+  line-height: 1.03;
+  color: var(--plum-900);
+}
+.method__pool span:last-child {
+  color: var(--magenta-deep);
+}
+
+/* ═══ 4 · HEART — RIGHT, the guide enters. TWO SIDE-BY-SIDE FRAMES in
+         normal flex flow (not a shared background + anchored pool): overlap
+         with the clearing is now geometrically impossible, not estimated by
+         crop. The portrait fills its own frame edge to edge; the clearing
+         keeps its 620px growth-ladder width and gets its own (human-free)
+         plate. Flex siblings never overlap by construction. ═══════════════ */
+/* Her introduction now lives INSIDE "what this is not" — that plate is
+         her hands, so "the person whose hands these are" lands on the picture
+         that shows them. It sits right and low, clear of the hands themselves. */
+.throat .heart__pool {
+  flex: 0 0 clamp(420px, 44vw, 620px);
+  max-width: clamp(420px, 44vw, 620px);
+}
+.heart__avatar {
+  width: clamp(140px, 14vw, 200px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  display: block;
+  margin: 0 0 clamp(20px, 2.2vw, 32px);
+}
+.heart__lead {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(21px, 1.8vw, 27px);
+  line-height: 1.18;
+  color: var(--plum-900);
+  margin: 0 0 clamp(12px, 1.2vw, 18px);
+}
+.heart__cred {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--magenta-deep);
+  margin-top: clamp(16px, 1.8vw, 24px);
+  max-width: 46ch;
+}
+
+/* ═══ 5 · THROAT — LEFT; a short line stays outside the light, the
+         compliance paragraph sits INSIDE a clearing in single-ink plum (F-7,
+         fix #4). Only ONE marginal note survives on the whole page (fix #5). ═ */
+/* Operator change (2026-08-08): the clearing was removed from this beat.
+         The refusal is now spoken entirely on the plate — the headline at the
+         top left, the qualifying paragraph centred along the bottom. The plate
+         is dimmed at source (--b) rather than scrimmed, so the type stays
+         legible without an overlay the direction forbids. */
+.throat {
+  align-items: center;
+  justify-content: space-between;
+  min-height: 104vh;
+  min-height: 104svh;
+  flex-direction: row;
+  padding-top: clamp(110px, 14vh, 170px);
+  padding-bottom: clamp(64px, 9vh, 110px);
+  gap: clamp(32px, 5vw, 88px);
+}
+.throat__intro {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 60ch;
+}
+.throat__intro .disp {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(30px, 4.2vw, 60px);
+  line-height: 1.05;
+  color: var(--blush);
+  hyphens: none;
+}
+.throat__intro .disp span {
+  display: block;
+}
+
+/* ═══ THE TURN — the before-and-after, restored. On-plate column left,
+         the punchline in the clearing right. Its pool sits between the throat
+         beat (620) and the crown, so the widening still runs upward. ═══════ */
+.turn {
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-block: clamp(70px, 9vh, 130px);
+  gap: clamp(32px, 5vw, 88px);
+}
+.turn__col {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 46ch;
+}
+.turn .pool {
+  flex: 0 0 clamp(460px, 48vw, 680px);
+  max-width: clamp(460px, 48vw, 680px);
+}
+.turn__close {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(26px, 2.9vw, 42px);
+  line-height: 1.12;
+  color: var(--magenta-deep);
+  margin: 0;
+}
+
+/* ═══ PRODUCTS — LEFT, hairline ledger, no thumbnails inside the light
+         (fix #2 — was a 3-up card grid with dark photos inside the clearing,
+         which inverted the direction's own photo-outside/ink-inside rule) ═══ */
+/* Operator change (2026-08-08): this beat is FULL WIDTH and runs the three
+         kinds as three parallel columns, one row per offering, each row with its
+         own book control. The pool comes off the growth ladder and takes the
+         whole measure — a timetable wants width. It keeps the section's gutter,
+         so the plate still frames the light on all four sides. */
+.schedule {
+  display: block;
+  min-height: 100vh;
+  padding-block: clamp(70px, 9vh, 130px);
+}
+.schedule .pool {
+  max-width: 100%;
+}
+/* Operator change (2026-08-08): the intro is its own centred box above,
+         and each offering kind gets a box of its own — three separate clearings
+         with the plate showing between them, not three columns in one pool. */
+.schedule__head {
+  position: relative;
+  z-index: 2;
+  max-width: clamp(560px, 62vw, 860px);
+  margin: 0 auto clamp(30px, 3.6vw, 54px);
+  text-align: center;
+}
+.schedule__head .schedule__lead {
+  color: var(--blush);
+}
+.schedule__head .schedule__intro {
+  color: var(--dim);
+}
+.schedule__head .schedule__lead,
+.schedule__head .schedule__intro {
+  margin-left: auto;
+  margin-right: auto;
+}
+.schedule__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.2vw, 36px);
+  margin-top: clamp(18px, 2.2vw, 36px);
+  align-items: stretch;
+}
+.schedule-col {
+  padding: clamp(26px, 2.6vw, 40px);
+}
+.schedule-col .schedule-group__label {
+  margin-top: 0;
+}
+.schedule__lead {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(26px, 2.9vw, 42px);
+  line-height: 1.1;
+  color: var(--plum-900);
+  margin: 0 0 clamp(12px, 1.2vw, 18px);
+  max-width: 30ch;
+}
+.schedule__intro {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--plum-800);
+  max-width: 70ch;
+}
+
+.schedule-group__label {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1;
+  color: var(--plum-900);
+  margin: 0 0 clamp(6px, 0.8vw, 10px);
+}
+.ledger {
+  margin-top: clamp(6px, 0.8vw, 10px);
+}
+/* Rows are links as of 2026-08-09 (see scripts/_tmp-home-nav-fix.mjs):
+         the element was already display:block + color:inherit, so the only
+         visual delta an anchor element introduces is the underline, killed here. */
+a.ledger-row {
+  text-decoration: none;
+}
+a.ledger-row:hover .ledger-row__title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.ledger-row {
+  display: block;
+  padding: clamp(11px, 1.2vw, 15px) 0;
+  border-top: 1px solid rgba(38, 15, 32, 0.22);
+  color: inherit;
+}
+/* Operator change (2026-08-08): date left, price + unit right, on ONE
+         baseline — the book controls are gone and the row is tighter. */
+.ledger-row__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+.ledger-row__date {
+  color: var(--plum-800);
+  white-space: nowrap;
+}
+.ledger-row__title {
+  font-size: clamp(19px, 1.5vw, 24px);
+  line-height: 1.2;
+  color: var(--plum-900);
+  margin: 0 0 4px;
+}
+.ledger-row:hover .ledger-row__title,
+.ledger-row:focus-visible .ledger-row__title {
+  color: var(--magenta-deep);
+}
+.ledger-row__meta {
+  color: var(--plum-800);
+  line-height: 1.45;
+}
+.ledger-row__price {
+  text-align: right;
+  white-space: nowrap;
+}
+.ledger-row__price .amt {
+  font-family: var(--font-display), Georgia, serif;
+  display: inline;
+  font-size: clamp(20px, 1.7vw, 26px);
+  line-height: 1;
+  color: var(--plum-900);
+  margin: 0 0 3px;
+  display: block;
+}
+
+/* ═══ 8 · CROWN — the swing rests, CENTRED, sized to its one sentence,
+         the footer dissolved into the same plate (F-5 / F-6 / F-10, fix #3) ═ */
+.crown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+  /* Operator change (2026-08-08): the ask is a PURE WHITE section — no
+           plate, no frame. The light has opened past all four edges. */
+  background: var(--blush);
+  color: var(--plum-900);
+  min-height: auto;
+  padding: clamp(90px, 11vh, 150px) var(--gut) 0;
+  gap: clamp(40px, 5.6vh, 76px);
+}
+/* Operator change (2026-08-08): the CTA panel carries her altar
+         photograph as its own ground, at 80% width. The picture is dimmed at
+         source via the page's existing plate idiom (an <img> with a brightness
+         filter) rather than a scrim laid over it. */
+.crown__pool {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: clamp(620px, 68vw, 900px);
+  background: transparent;
+  color: var(--plum-900);
+  padding: 0 0 clamp(48px, 7vh, 96px);
+  text-align: center;
+}
+.crown__ask {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(34px, 6vw, 80px);
+  line-height: 1.05;
+  color: var(--plum-900);
+  margin: 0 auto clamp(24px, 2.8vw, 40px);
+  max-width: 20ch;
+}
+.cta {
+  display: inline-block;
+  background: var(--magenta-deep);
+  color: var(--blush);
+  font-family: var(--font-body), sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 19px 40px;
+  text-decoration: none;
+  border: 0;
+}
+.cta:hover {
+  background: var(--plum-900);
+}
+
+/* ── the footer, WHITE at the operator's request (2026-08-08). It was
+         previously dissolved into the Crown's plate; it is now its own blush
+         field, full width, with the plate framing it via the section gutter. ── */
+.crown__foot {
+  position: relative;
+  z-index: 2;
+  width: auto;
+  max-width: none;
+  overflow: hidden;
+  background: var(--plum-900);
+  color: var(--blush);
+  padding: clamp(96px, 13vh, 170px) var(--gut);
+  min-height: 550px;
+  align-content: center;
+  margin-top: 0;
+  align-self: stretch;
+  margin-left: calc(-1 * var(--gut));
+  margin-right: calc(-1 * var(--gut));
+  margin-bottom: calc(-1 * clamp(48px, 6vh, 76px));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+/* the altar carries the footer, cropped to the row of saints' cards */
+.crown__foot-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 77%;
+  filter: brightness(0.38) saturate(1.06);
+  z-index: 0;
+}
+.crown__foot > :not(.crown__foot-plate) {
+  position: relative;
+  z-index: 1;
+}
+.crown__foot__brand img {
+  height: clamp(52px, 4.6vw, 70px);
+  width: auto;
+}
+.crown__foot__brand {
+  display: inline-block;
+}
+.crown__foot__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+}
+.crown__foot h3 {
+  font-size: 17px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+.crown__foot ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.crown__foot li {
+  margin-bottom: 9px;
+}
+.crown__foot a {
+  color: var(--blush);
+  text-decoration: none;
+  font-size: 17px;
+  border-bottom: 1px solid rgba(251, 243, 241, 0.34);
+  padding-bottom: 2px;
+}
+.crown__foot a:hover,
+.crown__foot a:focus-visible {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.crown__foot__legal {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 62ch;
+  color: var(--dim);
+  margin-top: clamp(22px, 3vw, 40px);
+}
+
+/* ── focus visibility (3:1+ against every ground it lands on) ───────────── */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+.pool a:focus-visible {
+  outline-color: var(--plum-900);
+}
+.crown__foot a:focus-visible {
+  outline-color: var(--gold);
+}
+
+/* ── the whole motion budget: one 24s drift on the first plate only ─────── */
+@keyframes clearing-drift {
+  from {
+    transform: scale(1.045);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+.hero .plate {
+  transform: scale(1.045);
+  animation: clearing-drift 24s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero .plate {
+    animation: none;
+    transform: scale(1.045);
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── narrow viewports: every pool collapses to full width, alternation
+         yields to a single stacked left column (the swing settles for touch) ── */
+@media (max-width: 760px) {
+  .anchor-right {
+    justify-content: flex-start;
+  }
+  .hero .pool,
+  .sacral .pool,
+  .method .pool,
+  .schedule .pool {
+    max-width: 100%;
+  }
+  .hero {
+    padding-top: clamp(150px, 30vh, 220px);
+  }
+  .corner-note {
+    position: static;
+    text-align: left;
+    margin-top: 18px;
+    max-width: none;
+  }
+  .onplate-primary {
+    position: static;
+    left: auto;
+    right: auto;
+    max-width: none;
+    margin-bottom: 18px;
+  }
+  .throat {
+    flex-direction: column;
+  }
+  .ledger-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .ledger-row__price {
+    text-align: left;
+  }
+  .masthead {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .crown {
+    align-items: stretch;
+  }
+  .crown__foot {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .hero__lines span {
+    font-size: clamp(22px, 7.2vw, 27px);
+  }
+  .method__pool span {
+    font-size: clamp(32px, 12vw, 46px);
+  }
+}
+
+/* cta-contrast-fix: the in-pool link rule (.pool a) outranks .cta and
+         would otherwise paint the button's label in its own background
+         colour. This restores the label. */
+.pool a.cta,
+.crown a.cta,
+a.cta {
+  color: var(--blush);
+  text-decoration: none;
+}

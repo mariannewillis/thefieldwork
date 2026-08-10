@@ -1,0 +1,214 @@
+{
+  "projectName": "thefieldwork-v5",
+  "detectedPlatforms": ["webapp", "admin"],
+  "targets": [
+    {
+      "platformId": "webapp",
+      "appId": "thefieldwork-webapp",
+      "screenCount": 17
+    },
+    {
+      "platformId": "admin",
+      "appId": "thefieldwork-admin",
+      "screenCount": 16
+    }
+  ],
+  "personas": [
+    {
+      "id": "the-practitioner",
+      "name": "The Practitioner (Owner)",
+      "primaryGoal": "Fill her calendar without spending evenings on admin — publish a dated, priced offering and reply to whoever asks, unaided."
+    },
+    {
+      "id": "the-carrier",
+      "name": "The Carrier",
+      "primaryGoal": "Work out whether this is credible and whether it will be embarrassing — specifically, whether she must undress or be touched."
+    },
+    {
+      "id": "the-returner",
+      "name": "The Returner",
+      "primaryGoal": "Find what's on and request a place in under a minute."
+    }
+  ],
+  "integrations": [
+    "hosting-deploy",
+    "managed-postgres",
+    "object-storage",
+    "transactional-email",
+    "broadcast-email",
+    "sending-domain-authentication",
+    "image-processing",
+    "scheduled-jobs",
+    "spam-guard",
+    "error-reporting-uptime",
+    "rich-text-block-editor",
+    "content-cms",
+    "auth",
+    "email-template-rendering",
+    "rate-limit-store"
+  ],
+  "compliance": [
+    "uk-gdpr",
+    "pecr-marketing-email-consent",
+    "pecr-double-opt-in",
+    "cap-code-asa-health-claims",
+    "equality-act-2010",
+    "wcag-2-2-aa",
+    "no-cookie-consent-required-v1"
+  ],
+  "skillsNeeded": [
+    "scheduling-availability-subtraction",
+    "double-opt-in-newsletter",
+    "branded-email-template-rendering",
+    "signed-token-links",
+    "pdf-safe-serving",
+    "draft-publish-content-model",
+    "wcag-computed-contrast-verification"
+  ],
+  "assetMode": "standard",
+  "styleCount": 10,
+  "briefClass": "consumer-marketing",
+  "domain": "solo wellness practitioner — aura-healing practice site plus single-owner admin",
+  "visualAmbition": "restrained",
+  "marketingAmbition": "embrace",
+  "mcpHints": [
+    "icons8",
+    "unsplash",
+    "playwright",
+    "chrome-devtools",
+    "image-generator"
+  ],
+  "openQuestions": [
+    "brief §20 — The practitioner's name and history are UNVERIFIED. 'Marianne', 'fifteen years practising, twelve teaching' were used during brief authoring and never confirmed with the client. Beat 4 and the about page depend on them.",
+    "brief §20 — Default working hours, session buffer, minimum lead time and booking horizon need the client's input; ship plausible defaults and let her correct them.",
+    "brief §20 — Hold duration (48h working default) is a guess trading her response time against a visitor's patience.",
+    "brief §20 — Newsletter cadence must be stated in the consent wording, so it becomes a promise she has to keep.",
+    "brief §20 — Whether she has an existing contact list. It cannot be imported (§14); those people must be invited to opt in.",
+    "brief §20 — A postal or contactable business address is legally required in the newsletter footer; a sole practitioner working from home may not want her home address published.",
+    "brief §20 — Venue: modelled as per-event (the safe superset); confirm whether workshops use a fixed venue.",
+    "brief §20 — Retention period for booking requests (24 months recommended) needs client agreement.",
+    "brief §20 — Cancellation and refund terms unspecified; needed before Milestone 4 and arguably before launch as a published policy.",
+    "webapp/coverage.md — Public header/footer composition is not specified in the brief; inferred from competitors.md and cited. A design decision for the creative director and Gate 2.",
+    "admin/coverage.md — The admin shell (nav model, chrome, information hierarchy) is unspecified; inferred from Acuity + Mailchimp with two brief-grounded departures recorded.",
+    "assets.md — The newsletter template needs a RASTER logo: email clients strip SVG, and §12 makes the template non-editable by the owner. Only six SVGs and one 425x357 PNG are supplied.",
+    "assets.md — No display face may be text-subsetted, because the owner edits every heading; a subsetted display font would render her new words as tofu.",
+    "integrations-options.md — Vercel Hobby is non-commercial-only, and Pro is also the only tier with better-than-daily cron; the licence question and the hold-expiry job are ONE decision.",
+    "integrations-options.md — §13's 'no eyesight, no JavaScript' spam-guard clause disqualifies the entire CAPTCHA market including Turnstile. Menu is Akismet (costs a subprocessor disclosure) or a honeypot + server-rendered form timestamp (no third party, weaker against a targeted attacker).",
+    "competitors.md — 2026 pricing for Acuity, Fresha and Mailchimp is third-party-sourced, not from vendor pricing pages; re-verify before repeating any figure to the client.",
+    "styles.md — Style 5 (Nightfield Terminal) is the credibility pole and will score WORST on the client's own 20-second affective success test. Flagged by its author rather than sold evenly.",
+    "styles.md — Style 3 (Long Dusk) has two ZONE-SCOPED tokens: gold #E9C87E dies as the ground ascends (11.68:1 at root, 1.47:1 at crown) and #C2187A is a fill-only colour in the root zone (3.32:1 as type). An implementation treating the palette as position-independent ships an AA failure no eye-review catches.",
+    "inspirations.md — Cormorant Light on cream is simultaneously brand-native AND the measured wellness preset; the most 'on-brand' typographic move is also the most generic."
+  ],
+  "styles": [
+    {
+      "name": "Field Emanation",
+      "rationale": "The practitioner's work happens in low light and stillness, and the client's own success test is affective — a visitor should feel their aura lifted; this direction spends its entire budget on that one felt quality by rendering the logo's radiating field as the page itself, which is the only direction where the brand mark and the composition are the same idea.",
+      "differentiationMove": "The category converges on a cream ground with one warm earth accent (measured: 5 of 6 sites; `#E1CCBE`, `#AB8041`, `#BFAD99`) and uses motion only for scroll fade-ins and testimonial carousels. This direction takes the unoccupied night-side ground and makes the _emanation_ — not a fade-in — the only motion on the page, at a 12-second drift the eye barely registers. Against the one dark exemplar (Othership `#372338`) it differentiates exactly where competitors.md says the room is: a gold→magenta radial emanation instead of an acid-yellow flat accent, and stillness instead of Webflow motion.",
+      "ground": "dark",
+      "dials": {
+        "design_variance": 4,
+        "motion_intensity": 4,
+        "visual_density": 3
+      }
+    },
+    {
+      "name": "Consulting Room",
+      "rationale": "The Carrier persona's day is broken by _\"a price that only appears after you make contact\"_ and by being asked to believe something before being told what happens; this is the direction that answers every practical question in the most literal, least decorated way available, which is the fastest route to credibility for a visitor who half-expects to be embarrassed.",
+      "differentiationMove": "Blossom Reiki has the right content and lost it under an off-the-shelf WordPress theme (_\"Spa and Salon\"_ by Rara Themes, sold for _\"spa, salons, beauty, care, girly, hair…\"_) whose olive-lime `#7FA200` register was inherited from a beauty parlour, with the reassurance buried two clicks deep in an FAQ. This direction takes her answers and gives them a composition of their own: Beat 1's three plain sentences set at display size in the first viewport, with no hero photograph above them to scroll past. It rejects the Squarespace order at its very first move — the category always opens with a full-bleed soft-focus photograph; this opens with a sentence.",
+      "ground": "light",
+      "dials": {
+        "design_variance": 2,
+        "motion_intensity": 2,
+        "visual_density": 5
+      }
+    },
+    {
+      "name": "Long Dusk",
+      "rationale": "The seven beats are named for the chakras and ascend root→crown _\"so the page ends in light\"_ (brief §20) — this is the only direction where that requirement is carried by the page's own material rather than illustrated by an icon or a colour band, which matters because the brief explicitly warns that the rainbow chakra chart is the measured category cliché.",
+      "differentiationMove": "The category ships a single flat ground for the entire page — cream in 5 of 6 measured sites — and expresses progression, if at all, through section dividers. This direction makes the ground the narrative: the visitor physically travels from the darkest point of the brand to the lightest across one scroll, arriving at the CTA at the page's brightest moment. It also refuses the brief's own most obvious trap: **no chakra hue appears as a band**; the only chroma is the client's own two-stop gold→magenta axis, and the crossover seam was contrast-computed rather than kept clear of type.",
+      "ground": "split",
+      "dials": {
+        "design_variance": 6,
+        "motion_intensity": 3,
+        "visual_density": 4
+      }
+    },
+    {
+      "name": "Plain Type",
+      "rationale": "This category is _\"full of overclaim\"_ (brief §1, principle 3) and the practitioner's differentiator is honesty — a direction with no decoration at all cannot overclaim visually, so every claim on the page has to be earned by a sentence, which is exactly the trade the brief's third principle asks for.",
+      "differentiationMove": "Every measured competitor opens with a photograph — _\"full-bleed soft-focus hero photograph → short mission statement → three-up service cards\"_ is Squarespace's own prescribed order across Jenani / Anza / Clune / Aurora / Clove, and 5 of 6 live sites follow a variant of it. This direction has **no hero image at all**: the first viewport is three sentences at 88px answering the question nobody in the researched set answers on the homepage (measured: 0 of 6 contain _clothed_, _undress_, _touch_, _hands-off_ or _believe_). It also refuses the typographic preset from both ends — a plain wide grotesk for display and a warm serif for body is the exact inverse of the category's ultralight-serif-display-over-neutral-grotesk-body.",
+      "ground": "light",
+      "dials": {
+        "design_variance": 7,
+        "motion_intensity": 1,
+        "visual_density": 6
+      }
+    },
+    {
+      "name": "Nightfield Terminal",
+      "rationale": "The practitioner will _live_ in the admin calendar (brief §11) and her success metric is measured in seconds — block a personal afternoon in under 30, publish a workshop in under 5 minutes — so this is the only direction that lets the working surface set the language and asks the public site to inherit it, which buys operator independence at the cost of some public warmth.",
+      "differentiationMove": "The realistic incumbent is a visual stitch — Squarespace plus Acuity plus Eventbrite plus Mailchimp, each with its own type, colour, corner radius and login, and `competitors.md` measured the seam directly (Blossom's Calendly popup and Re:Mind's Momence embed are both described as visual foreign bodies). This direction's differentiation is that **there is no seam**: the slot picker, the calendar and the newsletter template are the same design system as the landing page, in a category where owning the slot picker is a visible quality difference. Against Othership it takes a _near-black_, not plum, and a technical grotesk rather than a condensed display face.",
+      "ground": "dark",
+      "dials": {
+        "design_variance": 3,
+        "motion_intensity": 2,
+        "visual_density": 8
+      }
+    },
+    {
+      "name": "Concentric",
+      "rationale": "The client already owns the strongest possible structural idea and it is sitting unused inside her own logo — concentric light running outward from a centre — and this is the only direction that treats the mark as a **layout system** rather than as something to place in a header, which means the brand is legible even in a screenshot with the logo cropped out.",
+      "differentiationMove": "The category's composition is a vertical stack of full-width strips — Wix strips at Aura Quartz, Elementor blocks at Omnes, Squarespace sections everywhere else — and its accent is one flat warm earth tone. This direction is built on circular geometry with no full-width strip anywhere and reserves the gold strictly for arcs, which is possible only because the arcs carry no information. It is also the direction that most visibly rejects the three-up service-card grid that Squarespace prescribes and every measured competitor ships.",
+      "ground": "light",
+      "dials": {
+        "design_variance": 9,
+        "motion_intensity": 5,
+        "visual_density": 2
+      }
+    },
+    {
+      "name": "Ivory & Ink",
+      "rationale": "The practitioner is asking a sceptical adult to spend real money on something with no clinical evidence base, and the fastest non-verbal credibility signal available to her is editorial seriousness — a page that looks like a magazine feature reads as considered in a way that a spa brochure cannot, which is the right trade for a Carrier who is trying to tell a serious practitioner from a hobbyist.",
+      "differentiationMove": "`competitors.md` names the typographic default precisely — _\"a light-to-ultralight high-contrast serif display over a neutral grotesk body\"_, concretely PP Editorial New Ultralight (Re:Mind), Marcellus (Blossom), Raleway (Sahana) — and warns that reaching for it _\"is now indistinguishable from adopting a preset.\"_ This direction reaches for the same _class_ of face and rejects the three things that make it a preset: the ultralight weight, the airy float, and the warm metallic accent. It sets the serif at Regular and enormous, packs it hard against its body copy, and **removes gold from the palette entirely** — the accent measured on every competitor in the set (`#E1CCBE`, `#AB8041`, `#BFAD99`, `#EFE3B8`) is the one colour this direction refuses to own. What is left is ink, ivory, and one magenta price. - Offered **once**, per the explicit constraint that naming this preset as a deliberate refined take is legitimate and repeating it is the preset.",
+      "ground": "light",
+      "dials": {
+        "design_variance": 5,
+        "motion_intensity": 2,
+        "visual_density": 5
+      }
+    },
+    {
+      "name": "Warm Ledger",
+      "rationale": "The brief's load-bearing distinction is _\"the admin is not a CMS — configurable content, fixed design\"_, and the owner is non-technical and _\"not comfortable with anything that looks like software\"_ — a single structure she learns once and then recognises on the public site, in the admin, and in the newsletter template is the most direct design expression of that requirement, and it is why this direction is the strongest candidate on the §15 owner-independence metric.",
+      "differentiationMove": "The category's practitioner sites are single-column vertical stacks with a top nav; the third-party tools bolted onto them (Calendly, Momence, Acuity, Mailchimp) each arrive with their own type, colour, radius and motion, which `competitors.md` measured as a visible foreign body every time. This direction refuses both the single-column stack _and_ the seam: the persistent dark rail is a composition no measured competitor uses, and it is deliberately the _same_ composition that carries the newsletter and the admin. Where every competitor has three visual worlds, this has one. - It is also the only direction that resolves the brand's central colour tension structurally rather than by care — a gold that fails on light and a magenta that fails on dark are given a zone each, and the failure becomes impossible rather than merely avoided.",
+      "ground": "duotone",
+      "dials": {
+        "design_variance": 4,
+        "motion_intensity": 3,
+        "visual_density": 6
+      }
+    },
+    {
+      "name": "Low Amber",
+      "rationale": "The brief's voice is _\"warm, unhurried, quietly certain\"_, and of those three words the hardest to design is **certain** — certainty reads as the absence of persuasion, so this direction removes every persuasive device it can (no gradient, no second colour, no elevation, no motion) and lets the copy and the photography carry the whole page, which is the strongest available answer to a category that _\"either overclaims or hides behind jargon.\"_",
+      "differentiationMove": "The category's palette default is a cream ground with exactly one warm accent; this inverts the _ground_ while keeping the single-accent discipline, so it reads as the same restraint the category aspires to, executed in the register the brief actually asks for. Against Othership — whose `#372338` is the nearest neighbour to this brief's plum — it differentiates on three measured axes at once: **not plum** (a warm brown), **not condensed** (a textured book serif), and **not acid** (`#DBF572` replaced by the brand's own gold). And it is the only direction that treats the gold→magenta gradient as something to withhold, which `competitors.md` supports: the gradient is an unoccupied gap, and a gap is an opportunity to be spent deliberately, not a mandate.",
+      "ground": "dark",
+      "dials": {
+        "design_variance": 3,
+        "motion_intensity": 1,
+        "visual_density": 7
+      }
+    },
+    {
+      "name": "Plate Study",
+      "rationale": "Six art-directed plates is an unusually strong asset for a sole practitioner — most of the measured category is running stock or phone photography — and this is the only direction that spends the whole design budget on them, which matters because the brief's own note says `aura-two-people` _\"does the reassurance work faster than the copy will\"_, and a photo-essay structure is the composition that lets that be literally true.",
+      "differentiationMove": "`competitors.md` measured the imagery default as _\"soft-focus interiors, crystals, hands, candles, and low-saturation photography of empty rooms\"_ — photography used as atmosphere, placed behind a headline, with nothing asked of it. This direction inverts that on two axes at once: every plate is **captioned**, in sequence, so the photography makes a claim rather than setting a mood; and the ground is a **pale plum** rather than the cream that 5 of 6 measured sites ship, which keeps the light direction inside the brand's own hue instead of borrowing the category's. It is the light-ground counterpart to the chromatic-gap play — nobody in the set is on a plum ground at either end of the value scale. - The one direction where the brief's `MediaAsset` and auto-processing requirement (§12 — _\"uploads are cropped to the target ratio and given a palette treatment\"_) is load-bearing rather than defensive: a photo essay is exactly where one unprocessed phone snapshot would do the most damage.",
+      "ground": "light",
+      "dials": {
+        "design_variance": 6,
+        "motion_intensity": 3,
+        "visual_density": 3
+      }
+    }
+  ]
+}

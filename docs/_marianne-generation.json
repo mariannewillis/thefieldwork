@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-08-08T13:08:17.062Z",
+  "model": "nano_banana_2",
+  "direction": "the-lit-clearing",
+  "conditionedOn": "her supplied shots + TheFileWork.png",
+  "results": [
+    {
+      "id": "marianne-hands-at-the-edge",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-hands-at-the-edge.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 16.39.40 (1).jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    },
+    {
+      "id": "marianne-portrait-in-the-light",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-portrait-in-the-light.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 17.09.54.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "marianne-the-clearing",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-the-clearing.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.39.40.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "marianne-room-aglow",
+      "aspect": "16:9",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-room-aglow.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.46.47.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "marianne-altar-light",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-altar-light.png",
+      "refs": ["WhatsApp Image 2026-08-07 at 16.46.13.jpeg", "TheFileWork.png"],
+      "credits": 2
+    },
+    {
+      "id": "marianne-in-her-practice",
+      "aspect": "3:2",
+      "file": "C:\\Development\\ps\\claude\\claude_\\agentflow_phase3\\projects\\thefieldwork-v5\\assets\\images\\new\\marianne-in-her-practice.png",
+      "refs": [
+        "WhatsApp Image 2026-08-07 at 17.10.10.jpeg",
+        "WhatsApp Image 2026-08-07 at 16.45.48.jpeg",
+        "TheFileWork.png"
+      ],
+      "credits": 2
+    }
+  ]
+}

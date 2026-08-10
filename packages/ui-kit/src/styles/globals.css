@@ -1,0 +1,154 @@
+/* @repo/ui-kit globals.css — required header (bug-077). Do not remove or
+   reorder these three directives; production consumers' Tailwind utility
+   classes silently compile to zero CSS without them. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./fonts.css";
+@import "../tokens/tokens.css";
+
+/* ─────────── Reset + base typography below ───────────
+   the-lit-clearing is DARK-DEFAULT — see src/tokens/README.md. There is no
+   light-theme flip; :root already carries the dark values via tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+p {
+  margin: 0;
+}
+
+/* the direction's excludes ban border-radius + box-shadow on every non-pool,
+   non-avatar element (see tokens/README.md §Shape law). No global reset rule
+   forces this — it is a per-component contract kit consumers must honor,
+   not a CSS reset default (a reset that zeroed radius/shadow globally would
+   silently break a future non-this-direction consumer of the same kit code
+   path). */
+
+/* ── visible focus, everywhere, on both plate and pool grounds ──────────── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-secondary-500);
+  outline-offset: 3px;
+}
+
+/* inside a pool, the gold plate-only focus ring would fail the palette's
+   context lock (README §The palette is context-locked) — swap to plum ink,
+   matching the approved mockup's `.pool a:focus-visible` rule exactly. */
+[data-pool] :focus-visible,
+.pool :focus-visible,
+/* The composed screens express a pool with the KIT UTILITY, not the mockup's
+   `.pool` class — 31 of 33 screens carry `bg-pool-surface` and no `.pool`
+   token, so the override above never fired and keyboard focus rendered the
+   gold plate ring on blush at 1.47:1: a direct breach of the palette's own
+   context lock, on every pool in the product. Caught by /visual-review
+   (states.focus-visible). Match the utility too. */
+.bg-pool-surface :focus-visible {
+  outline-color: var(--color-text-inverted);
+}
+
+/* ── scrollbar, tuned to the dark ground ─────────────────────────────────── */
+::selection {
+  background-color: var(--color-accent-500);
+  color: var(--color-text-inverted);
+}
+
+/* ── reduced motion — the whole system already runs near-zero motion; this
+   removes the one ambient plate drift + all micro-transitions ───────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── The system's entire motion budget (motion_intensity 3) ──────────────
+   One 24s drift on the hero plate, authored in the gate-2-selected direction
+   (the-lit-clearing-3-1) and carried into docs/screens/webapp/home.html. It is
+   recorded here because the kit — not the page — is the canonical home for the
+   system's motion, and because /screens D9 derives its allowed keyframe set
+   from the kit + approved preview. Screens must NOT author their own drift;
+   two already tried (service-detail-drift, workshop-detail-drift) and were
+   rejected. This is the one. Every use pairs with a prefers-reduced-motion
+   fallback that keeps the composition whole (craft condition C-7). */
+@keyframes clearing-drift {
+  from {
+    transform: scale(1.045);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+/* ── safe-area insets ────────────────────────────────────────────────────────
+   /visual-review flagged mobile.safe-area on 15 of 33 screens: the marketing
+   pages pin an absolute masthead to the top of a min-h-[100svh] hero, and the
+   admin shell pins a sticky utility bar — none reserved the notch or the
+   home-indicator, so on a real handset the wordmark sits under the sensor
+   housing. Fixed centrally rather than per screen: these are chrome elements
+   the whole product shares. env() resolves to 0px wherever there is no inset,
+   so this is inert on desktop and in the review renders. */
+header,
+nav[aria-label],
+.masthead {
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+body > footer,
+.crown__foot {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}

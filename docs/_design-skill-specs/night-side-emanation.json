@@ -1,0 +1,34 @@
+{
+  "name": "night-side-emanation",
+  "skillClass": "identity",
+  "precedence": "supersede-generic",
+  "appliesTo": ["palette", "hero", "background", "imagery", "page-ground"],
+  "activationKeywords": [
+    "emanation",
+    "aura",
+    "field",
+    "gradient",
+    "night",
+    "plum",
+    "gold"
+  ],
+  "citations": [
+    {
+      "source": "asset",
+      "ref": "assets/brand/README.md — the mark is a radiating field, concentric light running outward from a centre; eleven sampled colours with computed contrast, gold #E9C87E measuring 10.89:1 on plum-800 and 1.47:1 on blush"
+    },
+    {
+      "source": "brief",
+      "ref": "brief.md §2 — 'Night-side rather than daylight — the work happens in low light, in stillness, and the site should feel like that room rather than like a spa brochure.'"
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md — measured: 5 of 6 researched sites are near-white/cream with exactly one warm earth or metallic accent (#E1CCBE, #AB8041, #BFAD99, #EFE3B8, #7FA200). Dark grounds: 1 of 6, and that one (Othership #372338) is a US bathhouse, not a UK healer. NOT ONE competitor uses magenta or a gold→magenta gradient."
+    },
+    {
+      "source": "differentiation-move",
+      "ref": "styles.md Style 1 (Field Emanation) — 'a gold→magenta radial emanation instead of an acid-yellow flat accent, and stillness instead of Webflow motion'"
+    }
+  ],
+  "body": "The brand is an emanating field, so light is the subject, not the decoration. When this project uses its gradient it uses it as EMANATION — light running outward from a centre or an edge, with real falloff — never as a button fill, a diagonal banner, or a rainbow band. One emanation per screen, placed where the eye should rest; two competing centres cancel each other. Register is night-side: low light, stillness, an adult in a quiet room. Explicitly NOT the category's cream-and-terracotta spa brochure, and explicitly NOT lavender, mandalas, crystals, chakra wheels, or soft-focus serenity. Where the direction is light-ground rather than dark, night-side still governs the FEELING — still, low-lit, unhurried — rather than the literal value. HARD CONSTRAINT: the palette is position-dependent and computationally verified. Gold is a text colour on dark (10.89:1 on plum-800) and a non-text colour on light (1.47:1 on blush). Magenta-deep #C2187A inverts: text-safe on light (5.18:1), fill-only on dark (3.10:1). Never place a mid-gradient stop as body text without computing it first — this exact failure is invisible to anyone who already knows what the text says, and it has shipped on this project before."
+}

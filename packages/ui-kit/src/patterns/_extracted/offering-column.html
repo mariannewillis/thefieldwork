@@ -1,0 +1,60 @@
+<!--
+  Pattern: offering-column (project-specific — a full offering-group pool)
+  Extracted from: home.html #dates .schedule-col
+  Shape: one pool (Card default: rounded-none, no shadow, blush bg, plum
+  ink), a group label at the top in display serif, then a ledger of
+  offering-row instances (see offering-row.html) stacked with no additional
+  gap beyond each row's own top hairline.
+-->
+<div
+  data-pattern="offering-column"
+  class="bg-pool-surface text-pool-text px-6 py-8 sm:px-8 sm:py-10"
+>
+  <p class="font-display text-3xl leading-none text-pool-text mb-1.5">
+    Courses
+  </p>
+  <div class="mt-1.5">
+    <!-- repeat offering-row per item; two shown as reference -->
+    <div class="border-t border-pool-border/[.22] py-3">
+      <p class="flex items-baseline justify-between gap-2.5 mb-1">
+        <span
+          class="whitespace-nowrap text-sm text-pool-text-secondary font-mono tabular-nums"
+          >15 Sep&ndash;20 Oct</span
+        >
+        <span
+          class="block font-display text-2xl leading-none text-pool-text tabular-nums"
+          >&pound;480</span
+        >
+      </p>
+      <p class="font-display text-lg leading-tight text-pool-text mb-1">
+        Aura Healing: Foundations
+      </p>
+      <p class="text-sm leading-snug text-pool-text-secondary">
+        Six evenings, 19:00&ndash;21:00, Tuesdays &middot; Garden room &middot;
+        6 places
+      </p>
+    </div>
+    <div class="border-t border-pool-border/[.22] py-3">
+      <p class="flex items-baseline justify-between gap-2.5 mb-1">
+        <span
+          class="whitespace-nowrap text-sm text-pool-text-secondary font-mono tabular-nums"
+          >7 Nov&ndash;12 Dec</span
+        >
+        <span
+          class="block font-display text-2xl leading-none text-pool-text tabular-nums"
+          >&pound;650</span
+        >
+      </p>
+      <p class="font-display text-lg leading-tight text-pool-text mb-1">
+        Aura Healing: Practitioner Pathway
+      </p>
+      <p class="text-sm leading-snug text-pool-text-secondary">
+        Six Saturdays, 10:00&ndash;16:00 &middot; Garden room &middot; 6 places
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Three offering-columns compose the full "dates" section, laid out as a
+     3-column grid on desktop, single column on narrow viewports — the grid
+     itself is the offering-column's PARENT layout, not part of this pattern. -->

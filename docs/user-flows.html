@@ -1,0 +1,2078 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>thefieldwork-v5 — User flows · final sign-off</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fafafa;
+        --bg-elevated: #ffffff;
+        --border: #e4e4e7;
+        --border-hover: #a1a1aa;
+        --text: #18181b;
+        --muted: #71717a;
+        --subtle: #f4f4f5;
+        --accent: #2563eb;
+        --olive: #3f6212;
+        --olive-bg: #ecfccb;
+        --red: #b91c1c;
+        --red-bg: #fee2e2;
+        --amber: #b45309;
+        --amber-bg: #fef3c7;
+        --focus: 0 0 0 3px rgb(37 99 235 / 0.3);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        grid-template-rows: 56px 1fr;
+        grid-template-areas: "header header" "sidebar main";
+        height: 100vh;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      code {
+        font:
+          0.92em ui-monospace,
+          "SF Mono",
+          Menlo,
+          Monaco,
+          Consolas,
+          monospace;
+        background: var(--subtle);
+        padding: 1px 6px;
+        border-radius: 3px;
+      }
+
+      header.page {
+        grid-area: header;
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-elevated);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      header.page h1 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      header.page .project {
+        font-size: 12px;
+        color: var(--muted);
+        margin-left: 8px;
+      }
+      header.page .spacer {
+        flex: 1;
+      }
+      header.page .kit-version {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 11px;
+        color: var(--muted);
+        padding: 4px 8px;
+        background: var(--subtle);
+        border-radius: 4px;
+      }
+      header.page .viewport-switcher {
+        display: inline-flex;
+        background: var(--subtle);
+        padding: 2px;
+        border-radius: 6px;
+      }
+      header.page .viewport-switcher button {
+        font-size: 12px;
+        padding: 4px 10px;
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        color: var(--muted);
+      }
+      header.page .viewport-switcher button.active {
+        background: var(--bg-elevated);
+        color: var(--text);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+        font-weight: 500;
+      }
+      header.page .platform-switcher {
+        display: inline-flex;
+        gap: 4px;
+      }
+      header.page .platform-switcher button {
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 1px solid var(--border);
+        background: var(--bg-elevated);
+        border-radius: 4px;
+        color: var(--muted);
+      }
+      header.page .platform-switcher button.active {
+        background: var(--text);
+        color: var(--bg-elevated);
+        border-color: var(--text);
+      }
+      header.page .signoff-btn {
+        padding: 6px 14px;
+        background: var(--olive);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      header.page .signoff-btn:hover {
+        opacity: 0.9;
+      }
+
+      aside.sidebar {
+        grid-area: sidebar;
+        border-right: 1px solid var(--border);
+        background: var(--bg-elevated);
+        overflow-y: auto;
+        padding: 16px 0;
+      }
+      .persona-block {
+        margin-bottom: 20px;
+      }
+      .persona-head {
+        padding: 8px 16px 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-family: ui-monospace, Menlo, monospace;
+      }
+      .persona-head .goal {
+        display: block;
+        font-weight: 400;
+        font-size: 11px;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--muted);
+        margin-top: 2px;
+        font-family: inherit;
+      }
+      .flow-block {
+        margin-bottom: 12px;
+      }
+      .flow-head {
+        padding: 6px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .flow-head .flow-platform {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 9px;
+        color: var(--muted);
+        padding: 1px 5px;
+        background: var(--subtle);
+        border-radius: 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .step-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 16px 5px 28px;
+        font-size: 12.5px;
+        color: var(--muted);
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        transition: background 120ms;
+      }
+      .step-item:hover {
+        background: var(--subtle);
+        color: var(--text);
+      }
+      .step-item.active {
+        background: var(--subtle);
+        color: var(--text);
+        border-left-color: var(--accent);
+        font-weight: 500;
+      }
+      .step-item .title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .badge {
+        flex-shrink: 0;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-family: ui-monospace, Menlo, monospace;
+        font-weight: 600;
+      }
+      .badge.pass {
+        background: var(--olive-bg);
+        color: var(--olive);
+      }
+      .badge.fail {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+      .badge.needs-human-review {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .badge.not-reviewed {
+        background: var(--subtle);
+        color: var(--muted);
+      }
+
+      main.stage {
+        grid-area: main;
+        overflow: auto;
+        padding: 20px;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 12px;
+        background: #0a0a0a;
+      }
+      .annotation {
+        background: var(--bg-elevated);
+        border-radius: 8px;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+      .annotation .flow-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .annotation .step-desc {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .annotation .review-issues {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--subtle);
+        font-size: 12px;
+        color: var(--amber);
+        font-family: ui-monospace, Menlo, monospace;
+      }
+
+      .iframe-wrap {
+        display: grid;
+        place-items: center;
+        overflow: auto;
+        padding: 16px;
+      }
+      iframe#viewer {
+        background: white;
+        border: 1px solid rgb(255 255 255 / 0.08);
+        box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+        display: block;
+      }
+
+      /* Sign-off modal */
+      dialog#signoff-dlg {
+        border: none;
+        padding: 0;
+        border-radius: 8px;
+        max-width: 520px;
+        width: 90%;
+      }
+      dialog#signoff-dlg::backdrop {
+        background: rgba(0, 0, 0, 0.55);
+      }
+      .signoff-inner {
+        padding: 24px;
+        background: var(--bg-elevated);
+        border-radius: 8px;
+      }
+      .signoff-inner h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+      .signoff-inner .desc {
+        margin: 0 0 16px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .signoff-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+      .signoff-field label {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .signoff-field input,
+      .signoff-field textarea {
+        font: inherit;
+        padding: 8px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 13px;
+        background: var(--bg-elevated);
+      }
+      .signoff-field input:focus,
+      .signoff-field textarea:focus {
+        outline: none;
+        box-shadow: var(--focus);
+        border-color: var(--accent);
+      }
+      .signoff-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        margin: 8px 0;
+      }
+      .signoff-hidden-info {
+        background: var(--subtle);
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 11px;
+        color: var(--muted);
+        margin: 12px 0;
+      }
+      .signoff-hidden-info .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+      }
+      .signoff-hidden-info .row .k {
+        color: var(--muted);
+      }
+      .signoff-hidden-info .row .v {
+        color: var(--text);
+        font-weight: 500;
+        max-width: 60%;
+        text-align: right;
+        overflow-wrap: anywhere;
+        word-break: break-all;
+      }
+      .signoff-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 16px;
+      }
+      .signoff-actions button.primary {
+        background: var(--olive);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .signoff-actions button.cancel {
+        background: transparent;
+        border: 1px solid var(--border);
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      .signoff-actions button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .signoff-status {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        display: none;
+      }
+      .signoff-status.show {
+        display: block;
+      }
+      .signoff-status.success {
+        background: var(--olive-bg);
+        color: var(--olive);
+      }
+      .signoff-status.error {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      /* Platform filter */
+      body[data-platform-filter="webapp"] .flow-block[data-platform="mobile"],
+      body[data-platform-filter="webapp"] .flow-block[data-platform="admin"],
+      body[data-platform-filter="mobile"] .flow-block[data-platform="webapp"],
+      body[data-platform-filter="mobile"] .flow-block[data-platform="admin"],
+      body[data-platform-filter="admin"] .flow-block[data-platform="webapp"],
+      body[data-platform-filter="admin"] .flow-block[data-platform="mobile"] {
+        display: none;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body data-platform-filter="all">
+    <header class="page">
+      <h1>thefieldwork-v5</h1>
+      <span class="project">User flows · final sign-off</span>
+      <span class="spacer"></span>
+      <span class="kit-version">ui-kit v0.1.0-tokens-only</span>
+      <span class="kit-version">33 screens</span>
+      <div class="platform-switcher" id="platform-switcher">
+        <button data-platform="all" class="active">All</button>
+        <button data-platform="webapp">Webapp</button>
+        <button data-platform="mobile">Mobile</button>
+        <button data-platform="admin">Admin</button>
+      </div>
+      <div class="viewport-switcher" id="viewport-switcher">
+        <button data-w="390" data-h="844">390</button>
+        <button data-w="820" data-h="1180">820</button>
+        <button data-w="1400" data-h="900" class="active">1400</button>
+      </div>
+      <button class="signoff-btn" id="open-signoff">Sign off →</button>
+    </header>
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="stage">
+      <div class="annotation" id="annotation">
+        <div class="flow-name" id="flow-name">Select a flow to preview</div>
+        <div class="step-desc" id="step-desc">
+          Click any step in the sidebar.
+        </div>
+        <div
+          class="review-issues"
+          id="review-issues"
+          style="display: none"
+        ></div>
+      </div>
+      <div class="iframe-wrap">
+        <iframe
+          id="viewer"
+          title="Screen preview"
+          sandbox="allow-same-origin allow-scripts"
+          width="1400"
+          height="900"
+        ></iframe>
+      </div>
+    </main>
+
+    <dialog id="signoff-dlg">
+      <div class="signoff-inner">
+        <h2>Sign off on user flows</h2>
+        <p class="desc">
+          This records your approval of 33 screens at ui-kit v0.1.0-tokens-only.
+          Any change after sign-off invalidates it.
+        </p>
+        <form id="signoff-form">
+          <div class="signoff-field">
+            <label for="f-client">Your name / company</label>
+            <input id="f-client" required autocomplete="name" />
+          </div>
+          <div class="signoff-field">
+            <label for="f-comments">Comments (optional)</label>
+            <textarea
+              id="f-comments"
+              rows="3"
+              placeholder="Any final notes?"
+            ></textarea>
+          </div>
+          <label class="signoff-check">
+            <input type="checkbox" id="f-approved" checked />
+            I approve this set of screens for handoff to engineering
+          </label>
+          <div class="signoff-hidden-info">
+            <div class="row">
+              <span class="k">screensManifestHash</span
+              ><span class="v" id="h-screens"
+                >sha256:eea1fc17eca2d750f958900ad50b7754544179e6d0e6480b667d9fd52c76f09c</span
+              >
+            </div>
+            <div class="row">
+              <span class="k">visualReviewReportHash</span
+              ><span class="v" id="h-review"
+                >sha256:c6c35f17998409adcdbff2f768b48b034ead22f547ce9ccc19bd613c82a26083</span
+              >
+            </div>
+            <div class="row">
+              <span class="k">uiKitVersion</span
+              ><span class="v">0.1.0-tokens-only</span>
+            </div>
+            <div class="row">
+              <span class="k">screensApproved</span><span class="v">33</span>
+            </div>
+          </div>
+          <div class="signoff-status" id="signoff-status"></div>
+          <div class="signoff-actions">
+            <button type="button" class="cancel" id="signoff-cancel">
+              Cancel
+            </button>
+            <button type="submit" class="primary" id="signoff-submit">
+              Sign off
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <script>
+      const MANIFEST = {
+        version: "1.0",
+        generatedAt: "2026-08-09T05:29:31.111Z",
+        projectName: "thefieldwork-v5",
+        platforms: ["webapp", "admin"],
+        uiKitVersion: "0.1.0-tokens-only",
+        screensManifestHash:
+          "sha256:eea1fc17eca2d750f958900ad50b7754544179e6d0e6480b667d9fd52c76f09c",
+        visualReviewReportHash:
+          "sha256:c6c35f17998409adcdbff2f768b48b034ead22f547ce9ccc19bd613c82a26083",
+        flows: [
+          {
+            id: "flow-1",
+            slug: "answer-the-unasked-question",
+            platform: "webapp",
+            name: "Answer the unasked question",
+            description:
+              "Decide, from a cold arrival, that this is credible and will not be embarrassing — without having to ask anyone anything.",
+            primaryPersona: "The Carrier",
+            steps: [
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+              {
+                screenId: "about",
+                platform: "webapp",
+                file: "docs/screens/webapp/about.html",
+                route: "/about",
+                status: "pass",
+                title: "About",
+              },
+              {
+                screenId: "services-index",
+                platform: "webapp",
+                file: "docs/screens/webapp/services-index.html",
+                route: "/services",
+                status: "fail",
+                title: "Services index",
+              },
+              {
+                screenId: "service-detail",
+                platform: "webapp",
+                file: "docs/screens/webapp/service-detail.html",
+                route: "/services/:slug",
+                status: "fail",
+                title: "Service detail",
+              },
+            ],
+            seedingTier: "read-only",
+            interactions: [
+              { kind: "navigate", to: "/" },
+              { kind: "click", selector: 'role=link[name="Who she is"]' },
+              { kind: "click", selector: 'role=link[name="Services"]' },
+              {
+                kind: "click",
+                selector: 'role=link[name="One-to-one session"]',
+              },
+              {
+                kind: "assertVisible",
+                selector: '[data-kit-component="OfferingHero"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/services/" },
+            ],
+          },
+          {
+            id: "flow-2",
+            slug: "book-a-service",
+            platform: "webapp",
+            name: "Book a one-to-one service",
+            description:
+              "Choose a real time from the practitioner's actual calendar, ask for it, and understand exactly what has and has not just happened.",
+            primaryPersona:
+              "The Carrier (first time) and The Returner (repeat)",
+            steps: [
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+              {
+                screenId: "services-index",
+                platform: "webapp",
+                file: "docs/screens/webapp/services-index.html",
+                route: "/services",
+                status: "fail",
+                title: "Services index",
+              },
+              {
+                screenId: "service-detail",
+                platform: "webapp",
+                file: "docs/screens/webapp/service-detail.html",
+                route: "/services/:slug",
+                status: "fail",
+                title: "Service detail",
+              },
+              {
+                screenId: "booking-request",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-request.html",
+                route: "/book/:kind/:slug",
+                status: "fail",
+                title: "Booking request",
+              },
+              {
+                screenId: "booking-confirmation",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-confirmation.html",
+                route: "/book/thanks/:ref",
+                status: "fail",
+                title: "Booking confirmation",
+              },
+              {
+                screenId: "privacy-notice",
+                platform: "webapp",
+                file: "docs/screens/webapp/privacy-notice.html",
+                route: "/privacy",
+                status: "pass",
+                title: "Privacy notice",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/" },
+              {
+                kind: "click",
+                selector: 'role=link[name="One-to-one sessions"]',
+              },
+              {
+                kind: "click",
+                selector: 'role=link[name="One-to-one session"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  '[data-kit-component="Button"][data-kit-variant="primary"][data-kit-size="md"]',
+              },
+              { kind: "fill", selector: "#name", value: "Test User" },
+              { kind: "fill", selector: "#email", value: "test@example.com" },
+              {
+                kind: "click",
+                selector: 'role=button[name="Request this place"]',
+              },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="ConfirmationPanel"][data-kit-variant="clearing"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/book/thanks/" },
+              { kind: "navigate", to: "/privacy" },
+              {
+                kind: "assertVisible",
+                selector:
+                  'role=heading[name="This page says plainly what is collected, and how to have it back."]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/privacy" },
+            ],
+          },
+          {
+            id: "flow-3",
+            slug: "reserve-a-workshop-place",
+            platform: "webapp",
+            name: "Reserve a place on a dated workshop",
+            description:
+              "Scan what is on, pick a date, ask for a place — without re-reading the site to find it.",
+            primaryPersona: "The Returner",
+            steps: [
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+              {
+                screenId: "workshops-index",
+                platform: "webapp",
+                file: "docs/screens/webapp/workshops-index.html",
+                route: "/workshops",
+                status: "fail",
+                title: "Workshops index",
+              },
+              {
+                screenId: "workshop-detail",
+                platform: "webapp",
+                file: "docs/screens/webapp/workshop-detail.html",
+                route: "/workshops/:slug",
+                status: "fail",
+                title: "Workshop detail",
+              },
+              {
+                screenId: "booking-request",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-request.html",
+                route: "/book/:kind/:slug",
+                status: "fail",
+                title: "Booking request",
+              },
+              {
+                screenId: "booking-confirmation",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-confirmation.html",
+                route: "/book/thanks/:ref",
+                status: "fail",
+                title: "Booking confirmation",
+              },
+              {
+                screenId: "privacy-notice",
+                platform: "webapp",
+                file: "docs/screens/webapp/privacy-notice.html",
+                route: "/privacy",
+                status: "pass",
+                title: "Privacy notice",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/" },
+              { kind: "click", selector: 'role=link[name="Workshops"]' },
+              {
+                kind: "click",
+                selector: 'role=link[name="Reading the Field"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  '[data-kit-component="Button"][data-kit-variant="primary"][data-kit-size="md"]',
+              },
+              { kind: "fill", selector: "#name", value: "Test User" },
+              { kind: "fill", selector: "#email", value: "test@example.com" },
+              {
+                kind: "click",
+                selector: 'role=button[name="Request this place"]',
+              },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="ConfirmationPanel"][data-kit-variant="clearing"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/book/thanks/" },
+              { kind: "navigate", to: "/privacy" },
+              {
+                kind: "assertVisible",
+                selector:
+                  'role=heading[name="This page says plainly what is collected, and how to have it back."]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/privacy" },
+            ],
+          },
+          {
+            id: "flow-4",
+            slug: "commit-to-a-course",
+            platform: "webapp",
+            name: "Commit to a course",
+            description:
+              "Understand what the whole series commits them to — every date, not just the first — and then ask for a place on it.",
+            primaryPersona: "The Returner",
+            steps: [
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+              {
+                screenId: "courses-index",
+                platform: "webapp",
+                file: "docs/screens/webapp/courses-index.html",
+                route: "/courses",
+                status: "fail",
+                title: "Courses index",
+              },
+              {
+                screenId: "course-detail",
+                platform: "webapp",
+                file: "docs/screens/webapp/course-detail.html",
+                route: "/courses/:slug",
+                status: "fail",
+                title: "Course detail",
+              },
+              {
+                screenId: "booking-request",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-request.html",
+                route: "/book/:kind/:slug",
+                status: "fail",
+                title: "Booking request",
+              },
+              {
+                screenId: "booking-confirmation",
+                platform: "webapp",
+                file: "docs/screens/webapp/booking-confirmation.html",
+                route: "/book/thanks/:ref",
+                status: "fail",
+                title: "Booking confirmation",
+              },
+              {
+                screenId: "privacy-notice",
+                platform: "webapp",
+                file: "docs/screens/webapp/privacy-notice.html",
+                route: "/privacy",
+                status: "pass",
+                title: "Privacy notice",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/" },
+              { kind: "click", selector: 'role=link[name="Courses"]' },
+              {
+                kind: "click",
+                selector: 'role=link[name="Aura Healing: Foundations"]',
+              },
+              {
+                kind: "click",
+                selector: 'role=link[name="Request your place"]',
+              },
+              { kind: "fill", selector: "#name", value: "Test User" },
+              { kind: "fill", selector: "#email", value: "test@example.com" },
+              {
+                kind: "click",
+                selector: 'role=button[name="Request this place"]',
+              },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="ConfirmationPanel"][data-kit-variant="clearing"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/book/thanks/" },
+              { kind: "navigate", to: "/privacy" },
+              {
+                kind: "assertVisible",
+                selector:
+                  'role=heading[name="This page says plainly what is collected, and how to have it back."]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/privacy" },
+            ],
+          },
+          {
+            id: "flow-5",
+            slug: "contact-without-a-form",
+            platform: "webapp",
+            name: "Get in touch without using a form",
+            description:
+              "Reach a human directly — because some visitors will not put their name in a box before they have spoken to someone.",
+            primaryPersona: "The Carrier",
+            steps: [
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+              {
+                screenId: "contact",
+                platform: "webapp",
+                file: "docs/screens/webapp/contact.html",
+                route: "/contact",
+                status: "fail",
+                title: "Contact",
+              },
+              {
+                screenId: "about",
+                platform: "webapp",
+                file: "docs/screens/webapp/about.html",
+                route: "/about",
+                status: "pass",
+                title: "About",
+              },
+            ],
+            seedingTier: "read-only",
+            interactions: [
+              { kind: "navigate", to: "/" },
+              { kind: "click", selector: 'role=link[name="Ask a question"]' },
+              {
+                kind: "click",
+                selector: 'nav[aria-label="Main"] >> role=link[name="About"]',
+              },
+              {
+                kind: "assertVisible",
+                selector:
+                  'role=heading[name="One practitioner. One room. No clinic front."]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/about" },
+            ],
+          },
+          {
+            id: "flow-6",
+            slug: "join-the-newsletter",
+            platform: "webapp",
+            name: "Join the newsletter",
+            description:
+              "Get on the list — and, where a document is offered, receive it.",
+            primaryPersona:
+              "The Carrier who is not ready to book, and The Returner between",
+            steps: [
+              {
+                screenId: "subscribe",
+                platform: "webapp",
+                file: "docs/screens/webapp/subscribe.html",
+                route: "/subscribe",
+                status: "fail",
+                title: "Subscribe",
+              },
+              {
+                screenId: "subscribe-pending",
+                platform: "webapp",
+                file: "docs/screens/webapp/subscribe-pending.html",
+                route: "/subscribe/check-email",
+                status: "fail",
+                title: "Subscribe pending",
+              },
+              {
+                screenId: "subscribe-confirmed",
+                platform: "webapp",
+                file: "docs/screens/webapp/subscribe-confirmed.html",
+                route: "/subscribe/confirm/:token",
+                status: "fail",
+                title: "Subscribe confirmed",
+              },
+              {
+                screenId: "document-download",
+                platform: "webapp",
+                file: "docs/screens/webapp/document-download.html",
+                route: "/downloads/:slug",
+                status: "fail",
+                title: "Document download",
+              },
+              {
+                screenId: "privacy-notice",
+                platform: "webapp",
+                file: "docs/screens/webapp/privacy-notice.html",
+                route: "/privacy",
+                status: "pass",
+                title: "Privacy notice",
+              },
+              {
+                screenId: "home",
+                platform: "webapp",
+                file: "docs/screens/webapp/home.html",
+                route: "/",
+                status: "fail",
+                title: "Home",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/subscribe" },
+              {
+                kind: "fill",
+                selector: "#subscribe-email",
+                value: "test@example.com",
+              },
+              { kind: "click", selector: "#subscribe-consent" },
+              { kind: "click", selector: 'role=button[name="Join the list"]' },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="StatusPanel"][data-kit-variant="pending"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/subscribe/check-email" },
+              { kind: "navigate", to: "/subscribe/confirm/:token" },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="StatusPanel"][data-kit-variant="confirmed"]',
+              },
+              {
+                kind: "click",
+                selector: 'role=link[name="Download the guide"]',
+              },
+              {
+                kind: "assertVisible",
+                selector: '[data-kit-component="DocumentPanel"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/downloads/" },
+              { kind: "navigate", to: "/privacy" },
+              {
+                kind: "assertVisible",
+                selector:
+                  'role=heading[name="This page says plainly what is collected, and how to have it back."]',
+              },
+              {
+                kind: "click",
+                selector: 'role=link[name="The Field Work — home"]',
+              },
+              { kind: "assertVisible", selector: "#what-happens" },
+              { kind: "assertUrlMatches", pattern: "^/$" },
+            ],
+          },
+          {
+            id: "flow-7",
+            slug: "retrieve-a-document",
+            platform: "webapp",
+            name: "Retrieve a document",
+            description: "Get the PDF.",
+            primaryPersona:
+              "Existing Subscriber (subscriber-only files) and any visitor",
+            steps: [
+              {
+                screenId: "subscribe-confirmed",
+                platform: "webapp",
+                file: "docs/screens/webapp/subscribe-confirmed.html",
+                route: "/subscribe/confirm/:token",
+                status: "fail",
+                title: "Subscribe confirmed",
+              },
+              {
+                screenId: "document-download",
+                platform: "webapp",
+                file: "docs/screens/webapp/document-download.html",
+                route: "/downloads/:slug",
+                status: "fail",
+                title: "Document download",
+              },
+            ],
+            seedingTier: "read-only",
+            interactions: [
+              { kind: "navigate", to: "/subscribe/confirm/:token" },
+              {
+                kind: "click",
+                selector: 'role=link[name="Download the guide"]',
+              },
+              {
+                kind: "assertVisible",
+                selector: '[data-kit-component="DocumentPanel"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/downloads/" },
+            ],
+          },
+          {
+            id: "flow-8",
+            slug: "leave-the-list",
+            platform: "webapp",
+            name: "Leave the list",
+            description:
+              "Stop receiving the newsletter. Immediately, with no account and no conversation.",
+            primaryPersona: "Existing Subscriber",
+            steps: [
+              {
+                screenId: "unsubscribe",
+                platform: "webapp",
+                file: "docs/screens/webapp/unsubscribe.html",
+                route: "/unsubscribe/:token",
+                status: "pass",
+                title: "Unsubscribe",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/unsubscribe/:token" },
+              {
+                kind: "assertVisible",
+                selector:
+                  '[data-kit-component="StatusPanel"][data-kit-variant="unsubscribed"]',
+              },
+              { kind: "assertUrlMatches", pattern: "^/unsubscribe/" },
+            ],
+          },
+          {
+            id: "flow-9",
+            slug: "first-run-setup",
+            platform: "admin",
+            name: "First sign-in and first-run setup",
+            description:
+              "get from a seeded account to a site carrying her details, her working pattern and her words — without her having to know what any of those things are called.",
+            primaryPersona: "The Practitioner (Owner), day one",
+            steps: [
+              {
+                screenId: "admin-login",
+                platform: "admin",
+                file: "docs/screens/admin/admin-login.html",
+                route: "/admin/login",
+                status: "fail",
+                title: "Admin login",
+              },
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-settings",
+                platform: "admin",
+                file: "docs/screens/admin/admin-settings.html",
+                route: "/admin/settings",
+                status: "fail",
+                title: "Admin settings",
+              },
+              {
+                screenId: "admin-availability",
+                platform: "admin",
+                file: "docs/screens/admin/admin-availability.html",
+                route: "/admin/availability",
+                status: "fail",
+                title: "Admin availability",
+              },
+              {
+                screenId: "admin-media",
+                platform: "admin",
+                file: "docs/screens/admin/admin-media.html",
+                route: "/admin/media",
+                status: "fail",
+                title: "Admin media",
+              },
+              {
+                screenId: "admin-landing-sections",
+                platform: "admin",
+                file: "docs/screens/admin/admin-landing-sections.html",
+                route: "/admin/page",
+                status: "fail",
+                title: "Admin landing sections",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin/login" },
+              {
+                kind: "fill",
+                selector: "#login-email-default",
+                value: "test@example.com",
+              },
+              {
+                kind: "fill",
+                selector: "#login-password-default",
+                value: "TestPass123!",
+              },
+              {
+                kind: "click",
+                selector:
+                  'section[data-state="default"] >> role=button[name="Sign in"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Settings"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Availability"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Pictures"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Home page"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/page" },
+            ],
+          },
+          {
+            id: "flow-10",
+            slug: "publish-a-workshop",
+            platform: "admin",
+            name: "Publish a workshop with a date and a price",
+            description:
+              "a dated, priced workshop live on the public site and blocking her own calendar — in under 5 minutes, with no second edit anywhere. This is the §15 headline task.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-offerings",
+                platform: "admin",
+                file: "docs/screens/admin/admin-offerings.html",
+                route: "/admin/offerings",
+                status: "fail",
+                title: "Admin offerings",
+              },
+              {
+                screenId: "admin-offering-edit",
+                platform: "admin",
+                file: "docs/screens/admin/admin-offering-edit.html",
+                route: "/admin/offerings/:id",
+                status: "fail",
+                title: "Admin offering edit",
+              },
+              {
+                screenId: "admin-media",
+                platform: "admin",
+                file: "docs/screens/admin/admin-media.html",
+                route: "/admin/media",
+                status: "fail",
+                title: "Admin media",
+              },
+              {
+                screenId: "admin-calendar",
+                platform: "admin",
+                file: "docs/screens/admin/admin-calendar.html",
+                route: "/admin/calendar",
+                status: "fail",
+                title: "Admin calendar",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Offerings"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'section[aria-labelledby="greeting"] >> role=link[name="Add an offering"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Pictures"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Calendar"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/calendar" },
+            ],
+          },
+          {
+            id: "flow-11",
+            slug: "build-a-course",
+            platform: "admin",
+            name: "Build a course out of its sessions",
+            description: "sell a fixed series of dates as ONE purchase.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-offerings",
+                platform: "admin",
+                file: "docs/screens/admin/admin-offerings.html",
+                route: "/admin/offerings",
+                status: "fail",
+                title: "Admin offerings",
+              },
+              {
+                screenId: "admin-offering-edit",
+                platform: "admin",
+                file: "docs/screens/admin/admin-offering-edit.html",
+                route: "/admin/offerings/:id",
+                status: "fail",
+                title: "Admin offering edit",
+              },
+              {
+                screenId: "admin-calendar",
+                platform: "admin",
+                file: "docs/screens/admin/admin-calendar.html",
+                route: "/admin/calendar",
+                status: "fail",
+                title: "Admin calendar",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin/offerings" },
+              {
+                kind: "click",
+                selector: 'role=link[name="Edit Evening Series"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Calendar"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/calendar" },
+            ],
+          },
+          {
+            id: "flow-12",
+            slug: "edit-and-publish-a-beat",
+            platform: "admin",
+            name: "Change a paragraph and a picture on the home page",
+            description:
+              "change one beat's words and its image and get it live — in under 3 minutes (§15), with certainty at every moment about whether the public can see it yet.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-landing-sections",
+                platform: "admin",
+                file: "docs/screens/admin/admin-landing-sections.html",
+                route: "/admin/page",
+                status: "fail",
+                title: "Admin landing sections",
+              },
+              {
+                screenId: "admin-media",
+                platform: "admin",
+                file: "docs/screens/admin/admin-media.html",
+                route: "/admin/media",
+                status: "fail",
+                title: "Admin media",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Home page"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Pictures"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/media" },
+            ],
+          },
+          {
+            id: "flow-13",
+            slug: "block-personal-time",
+            platform: "admin",
+            name: "Block out a personal afternoon",
+            description:
+              "make Thursday afternoon disappear from what visitors can ask for — in one gesture, in under 30 seconds (§15), without leaving the calendar.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-calendar",
+                platform: "admin",
+                file: "docs/screens/admin/admin-calendar.html",
+                route: "/admin/calendar",
+                status: "fail",
+                title: "Admin calendar",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin/calendar" },
+              { kind: "click", selector: 'role=button[name="Block time"]' },
+              { kind: "assertVisible", selector: "#block-time-title" },
+              {
+                kind: "fill",
+                selector: 'input[placeholder="Family, admin, rest"]',
+                value: "Personal time",
+              },
+              {
+                kind: "click",
+                selector: 'role=button[name="Block this time"]',
+              },
+            ],
+          },
+          {
+            id: "flow-14",
+            slug: "triage-a-booking",
+            platform: "admin",
+            name: "Triage a booking request",
+            description:
+              "decide on a request before its hold runs out, and have the calendar be true either way.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-bookings",
+                platform: "admin",
+                file: "docs/screens/admin/admin-bookings.html",
+                route: "/admin/bookings",
+                status: "fail",
+                title: "Admin bookings",
+              },
+              {
+                screenId: "admin-calendar",
+                platform: "admin",
+                file: "docs/screens/admin/admin-calendar.html",
+                route: "/admin/calendar",
+                status: "fail",
+                title: "Admin calendar",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name=/Requests/]',
+              },
+              {
+                kind: "click",
+                selector:
+                  '[data-kit-component="BookingRow"]:has-text("Ffion Pryce") >> role=button[name="Confirm booking"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Calendar"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/calendar" },
+            ],
+          },
+          {
+            id: "flow-15",
+            slug: "set-the-working-pattern",
+            platform: "admin",
+            name: "Set the working pattern and the timing rules",
+            description:
+              "describe when she works ONCE, so the calendar can compute free time forever.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-availability",
+                platform: "admin",
+                file: "docs/screens/admin/admin-availability.html",
+                route: "/admin/availability",
+                status: "fail",
+                title: "Admin availability",
+              },
+              {
+                screenId: "admin-calendar",
+                platform: "admin",
+                file: "docs/screens/admin/admin-calendar.html",
+                route: "/admin/calendar",
+                status: "fail",
+                title: "Admin calendar",
+              },
+              {
+                screenId: "admin-settings",
+                platform: "admin",
+                file: "docs/screens/admin/admin-settings.html",
+                route: "/admin/settings",
+                status: "fail",
+                title: "Admin settings",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Availability"]',
+              },
+              { kind: "click", selector: 'role=button[name="Save changes"]' },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Calendar"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Settings"]',
+              },
+              { kind: "assertVisible", selector: "#settings-h" },
+              { kind: "assertUrlMatches", pattern: "^/admin/settings" },
+            ],
+          },
+          {
+            id: "flow-16",
+            slug: "write-and-send-an-issue",
+            platform: "admin",
+            name: "Write and send an issue",
+            description:
+              "write something, be sure it is right, and send it to the people who actually said yes — in under 15 minutes (§15).",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-newsletters",
+                platform: "admin",
+                file: "docs/screens/admin/admin-newsletters.html",
+                route: "/admin/newsletters",
+                status: "fail",
+                title: "Admin newsletters",
+              },
+              {
+                screenId: "admin-newsletter-edit",
+                platform: "admin",
+                file: "docs/screens/admin/admin-newsletter-edit.html",
+                route: "/admin/newsletters/:id",
+                status: "fail",
+                title: "Admin newsletter edit",
+              },
+              {
+                screenId: "admin-documents",
+                platform: "admin",
+                file: "docs/screens/admin/admin-documents.html",
+                route: "/admin/documents",
+                status: "fail",
+                title: "Admin documents",
+              },
+              {
+                screenId: "admin-subscribers",
+                platform: "admin",
+                file: "docs/screens/admin/admin-subscribers.html",
+                route: "/admin/subscribers",
+                status: "fail",
+                title: "Admin subscribers",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Newsletter"]',
+              },
+              { kind: "click", selector: 'role=link[name="Write an issue"]' },
+              {
+                kind: "click",
+                selector: 'role=link[name="Attach a document"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Subscribers"]',
+              },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin/subscribers" },
+            ],
+          },
+          {
+            id: "flow-17",
+            slug: "look-after-the-list",
+            platform: "admin",
+            name: "Look after the list",
+            description:
+              "know who is actually on the list, and take someone off when they ask her by email.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+              {
+                screenId: "admin-subscribers",
+                platform: "admin",
+                file: "docs/screens/admin/admin-subscribers.html",
+                route: "/admin/subscribers",
+                status: "fail",
+                title: "Admin subscribers",
+              },
+            ],
+            seedingTier: "mutation",
+            interactions: [
+              { kind: "navigate", to: "/admin" },
+              {
+                kind: "click",
+                selector:
+                  'nav[aria-label="Admin"] >> role=link[name="Subscribers"]',
+              },
+              {
+                kind: "click",
+                selector:
+                  '[data-kit-component="SubscriberRow"]:has-text("Grace Halloran") >> role=button[name="Remove"]',
+              },
+              { kind: "assertVisible", selector: "#remove-guard" },
+            ],
+          },
+          {
+            id: "flow-18",
+            slug: "publish-and-retire-a-document",
+            platform: "admin",
+            name: "Publish and retire a document",
+            description:
+              "put a PDF somewhere it can be attached or offered — and later remove one without breaking anything she has already sent.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-documents",
+                platform: "admin",
+                file: "docs/screens/admin/admin-documents.html",
+                route: "/admin/documents",
+                status: "fail",
+                title: "Admin documents",
+              },
+              {
+                screenId: "admin-newsletter-edit",
+                platform: "admin",
+                file: "docs/screens/admin/admin-newsletter-edit.html",
+                route: "/admin/newsletters/:id",
+                status: "fail",
+                title: "Admin newsletter edit",
+              },
+              {
+                screenId: "admin-newsletters",
+                platform: "admin",
+                file: "docs/screens/admin/admin-newsletters.html",
+                route: "/admin/newsletters",
+                status: "fail",
+                title: "Admin newsletters",
+              },
+            ],
+            seedingTier: "mutation",
+          },
+          {
+            id: "flow-19",
+            slug: "add-a-picture",
+            platform: "admin",
+            name: "Add a picture she took herself",
+            description:
+              "get her own photograph into the library and safely onto the site.",
+            primaryPersona: "The Practitioner (Owner)",
+            steps: [
+              {
+                screenId: "admin-media",
+                platform: "admin",
+                file: "docs/screens/admin/admin-media.html",
+                route: "/admin/media",
+                status: "fail",
+                title: "Admin media",
+              },
+              {
+                screenId: "admin-landing-sections",
+                platform: "admin",
+                file: "docs/screens/admin/admin-landing-sections.html",
+                route: "/admin/page",
+                status: "fail",
+                title: "Admin landing sections",
+              },
+              {
+                screenId: "admin-offering-edit",
+                platform: "admin",
+                file: "docs/screens/admin/admin-offering-edit.html",
+                route: "/admin/offerings/:id",
+                status: "fail",
+                title: "Admin offering edit",
+              },
+            ],
+            seedingTier: "mutation",
+          },
+          {
+            id: "flow-20",
+            slug: "recover-the-password",
+            platform: "admin",
+            name: "Get back in after forgetting the password",
+            description:
+              "get back into her own admin without calling anyone — the failure mode that actually happens to a sole operator who signs in monthly.",
+            primaryPersona:
+              "The Practitioner (Owner), returning after weeks away",
+            steps: [
+              {
+                screenId: "admin-login",
+                platform: "admin",
+                file: "docs/screens/admin/admin-login.html",
+                route: "/admin/login",
+                status: "fail",
+                title: "Admin login",
+              },
+              {
+                screenId: "admin-forgot-password",
+                platform: "admin",
+                file: "docs/screens/admin/admin-forgot-password.html",
+                route: "/admin/forgot-password",
+                status: "pass",
+                title: "Admin forgot password",
+              },
+              {
+                screenId: "admin-reset-password",
+                platform: "admin",
+                file: "docs/screens/admin/admin-reset-password.html",
+                route: "/admin/reset-password/:token",
+                status: "fail",
+                title: "Admin reset password",
+              },
+              {
+                screenId: "admin-dashboard",
+                platform: "admin",
+                file: "docs/screens/admin/admin-dashboard.html",
+                route: "/admin",
+                status: "fail",
+                title: "Admin dashboard",
+              },
+            ],
+            seedingTier: "read-only",
+            interactions: [
+              { kind: "navigate", to: "/admin/login" },
+              {
+                kind: "click",
+                selector:
+                  'section[data-state="default"] >> role=link[name="Forgotten your password?"]',
+              },
+              { kind: "fill", selector: "#email", value: "test@example.com" },
+              {
+                kind: "click",
+                selector: 'role=button[name="Send reset link"]',
+              },
+              {
+                kind: "navigate",
+                to: "/admin/reset-password/reset-test-token",
+              },
+              {
+                kind: "fill",
+                selector: "#new-password",
+                value: "TestPass123!",
+              },
+              {
+                kind: "fill",
+                selector: "#confirm-password",
+                value: "TestPass123!",
+              },
+              { kind: "click", selector: 'role=button[name="Set password"]' },
+              { kind: "assertVisible", selector: "#greeting" },
+              { kind: "assertUrlMatches", pattern: "^/admin$" },
+            ],
+          },
+        ],
+        personas: [
+          {
+            id: "the-practitioner",
+            name: "The Practitioner (Owner)",
+            primaryGoal:
+              "Fill her calendar without spending evenings on admin — publish a dated, priced offering and reply to whoever asks, unaided.",
+            flowIds: [
+              "flow-9",
+              "flow-10",
+              "flow-11",
+              "flow-12",
+              "flow-13",
+              "flow-14",
+              "flow-15",
+              "flow-16",
+              "flow-17",
+              "flow-18",
+              "flow-19",
+              "flow-20",
+            ],
+          },
+          {
+            id: "the-carrier",
+            name: "The Carrier",
+            primaryGoal:
+              "Work out whether this is credible and whether it will be embarrassing — specifically, whether she must undress or be touched.",
+            flowIds: ["flow-1", "flow-2", "flow-5", "flow-6"],
+          },
+          {
+            id: "the-returner",
+            name: "The Returner",
+            primaryGoal:
+              "Find what's on and request a place in under a minute.",
+            flowIds: ["flow-2", "flow-3", "flow-4", "flow-6"],
+          },
+        ],
+        screensCounts: {
+          total: 33,
+          pass: 4,
+          fail: 29,
+          "needs-human-review": 0,
+          "not-reviewed": 0,
+        },
+        schemaVersion: "2.0",
+      };
+      const GATE = "";
+      const UI_KIT_VERSION = "0.1.0-tokens-only";
+      const SCREENS_MANIFEST_HASH =
+        "sha256:eea1fc17eca2d750f958900ad50b7754544179e6d0e6480b667d9fd52c76f09c";
+      const VISUAL_REVIEW_REPORT_HASH =
+        "sha256:c6c35f17998409adcdbff2f768b48b034ead22f547ce9ccc19bd613c82a26083";
+      const SCREENS_COUNT = 33;
+
+      const $sidebar = document.getElementById("sidebar");
+      const $viewer = document.getElementById("viewer");
+      const $flowName = document.getElementById("flow-name");
+      const $stepDesc = document.getElementById("step-desc");
+      const $reviewIssues = document.getElementById("review-issues");
+      const $vpSwitcher = document.getElementById("viewport-switcher");
+      const $platformSwitcher = document.getElementById("platform-switcher");
+      const $signoffDlg = document.getElementById("signoff-dlg");
+
+      function esc(s) {
+        return String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      function renderSidebar() {
+        // Flows are the primary organizational unit. `primaryPersona` on each
+        // flow is metadata — we surface it as a pill on the flow header, and
+        // also render a tiny persona legend above the flows.
+        const flows = MANIFEST.flows || [];
+        const personas = MANIFEST.personas || [];
+        const personaById = Object.fromEntries(personas.map((p) => [p.id, p]));
+        const frag = document.createDocumentFragment();
+
+        // Legend row: which personas map to which flows
+        if (personas.length > 0) {
+          const legend = document.createElement("div");
+          legend.className = "persona-block";
+          legend.innerHTML = `
+            <div class="persona-head" style="border-bottom:none;margin-bottom:4px">
+              Personas
+              <span class="goal">${personas.length} user type${personas.length === 1 ? "" : "s"} — flows below are tagged per primary audience</span>
+            </div>
+          `;
+          frag.appendChild(legend);
+        }
+
+        flows.forEach((f) => {
+          const fBlock = document.createElement("div");
+          fBlock.className = "flow-block";
+          fBlock.dataset.platform = f.platform || "webapp";
+          const personaLabel =
+            f.primaryPersona && personaById[f.primaryPersona]
+              ? personaById[f.primaryPersona].name.split(/\s*—\s*/)[0]
+              : f.primaryPersona === "any"
+                ? "any persona"
+                : f.primaryPersona || "";
+          const steps = (f.steps || [])
+            .map(
+              (s, i) => `
+              <li class="step-item" data-file="${esc(s.file)}" data-screen-id="${esc(s.screenId)}" data-flow-name="${esc(f.name)}" data-step-desc="${esc(f.description || s.title || "")}" data-issues='${esc(JSON.stringify(s.issues || []))}'>
+                <span class="title">${i + 1}. ${esc(s.title || s.screenId)}</span>
+                <span class="badge ${esc(s.status || "not-reviewed")}">${esc(s.status || "not-reviewed")}</span>
+              </li>
+            `,
+            )
+            .join("");
+          fBlock.innerHTML = `
+            <div class="flow-head">
+              ${esc(f.name)}
+              <span class="flow-platform">${esc(f.platform || "webapp")}${personaLabel ? " · " + esc(personaLabel) : ""}</span>
+            </div>
+            <ul class="step-list">${steps}</ul>
+          `;
+          frag.appendChild(fBlock);
+        });
+
+        $sidebar.replaceChildren(frag);
+      }
+
+      $sidebar.addEventListener("click", (e) => {
+        const li = e.target.closest(".step-item");
+        if (!li) return;
+        $sidebar
+          .querySelectorAll(".step-item.active")
+          .forEach((x) => x.classList.remove("active"));
+        li.classList.add("active");
+        $viewer.src = "../" + li.dataset.file;
+        $flowName.textContent = li.dataset.flowName;
+        $stepDesc.textContent = li.dataset.stepDesc || "";
+        let issues = [];
+        try {
+          issues = JSON.parse(li.dataset.issues || "[]");
+        } catch {
+          /* ignore */
+        }
+        if (issues.length > 0) {
+          $reviewIssues.style.display = "block";
+          $reviewIssues.textContent =
+            "Visual-review flagged: " +
+            issues.map((i) => i.rule || i).join(" · ");
+        } else {
+          $reviewIssues.style.display = "none";
+        }
+      });
+
+      $vpSwitcher.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-w]");
+        if (!b) return;
+        $vpSwitcher
+          .querySelectorAll("button")
+          .forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        $viewer.width = Number(b.dataset.w);
+        $viewer.height = Number(b.dataset.h);
+      });
+
+      $platformSwitcher.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-platform]");
+        if (!b) return;
+        $platformSwitcher
+          .querySelectorAll("button")
+          .forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        document.body.dataset.platformFilter = b.dataset.platform;
+      });
+
+      // Sign-off
+      document
+        .getElementById("open-signoff")
+        .addEventListener("click", () => $signoffDlg.showModal());
+      document
+        .getElementById("signoff-cancel")
+        .addEventListener("click", () => $signoffDlg.close());
+      document
+        .getElementById("signoff-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const $submit = document.getElementById("signoff-submit");
+          const $status = document.getElementById("signoff-status");
+          $submit.disabled = true;
+          $submit.textContent = "Submitting…";
+          $status.className = "signoff-status";
+          const body = {
+            version: "1.0",
+            signedAt: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
+            clientName: document.getElementById("f-client").value.trim(),
+            approved: document.getElementById("f-approved").checked,
+            comments: document.getElementById("f-comments").value,
+            screensApproved: SCREENS_COUNT,
+            screensManifestHash: SCREENS_MANIFEST_HASH,
+            visualReviewReportHash: VISUAL_REVIEW_REPORT_HASH,
+            uiKitVersion: UI_KIT_VERSION,
+          };
+          try {
+            const r = await fetch(`${GATE}/api/signoff`, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            const payload = await r.json().catch(() => ({}));
+            if (!r.ok) {
+              $status.className = "signoff-status show error";
+              $status.textContent = `Rejected: ${payload.error || r.statusText}. ${payload.reason || "Re-review the latest state."}`;
+              $submit.disabled = false;
+              $submit.textContent = "Sign off";
+              return;
+            }
+            $status.className = "signoff-status show success";
+            $status.textContent = `Sign-off accepted. Orchestrator advances to /architect.`;
+            $submit.textContent = "Signed ✓";
+            document
+              .querySelectorAll("#signoff-form input, #signoff-form textarea")
+              .forEach((x) => (x.disabled = true));
+          } catch (err) {
+            $status.className = "signoff-status show error";
+            $status.textContent = `Network error: ${err.message}`;
+            $submit.disabled = false;
+            $submit.textContent = "Sign off";
+          }
+        });
+
+      // Keyboard nav
+      document.addEventListener("keydown", (e) => {
+        if (e.target.matches("input, textarea")) return;
+        const active = $sidebar.querySelector(".step-item.active");
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          const items = [
+            ...$sidebar.querySelectorAll(
+              ".step-item:not([style*='display: none'])",
+            ),
+          ];
+          const visible = items.filter((x) => x.offsetParent !== null);
+          let idx = visible.indexOf(active);
+          idx += e.key === "ArrowDown" ? 1 : -1;
+          if (idx >= 0 && idx < visible.length) visible[idx].click();
+        }
+        if (e.key === "Escape" && $signoffDlg.open) $signoffDlg.close();
+      });
+
+      renderSidebar();
+      // Auto-load first step
+      const first = $sidebar.querySelector(".step-item");
+      if (first) first.click();
+    </script>
+  </body>
+</html>

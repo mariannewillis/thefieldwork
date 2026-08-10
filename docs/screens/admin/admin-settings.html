@@ -1,0 +1,1731 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Settings — The Field Work admin</title>
+    <meta
+      name="description"
+      content="What the public site shows about Marianne and the practice, what reaches her inbox, and where payments land — the singleton the rest of the site reads its identity from."
+    />
+
+    <link
+      rel="stylesheet"
+      href="../../../packages/ui-kit/src/styles/globals.css"
+    />
+
+    <!-- preview-bootstrap.html — inlined verbatim (packages/ui-kit/src/styles/preview-bootstrap.html) -->
+    <style id="kit-tokens">
+      /**
+       * @repo/ui-kit — tokens.css
+       * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
+       *
+       * DARK-DEFAULT (see src/tokens/README.md before touching this file).
+       * :root already carries the dark/near-black values — there is no light-mode
+       * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
+       * of :root, kept only because the approved mockups literally set
+       * data-theme="dark" on <html> and the Tailwind config's darkMode selector
+       * references it — not because a second theme exists.
+       */
+
+      :root,
+      [data-theme="dark"] {
+        color-scheme: dark;
+
+        /* ---- color.neutral ---- */
+        --color-neutral-50: #fbf3f1;
+        --color-neutral-100: #e6dcdc;
+        --color-neutral-200: #d8bfc9;
+        --color-neutral-300: #b0a3a8;
+        --color-neutral-400: #95868d;
+        --color-neutral-500: #8e6a82;
+        --color-neutral-600: #64515d;
+        --color-neutral-700: #4e3a48;
+        --color-neutral-800: #3b2635;
+        --color-neutral-900: #260f20;
+        --color-neutral-950: #160712;
+
+        /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
+        --color-accent-50: #fbeff6;
+        --color-accent-100: #f7d9eb;
+        --color-accent-200: #f2badb;
+        --color-accent-300: #ed91c7;
+        --color-accent-400: #e75aac;
+        --color-accent-500: #c2187a;
+        --color-accent-600: #a51266;
+        --color-accent-700: #870d50;
+        --color-accent-800: #67093b;
+        --color-accent-900: #4b062a;
+        --color-accent-950: #2f041a;
+
+        /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
+        --color-secondary-500: #e9c87e;
+        --color-secondary-600: #c99a3f;
+
+        /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
+        --color-highlight-300: #f8c9bf;
+        --color-highlight-500: #f5876f;
+
+        /* ---- color.semantic ---- */
+        --color-success: #6fcb99;
+        --color-warning: #e9c87e;
+        --color-danger: #f58a80;
+        --color-info: #e9c87e;
+
+        /* ---- color.surface ---- */
+        --color-surface-base: #160712;
+        --color-surface-raised: #260f20;
+        --color-surface-overlay: #1e0a1ce6;
+        --color-surface-inverted: #fbf3f1;
+
+        /* ---- color.text ---- */
+        --color-text-primary: #fbf3f1;
+        --color-text-secondary: #d8bfc9;
+        --color-text-tertiary: #8e6a82;
+        --color-text-inverted: #1e0a1c;
+
+        /* ---- color.border ---- */
+        --color-border-subtle: #4e3a48;
+        --color-border-default: #8e6a82;
+        --color-border-strong: #b0a3a8;
+
+        /* ---- color.pool (the inverted-context family — see README) ---- */
+        --color-pool-surface: #fbf3f1;
+        --color-pool-text: #1e0a1c;
+        --color-pool-text-secondary: #5a4356;
+        --color-pool-border: #8a7285;
+        --color-pool-danger: #a3221a;
+        --color-pool-success: #0f6b3d;
+
+        /* ---- typography.fontFamily ---- */
+        --font-family-sans:
+          "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-family-mono:
+          "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+        --font-family-display: "Cormorant Garamond", Georgia, serif;
+
+        /* ---- typography.fontSize ---- */
+        --font-size-xs: 15px;
+        --font-size-sm: 17px;
+        --font-size-md: 18px;
+        --font-size-lg: 19px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 36px;
+        --font-size-5xl: 48px;
+        --font-size-6xl: 64px;
+
+        /* ---- typography.fontWeight ---- */
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* ---- typography.lineHeight ---- */
+        --line-height-tight: 1.05;
+        --line-height-snug: 1.2;
+        --line-height-normal: 1.6;
+        --line-height-relaxed: 1.7;
+
+        /* ---- typography.letterSpacing ---- */
+        --letter-spacing-tight: -0.005em;
+        --letter-spacing-normal: 0em;
+        --letter-spacing-wide: 0.18em;
+
+        /* ---- spacing ---- */
+        --spacing-0: 0px;
+        --spacing-0_5: 2px;
+        --spacing-1: 4px;
+        --spacing-2: 8px;
+        --spacing-3: 12px;
+        --spacing-4: 16px;
+        --spacing-5: 20px;
+        --spacing-6: 24px;
+        --spacing-8: 32px;
+        --spacing-10: 40px;
+        --spacing-12: 48px;
+        --spacing-16: 64px;
+        --spacing-20: 80px;
+        --spacing-24: 96px;
+
+        /* ---- radius (the direction uses --radius-none everywhere except a true
+           circle avatar, which uses --radius-full — see README §Shape law) ---- */
+        --radius-none: 0px;
+        --radius-sm: 2px;
+        --radius-md: 4px;
+        --radius-lg: 8px;
+        --radius-xl: 12px;
+        --radius-2xl: 16px;
+        --radius-full: 9999px;
+
+        /* ---- shadow (unused by this direction — kept for schema completeness) --- */
+        --shadow-xs: none;
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+        --shadow-xl: none;
+
+        /* ---- motion ---- */
+        --motion-duration-instant: 80ms;
+        --motion-duration-fast: 120ms;
+        --motion-duration-normal: 150ms;
+        --motion-duration-slow: 220ms;
+        --motion-duration-slower: 320ms;
+        --motion-duration-ambient: 24000ms;
+        --motion-easing-linear: linear;
+        --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+        --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
+        --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
+        --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* ---- zIndex ---- */
+        --z-base: 0;
+        --z-dropdown: 1000;
+        --z-sticky: 1100;
+        --z-overlay: 1200;
+        --z-modal: 1300;
+        --z-toast: 1400;
+        --z-tooltip: 1500;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: ["class", '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              neutral: {
+                50: "var(--color-neutral-50)",
+                100: "var(--color-neutral-100)",
+                200: "var(--color-neutral-200)",
+                300: "var(--color-neutral-300)",
+                400: "var(--color-neutral-400)",
+                500: "var(--color-neutral-500)",
+                600: "var(--color-neutral-600)",
+                700: "var(--color-neutral-700)",
+                800: "var(--color-neutral-800)",
+                900: "var(--color-neutral-900)",
+                950: "var(--color-neutral-950)",
+              },
+              accent: {
+                50: "var(--color-accent-50)",
+                100: "var(--color-accent-100)",
+                200: "var(--color-accent-200)",
+                300: "var(--color-accent-300)",
+                400: "var(--color-accent-400)",
+                500: "var(--color-accent-500)",
+                600: "var(--color-accent-600)",
+                700: "var(--color-accent-700)",
+                800: "var(--color-accent-800)",
+                900: "var(--color-accent-900)",
+                950: "var(--color-accent-950)",
+              },
+              secondary: {
+                500: "var(--color-secondary-500)",
+                600: "var(--color-secondary-600)",
+              },
+              highlight: {
+                300: "var(--color-highlight-300)",
+                500: "var(--color-highlight-500)",
+              },
+              success: "var(--color-success)",
+              warning: "var(--color-warning)",
+              danger: "var(--color-danger)",
+              info: "var(--color-info)",
+              surface: {
+                base: "var(--color-surface-base)",
+                raised: "var(--color-surface-raised)",
+                overlay: "var(--color-surface-overlay)",
+                inverted: "var(--color-surface-inverted)",
+              },
+              text: {
+                primary: "var(--color-text-primary)",
+                secondary: "var(--color-text-secondary)",
+                tertiary: "var(--color-text-tertiary)",
+                inverted: "var(--color-text-inverted)",
+              },
+              border: {
+                subtle: "var(--color-border-subtle)",
+                DEFAULT: "var(--color-border-default)",
+                strong: "var(--color-border-strong)",
+              },
+              pool: {
+                surface: "var(--color-pool-surface)",
+                text: "var(--color-pool-text)",
+                "text-secondary": "var(--color-pool-text-secondary)",
+                border: "var(--color-pool-border)",
+                danger: "var(--color-pool-danger)",
+                success: "var(--color-pool-success)",
+              },
+            },
+            fontFamily: {
+              sans: "var(--font-family-sans)",
+              mono: "var(--font-family-mono)",
+              display: "var(--font-family-display)",
+            },
+            fontSize: {
+              xs: "var(--font-size-xs)",
+              sm: "var(--font-size-sm)",
+              md: "var(--font-size-md)",
+              lg: "var(--font-size-lg)",
+              xl: "var(--font-size-xl)",
+              "2xl": "var(--font-size-2xl)",
+              "3xl": "var(--font-size-3xl)",
+              "4xl": "var(--font-size-4xl)",
+              "5xl": "var(--font-size-5xl)",
+              "6xl": "var(--font-size-6xl)",
+            },
+            fontWeight: {
+              regular: "var(--font-weight-regular)",
+              medium: "var(--font-weight-medium)",
+              semibold: "var(--font-weight-semibold)",
+              bold: "var(--font-weight-bold)",
+            },
+            lineHeight: {
+              tight: "var(--line-height-tight)",
+              snug: "var(--line-height-snug)",
+              normal: "var(--line-height-normal)",
+              relaxed: "var(--line-height-relaxed)",
+            },
+            letterSpacing: {
+              tight: "var(--letter-spacing-tight)",
+              normal: "var(--letter-spacing-normal)",
+              wide: "var(--letter-spacing-wide)",
+            },
+            spacing: {
+              0.5: "var(--spacing-0_5)",
+              1: "var(--spacing-1)",
+              2: "var(--spacing-2)",
+              3: "var(--spacing-3)",
+              4: "var(--spacing-4)",
+              5: "var(--spacing-5)",
+              6: "var(--spacing-6)",
+              8: "var(--spacing-8)",
+              10: "var(--spacing-10)",
+              12: "var(--spacing-12)",
+              16: "var(--spacing-16)",
+              20: "var(--spacing-20)",
+              24: "var(--spacing-24)",
+            },
+            borderRadius: {
+              none: "var(--radius-none)",
+              sm: "var(--radius-sm)",
+              DEFAULT: "var(--radius-md)",
+              md: "var(--radius-md)",
+              lg: "var(--radius-lg)",
+              xl: "var(--radius-xl)",
+              "2xl": "var(--radius-2xl)",
+              full: "var(--radius-full)",
+            },
+            boxShadow: {
+              xs: "var(--shadow-xs)",
+              sm: "var(--shadow-sm)",
+              DEFAULT: "var(--shadow-md)",
+              md: "var(--shadow-md)",
+              lg: "var(--shadow-lg)",
+              xl: "var(--shadow-xl)",
+            },
+            transitionDuration: {
+              instant: "var(--motion-duration-instant)",
+              fast: "var(--motion-duration-fast)",
+              DEFAULT: "var(--motion-duration-normal)",
+              normal: "var(--motion-duration-normal)",
+              slow: "var(--motion-duration-slow)",
+              slower: "var(--motion-duration-slower)",
+            },
+            transitionTimingFunction: {
+              linear: "var(--motion-easing-linear)",
+              standard: "var(--motion-easing-standard)",
+              decel: "var(--motion-easing-decel)",
+              accel: "var(--motion-easing-accel)",
+              spring: "var(--motion-easing-spring)",
+            },
+            zIndex: {
+              dropdown: "var(--z-dropdown)",
+              sticky: "var(--z-sticky)",
+              overlay: "var(--z-overlay)",
+              modal: "var(--z-modal)",
+              toast: "var(--z-toast)",
+              tooltip: "var(--z-tooltip)",
+            },
+          },
+        },
+      };
+    </script>
+    <!-- /preview-bootstrap.html -->
+
+    <style>
+      .main-field {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 42%;
+        filter: brightness(0.42) saturate(1.04);
+        opacity: 0.55;
+        z-index: 0;
+        pointer-events: none;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid var(--color-secondary-500);
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible,
+      .on-pool input:focus-visible,
+      .on-pool textarea:focus-visible,
+      .on-pool label:focus-within {
+        outline: 2px solid var(--color-accent-500);
+      }
+      .skel {
+        background: var(--color-text-secondary);
+        opacity: 0.14;
+      }
+      dialog[data-kit-component="ConfirmDialog"] {
+        border: none;
+      }
+      dialog[data-kit-component="ConfirmDialog"]::backdrop {
+        background: rgba(10, 3, 9, 0.6);
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      input[type="number"],
+      textarea {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--color-pool-border);
+        border-radius: 0;
+        color: var(--color-pool-text);
+        width: 100%;
+        padding: 0.5rem 0;
+      }
+      input[type="text"]::placeholder,
+      input[type="email"]::placeholder,
+      input[type="tel"]::placeholder,
+      input[type="number"]::placeholder,
+      textarea::placeholder {
+        color: var(--color-pool-text-secondary);
+        opacity: 0.7;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    data-kit-layout="AppShell"
+    data-screen-id="admin-settings"
+    class="bg-surface-base text-text-primary font-sans"
+  >
+    <a
+      href="#account-h"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-5 focus:top-5 focus:z-tooltip bg-secondary-500 px-5 py-3 text-sm font-semibold text-text-inverted"
+      >Skip to your account</a
+    >
+
+    <div class="flex min-h-screen">
+      <!-- ================= SIDE MENU ================= -->
+      <aside
+        data-kit-component="SideMenu"
+        class="relative hidden lg:flex w-[256px] shrink-0 flex-col gap-7 px-5 py-7 overflow-hidden"
+        aria-label="Admin sections"
+      >
+        <div class="relative z-10 flex flex-col gap-7 h-full">
+          <a
+            data-pattern="wordmark"
+            data-variant="rail"
+            href="/admin"
+            aria-label="The Field Work admin — Today"
+            class="block w-full min-h-[44px]"
+          >
+            <img
+              src="../../../assets/brand/logo-horizontal.svg"
+              alt="The Field Work"
+              width="440"
+              height="120"
+              class="h-auto w-full"
+            />
+          </a>
+          <p
+            data-pattern="eyebrow"
+            class="font-mono text-xs uppercase tracking-wide text-secondary-500 -mt-4"
+          >
+            Admin
+          </p>
+
+          <nav
+            data-pattern="sidebar-nav-row"
+            data-kit-component="Nav"
+            aria-label="Admin"
+            class="relative flex flex-col gap-0.5"
+          >
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="7" height="9" rx="1" />
+                <rect x="14" y="3" width="7" height="5" rx="1" />
+                <rect x="14" y="12" width="7" height="9" rx="1" />
+                <rect x="3" y="16" width="7" height="5" rx="1" />
+              </svg>
+              Today
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/calendar"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="17" rx="2" />
+                <path d="M8 2v4M16 2v4M3 10h18" />
+              </svg>
+              Calendar
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/bookings"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+                <path
+                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"
+                />
+              </svg>
+              Requests
+              <span class="ml-auto font-mono text-xs text-secondary-500"
+                >2</span
+              >
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/page"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 3v5h5" />
+                <path d="m9.5 15.5 1-1 3-3 1.5 1.5-3 3-1 1H9.5v-1.5Z" />
+              </svg>
+              Home page
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/offerings"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+                <path d="m3 12 9 5 9-5" />
+                <path d="m3 17 9 5 9-5" />
+              </svg>
+              Offerings
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/media"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <circle cx="9" cy="10" r="2" />
+                <path d="m3 17 5-4 4 3 3-2 6 5" />
+              </svg>
+              Pictures
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/newsletters"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <path d="m2 7 10 6 10-6" />
+              </svg>
+              Newsletter
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/subscribers"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Subscribers
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/documents"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 3v5h5" />
+                <path d="M9 13h6M9 17h4" />
+              </svg>
+              Documents
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="default"
+              href="/admin/availability"
+              class="flex min-h-[46px] items-center gap-3 px-3.5 text-sm font-medium text-text-secondary no-underline transition-colors duration-fast hover:bg-secondary-500/[.08] hover:text-text-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+              Availability
+            </a>
+            <a
+              data-kit-component="NavItem"
+              data-kit-variant="active"
+              href="/admin/settings"
+              aria-current="page"
+              class="flex min-h-[46px] items-center gap-3 bg-surface-inverted px-3.5 text-sm font-bold text-text-inverted no-underline"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-[18px] w-[18px] shrink-0"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.9 13.6a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.2a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7h-.2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.2-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V4a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7h.2a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"
+                />
+              </svg>
+              Settings
+            </a>
+          </nav>
+
+          <p
+            class="mt-auto font-mono text-xs leading-relaxed text-text-secondary"
+          >
+            Signed in as Marianne<br />Owner &middot; session ends 2 Sep
+          </p>
+        </div>
+      </aside>
+
+      <!-- ================= MAIN COLUMN ================= -->
+      <div class="min-w-0 flex-1">
+        <!-- ============ UTILITY BAR ============ -->
+        <header
+          data-kit-component="Header"
+          data-kit-variant="admin"
+          class="sticky top-0 z-sticky flex flex-wrap items-center justify-between gap-4 bg-surface-base px-6 lg:px-11 py-5 border-b border-border/40"
+        >
+          <div class="flex items-center gap-3 lg:hidden">
+            <img
+              src="../../../assets/brand/logo-horizontal.svg"
+              alt="The Field Work"
+              width="300"
+              height="82"
+              class="h-[26px] w-auto"
+            />
+          </div>
+          <p class="font-mono text-xs tracking-wide text-text-secondary">
+            THURSDAY 6 AUGUST &middot; 09:14 &middot; EUROPE/LONDON
+          </p>
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span
+              data-kit-component="StatusBadge"
+              data-kit-variant="success"
+              class="flex items-center gap-2 font-mono text-xs text-success"
+            >
+              <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+              All changes saved
+            </span>
+            <a
+              data-kit-component="Link"
+              data-kit-variant="on-dark"
+              class="flex items-center gap-1.5 text-sm font-medium text-secondary-500 underline decoration-secondary-500 transition-colors duration-fast hover:text-text-primary hover:decoration-text-primary"
+              href="/"
+            >
+              View site
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-3.5 w-3.5"
+                aria-hidden="true"
+              >
+                <path d="M14 4h6v6" />
+                <path d="M20 4 10 14" />
+                <path
+                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                />
+              </svg>
+            </a>
+            <button
+              type="button"
+              data-kit-component="Menu"
+              data-kit-variant="account"
+              class="flex items-center gap-2.5 transition-colors duration-fast"
+              aria-haspopup="menu"
+              aria-expanded="false"
+            >
+              <span
+                data-kit-component="Avatar"
+                data-kit-size="sm"
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-500 font-mono text-xs font-bold text-text-inverted"
+                aria-hidden="true"
+                >M</span
+              >
+              <span class="text-left">
+                <span class="block text-sm font-semibold text-text-primary"
+                  >Marianne</span
+                >
+                <span class="block text-xs text-text-secondary">Owner</span>
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-3.5 w-3.5 text-text-secondary"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <main id="main" class="relative px-6 lg:px-11 pb-14">
+          <img
+            src="../../../assets/images/new/aura-field-abstract.png"
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[.55] [object-position:50%_42%] [filter:brightness(.42)_saturate(1.04)]"
+          />
+          <div class="relative z-10 max-w-[1280px] mx-auto">
+            <!-- ============ THE ONE QUESTION ============ -->
+            <section class="pt-8 pb-1" aria-labelledby="settings-h">
+              <p
+                data-pattern="eyebrow"
+                class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+              >
+                Settings
+              </p>
+              <h1
+                id="settings-h"
+                data-kit-component="Heading"
+                data-kit-variant="display"
+                class="font-display font-normal text-3xl sm:text-4xl text-text-primary mt-3 leading-tight"
+              >
+                What the site says about you, and how you&rsquo;re paid.
+              </h1>
+              <p class="mt-3 max-w-[62ch] text-sm text-text-secondary">
+                Four groups: your account, what the public site shows, what
+                reaches your inbox, and where payments land. Nothing changes
+                until you save at the bottom of this page.
+              </p>
+            </section>
+
+            <!-- ============ ACCOUNT ============ -->
+            <section class="mt-8" aria-labelledby="account-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="account-h"
+                  data-pattern="eyebrow"
+                  class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+                >
+                  Account
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  How you sign in to this admin
+                </p>
+              </div>
+
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="Card"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+              >
+                <div data-kit-component="FormField" class="max-w-[420px]">
+                  <label
+                    for="signin-email"
+                    class="block text-sm font-medium text-pool-text-secondary"
+                    >Sign-in email</label
+                  >
+                  <input
+                    id="signin-email"
+                    type="email"
+                    value="marianne@thefieldwork.co.uk"
+                    class="mt-1 text-lg"
+                  />
+                  <p class="mt-1.5 text-sm text-pool-text-secondary">
+                    Used to sign in here. Not shown on the public site.
+                  </p>
+                </div>
+
+                <div
+                  class="mt-6 border-t border-pool-border/[.22] pt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2"
+                >
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-pool-text">Password</p>
+                    <p class="mt-0.5 text-sm text-pool-text-secondary">
+                      Changed 3 months ago.
+                    </p>
+                  </div>
+                  <a
+                    href="#"
+                    data-kit-component="Link"
+                    class="shrink-0 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                    >Change password</a
+                  >
+                </div>
+
+                <div
+                  class="mt-5 border-t border-pool-border/[.22] pt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2"
+                >
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-pool-text">Sessions</p>
+                    <p class="mt-0.5 text-sm text-pool-text-secondary">
+                      Signed in on 2 devices.
+                    </p>
+                  </div>
+                  <a
+                    href="#"
+                    data-kit-component="Link"
+                    class="shrink-0 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                    >Sign out everywhere</a
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ PRACTICE DETAILS ============ -->
+            <section class="mt-10" aria-labelledby="practice-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="practice-h"
+                  data-pattern="eyebrow"
+                  class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+                >
+                  Practice details
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  Everything here appears somewhere on thefieldwork.co.uk
+                </p>
+              </div>
+
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="Card"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+              >
+                <div class="grid gap-6 sm:grid-cols-2">
+                  <div data-kit-component="FormField">
+                    <label
+                      for="contact-email"
+                      class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <rect x="3" y="5" width="18" height="14" />
+                        <path d="m3 7 9 6 9-6" />
+                      </svg>
+                      Contact email
+                    </label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      value="hello@thefieldwork.co.uk"
+                      class="mt-1"
+                    />
+                    <p class="mt-1.5 text-sm text-pool-text-secondary">
+                      Shown on the contact page and in booking confirmations.
+                    </p>
+                  </div>
+
+                  <div data-kit-component="FormField">
+                    <label
+                      for="contact-phone"
+                      class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 1h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7 8.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z"
+                        />
+                      </svg>
+                      Phone
+                    </label>
+                    <input
+                      id="contact-phone"
+                      type="tel"
+                      value="+44 7700 900312"
+                      class="mt-1"
+                    />
+                    <p class="mt-1.5 text-sm text-pool-text-secondary">
+                      Shown on the contact page only.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  data-kit-component="FormField"
+                  class="mt-6 border-t border-pool-border/[.22] pt-6"
+                >
+                  <label
+                    for="bio"
+                    class="block text-sm font-medium text-pool-text-secondary"
+                    >About you</label
+                  >
+                  <textarea id="bio" rows="3" class="mt-1 resize-none">
+I trained in energy healing and now work from a garden room at home. Sessions are seated, and you keep your clothes on throughout.</textarea>
+                  <p class="mt-1.5 text-sm text-pool-text-secondary">
+                    Shown on the about page, in your words.
+                  </p>
+                </div>
+
+                <div
+                  data-kit-component="FormField"
+                  class="mt-6 border-t border-pool-border/[.22] pt-6"
+                >
+                  <label
+                    for="credentials"
+                    class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z"
+                      />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                    Training &amp; experience (optional)
+                  </label>
+                  <input
+                    id="credentials"
+                    type="text"
+                    placeholder="Not yet added."
+                    class="mt-1"
+                  />
+                  <p
+                    data-kit-component="InlineNotice"
+                    data-kit-variant="warning"
+                    class="mt-2 flex items-start gap-1.5 text-sm text-pool-text-secondary"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="mt-0.5 h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 8v5M12 16h.01" />
+                    </svg>
+                    Not confirmed yet. Add this only when you&rsquo;re ready
+                    &mdash; it won&rsquo;t appear on the site until it does.
+                  </p>
+                </div>
+
+                <div
+                  class="mt-6 border-t border-pool-border/[.22] pt-6 grid gap-6 sm:grid-cols-2"
+                >
+                  <div data-kit-component="FormField">
+                    <label
+                      for="instagram"
+                      class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <rect x="3" y="3" width="18" height="18" />
+                        <circle cx="12" cy="12" r="4" />
+                        <circle cx="17.3" cy="6.7" r="0.6" />
+                      </svg>
+                      Instagram
+                    </label>
+                    <input
+                      id="instagram"
+                      type="text"
+                      value="@thefieldwork.somerset"
+                      class="mt-1"
+                    />
+                  </div>
+
+                  <div data-kit-component="FormField">
+                    <label
+                      for="also-online"
+                      class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <path d="M14 4h6v6" />
+                        <path d="M20 4 10 14" />
+                        <path
+                          d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                        />
+                      </svg>
+                      Also online
+                    </label>
+                    <input
+                      id="also-online"
+                      type="text"
+                      placeholder="Not added."
+                      class="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div class="mt-6 border-t border-pool-border/[.22] pt-6">
+                  <p
+                    class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    >
+                      <rect x="3" y="4" width="18" height="16" />
+                      <circle cx="8.5" cy="9.5" r="1.5" />
+                      <path d="m21 15-5-5-11 11" />
+                    </svg>
+                    Background image
+                  </p>
+                  <p class="mt-1 text-sm text-pool-text-secondary">
+                    The photograph behind every page on the public site.
+                  </p>
+                  <div
+                    data-kit-component="MediaPicker"
+                    class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3"
+                  >
+                    <button
+                      type="button"
+                      data-kit-component="MediaPickerItem"
+                      data-kit-props="selected"
+                      class="relative aspect-[4/3] overflow-hidden border-2 border-accent-500 text-left"
+                    >
+                      <img
+                        src="../../../assets/images/new/marianne-room-aglow.png"
+                        alt="Marianne seated in a warm, low-lit room"
+                        class="h-full w-full object-cover"
+                      />
+                      <span
+                        class="absolute inset-x-0 bottom-0 bg-accent-500 px-2 py-1 font-mono text-xs uppercase tracking-wide text-pool-surface"
+                        >Current</span
+                      >
+                    </button>
+                    <button
+                      type="button"
+                      data-kit-component="MediaPickerItem"
+                      class="relative aspect-[4/3] overflow-hidden border border-pool-border/40 text-left"
+                    >
+                      <img
+                        src="../../../assets/images/new/window-last-light.png"
+                        alt="Last light through a window at dusk"
+                        class="h-full w-full object-cover"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      data-kit-component="MediaPickerItem"
+                      class="relative aspect-[4/3] overflow-hidden border border-pool-border/40 text-left"
+                    >
+                      <img
+                        src="../../../assets/images/new/chair-with-her-coat.png"
+                        alt="An empty chair with her coat over the back"
+                        class="h-full w-full object-cover"
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      data-kit-component="MediaPickerItem"
+                      class="relative aspect-[4/3] overflow-hidden border border-pool-border/40 text-left"
+                    >
+                      <img
+                        src="../../../assets/images/new/work-wide-the-room.png"
+                        alt="The room, seen wide, where sessions happen"
+                        class="h-full w-full object-cover"
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  class="mt-6 border-t border-pool-border/[.22] pt-6 flex flex-wrap items-end gap-6"
+                >
+                  <div data-kit-component="FormField" class="w-[140px]">
+                    <label
+                      for="hold-duration"
+                      class="flex items-center gap-1.5 text-sm font-medium text-pool-text-secondary"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-3.5 w-3.5 shrink-0"
+                        aria-hidden="true"
+                      >
+                        <path d="M10 2h4M12 6v4l3 2" />
+                        <circle cx="12" cy="13" r="8" />
+                      </svg>
+                      Booking hold
+                    </label>
+                    <div class="mt-1 flex items-baseline gap-2">
+                      <input
+                        id="hold-duration"
+                        type="number"
+                        value="48"
+                        class="w-[64px]"
+                      />
+                      <span class="text-sm text-pool-text-secondary"
+                        >hours</span
+                      >
+                    </div>
+                  </div>
+                  <p class="max-w-[46ch] text-sm text-pool-text-secondary">
+                    How long a request holds a place before it expires and the
+                    place goes back on sale.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ NOTIFICATIONS ============ -->
+            <section class="mt-10" aria-labelledby="notifications-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="notifications-h"
+                  data-pattern="eyebrow"
+                  class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+                >
+                  Notifications
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  Today always shows everything, whether or not it&rsquo;s here
+                </p>
+              </div>
+
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="Card"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 mt-4"
+              >
+                <label
+                  class="flex items-center justify-between gap-6 border-t border-pool-border/[.22] py-4 cursor-pointer first:border-t-0"
+                >
+                  <span class="min-w-0">
+                    <span class="block text-sm font-medium text-pool-text"
+                      >New booking request</span
+                    >
+                    <span class="block mt-0.5 text-sm text-pool-text-secondary"
+                      >Emailed the moment someone asks to hold a place.</span
+                    >
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked
+                    class="sr-only"
+                    aria-label="New booking request"
+                  />
+                  <span
+                    data-kit-component="Checkbox"
+                    data-kit-props="checked"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center border border-accent-500 bg-accent-500"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-4 w-4 text-pool-surface"
+                    >
+                      <path d="M4 12l5 5L20 6" />
+                    </svg>
+                  </span>
+                </label>
+
+                <label
+                  class="flex items-center justify-between gap-6 border-t border-pool-border/[.22] py-4 cursor-pointer"
+                >
+                  <span class="min-w-0">
+                    <span class="block text-sm font-medium text-pool-text"
+                      >Balance overdue</span
+                    >
+                    <span class="block mt-0.5 text-sm text-pool-text-secondary"
+                      >Emailed when a deposit&rsquo;s balance is more than 7
+                      days late.</span
+                    >
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked
+                    class="sr-only"
+                    aria-label="Balance overdue"
+                  />
+                  <span
+                    data-kit-component="Checkbox"
+                    data-kit-props="checked"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center border border-accent-500 bg-accent-500"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-4 w-4 text-pool-surface"
+                    >
+                      <path d="M4 12l5 5L20 6" />
+                    </svg>
+                  </span>
+                </label>
+
+                <label
+                  class="flex items-center justify-between gap-6 border-t border-pool-border/[.22] py-4 cursor-pointer"
+                >
+                  <span class="min-w-0">
+                    <span class="block text-sm font-medium text-pool-text"
+                      >Refund completed</span
+                    >
+                    <span class="block mt-0.5 text-sm text-pool-text-secondary"
+                      >Emailed once a refund finishes processing with
+                      Stripe.</span
+                    >
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked
+                    class="sr-only"
+                    aria-label="Refund completed"
+                  />
+                  <span
+                    data-kit-component="Checkbox"
+                    data-kit-props="checked"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center border border-accent-500 bg-accent-500"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-4 w-4 text-pool-surface"
+                    >
+                      <path d="M4 12l5 5L20 6" />
+                    </svg>
+                  </span>
+                </label>
+
+                <label
+                  class="flex items-center justify-between gap-6 border-t border-pool-border/[.22] py-4 cursor-pointer"
+                >
+                  <span class="min-w-0">
+                    <span class="block text-sm font-medium text-pool-text"
+                      >Newsletter sent</span
+                    >
+                    <span class="block mt-0.5 text-sm text-pool-text-secondary"
+                      >Emailed a copy when a newsletter goes out to
+                      subscribers.</span
+                    >
+                  </span>
+                  <input
+                    type="checkbox"
+                    class="sr-only"
+                    aria-label="Newsletter sent"
+                  />
+                  <span
+                    data-kit-component="Checkbox"
+                    class="flex h-6 w-6 shrink-0 items-center justify-center border border-pool-border bg-pool-surface"
+                    aria-hidden="true"
+                  ></span>
+                </label>
+              </div>
+            </section>
+
+            <!-- ============ PAYMENT CONNECTION ============ -->
+            <section class="mt-10" aria-labelledby="payment-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="payment-h"
+                  data-pattern="eyebrow"
+                  class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+                >
+                  Payment connection
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  Stripe holds your bank details &mdash; this only shows
+                  what&rsquo;s connected
+                </p>
+              </div>
+
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="Card"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+              >
+                <p
+                  data-kit-component="StatusBadge"
+                  data-kit-variant="success"
+                  class="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-pool-success"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-3.5 w-3.5 shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5l-8-3Z"
+                    />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  Connected to Stripe
+                </p>
+                <p class="mt-2 text-lg font-semibold text-pool-text">
+                  Payouts go to the account ending
+                  <span
+                    class="font-mono"
+                    style="font-variant-numeric: tabular-nums"
+                    >4471</span
+                  >.
+                </p>
+                <p class="mt-1 font-mono text-xs text-pool-text-secondary">
+                  Connected 12 March 2025
+                </p>
+                <a
+                  href="#"
+                  data-kit-component="Link"
+                  class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+                >
+                  Manage payout details on Stripe
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-3.5 w-3.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M14 4h6v6" />
+                    <path d="M20 4 10 14" />
+                    <path
+                      d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                    />
+                  </svg>
+                </a>
+
+                <div class="mt-6 border-t border-pool-border/[.22] pt-6">
+                  <p class="max-w-[52ch] text-sm text-pool-text-secondary">
+                    Disconnecting stops new bookings from taking deposits. 3
+                    requests this month rely on this connection.
+                  </p>
+                  <a
+                    href="#disconnect-guard"
+                    data-kit-component="Button"
+                    data-kit-variant="ghost-danger"
+                    class="mt-3 inline-block text-sm font-medium text-pool-danger underline decoration-1 underline-offset-4 hover:text-pool-text"
+                    aria-haspopup="dialog"
+                    aria-controls="disconnect-guard"
+                    >Disconnect Stripe</a
+                  >
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ THE OTHER STATES ============ -->
+            <section class="mt-12" aria-labelledby="states-h">
+              <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                <h2
+                  id="states-h"
+                  data-pattern="eyebrow"
+                  data-variant="muted"
+                  class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+                >
+                  Settings &mdash; the other states
+                </h2>
+                <p class="font-mono text-xs text-text-secondary">
+                  The same panel, holding a different situation
+                </p>
+              </div>
+
+              <div
+                data-pattern="state-panel"
+                data-kit-component="StatePanel"
+                class="mt-4 grid gap-4 lg:grid-cols-3 items-start"
+              >
+                <!-- FIRST RUN (empty-equivalent for a singleton record) -->
+                <article
+                  data-state="empty"
+                  data-kit-component="EmptyState"
+                  class="on-pool bg-pool-surface text-pool-text px-6 py-7 sm:px-7"
+                >
+                  <p
+                    class="font-mono text-xs uppercase tracking-wide text-accent-500"
+                  >
+                    First run
+                  </p>
+                  <p class="mt-2 text-xl font-semibold text-pool-text">
+                    Nothing filled in yet.
+                  </p>
+                  <p
+                    class="mt-2 max-w-[36rem] text-sm text-pool-text-secondary"
+                  >
+                    A brand-new practice starts here. The public site shows
+                    sensible defaults until you add your own contact details.
+                  </p>
+                  <a
+                    href="#practice-h"
+                    data-kit-component="Link"
+                    class="mt-4 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+                  >
+                    Start with contact details
+                  </a>
+                </article>
+
+                <!-- LOADING -->
+                <article
+                  data-state="loading"
+                  data-kit-component="Skeleton"
+                  aria-busy="true"
+                  class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+                >
+                  <p
+                    class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+                  >
+                    Loading
+                  </p>
+                  <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+                    <div class="skel h-3.5 w-1/3"></div>
+                    <div class="skel h-8 w-3/5" style="opacity: 0.22"></div>
+                    <div class="skel h-3.5 w-4/5"></div>
+                  </div>
+                  <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+                    The panel keeps its shape and stays at rest until your
+                    settings arrive.
+                  </p>
+                </article>
+
+                <!-- ERROR -->
+                <article
+                  data-state="error"
+                  data-kit-component="ErrorState"
+                  class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+                >
+                  <p
+                    class="font-mono text-xs uppercase tracking-wide text-pool-danger"
+                  >
+                    Error
+                  </p>
+                  <p class="mt-2 text-xl font-semibold text-pool-danger">
+                    Couldn&rsquo;t load your settings.
+                  </p>
+                  <p class="mt-2 text-sm text-pool-text-secondary">
+                    Nothing has changed and no edit has been lost.
+                  </p>
+                  <a
+                    href="/admin/settings"
+                    data-kit-component="Link"
+                    class="mt-4 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+                    >Try again</a
+                  >
+                </article>
+              </div>
+            </section>
+
+            <!-- ============ SAVE — the one primary control ============ -->
+            <section class="mt-10" aria-labelledby="save-h">
+              <h2 id="save-h" class="sr-only">Save your changes</h2>
+              <div
+                data-pattern="clearing-plate"
+                data-variant="admin-panel"
+                data-kit-component="Card"
+                class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-6">
+                  <p class="max-w-[46ch] text-sm text-pool-text-secondary">
+                    Saves the account, practice details, notifications and
+                    payment connection above, all at once.
+                  </p>
+                  <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <a
+                      href="/admin/settings"
+                      data-kit-component="Link"
+                      class="text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+                      >Discard changes</a
+                    >
+                    <button
+                      type="submit"
+                      data-kit-component="Button"
+                      data-kit-variant="primary"
+                      data-kit-size="md"
+                      class="bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ============ DISCONNECT GUARD ============ -->
+    <dialog
+      id="disconnect-guard"
+      data-pattern="clearing-plate"
+      data-variant="admin-panel"
+      data-kit-component="ConfirmDialog"
+      class="bg-pool-surface text-pool-text max-w-[440px] w-full rounded-none shadow-none p-0"
+      aria-labelledby="disconnect-guard-title"
+    >
+      <div class="px-8 py-7">
+        <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+          Disconnect Stripe
+        </p>
+        <h2
+          id="disconnect-guard-title"
+          class="font-display text-2xl text-pool-text mt-2"
+        >
+          Stop taking deposits now?
+        </h2>
+        <p class="mt-2 text-sm text-pool-text-secondary">
+          New booking requests won&rsquo;t be able to hold a place with a
+          deposit until you reconnect. 3 requests this month have used this
+          connection. You&rsquo;ll need to reconnect through Stripe afterward.
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-6">
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="danger"
+            class="bg-pool-danger px-10 py-5 text-sm font-semibold text-pool-surface"
+          >
+            Disconnect Stripe
+          </button>
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="ghost"
+            class="text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+          >
+            Keep it connected
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

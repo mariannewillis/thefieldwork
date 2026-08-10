@@ -1,0 +1,951 @@
+{
+  "version": "3.0",
+  "generatedAt": "2026-08-06T22:45:00Z",
+  "app": {
+    "appId": "thefieldwork-admin",
+    "appName": "The Field Work — Admin",
+    "appType": "admin",
+    "layoutSkill": "desktop",
+    "defaultNavigation": {
+      "header": {
+        "variant": "admin",
+        "actions": ["view-site", "unpublished-changes", "account-menu"]
+      },
+      "footer": {
+        "variant": "hidden"
+      },
+      "sidemenu": {
+        "visible": true,
+        "items": [
+          "today",
+          "calendar",
+          "requests",
+          "home-page",
+          "offerings",
+          "pictures",
+          "newsletter",
+          "subscribers",
+          "documents",
+          "availability",
+          "settings"
+        ],
+        "activeSection": "today"
+      }
+    },
+    "screens": [
+      {
+        "id": "admin-login",
+        "file": "admin-login.html",
+        "routePattern": "/admin/login",
+        "name": "Sign in",
+        "description": "The single seeded owner account signs in; there is no registration screen anywhere in the product, the form is rate-limited by IP and by account, and the one route out is 'forgotten your password'.",
+        "section": "auth",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": []
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "brand-lockup",
+          "card",
+          "form-input",
+          "button-primary",
+          "error-state"
+        ],
+        "icons": ["mail", "lock", "eye", "eye-off", "alert-circle"],
+        "flows": ["first-run-setup", "recover-the-password"]
+      },
+      {
+        "id": "admin-forgot-password",
+        "file": "admin-forgot-password.html",
+        "routePattern": "/admin/forgot-password",
+        "name": "Forgotten password",
+        "description": "Ungated and rate-limited: she gives the account address and receives the same acknowledgement whether or not it matches, so the screen can never be used to confirm the owner's email — a deliberate designed state whose copy says what was done, never what was found.",
+        "section": "auth",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": []
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "brand-lockup",
+          "card",
+          "form-input",
+          "button-primary",
+          "inline-notice",
+          "error-state"
+        ],
+        "icons": [
+          "mail",
+          "send",
+          "shield-check",
+          "check-circle",
+          "alert-circle"
+        ],
+        "flows": ["recover-the-password"]
+      },
+      {
+        "id": "admin-reset-password",
+        "file": "admin-reset-password.html",
+        "routePattern": "/admin/reset-password/:token",
+        "name": "Set a new password",
+        "description": "Ungated, reached only from a single-use short-lived signed link, where the three token failures — expired, already used, not valid — are named separately because each needs a different next action, and the password rule is stated before she types rather than after she fails.",
+        "section": "auth",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "minimal",
+            "actions": []
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": false
+          }
+        },
+        "components": [
+          "brand-lockup",
+          "card",
+          "form-input",
+          "button-primary",
+          "inline-notice",
+          "error-state"
+        ],
+        "icons": [
+          "lock",
+          "eye",
+          "eye-off",
+          "timer",
+          "check-circle",
+          "alert-circle"
+        ],
+        "flows": ["recover-the-password"]
+      },
+      {
+        "id": "admin-dashboard",
+        "file": "admin-dashboard.html",
+        "routePattern": "/admin",
+        "name": "Today",
+        "description": "Answers 'what needs me today' above the fold — new booking requests first, holds nearest expiry surfaced as decisions with a deadline, then what is coming up; on day one its empty state is the ordered first-run setup list.",
+        "section": "today",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "today"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "stat-tile",
+          "setup-checklist",
+          "list-item",
+          "hold-timer",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "layout-dashboard",
+          "inbox",
+          "timer",
+          "calendar-days",
+          "circle-alert",
+          "chevron-right"
+        ],
+        "flows": [
+          "first-run-setup",
+          "publish-a-workshop",
+          "edit-and-publish-a-beat",
+          "triage-a-booking",
+          "set-the-working-pattern",
+          "write-and-send-an-issue",
+          "look-after-the-list",
+          "recover-the-password"
+        ]
+      },
+      {
+        "id": "admin-calendar",
+        "file": "admin-calendar.html",
+        "routePattern": "/admin/calendar",
+        "name": "Calendar",
+        "description": "One merged month-and-week calendar showing confirmed bookings, pending holds, derived workshop and course-session blocks and personal blocks as four visually distinct kinds, where blocking personal time happens in place and a derived block explains where it came from instead of silently refusing.",
+        "section": "calendar",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "calendar"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "calendar-month-grid",
+          "calendar-week-grid",
+          "calendar-block-chip",
+          "time-block-sheet",
+          "derived-block-explainer",
+          "hold-timer",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "calendar-days",
+          "calendar",
+          "clock",
+          "plus",
+          "link",
+          "lock",
+          "timer",
+          "chevron-left",
+          "chevron-right",
+          "x"
+        ],
+        "flows": [
+          "publish-a-workshop",
+          "build-a-course",
+          "block-personal-time",
+          "triage-a-booking",
+          "set-the-working-pattern"
+        ]
+      },
+      {
+        "id": "admin-availability",
+        "file": "admin-availability.html",
+        "routePattern": "/admin/availability",
+        "name": "When you work",
+        "description": "Owns the recurring weekly pattern AND session buffer, minimum lead time and booking horizon — the base layer the calendar subtracts from — deliberately separate from the calendar and the one screen in the admin that saves explicitly rather than autosaving.",
+        "section": "availability",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": [
+              "view-site",
+              "save-state",
+              "unpublished-changes",
+              "account-menu"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "availability"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "card",
+          "form-input",
+          "toggle-switch",
+          "button-primary",
+          "confirm-dialog",
+          "inline-notice",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "sliders-horizontal",
+          "clock",
+          "calendar-days",
+          "save",
+          "circle-alert",
+          "check"
+        ],
+        "flows": ["first-run-setup", "set-the-working-pattern"]
+      },
+      {
+        "id": "admin-landing-sections",
+        "file": "admin-landing-sections.html",
+        "routePattern": "/admin/page",
+        "name": "Home page",
+        "description": "The seven fixed narrative beats as seven editable groups with a visibility toggle on beats 2 to 6 only and no add, delete, reorder or styling controls at all, where preview opens the real public page from draft at /preview/[token] and the single publish confirmation itemises every pending change across both the beats and site settings.",
+        "section": "home-page",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": [
+              "view-site",
+              "save-state",
+              "unpublished-changes",
+              "account-menu"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "home-page"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "beat-editor-card",
+          "visibility-toggle",
+          "media-picker",
+          "publish-bar",
+          "confirm-dialog",
+          "inline-notice",
+          "skeleton",
+          "toast"
+        ],
+        "icons": [
+          "file-pen",
+          "eye",
+          "eye-off",
+          "image",
+          "badge-check",
+          "circle-alert",
+          "external-link",
+          "save"
+        ],
+        "flows": ["first-run-setup", "edit-and-publish-a-beat", "add-a-picture"]
+      },
+      {
+        "id": "admin-offerings",
+        "file": "admin-offerings.html",
+        "routePattern": "/admin/offerings",
+        "name": "What you offer",
+        "description": "Every Service, Workshop and Course in one list at equal billing, filterable by kind and by active or inactive, with dates and prices visible on the row and 'create' as the single primary action.",
+        "section": "offerings",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "offerings"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "filter-bar",
+          "data-table",
+          "offering-row",
+          "status-badge",
+          "button-primary",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "package",
+          "plus",
+          "filter",
+          "search",
+          "calendar-days",
+          "tag",
+          "layers",
+          "pencil"
+        ],
+        "flows": ["publish-a-workshop", "build-a-course"]
+      },
+      {
+        "id": "admin-offering-edit",
+        "file": "admin-offering-edit.html",
+        "routePattern": "/admin/offerings/:id",
+        "name": "Edit an offering",
+        "description": "One Offering in full, with kind chosen once at create because it governs every field beneath it, a Course's Sessions added and ordered inline, and delete guarded by the count of booking requests it would take with it.",
+        "section": "offerings",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": [
+              "view-site",
+              "save-state",
+              "unpublished-changes",
+              "account-menu"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "offerings"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "card",
+          "form-input",
+          "media-picker",
+          "session-list",
+          "button-primary",
+          "destructive-guard-modal",
+          "inline-notice",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "package",
+          "calendar-days",
+          "clock",
+          "map-pin",
+          "tag",
+          "users",
+          "layers",
+          "grip-vertical",
+          "image",
+          "trash-2",
+          "save"
+        ],
+        "flows": [
+          "publish-a-workshop",
+          "build-a-course",
+          "block-personal-time",
+          "add-a-picture"
+        ]
+      },
+      {
+        "id": "admin-bookings",
+        "file": "admin-bookings.html",
+        "routePattern": "/admin/bookings",
+        "name": "Requests",
+        "description": "The request queue with the visitor's message in full, the held slot and the time left on the hold, where confirming converts the hold into a confirmed calendar booking, declining releases the slot immediately, and an expired hold is shown as already released rather than silently dropped.",
+        "section": "requests",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "requests"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "filter-bar",
+          "data-table",
+          "booking-row",
+          "hold-timer",
+          "status-badge",
+          "confirm-dialog",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "inbox",
+          "timer",
+          "check-circle",
+          "x",
+          "mail",
+          "phone",
+          "calendar-days",
+          "filter",
+          "trash-2"
+        ],
+        "flows": ["triage-a-booking"]
+      },
+      {
+        "id": "admin-newsletters",
+        "file": "admin-newsletters.html",
+        "routePattern": "/admin/newsletters",
+        "name": "Newsletter",
+        "description": "Every issue, draft and sent, with its date and the number it actually went to; writing a new issue is the primary action and a sent issue is read-only forever because the copy in someone's inbox cannot be edited.",
+        "section": "newsletter",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "newsletter"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "data-table",
+          "list-item",
+          "status-badge",
+          "button-primary",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "mail-open",
+          "plus",
+          "send",
+          "users-round",
+          "calendar",
+          "badge-check",
+          "chevron-right"
+        ],
+        "flows": ["write-and-send-an-issue", "publish-and-retire-a-document"]
+      },
+      {
+        "id": "admin-newsletter-edit",
+        "file": "admin-newsletter-edit.html",
+        "routePattern": "/admin/newsletters/:id",
+        "name": "Write an issue",
+        "description": "Compose one issue — subject, preheader and a body built from a small fixed block set on her branded template with no styling controls at all — where test-send-to-self is unguarded and repeatable and the real send is irreversible behind a confirmation naming the exact confirmed-subscriber count.",
+        "section": "newsletter",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": [
+              "view-site",
+              "save-state",
+              "unpublished-changes",
+              "account-menu"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "newsletter"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "form-input",
+          "block-composer",
+          "document-attach",
+          "button-secondary",
+          "send-guard-modal",
+          "inline-notice",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "mail-open",
+          "send",
+          "image",
+          "file-text",
+          "layers",
+          "users-round",
+          "alert-circle",
+          "plus",
+          "save"
+        ],
+        "flows": ["write-and-send-an-issue", "publish-and-retire-a-document"]
+      },
+      {
+        "id": "admin-subscribers",
+        "file": "admin-subscribers.html",
+        "routePattern": "/admin/subscribers",
+        "name": "Subscribers",
+        "description": "The list with the confirmed count shown distinctly from the pending count because only one of those is the real audience, plus source and joined date as the consent evidence, search, CSV export and manual unsubscribe as a permanent suppression rather than a delete.",
+        "section": "subscribers",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "subscribers"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "count-stat",
+          "search-input",
+          "filter-bar",
+          "data-table",
+          "subscriber-row",
+          "confirm-dialog",
+          "empty-state",
+          "skeleton",
+          "error-state"
+        ],
+        "icons": [
+          "users-round",
+          "search",
+          "filter",
+          "file-down",
+          "mail-check",
+          "mail-x",
+          "shield-check",
+          "calendar"
+        ],
+        "flows": ["write-and-send-an-issue", "look-after-the-list"]
+      },
+      {
+        "id": "admin-documents",
+        "file": "admin-documents.html",
+        "routePattern": "/admin/documents",
+        "name": "Documents",
+        "description": "The PDF library — upload, title, description and public or subscribers-only visibility — with a plain view of which newsletters and subscribe forms reference each file so she can see what would break before deleting it.",
+        "section": "documents",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "documents"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "upload-dropzone",
+          "data-table",
+          "document-row",
+          "reference-list",
+          "destructive-guard-modal",
+          "empty-state",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "file-text",
+          "upload",
+          "lock",
+          "download",
+          "link",
+          "trash-2",
+          "alert-circle",
+          "eye"
+        ],
+        "flows": ["write-and-send-an-issue", "publish-and-retire-a-document"]
+      },
+      {
+        "id": "admin-media",
+        "file": "admin-media.html",
+        "routePattern": "/admin/media",
+        "name": "Pictures",
+        "description": "The image library — the six supplied plates plus anything she uploads, auto-cropped and palette-treated on arrival as a visible before-and-after rather than a silent rewrite — where alt text is a gate that explains itself before an image can be used anywhere.",
+        "section": "pictures",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": ["view-site", "unpublished-changes", "account-menu"]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "pictures"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "upload-dropzone",
+          "media-grid",
+          "media-tile",
+          "alt-text-field",
+          "skeleton",
+          "empty-state",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "image",
+          "upload",
+          "search",
+          "filter",
+          "loader",
+          "alert-circle",
+          "check",
+          "trash-2"
+        ],
+        "flows": [
+          "first-run-setup",
+          "publish-a-workshop",
+          "edit-and-publish-a-beat",
+          "add-a-picture"
+        ]
+      },
+      {
+        "id": "admin-settings",
+        "file": "admin-settings.html",
+        "routePattern": "/admin/settings",
+        "name": "Settings",
+        "description": "The singleton the public site reads its identity from — contact email, phone, practitioner bio, credentials, social links, background-image selection and hold duration, which is the only timing rule that lives here because buffer, minimum lead time and booking horizon belong beside the pattern they modify.",
+        "section": "settings",
+        "surface": "application",
+        "navigation": {
+          "header": {
+            "variant": "admin",
+            "actions": [
+              "view-site",
+              "save-state",
+              "unpublished-changes",
+              "account-menu"
+            ]
+          },
+          "footer": {
+            "variant": "hidden"
+          },
+          "sidemenu": {
+            "visible": true,
+            "items": [
+              "today",
+              "calendar",
+              "requests",
+              "home-page",
+              "offerings",
+              "pictures",
+              "newsletter",
+              "subscribers",
+              "documents",
+              "availability",
+              "settings"
+            ],
+            "activeSection": "settings"
+          }
+        },
+        "components": [
+          "header",
+          "side-menu",
+          "card",
+          "form-input",
+          "media-picker",
+          "publish-bar",
+          "button-primary",
+          "inline-notice",
+          "error-state",
+          "toast"
+        ],
+        "icons": [
+          "settings",
+          "mail",
+          "phone",
+          "image",
+          "external-link",
+          "timer",
+          "badge-check",
+          "save"
+        ],
+        "flows": ["first-run-setup", "set-the-working-pattern"]
+      }
+    ]
+  }
+}

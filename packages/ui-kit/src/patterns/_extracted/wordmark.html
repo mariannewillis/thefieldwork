@@ -1,0 +1,41 @@
+<!--
+  Pattern: wordmark
+  Extracted from: docs/mockups/the-lit-clearing-3-1/webapp/home.html (masthead)
+                  + docs/mockups/the-lit-clearing-3-1/admin/admin-dashboard.html (sidebar brand lockup)
+  The brand mark itself is an organic gradient-masked silhouette baked into
+  assets/brand/logo-horizontal.svg (gold -> coral -> magenta) with a two-tone
+  wordmark ("THE FIELD" gold / "WORK" magenta) drawn INSIDE the SVG. This
+  pattern is therefore just the LOCKUP wrapper around the user-supplied asset
+  — never redraw or approximate the mark as a generic glyph (asset priority:
+  user-supplied > researched > generated).
+-->
+<a
+  data-pattern="wordmark"
+  href="#"
+  aria-label="The Field Work — home"
+  class="inline-flex items-center min-h-[44px]"
+>
+  <img
+    src="/assets/brand/logo-horizontal.svg"
+    alt="The Field Work"
+    class="h-[74px] w-auto sm:h-[104px]"
+  />
+</a>
+
+<!-- Compact rail variant (admin sidebar) — full width, no min-height clamp,
+     stacked above a mono "Admin" eyebrow (see eyebrow.html). -->
+<a
+  data-pattern="wordmark"
+  data-variant="rail"
+  href="/admin"
+  aria-label="The Field Work admin — Today"
+  class="block w-full min-h-[44px]"
+>
+  <img
+    src="/assets/brand/logo-horizontal.svg"
+    alt="The Field Work"
+    width="440"
+    height="120"
+    class="h-auto w-full"
+  />
+</a>

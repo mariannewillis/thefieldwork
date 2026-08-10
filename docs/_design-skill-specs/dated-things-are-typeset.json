@@ -1,0 +1,29 @@
+{
+  "name": "dated-things-are-typeset",
+  "skillClass": "technique",
+  "precedence": "augment-generic",
+  "appliesTo": ["products-block", "list", "schedule", "slot-picker", "card"],
+  "activationKeywords": [
+    "date",
+    "schedule",
+    "listing",
+    "price",
+    "slot",
+    "calendar"
+  ],
+  "citations": [
+    {
+      "source": "brief",
+      "ref": "brief.md §12 — the products block renders live Courses, Workshops and Services at equal billing with real dates and prices; publishing a workshop makes it appear with no second edit"
+    },
+    {
+      "source": "competitor",
+      "ref": "competitors.md — 3 of 6 sites publish no price at all and Re:Mind's schedule returns 'No results found' to a static fetch because Momence renders it client-side; the brief's Carrier persona names 'a price that only appears after you make contact' as what breaks their day"
+    },
+    {
+      "source": "domain-research",
+      "ref": "inspirations.md — Metrograph calendar: date as section header, showtimes as standalone tappable anchors. Solves the products block and the slot picker in one layout."
+    }
+  ],
+  "body": "Dates and prices are the content, so typeset them as content rather than hiding them in cards. The repertory-cinema pattern: the DATE is a section header at display scale, and each time or offering under it is a standalone, tappable line — not a rectangle with a shadow. Prices are stated, always, in the same typographic voice as everything else; a price behind an enquiry is a category failure this project exists to reject. Give the three offering kinds genuinely equal billing: one register, one price list, one surface. Practical rules: right-align or tabular-align numerals so a column of times and fees scans; use a real tabular-figures setting rather than hoping; make the empty state worth landing on, because a new practitioner has zero workshops on day one and that is most of her first month. Render dates server-side — a schedule that only exists after JavaScript does not exist for a crawler, a slow connection, or assistive tech."
+}

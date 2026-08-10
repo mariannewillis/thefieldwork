@@ -1,0 +1,98 @@
+{
+  "version": "1.0",
+  "stage": "mockups",
+  "startedAt": "2026-08-08T13:55:15.271Z",
+  "updatedAt": "2026-08-08T23:59:52.581Z",
+  "phasesDone": [],
+  "dispatches": [
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home.txt",
+      "at": "2026-08-08T13:55:15.319Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-1",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-1.txt",
+      "at": "2026-08-08T15:04:39.023Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-2",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-2.txt",
+      "at": "2026-08-08T15:04:39.229Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3.txt",
+      "at": "2026-08-08T15:04:39.437Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-4",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-4.txt",
+      "at": "2026-08-08T15:04:39.651Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-5",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-5.txt",
+      "at": "2026-08-08T15:04:39.859Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3-1",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3-1.txt",
+      "at": "2026-08-08T15:47:48.152Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3-2",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3-2.txt",
+      "at": "2026-08-08T15:47:48.360Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3-3",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3-3.txt",
+      "at": "2026-08-08T15:47:48.553Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3-4",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3-4.txt",
+      "at": "2026-08-08T15:47:48.742Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "home-the-lit-clearing-3-5",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__home-the-lit-clearing-3-5.txt",
+      "at": "2026-08-08T15:47:48.949Z"
+    },
+    {
+      "phase": "mockups",
+      "agent": "ui-designer",
+      "screen": "admin-dashboard",
+      "promptPath": "docs\\_dispatches\\mockups__mockups__admin-dashboard.txt",
+      "at": "2026-08-08T21:13:21.171Z"
+    }
+  ],
+  "lastGate": {
+    "name": "phase-gates:screens",
+    "status": "pass",
+    "at": "2026-08-08T23:59:52.581Z"
+  }
+}

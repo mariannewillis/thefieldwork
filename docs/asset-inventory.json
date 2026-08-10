@@ -1,0 +1,144 @@
+{
+  "hasUserAssets": true,
+  "scannedAt": "2026-08-06",
+  "assetRoot": "assets/",
+  "logos": {
+    "primary": {
+      "path": "assets/brand/logo-primary.svg",
+      "viewBox": "0 0 300 329",
+      "format": "svg",
+      "note": "Stacked lockup (mark over wordmark). For dark grounds."
+    },
+    "primaryLight": {
+      "path": "assets/brand/logo-primary-light.svg",
+      "viewBox": "0 0 300 329",
+      "format": "svg",
+      "note": "Stacked lockup, deepened gradient. For light grounds."
+    },
+    "horizontal": {
+      "path": "assets/brand/logo-horizontal.svg",
+      "viewBox": "0 0 440 120",
+      "format": "svg",
+      "note": "Horizontal lockup. For dark grounds."
+    },
+    "horizontalLight": {
+      "path": "assets/brand/logo-horizontal-light.svg",
+      "viewBox": "0 0 440 120",
+      "format": "svg",
+      "note": "Horizontal lockup. For light grounds."
+    },
+    "mark": {
+      "path": "assets/brand/logo-mark.svg",
+      "viewBox": "0 0 200 225",
+      "format": "svg",
+      "note": "Mark only, transparent. For dark grounds."
+    },
+    "markLight": {
+      "path": "assets/brand/logo-mark-light.svg",
+      "viewBox": "0 0 200 225",
+      "format": "svg",
+      "note": "Mark only, deepened gradient. For light grounds."
+    },
+    "sourceReference": {
+      "path": "assets/TheFileWork.png",
+      "dimensions": "425x357",
+      "format": "png",
+      "note": "The client's original supplied artwork. Every SVG lockup is traced from this."
+    }
+  },
+  "icons": [],
+  "fonts": [],
+  "images": {
+    "hero": [
+      {
+        "path": "assets/images/aura-two-people.png",
+        "dimensions": "2528x1696",
+        "format": "png",
+        "subject": "Practitioner standing, hands hovering above the shoulders of a seated, fully clothed woman; a large concentric field of gold-to-magenta light behind them.",
+        "briefRole": "brief.md §20 — anchors landing beat 1 (Root). Answers the unasked question (clothed, untouched) visually."
+      },
+      {
+        "path": "assets/images/aura-light-in-a-room.png",
+        "dimensions": "2528x1696",
+        "format": "png",
+        "subject": "A woman seated alone in an armchair in a real domestic interior; a vast concentric field of light fills the room behind her.",
+        "briefRole": "Anchors landing beat 2 (Sacral) — what the hour feels like, in a real room."
+      },
+      {
+        "path": "assets/images/aura-radiant-portrait.png",
+        "dimensions": "2528x1696",
+        "format": "png",
+        "subject": "Radiant portrait, face lifted into the light.",
+        "briefRole": "Anchors landing beat 7 (Crown) — the brightest point of the page, at the CTA."
+      },
+      {
+        "path": "assets/images/aura-seated-figure.png",
+        "dimensions": "2528x1696",
+        "format": "png",
+        "subject": "Single seated figure within an emanating field.",
+        "briefRole": "Reserve."
+      }
+    ],
+    "backgrounds": [
+      {
+        "path": "assets/images/aura-field-abstract.png",
+        "dimensions": "2752x1536",
+        "format": "png",
+        "subject": "Non-figurative concentric emanation — the specified geometry photographed rather than CSS-faked.",
+        "briefRole": "brief.md §12 — one of the selectable page backgrounds; carries the dark plum world without competing with content."
+      }
+    ],
+    "placeholders": [
+      {
+        "path": "assets/images/aura-hands-between.png",
+        "dimensions": "2528x1696",
+        "format": "png",
+        "subject": "Cupped hands around a glowing orb on near-black.",
+        "briefRole": "brief.md §2 — RESERVE ONLY. Commissioned, not stock, but it is the single most-reproduced composition in this category and reads as stock. Never a hero or a beat anchor; small inline detail at most."
+      }
+    ]
+  },
+  "wireframes": [],
+  "brandGuides": [
+    {
+      "path": "assets/brand/README.md",
+      "format": "markdown",
+      "note": "Not a PDF, so no vision extraction needed — machine-readable already. Authoritative record of the artwork's eleven sampled colours WITH computed contrast ratios. See colors below."
+    }
+  ],
+  "colors": {
+    "source": "assets/brand/README.md — sampled from the supplied artwork's own gradient and ground. FACTS about the artwork, not role assignments.",
+    "plum-900": "#1E0A1C",
+    "plum-800": "#2B0E28",
+    "plum-700": "#3A1233",
+    "gold": "#E9C87E",
+    "gold-deep": "#C99A3F",
+    "coral": "#F5876F",
+    "rose": "#E85D9B",
+    "magenta": "#D6338A",
+    "magenta-deep": "#C2187A",
+    "blush": "#FBF3F1",
+    "ivory": "#FDFAF7"
+  },
+  "measuredContrast": {
+    "note": "Computed, not estimated. Re-measure before trusting any derived claim. This is the constraint that bit prior versions of this project: the mid-gradient stops are unusable as text on light grounds and the failure is invisible to anyone who already knows what the text says.",
+    "onLightGrounds": {
+      "gold #E9C87E on blush": "1.47:1 — fails AA body AND 3:1 large-text",
+      "gold-deep #C99A3F on blush": "2.35:1 — fails",
+      "magenta #D6338A on blush": "4.08:1 — fails AA body",
+      "magenta-deep #C2187A on blush": "5.18:1 — passes AA body"
+    },
+    "onDarkGrounds": {
+      "gold #E9C87E on plum-800 #2B0E28": "10.89:1 — passes comfortably"
+    },
+    "derivedOption": {
+      "#8A6A22 on light grounds": "4.61:1 — a gold that clears AA body on light. Derived, not present in the artwork; optional."
+    }
+  },
+  "other": [],
+  "warnings": [
+    "Logos live in assets/brand/, not the canonical assets/logos/ slot. Paths in this inventory are real and correct; downstream agents must read the paths, not assume the directory.",
+    "No icon set and no font files supplied — icon library and typefaces are open design decisions.",
+    "No wireframes supplied — no wireframe-digest is emitted for this project (feat-103 step 6h skipped)."
+  ]
+}

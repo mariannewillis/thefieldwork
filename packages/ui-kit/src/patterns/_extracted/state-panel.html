@@ -1,0 +1,123 @@
+<!--
+  Pattern: state-panel — the five-state primitive contract (I-1)
+  Extracted from: admin-dashboard.html "Needs you today — the other states"
+  section (empty, overflow, loading, error, stale — all five rendered as
+  siblings so the contrast between them is legible in one glance). Every
+  state reuses the exact same pool shape (Card default): a mono uppercase
+  kicker names the state, then state-specific content, then (where
+  applicable) exactly one action.
+-->
+<div data-pattern="state-panel" class="grid gap-4">
+  <!-- EMPTY -->
+  <article
+    data-state="empty"
+    class="bg-pool-surface text-pool-text px-6 py-7 sm:px-7"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-accent-500">
+      Empty
+    </p>
+    <p class="mt-2 text-xl font-semibold text-pool-text">
+      Nothing needs you today.
+    </p>
+    <p class="mt-2 max-w-[42rem] text-sm text-pool-text-secondary">
+      No requests holding, no balance outstanding, no refund in flight. December
+      is not open for one-to-ones yet — that is the only thing left undone.
+    </p>
+    <a
+      href="#"
+      class="mt-4 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+    >
+      Open December
+    </a>
+  </article>
+
+  <!-- LOADING -->
+  <article
+    data-state="loading"
+    aria-busy="true"
+    class="bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+  >
+    <p
+      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+    >
+      Loading
+    </p>
+    <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+      <div class="h-[13px] w-[34%] bg-neutral-200/[.14]"></div>
+      <div class="h-[30px] w-[58%] bg-neutral-200/[.22]"></div>
+      <div class="h-[13px] w-[82%] bg-neutral-200/[.14]"></div>
+      <div class="h-[13px] w-[64%] bg-neutral-200/[.14]"></div>
+    </div>
+    <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+      The panel keeps its shape and stays at rest until the values arrive.
+      Nothing pulses; nothing pretends to be a number.
+    </p>
+  </article>
+
+  <!-- ERROR -->
+  <article
+    data-state="error"
+    class="bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Error
+    </p>
+    <p class="mt-2 text-xl font-semibold text-pool-danger">
+      Stripe did not answer.
+    </p>
+    <p class="mt-2 text-sm text-pool-text-secondary">
+      Balances and refunds may be out of date. Requests and the calendar are
+      fine — this only affects money.
+    </p>
+    <div class="mt-4 flex flex-wrap items-center gap-4">
+      <a
+        href="#"
+        class="text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+        >Try again</a
+      >
+      <p class="font-mono text-xs text-pool-text-secondary">
+        Last good read 08:52 &middot; 3 attempts since
+      </p>
+    </div>
+  </article>
+
+  <!-- STALE -->
+  <article
+    data-state="stale"
+    class="bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+  >
+    <p
+      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+    >
+      Stale
+    </p>
+    <p class="mt-2 max-w-[54ch] text-sm text-pool-text-secondary">
+      Showing what Stripe last confirmed at
+      <span class="font-mono text-pool-text">07:40</span>, 1h 34m ago. Figures
+      are held at their last observed value, not guessed forward.
+    </p>
+  </article>
+
+  <!-- OVERFLOW -->
+  <article
+    data-state="overflow"
+    class="bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+  >
+    <p
+      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+    >
+      Overflow
+    </p>
+    <p class="mt-2 text-lg font-semibold text-pool-text">23 things need you</p>
+    <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+      Showing the 4 that run out first. The other 19 are in Requests and
+      Bookings, newest last.
+    </p>
+    <a
+      href="#"
+      class="mt-2 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+    >
+      See all 23
+    </a>
+  </article>
+</div>

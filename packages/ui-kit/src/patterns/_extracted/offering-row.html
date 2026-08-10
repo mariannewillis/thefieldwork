@@ -1,0 +1,62 @@
+<!--
+  Pattern: offering-row (project-specific — the ledger row)
+  Extracted from: home.html #dates .ledger-row
+  Shape: date on the left, price on the right, ON ONE BASELINE, hairline rule
+  ABOVE the row (not below — each row owns the rule that opens it). Title
+  sits on its own line below the date/price baseline; meta (time, place,
+  capacity) below the title. Lives inside a pool (Card default), text is
+  always plum ink — never blush — because it is inside the light.
+-->
+<div data-pattern="offering-row" class="border-t border-pool-border/[.22] py-3">
+  <p class="flex items-baseline justify-between gap-2.5 mb-1">
+    <span
+      class="whitespace-nowrap text-sm text-pool-text-secondary font-mono tabular-nums"
+    >
+      15 Sep&ndash;20 Oct
+    </span>
+    <span class="whitespace-nowrap text-right">
+      <span
+        class="block font-display text-2xl leading-none text-pool-text tabular-nums"
+      >
+        &pound;480
+      </span>
+    </span>
+  </p>
+  <p class="font-display text-lg leading-tight text-pool-text mb-1">
+    Aura Healing: Foundations
+  </p>
+  <p class="text-sm leading-snug text-pool-text-secondary">
+    Six evenings, 19:00&ndash;21:00, Tuesdays &middot; Garden room &middot; 6
+    places
+  </p>
+</div>
+
+<!-- Hover / focus state: the title shifts to accent-500, nothing else moves —
+     no background fill, no border, no shadow (the pool never elevates further
+     than its own cut edge). -->
+<div
+  data-pattern="offering-row"
+  data-state="hover"
+  class="border-t border-pool-border/[.22] py-3 group"
+>
+  <p class="flex items-baseline justify-between gap-2.5 mb-1">
+    <span
+      class="whitespace-nowrap text-sm text-pool-text-secondary font-mono tabular-nums"
+    >
+      7 Nov&ndash;12 Dec
+    </span>
+    <span class="whitespace-nowrap text-right">
+      <span
+        class="block font-display text-2xl leading-none text-pool-text tabular-nums"
+      >
+        &pound;650
+      </span>
+    </span>
+  </p>
+  <p class="font-display text-lg leading-tight text-accent-500 mb-1">
+    Aura Healing: Practitioner Pathway
+  </p>
+  <p class="text-sm leading-snug text-pool-text-secondary">
+    Six Saturdays, 10:00&ndash;16:00 &middot; Garden room &middot; 6 places
+  </p>
+</div>

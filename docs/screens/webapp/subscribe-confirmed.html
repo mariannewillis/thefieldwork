@@ -1,0 +1,784 @@
+<!--
+  Screen: subscribe-confirmed (webapp) · surface: application · layout: FocusedTask
+  Direction: the-lit-clearing — signature move via data-pattern="clearing-plate"
+  (center anchor for the live route, admin-panel variant for reference states).
+  Named question this screen answers: "Did it work, and what happens now?" —
+  answered inside one clearing, stating what arrives and when, not just "done".
+  Chrome/head/tokens copied byte-for-byte from subscribe-pending.html (the prior
+  screen in the join-the-newsletter flow) for continuity. Expired-token copy
+  mirrors unsubscribe.html's "This link isn't valid anymore." treatment so the
+  two token-based screens don't contradict each other on what a dead link means.
+  Interface-craft (application surface, no narrative spine): one primary
+  control per screen (Download the guide) on the live route; the already-
+  confirmed and expired-token states below the fold carry only quiet links,
+  because a revisit or a dead link leaves nothing to press.
+-->
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Subscription confirmed — The Field Work</title>
+    <meta
+      name="description"
+      content="Your address is on the list. What arrives, how often, and where to find the guide that came with it."
+    />
+    <link
+      rel="stylesheet"
+      href="../../../packages/ui-kit/src/styles/globals.css"
+    />
+
+    <!-- preview-bootstrap.html inlined verbatim (packages/ui-kit/src/styles/preview-bootstrap.html) -->
+    <style id="kit-tokens">
+      /**
+       * @repo/ui-kit — tokens.css
+       * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
+       *
+       * DARK-DEFAULT (see src/tokens/README.md before touching this file).
+       * :root already carries the dark/near-black values — there is no light-mode
+       * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
+       * of :root, kept only because the approved mockups literally set
+       * data-theme="dark" on <html> and the Tailwind config's darkMode selector
+       * references it — not because a second theme exists.
+       */
+
+      :root,
+      [data-theme="dark"] {
+        color-scheme: dark;
+
+        /* ---- color.neutral ---- */
+        --color-neutral-50: #fbf3f1;
+        --color-neutral-100: #e6dcdc;
+        --color-neutral-200: #d8bfc9;
+        --color-neutral-300: #b0a3a8;
+        --color-neutral-400: #95868d;
+        --color-neutral-500: #8e6a82;
+        --color-neutral-600: #64515d;
+        --color-neutral-700: #4e3a48;
+        --color-neutral-800: #3b2635;
+        --color-neutral-900: #260f20;
+        --color-neutral-950: #160712;
+
+        /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
+        --color-accent-50: #fbeff6;
+        --color-accent-100: #f7d9eb;
+        --color-accent-200: #f2badb;
+        --color-accent-300: #ed91c7;
+        --color-accent-400: #e75aac;
+        --color-accent-500: #c2187a;
+        --color-accent-600: #a51266;
+        --color-accent-700: #870d50;
+        --color-accent-800: #67093b;
+        --color-accent-900: #4b062a;
+        --color-accent-950: #2f041a;
+
+        /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
+        --color-secondary-500: #e9c87e;
+        --color-secondary-600: #c99a3f;
+
+        /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
+        --color-highlight-300: #f8c9bf;
+        --color-highlight-500: #f5876f;
+
+        /* ---- color.semantic ---- */
+        --color-success: #6fcb99;
+        --color-warning: #e9c87e;
+        --color-danger: #f58a80;
+        --color-info: #e9c87e;
+
+        /* ---- color.surface ---- */
+        --color-surface-base: #160712;
+        --color-surface-raised: #260f20;
+        --color-surface-overlay: #1e0a1ce6;
+        --color-surface-inverted: #fbf3f1;
+
+        /* ---- color.text ---- */
+        --color-text-primary: #fbf3f1;
+        --color-text-secondary: #d8bfc9;
+        --color-text-tertiary: #8e6a82;
+        --color-text-inverted: #1e0a1c;
+
+        /* ---- color.border ---- */
+        --color-border-subtle: #4e3a48;
+        --color-border-default: #8e6a82;
+        --color-border-strong: #b0a3a8;
+
+        /* ---- color.pool (the inverted-context family — see README) ---- */
+        --color-pool-surface: #fbf3f1;
+        --color-pool-text: #1e0a1c;
+        --color-pool-text-secondary: #5a4356;
+        --color-pool-border: #8a7285;
+        --color-pool-danger: #a3221a;
+        --color-pool-success: #0f6b3d;
+
+        /* ---- typography.fontFamily ---- */
+        --font-family-sans:
+          "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --font-family-mono:
+          "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+        --font-family-display: "Cormorant Garamond", Georgia, serif;
+
+        /* ---- typography.fontSize ---- */
+        --font-size-xs: 15px;
+        --font-size-sm: 17px;
+        --font-size-md: 18px;
+        --font-size-lg: 19px;
+        --font-size-xl: 21px;
+        --font-size-2xl: 24px;
+        --font-size-3xl: 28px;
+        --font-size-4xl: 36px;
+        --font-size-5xl: 48px;
+        --font-size-6xl: 64px;
+
+        /* ---- typography.fontWeight ---- */
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+
+        /* ---- typography.lineHeight ---- */
+        --line-height-tight: 1.05;
+        --line-height-snug: 1.2;
+        --line-height-normal: 1.6;
+        --line-height-relaxed: 1.7;
+
+        /* ---- typography.letterSpacing ---- */
+        --letter-spacing-tight: -0.005em;
+        --letter-spacing-normal: 0em;
+        --letter-spacing-wide: 0.18em;
+
+        /* ---- spacing ---- */
+        --spacing-0: 0px;
+        --spacing-0_5: 2px;
+        --spacing-1: 4px;
+        --spacing-2: 8px;
+        --spacing-3: 12px;
+        --spacing-4: 16px;
+        --spacing-5: 20px;
+        --spacing-6: 24px;
+        --spacing-8: 32px;
+        --spacing-10: 40px;
+        --spacing-12: 48px;
+        --spacing-16: 64px;
+        --spacing-20: 80px;
+        --spacing-24: 96px;
+
+        /* ---- radius (the direction uses --radius-none everywhere except a true
+           circle avatar, which uses --radius-full — see README §Shape law) ---- */
+        --radius-none: 0px;
+        --radius-sm: 2px;
+        --radius-md: 4px;
+        --radius-lg: 8px;
+        --radius-xl: 12px;
+        --radius-2xl: 16px;
+        --radius-full: 9999px;
+
+        /* ---- shadow (unused by this direction — kept for schema completeness) --- */
+        --shadow-xs: none;
+        --shadow-sm: none;
+        --shadow-md: none;
+        --shadow-lg: none;
+        --shadow-xl: none;
+
+        /* ---- motion ---- */
+        --motion-duration-instant: 80ms;
+        --motion-duration-fast: 120ms;
+        --motion-duration-normal: 150ms;
+        --motion-duration-slow: 220ms;
+        --motion-duration-slower: 320ms;
+        --motion-duration-ambient: 24000ms;
+        --motion-easing-linear: linear;
+        --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+        --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
+        --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
+        --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        /* ---- zIndex ---- */
+        --z-base: 0;
+        --z-dropdown: 1000;
+        --z-sticky: 1100;
+        --z-overlay: 1200;
+        --z-modal: 1300;
+        --z-toast: 1400;
+        --z-tooltip: 1500;
+      }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: ["class", '[data-theme="dark"]'],
+        theme: {
+          extend: {
+            colors: {
+              neutral: {
+                50: "var(--color-neutral-50)",
+                100: "var(--color-neutral-100)",
+                200: "var(--color-neutral-200)",
+                300: "var(--color-neutral-300)",
+                400: "var(--color-neutral-400)",
+                500: "var(--color-neutral-500)",
+                600: "var(--color-neutral-600)",
+                700: "var(--color-neutral-700)",
+                800: "var(--color-neutral-800)",
+                900: "var(--color-neutral-900)",
+                950: "var(--color-neutral-950)",
+              },
+              accent: {
+                50: "var(--color-accent-50)",
+                100: "var(--color-accent-100)",
+                200: "var(--color-accent-200)",
+                300: "var(--color-accent-300)",
+                400: "var(--color-accent-400)",
+                500: "var(--color-accent-500)",
+                600: "var(--color-accent-600)",
+                700: "var(--color-accent-700)",
+                800: "var(--color-accent-800)",
+                900: "var(--color-accent-900)",
+                950: "var(--color-accent-950)",
+              },
+              secondary: {
+                500: "var(--color-secondary-500)",
+                600: "var(--color-secondary-600)",
+              },
+              highlight: {
+                300: "var(--color-highlight-300)",
+                500: "var(--color-highlight-500)",
+              },
+              success: "var(--color-success)",
+              warning: "var(--color-warning)",
+              danger: "var(--color-danger)",
+              info: "var(--color-info)",
+              surface: {
+                base: "var(--color-surface-base)",
+                raised: "var(--color-surface-raised)",
+                overlay: "var(--color-surface-overlay)",
+                inverted: "var(--color-surface-inverted)",
+              },
+              text: {
+                primary: "var(--color-text-primary)",
+                secondary: "var(--color-text-secondary)",
+                tertiary: "var(--color-text-tertiary)",
+                inverted: "var(--color-text-inverted)",
+              },
+              border: {
+                subtle: "var(--color-border-subtle)",
+                DEFAULT: "var(--color-border-default)",
+                strong: "var(--color-border-strong)",
+              },
+              pool: {
+                surface: "var(--color-pool-surface)",
+                text: "var(--color-pool-text)",
+                "text-secondary": "var(--color-pool-text-secondary)",
+                border: "var(--color-pool-border)",
+                danger: "var(--color-pool-danger)",
+                success: "var(--color-pool-success)",
+              },
+            },
+            fontFamily: {
+              sans: "var(--font-family-sans)",
+              mono: "var(--font-family-mono)",
+              display: "var(--font-family-display)",
+            },
+            fontSize: {
+              xs: "var(--font-size-xs)",
+              sm: "var(--font-size-sm)",
+              md: "var(--font-size-md)",
+              lg: "var(--font-size-lg)",
+              xl: "var(--font-size-xl)",
+              "2xl": "var(--font-size-2xl)",
+              "3xl": "var(--font-size-3xl)",
+              "4xl": "var(--font-size-4xl)",
+              "5xl": "var(--font-size-5xl)",
+              "6xl": "var(--font-size-6xl)",
+            },
+            fontWeight: {
+              regular: "var(--font-weight-regular)",
+              medium: "var(--font-weight-medium)",
+              semibold: "var(--font-weight-semibold)",
+              bold: "var(--font-weight-bold)",
+            },
+            lineHeight: {
+              tight: "var(--line-height-tight)",
+              snug: "var(--line-height-snug)",
+              normal: "var(--line-height-normal)",
+              relaxed: "var(--line-height-relaxed)",
+            },
+            letterSpacing: {
+              tight: "var(--letter-spacing-tight)",
+              normal: "var(--letter-spacing-normal)",
+              wide: "var(--letter-spacing-wide)",
+            },
+            spacing: {
+              0.5: "var(--spacing-0_5)",
+              1: "var(--spacing-1)",
+              2: "var(--spacing-2)",
+              3: "var(--spacing-3)",
+              4: "var(--spacing-4)",
+              5: "var(--spacing-5)",
+              6: "var(--spacing-6)",
+              8: "var(--spacing-8)",
+              10: "var(--spacing-10)",
+              12: "var(--spacing-12)",
+              16: "var(--spacing-16)",
+              20: "var(--spacing-20)",
+              24: "var(--spacing-24)",
+            },
+            borderRadius: {
+              none: "var(--radius-none)",
+              sm: "var(--radius-sm)",
+              DEFAULT: "var(--radius-md)",
+              md: "var(--radius-md)",
+              lg: "var(--radius-lg)",
+              xl: "var(--radius-xl)",
+              "2xl": "var(--radius-2xl)",
+              full: "var(--radius-full)",
+            },
+            boxShadow: {
+              xs: "var(--shadow-xs)",
+              sm: "var(--shadow-sm)",
+              DEFAULT: "var(--shadow-md)",
+              md: "var(--shadow-md)",
+              lg: "var(--shadow-lg)",
+              xl: "var(--shadow-xl)",
+            },
+            transitionDuration: {
+              instant: "var(--motion-duration-instant)",
+              fast: "var(--motion-duration-fast)",
+              DEFAULT: "var(--motion-duration-normal)",
+              normal: "var(--motion-duration-normal)",
+              slow: "var(--motion-duration-slow)",
+              slower: "var(--motion-duration-slower)",
+            },
+            transitionTimingFunction: {
+              linear: "var(--motion-easing-linear)",
+              standard: "var(--motion-easing-standard)",
+              decel: "var(--motion-easing-decel)",
+              accel: "var(--motion-easing-accel)",
+              spring: "var(--motion-easing-spring)",
+            },
+            zIndex: {
+              dropdown: "var(--z-dropdown)",
+              sticky: "var(--z-sticky)",
+              overlay: "var(--z-overlay)",
+              modal: "var(--z-modal)",
+              toast: "var(--z-toast)",
+              tooltip: "var(--z-tooltip)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* ═══════════════════════════════════════════════════════════════════
+         subscribe-confirmed — the double opt-in landing. APPLICATION surface
+         (interface-craft, not the narrative spine): one question only — "did
+         it work, and what happens now" — answered inside a single
+         clearing-plate pool, centred, on marianne-room-aglow (light arriving
+         in a room — the confirmation register, distinct from subscribe-
+         pending's "waiting" and unsubscribe's "departure", both of which use
+         window-last-light). One primary control on the live route: Download
+         the guide. Two calm revisit states (already-confirmed, expired-token)
+         live below the fold as reference, matching unsubscribe.html's own
+         "This link isn't valid anymore" copy so the two token screens agree.
+         ═══════════════════════════════════════════════════════════════════ */
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--color-surface-base);
+        overflow-x: hidden;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+      }
+      .plate {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .plate {
+          transition: filter var(--motion-duration-slower)
+            var(--motion-easing-standard);
+        }
+      }
+    </style>
+  </head>
+
+  <body
+    data-kit-layout="FocusedTask"
+    data-screen-id="subscribe-confirmed"
+    class="font-sans text-text-primary"
+  >
+    <!-- ═══ Minimal header — navigation.header.variant: "minimal",
+         actions: ["nav-home"]. Sticky, matching subscribe-pending.html
+         byte-for-byte: this is a utility screen reached directly from an
+         email client, so wayfinding stays on screen rather than
+         disappearing on scroll. ═══ -->
+    <header
+      data-kit-component="Header"
+      data-kit-variant="minimal"
+      class="sticky top-0 z-[3] flex items-center justify-between gap-6 border-b border-border-subtle bg-surface-base/95 px-6 py-4 backdrop-blur-sm sm:px-[var(--spacing-24,6rem)]"
+    >
+      <a
+        data-pattern="wordmark"
+        data-kit-component="Logo"
+        href="/"
+        aria-label="The Field Work — home"
+        class="inline-flex items-center min-h-[44px]"
+      >
+        <img
+          src="../../../assets/brand/logo-horizontal.svg"
+          alt="The Field Work"
+          class="h-[44px] w-auto sm:h-[52px]"
+        />
+      </a>
+
+      <a
+        href="/"
+        data-kit-component="Nav"
+        data-kit-variant="nav-home"
+        class="inline-flex min-h-[44px] items-center gap-2 text-sm text-text-primary no-underline hover:text-secondary-500"
+      >
+        Home
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="h-[14px] w-[14px] shrink-0"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </header>
+
+    <main
+      data-kit-component="Layout"
+      data-kit-variant="content-wrapper"
+      class="relative mx-auto max-w-[1280px]"
+    >
+      <!-- ═══ The screen itself — the live route, populated (confirmed) state. ═══ -->
+      <section
+        data-pattern="clearing-plate"
+        data-anchor="center"
+        class="relative flex min-h-[calc(100svh-73px)] items-center justify-center overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
+      >
+        <img
+          src="../../../assets/images/new/marianne-room-aglow.png"
+          alt=""
+          class="plate pointer-events-none"
+          style="filter: brightness(0.5) saturate(1.14) contrast(1.05)"
+        />
+
+        <div
+          data-kit-component="StatusPanel"
+          data-kit-variant="confirmed"
+          data-state="populated"
+          class="relative z-[2] w-full max-w-[480px] bg-pool-surface px-8 py-10 text-pool-text sm:px-10 sm:py-12"
+        >
+          <p
+            data-pattern="eyebrow"
+            data-variant="marketing-on-pool"
+            class="mb-3 inline-flex items-center gap-2 font-sans text-sm font-semibold uppercase tracking-wide text-accent-500"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="h-[15px] w-[15px] shrink-0"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8 12 3 3 5-6" />
+            </svg>
+            Confirmed
+          </p>
+
+          <h1
+            class="mb-4 font-display text-3xl leading-tight text-pool-text sm:text-4xl"
+          >
+            You're on the list.
+          </h1>
+
+          <p class="mb-1 text-md leading-relaxed text-pool-text">
+            Field notes go out roughly once a month, sometimes twice. Each one
+            is a note from Marianne, not an offer.
+          </p>
+          <p class="mb-6 text-md leading-relaxed text-pool-text-secondary">
+            Leave any time. Every email carries the same one-line link this page
+            used to add you.
+          </p>
+
+          <div
+            data-kit-component="DocumentOfferCard"
+            data-kit-variant="download"
+            class="mb-2 border-t border-pool-border/[.22] pt-6"
+          >
+            <p
+              class="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-pool-text"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="h-[16px] w-[16px] shrink-0 text-accent-500"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"
+                />
+                <path d="M14 2v6h6" />
+                <path d="M9 13h6M9 17h6" />
+              </svg>
+              The First Session, in Plain English
+            </p>
+            <p class="mb-4 text-sm leading-relaxed text-pool-text-secondary">
+              Four pages on what happens, what to wear, and what it isn't. Yours
+              because you asked for field notes.
+            </p>
+            <a
+              href="#"
+              data-kit-component="Button"
+              data-kit-variant="primary"
+              class="inline-flex min-h-[44px] items-center gap-2 bg-accent-500 px-10 py-5 text-sm font-semibold text-surface-inverted no-underline transition-colors duration-fast hover:bg-neutral-900"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="h-[15px] w-[15px] shrink-0"
+              >
+                <path d="M12 3v12M6 11l6 6 6-6" />
+                <path d="M4 21h16" />
+              </svg>
+              Download the guide
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ Reference states — I-1 state-completeness for engineering
+           handoff. Not part of the live route above; the same convention
+           subscribe-pending.html and unsubscribe.html use: labelled siblings
+           on their own dimmed plate. "Overflow" and "stale" are N/A on this
+           single-fact status screen (no list to overflow, nothing cached to
+           go stale) — the same omission subscribe-pending.html makes for the
+           same reason. What IS applicable to a token-based confirmation
+           landing: revisiting an already-confirmed link, a dead/expired
+           token, the brief moment the token is being checked, and the
+           server not answering at all. ═══ -->
+      <section
+        data-pattern="clearing-plate"
+        data-variant="admin-panel"
+        class="relative overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
+      >
+        <img
+          src="../../../assets/images/new/aura-field-abstract.png"
+          alt=""
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[.55] [filter:brightness(.42)_saturate(1.04)]"
+        />
+
+        <div class="relative z-[1]">
+          <p
+            data-pattern="eyebrow"
+            data-variant="marketing-on-plate"
+            class="mb-6 font-sans text-sm font-semibold uppercase tracking-wide text-secondary-500"
+          >
+            The other states — for reference, not shown in the live flow
+          </p>
+
+          <div
+            data-pattern="state-panel"
+            class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <!-- ALREADY CONFIRMED — idempotent revisit, not an error. A
+                 confirmation link gets clicked twice: once to confirm, once
+                 later out of habit or curiosity. Both land here calmly. -->
+            <article
+              data-state="already-confirmed"
+              data-kit-component="StatusPanel"
+              data-kit-variant="already-confirmed"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                data-pattern="eyebrow"
+                data-variant="muted"
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+              >
+                Already confirmed
+              </p>
+              <p class="mt-2 text-lg font-semibold text-pool-text">
+                You'd already confirmed.
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-pool-text-secondary">
+                This link only needs to work once. You're already on the list —
+                there's nothing else to do here.
+              </p>
+            </article>
+
+            <!-- EXPIRED / INVALID TOKEN — the one error this screen can
+                 reach on its own. Copy deliberately echoes unsubscribe.html's
+                 "This link isn't valid anymore" so the two token-based
+                 screens agree on what a dead link means. -->
+            <article
+              data-state="expired-token"
+              data-kit-component="ErrorState"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-pool-danger"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  class="h-[15px] w-[15px] shrink-0"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+                Link expired
+              </p>
+              <p class="mt-2 text-lg font-semibold text-pool-danger">
+                This link isn't valid anymore.
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-pool-text-secondary">
+                Confirmation links are single-use and expire after a few days.
+                If you still want field notes, join again and we'll send a fresh
+                one.
+              </p>
+              <div class="mt-3 flex flex-wrap items-center gap-4">
+                <a
+                  href="subscribe.html"
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+                >
+                  Join again
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    class="h-[13px] w-[13px] shrink-0"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </a>
+                <a
+                  href="mailto:hello@thefieldwork.co.uk"
+                  class="text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+                >
+                  Email us instead
+                </a>
+              </div>
+            </article>
+
+            <!-- LOADING — the brief window while the token is checked
+                 server-side, before this page has anything to state as
+                 fact. Flat static blocks, no shimmer, per this direction's
+                 motion budget. -->
+            <article
+              data-state="loading"
+              aria-busy="true"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+              >
+                Loading
+              </p>
+              <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+                <div class="h-[13px] w-[70%] bg-neutral-200/[.14]"></div>
+                <div class="h-[13px] w-[45%] bg-neutral-200/[.14]"></div>
+                <div class="h-[13px] w-[85%] bg-neutral-200/[.14]"></div>
+              </div>
+              <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+                Checking that this link is still valid.
+              </p>
+            </article>
+
+            <!-- ERROR (network) — the server didn't answer at all, distinct
+                 from an expired token: nothing is known either way yet. -->
+            <article
+              data-state="error"
+              data-kit-component="ErrorState"
+              class="bg-pool-surface px-6 py-6 text-pool-text sm:px-7"
+            >
+              <p
+                class="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-pool-danger"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  class="h-[15px] w-[15px] shrink-0"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+                Error
+              </p>
+              <p class="mt-2 text-lg font-semibold text-pool-danger">
+                Couldn't confirm that link.
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-pool-text-secondary">
+                The server didn't answer. Nothing has changed — try again in a
+                moment.
+              </p>
+              <a
+                href="#"
+                class="mt-3 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+              >
+                Try again
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- navigation.footer.variant: "hidden" — no site footer on this screen. -->
+  </body>
+</html>

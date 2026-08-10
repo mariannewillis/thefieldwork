@@ -1,0 +1,1539 @@
+{
+  "projectSlug": "thefieldwork-v5",
+  "requestedCount": 13,
+  "note": "Ten concept territories for Gate 2. Concept-first: each layoutArchetype is DERIVED from its governingIdea, never a template with the idea painted on. No wireframes were supplied (docs/asset-inventory.json.wireframes = []), so every direction is paletteSource 'derived' — none is captured-wireframe. Every contrast figure below is COMPUTED with the WCAG 2.x relative-luminance formula, validated first against assets/brand/README.md (it reproduces gold/blush 1.47, magenta-deep/blush 5.18, gold/plum-800 10.89, rose/plum-800 5.41, #8A6A22/blush 4.61, and the factory default success #16A34A on white at 3.30 — which is why no direction emits it). brief §20 records the dark plum as the client's PREFERENCE, explicitly not a mandate: the ground spread below is 3 dark, 4 light, 1 mid-value, 1 travelling, 1 duotone. The practitioner's name, years and training are UNVERIFIED (brief §20.1) and every direction ships them as visibly-marked placeholders.",
+  "directions": [
+    {
+      "name": "the-room-you-are-standing-in",
+      "governingIdea": "The site is not a description of the room where the work happens — it IS that room, seen from the doorway, with one light in it, and every element is placed by how far it stands from that light.",
+      "singleMindedProposition": "Look into the room before you decide: one lamp, one chair, a woman with her coat still on, and a pair of hands that never land.",
+      "narrativeSpine": {
+        "openWound": "You have been flattened long enough to start searching at eleven at night, and every page you open wants you to believe something before it will tell you what will happen to your body — so you keep closing tabs on the one question you cannot make yourself type: do I have to take my clothes off.",
+        "openLoop": "The first screen is a doorway into a low-lit room. A woman is sitting in a chair with her coat still on, and a pair of hands is stopped a hand's width above her shoulders. That gap is the loudest thing on the page. What happens in it?",
+        "villainStakes": "The villain is your own embarrassment, and it wins by default — nobody is going to answer a question you will not ask out loud. What it costs is another eight months of carrying the thing you came in with, while calling it deciding.",
+        "guideEntrance": "The practitioner enters at the fourth beat as the person who has sat in that room with strangers for years: her own plain sentences at reading scale first, her training in small type underneath, and no borrowed logos, no press awards, no client wall. (Name, years and training are UNVERIFIED per brief §20.1 and ship as visibly-marked placeholders until the client confirms.)",
+        "staircaseBeats": [
+          "Root — the doorway. The plate at doorway scale, three flat sentences set into its own unlit quadrant. Dense, close, quiet; the smallest bloom on the site.",
+          "Sacral — register change to a near voice and small type: what the hour is like from inside the chair, in a real domestic room, at the scale of someone speaking beside you.",
+          "Solar plexus — register change to display verbs. Clearing, charging, repairing, restructuring, set as four words with the light widening a step behind each.",
+          "Heart — register change to a face and a hand-set paragraph at reading measure. The practitioner, empathy before credentials.",
+          "Throat — register change to the coldest, plainest block on the page: what this is not, set on the unlit surface with no bloom behind it at all. The one region the light does not reach.",
+          "Third eye — register change back to warmth and to one named person: a single before-and-after paragraph, no adjectives.",
+          "Products — register change to a schedule. Real dates, real prices, tabular figures, three offering kinds at equal billing, lit by the widest bloom yet.",
+          "Crown — the light is now the entire viewport and the composition opens all the way: one sentence, one control, nothing else."
+        ],
+        "transformationBridge": "Before: someone who has had an appointment window open in another tab since March and has never got as far as the contact form, because the thing she needs to know is the thing she cannot make herself ask. After: someone who has spent an hour in a chair with her coat on the back of it, who knows exactly what did and did not happen to her, and who has an opinion about it instead of a fear. Nothing was cured. The not-knowing was.",
+        "closedLoop": "The crown answers the gap the doorway opened, in the words the doorway used: the hands never land. Beneath it sits one control — Ask for a time — and the confirmation that follows states the held hour plainly and says a person will reply, because a person does."
+      },
+      "interfaceCraftEmphasis": [
+        "I-2 one primary action per screen, marked everywhere by the same radial bloom that marks the crown CTA — the owner learns one gesture on the public site and meets it again in the admin",
+        "I-1 state-completeness with the NEW practitioner designed FIRST: the empty merged calendar, the zero-workshop index and the empty booking queue are composed before the populated states (brief §11 day-one requirement)",
+        "I-5 density held deliberately LOW on the working surfaces — this admin is a quiet room too, so the merged calendar separates confirmed / held / derived-session / personal blocks by light and generous rows rather than by a dense ruled grid"
+      ],
+      "excludes": [
+        "No second emanation anywhere on a screen — two competing centres cancel each other and the concept dies with them",
+        "No drop shadows at any elevation: light is the elevation currency in a dark room, and a card that floats on this ground is a foreign body",
+        "No chakra band, no rainbow, no mandala, no crystals, no cupped hands around an orb — aura-hands-between stays reserve and never anchors a beat",
+        "No condensed display face and no flat acid accent: that is Othership's costume at #372338 and this ground sits one measured step from it",
+        "No scroll-triggered fade-in or IntersectionObserver gate — the room is fully lit in a static screenshot or the composition is wrong"
+      ],
+      "layoutArchetype": "One radial light source per viewport, with every element placed by its distance from that centre — near copy tight and bright, far copy dim and widely spaced; nothing spans edge to edge and no lattice of equal cards exists anywhere on the site.",
+      "signatureMove": "The emanation is the page's only light source: exactly one radial bloom per viewport, drifting on a ~12-second cycle, its radius growing beat by beat until the crown's bloom fills the frame — and every elevation on the site rendered as light rather than as shadow.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "hushed nocturne — one lamp, one adult, a room at eleven at night",
+      "visualToneIndicators": [
+        "0px radius on every container; the only curve in the system is a true circle, and it is always the light",
+        "gold hairline under each eyebrow; rose reserved for the single primary action per screen",
+        "long vertical silences between beats so the ascent is felt as pacing before it is read",
+        "the plates are native here — they were lit for this ground and take no scrim, no tint and no overlay",
+        "aperture is the ascent mechanic: bloom radius grows monotonically root to crown and never reverses"
+      ],
+      "theUnaskedQuestionAnswer": "The photograph does it before a word is read. aura-two-people at doorway scale, cropped so BOTH the clothed body and the visible gap between hands and shoulders survive at every breakpoint, with the three flat sentences set into the plate's own dark quadrant so picture and sentence make the same claim simultaneously.",
+      "ascentMechanic": "aperture / scale progression — the emanation's radius opens one step per beat (inspirations.md §Four non-rainbow mechanics, row 3; Insp. 38 Turrell's Skyspace dusk programme, where the perceived transformation is enormous and the actual hue travel is small)",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#E9C87E",
+          "secondary": "#E85D9B",
+          "accent": "#F5876F",
+          "background": "#2B0E28",
+          "surface": "#3A1233",
+          "textPrimary": "#FBF3F1",
+          "textSecondary": "#DCC0CF",
+          "error": "#F58A80",
+          "success": "#6FCB99"
+        },
+        "typography": {
+          "headingFont": "Cormorant Garamond",
+          "bodyFont": "Source Sans 3",
+          "monoFont": "DM Mono"
+        },
+        "dials": {
+          "visual_density": 3,
+          "motion_intensity": 4,
+          "design_variance": 4
+        },
+        "characteristics": "0px radius everywhere; zero drop shadow (elevation = a soft radial bloom); spacious; body 18px / 1.7; the one curve in the system is the circle of light itself.",
+        "ground": "dark plum — the artwork's own ground #2B0E28",
+        "gradientRole": "literal radial EMANATION at page scale, one per screen, never two",
+        "contrastComputed": [
+          "textPrimary #FBF3F1 on background 16.04:1 / on surface 14.60:1 — AA body",
+          "textSecondary #DCC0CF on background 10.44:1 / on surface 9.50:1 — AA body",
+          "primary gold #E9C87E on background 10.89:1 / on surface 9.91:1 — AA body (the README inversion)",
+          "secondary rose #E85D9B on background 5.41:1 / on surface 4.92:1 — AA body on both",
+          "accent coral #F5876F on background 7.17:1 — AA body",
+          "error #F58A80 7.38:1 / 6.72:1 · success #6FCB99 8.93:1 / 8.13:1 — AA body (factory #16A34A = 3.30:1 on white, rejected)",
+          "CTA label #1E0A1C on gold fill 11.68:1 — AA body",
+          "focus ring gold on background 10.89:1 · functional border #996E8C on background 4.15:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "magenta #D6338A as type on this ground = 3.93:1 — fails AA body; rose #E85D9B substituted at 5.41:1",
+          "magenta-deep #C2187A on plum-800 = 3.10:1 and on plum-700 = 2.82:1 — misses even the 3:1 non-text floor; absent from this direction entirely"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are native — they were lit for this ground and get no scrim. aura-two-people full-bleed at Root with copy in its unlit quadrant; aura-light-in-a-room at Sacral; aura-radiant-portrait is the brightest thing on the site and belongs to Crown; aura-field-abstract is the default selectable background at low opacity; aura-seated-figure covers offering detail. aura-hands-between: reserve, small inline at most."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§2 Emotional register — “Night-side rather than daylight — the work happens in low light, in stillness, and the site should feel like that room rather than like a spa brochure.”"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — computed: gold #E9C87E on plum-800 = 10.89:1; magenta #D6338A on plum-800 = 3.93:1 (fails AA body); rose #E85D9B = 5.41:1 is the dark-ground text-safe pink; magenta-deep #C2187A on plum-700 = 2.82:1 misses even the 3:1 non-text floor"
+        },
+        {
+          "source": "asset",
+          "ref": "docs/asset-inventory.json — assets/images/aura-two-people.png: “hands hovering above the shoulders of a seated, fully clothed woman”; briefRole “Answers the unasked question (clothed, untouched) visually.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — dark grounds 1 of 6, and that one (Othership #372338) is a US bathhouse; “a dark direction that also reaches for a condensed display face and a bright accent risks reading as an Othership derivative”"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 Field Emanation — “a gold→magenta radial emanation instead of an acid-yellow flat accent, and stillness instead of Webflow motion”"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 5 Dan Flavin Art Institute — fluorescent light installed as architecture so the room becomes the artwork; Insp. 38 Turrell's Skyspace dusk programme — the aperture mechanic"
+        }
+      ]
+    },
+    {
+      "name": "the-answer-printed-first",
+      "governingIdea": "The site's first act is to remove an embarrassment, so the design's first act is to make that removal impossible to miss: the answer is printed before the question is asked, at the size of a headline, with nothing standing in front of it.",
+      "singleMindedProposition": "You stay dressed, nobody touches you, and nothing is asked of your beliefs — printed first, at full size, before anything at all is sold.",
+      "narrativeSpine": {
+        "openWound": "The thing you actually need to know is whether a stranger will ask you to undress and then touch you, and it is precisely the thing you cannot type into a contact form — so you read six sites about energy and none about your body, and you close all six.",
+        "openLoop": "Three sentences fill the first screen and every one of them is about what will NOT happen. Underneath, in small type, the obvious question comes back: so what DOES happen, for an hour?",
+        "villainStakes": "The villain is the FAQ — this category's habit of filing the only answer that matters two clicks in, where it is found by people who had already decided to book. What it costs is the sceptical, curious adult who leaves believing that nobody was ever going to say.",
+        "guideEntrance": "She arrives at the fourth beat in exactly the same flat register: no adjectives, no mission statement, no borrowed authority. A person who describes what she does and declines to say what it will do for you. (Name, years and training UNVERIFIED per brief §20.1 — marked placeholders until confirmed.)",
+        "staircaseBeats": [
+          "Root — three sentences at 88px and nothing else in the viewport. No picture, no eyebrow, no navigation flourish, no tint.",
+          "Sacral — the register drops hard to 18px reading measure and second person: what the hour is like, minute by ordinary minute.",
+          "Solar plexus — register change to the page's only numbered list: the four verbs, set as four items and nothing more.",
+          "Heart — register change to a photograph, finally, at full width and full stop, with the practitioner's paragraph set BENEATH it rather than over it.",
+          "Throat — register change to the one shaded region on the site: what this is not, hard-ruled, in the same flat sentences as the opening.",
+          "Third eye — register change to a single long paragraph at wide measure. One person, before and after, no list.",
+          "Products — register change to figures: dates and prices in tabular numerals, rule-separated rows, three kinds at equal billing, not one card.",
+          "Crown — the register returns exactly to the opening: same face, same 88px, one sentence more than there was at the top."
+        ],
+        "transformationBridge": "Before: a 51-year-old who has read the word energy forty times this week and still does not know whether she will be asked to lie on a table in a gown. After: someone who can repeat three facts about the hour to her sister without being embarrassed, and who asked for a Tuesday because the price was on the page and she did not have to email to find it.",
+        "closedLoop": "The crown is literally the fourth sentence of the opening paragraph, set at the same size in the same face: “You stay dressed. Nobody touches you. Nothing is asked of your beliefs. Here is when she is free.” The dates sit directly beneath it, and the request is one screen away."
+      },
+      "interfaceCraftEmphasis": [
+        "I-6 affordance legibility carried by weight, rule and underline rather than by colour — this territory has almost no colour to spend, so an interactive thing must LOOK interactive typographically",
+        "I-3 scan hierarchy from SIZE alone: on every admin screen the single most important datum is literally the largest thing on it (what needs me today; how long is left on this hold)",
+        "I-1 state-completeness written as prose — the zero-workshop index and the empty booking queue are sentences at full reading size, never a grey box with a shrug icon in it"
+      ],
+      "excludes": [
+        "No hero photograph, ever — not above the opening sentences, not behind them, not as a tint underneath them",
+        "No image at all until after a claim has been made; a picture that arrives before the sentence is decoration pretending to be evidence",
+        "No ultralight display serif on cream — the measured 2022–2026 wellness preset, and the wordmark's Cormorant makes it the easiest wrong turn on this project",
+        "No coloured shape anywhere in the interface: colour exists only as text or as a rule, never as a fill except the ink CTA",
+        "No gradient in the UI — the artwork's gradient lives in the logo lockup and inside the photographs and nowhere else"
+      ],
+      "layoutArchetype": "A declarative fact-stack: the opening screen is three sentences at display size and nothing else — no picture above them, no eyebrow, no decorative chrome — and beneath it an asymmetric ragged argument where photographs appear only as corroboration after a claim has been made.",
+      "signatureMove": "The opening screen is three declarative sentences at 88px with nothing else in it, and the crown repeats them at exactly the same size with one sentence added — so the page begins and ends in the same voice and the visitor hears the answer twice.",
+      "signatureMoveScope": "landing-only",
+      "toneRegister": "plainspoken public-health editorial — flat, procedural, unembarrassed",
+      "visualToneIndicators": [
+        "0px radius, absolute — not one rounded corner exists in the system",
+        "hairline rules only; no shadow at any elevation; separation is whitespace and a single rule weight",
+        "typography IS the layout: the seven beats are numbered and set at display scale with no decorative element to remove",
+        "a plain wide grotesk for display over a warm serif for body — the exact inverse of the category's ultralight-serif-over-grotesk preset",
+        "one word per beat carries the accent as a TEXT colour; nothing on the page is coloured for decoration"
+      ],
+      "theUnaskedQuestionAnswer": "The sentences do it alone, with no picture to hide behind. Three second-person declaratives at 88px in the first viewport, in the NHS register (short, future tense, no adjectives, admit rather than deny) — and the corroborating photograph is deliberately WITHHELD until immediately below them, so the visitor reads the promise and then sees it kept.",
+      "ascentMechanic": "type-scale and density — root is the densest, most tightly-set region on the site and each beat opens its measure and its leading a step, so the crown is the most spacious point (inspirations.md §Four non-rainbow mechanics, row 4)",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#1A0F18",
+          "secondary": "#C2187A",
+          "accent": "#7E611F",
+          "background": "#FDFAF7",
+          "surface": "#F5EFE9",
+          "textPrimary": "#1A0F18",
+          "textSecondary": "#544452",
+          "error": "#A3231B",
+          "success": "#146B3A"
+        },
+        "typography": {
+          "headingFont": "Archivo",
+          "bodyFont": "Petrona",
+          "monoFont": "Space Mono"
+        },
+        "dials": {
+          "visual_density": 6,
+          "motion_intensity": 1,
+          "design_variance": 7
+        },
+        "characteristics": "0px radius absolute; flat — hairline rules, no shadow anywhere; comfortable density; body 18px / 1.7; the CTA is an ink-filled rectangle with an ivory label and it is the only fill on the page.",
+        "ground": "light ivory #FDFAF7, with ONE tinted region (#F5EFE9) reserved for the Throat beat",
+        "gradientRole": "absent entirely — there is no gradient anywhere in the interface",
+        "contrastComputed": [
+          "textPrimary #1A0F18 on background 17.94:1 / on surface 16.35:1 — AA body",
+          "textSecondary #544452 on background 8.68:1 / on surface 7.91:1 — AA body",
+          "secondary magenta-deep #C2187A on background 5.45:1 / on surface 4.97:1 — AA body on both",
+          "accent derived gold #7E611F on background 5.58:1 / on surface 5.09:1 — AA body on both",
+          "error #A3231B 7.18:1 / 6.54:1 · success #146B3A 6.32:1 / 5.76:1 — AA body (factory #16A34A rejected at 3.30:1 on white)",
+          "CTA label #FDFAF7 on ink fill 17.94:1 — AA body",
+          "focus ring ink on background 17.94:1 · rule / functional border #6E5C6B on background 5.93:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "the README's derived gold #8A6A22 measures 4.61:1 on blush but only 4.42:1 on this direction's #F5EFE9 tint — it FAILS AA body there, so #7E611F was derived instead and clears both grounds. Exactly the failure the brief warns is invisible to a designer who already knows what the text says",
+          "artwork gold #E9C87E on this ground = 1.47:1 and gold-deep #C99A3F = 2.35:1 — both fail every floor including the 3:1 non-text floor; neither appears in this direction at all"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are RATIONED and the ration is the design: each of the six appears exactly once, full-bleed at 100vw, uncropped, no overlay, no tint, no radius — and nothing else on the site is an image. Because there are no icons-as-illustration and no card thumbnails, a plate arriving after 800px of pure typography lands with the force of evidence. aura-two-people is deliberately withheld from the first viewport and placed immediately below the three sentences. aura-hands-between is omitted entirely."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§15 Success metrics — “≥80% of test visitors, unprompted, can state that they keep their clothes on and are not touched, after one scroll.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md headline finding — the strings clothed / undress / touch / hands-off / believe appear ZERO times on all six researched homepages; Blossom Reiki answers all three well but on a second-click /faq/"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the compositional default is “full-bleed soft-focus hero photograph → short mission statement → three-up service cards → practitioner bio → testimonials → booking CTA”, followed by 5 of 6 sites, with no slot for reassurance"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 31 NHS “What happens at your cervical screening appointment” — flat declaratives including the embarrassing parts, second person, future tense, 8–17 word sentences, discomfort admitted not denied; plus its structural warning that the parent page defers “what happens” four links down"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 4 Plain Type — no hero image at all; the derived gold #8A6A22 tested and REJECTED at 4.42:1 on the #F5EFE9 tint, #7E611F derived instead at 5.09:1"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — on light grounds neither gold clears the AA body floor OR the 3:1 large-text floor, so gold is a non-text colour there"
+        }
+      ]
+    },
+    {
+      "name": "long-dusk-ascent",
+      "governingIdea": "The page is a single hour of failing light run in reverse: the visitor lands at the darkest point of the brand and physically travels to the lightest, so the root-to-crown climb is made of the page's own material rather than illustrated on top of it.",
+      "singleMindedProposition": "Start where you are — in the dark, embarrassed — and arrive somewhere brighter by the time you reach the ask.",
+      "narrativeSpine": {
+        "openWound": "It is late, the room you are in is dark, and you have been reading about a thing you half-want and half-expect to be humiliated by. The first thing you need is not inspiration. It is to be told what happens to your body, by someone who is not going to be embarrassed telling you.",
+        "openLoop": "You land at the deepest, most enclosed point of the whole site — and within one screen of scrolling the ground under the text is visibly, measurably lighter than it was. It is still moving. Where does it stop?",
+        "villainStakes": "The villain is the flat page — a single unchanging cream ground that has no direction of travel, so a visitor cannot feel progress and reads the seven things she is told as seven unrelated boxes. What is lost is the arc: the sense that this hour would move her somewhere.",
+        "guideEntrance": "She enters at the Heart beat, at the exact point where the ground has climbed far enough that a photograph of a person is legible on it — empathy first, in a paragraph of her own words; the training beneath, small. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — plum-900 #1E0A1C, the deepest value on the site, dense type, the plate needing no treatment at all because the ground beneath it is already the plate's own darkness.",
+          "Sacral — register change to a warmer, closer voice as the ground lifts its first measured step; the last fully-dark plate on the page.",
+          "Solar plexus — register change to structure: the four verbs set as the page's only stepped list, the ground now unmistakably mid-value.",
+          "Heart — register change to a human face and a first-person paragraph, at the height where the ground can carry a portrait.",
+          "Throat — register change to the crossover seam itself. What this is not, set at the ~120px band where the two zones blend — contrast-computed rather than kept clear of type, so the honesty beat sits at the page's turning point.",
+          "Third eye — register change into the light half: one before-and-after paragraph on a near-blush ground, type opening as the optical size dials up.",
+          "Products — register change to a schedule set on light: dates as headers, prices in tabular figures, three kinds at equal billing.",
+          "Crown — blush #FBF3F1, the brightest area on the site, aura-radiant-portrait, and the request."
+        ],
+        "transformationBridge": "Before: a woman who has spent four months reading about this at night with the lights off, and has told nobody. After: a woman who told her husband about it over dinner, in ordinary words, because she now has ordinary words for it — she knows what happens, what does not, what it costs and when it is.",
+        "closedLoop": "The ground stops climbing at the crown, and that is the answer to where it was going: the brightest region on the site is the ask. The line above the form names what the light was — the hour after — and the CTA is the page's only element that sits on pure blush."
+      },
+      "interfaceCraftEmphasis": [
+        "I-3 scan hierarchy anchored to POSITION: every interior and admin screen takes ONE fixed station on the ascent (services at the mid-value, calendar near the top), so the owner can tell where she is in the product from the ground colour alone before she reads a label",
+        "I-1 state-completeness at every station — empty / loading / error / populated / overflow computed against THAT station's ground, since a token that clears AA at the root can fail at the crown",
+        "I-6 affordance legibility as a zone rule: gold is a root-and-seam colour only, magenta-deep does every job above the seam, so a control's colour is decided by where it sits rather than by taste"
+      ],
+      "excludes": [
+        "No chakra hue as a band, ever — the ascent is VALUE, and a seven-colour ramp would convert this direction into the exact category cliché brief §20 names",
+        "No reversal and no plateau: the property climbs monotonically or the concept is gone. One direction of travel, or none",
+        "No position-independent palette. Gold #E9C87E dies as it ascends (11.68:1 at root, 5.39:1 at the seam, 1.47:1 on the crown ground) and must not appear as type, rule, border or icon stroke above the seam",
+        "No magenta-deep #C2187A as TYPE in the root zone (3.32:1) — it is a filled-CTA colour there and a text colour only from the seam upward",
+        "No third register: two zones, one long blend, and the ground never doubles back"
+      ],
+      "layoutArchetype": "A continuously travelling ground whose value climbs monotonically from the deepest plum at the first beat to blush at the last, so passages read as stations inside one long gradient rather than as blocks stacked on a fixed backdrop.",
+      "signatureMove": "The page ground itself travels — one uninterrupted vertical value climb from plum-900 to blush across the whole scroll, with the imagery handing over to typography exactly as the page brightens, so you can tell how far through you are with your eyes shut to the copy.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "patient ascent — atmospheric, slow, ending in daylight",
+      "visualToneIndicators": [
+        "10px radius on beat panels ONLY, so each beat reads as a step the ground passes through rather than a card sitting on top of it",
+        "one long soft vertical ambient shadow that follows the climb, so elements sit IN the gradient rather than on it",
+        "Fraunces' optical size dialled up as the ground lightens — the type gets more open as the page gets brighter",
+        "the crossover seam is a designed 120px band with computed type contrast, not a region kept clear of content",
+        "spacious throughout; body 18px / 1.75 on a serif built for long reading"
+      ],
+      "theUnaskedQuestionAnswer": "The dark answers it. Beat 1 sits at the site's absolute deepest value where the plate needs no treatment at all — and the three facts are set in blush at 16.46:1 directly on that ground, so the most legible text on the entire site is the sentence about your clothes. The reassurance is literally the highest-contrast thing the visitor will ever see here.",
+      "ascentMechanic": "luminance — the literal, measured ground travel (inspirations.md §Four non-rainbow mechanics, row 1; Insp. 36 Rothko Chapel: fourteen canvases in one near-black family read as a sequence with no hue rotation; Insp. 37 Albers, progression by adjacency)",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#C2187A",
+          "secondary": "#E9C87E",
+          "accent": "#F5876F",
+          "background": "#1E0A1C",
+          "surface": "#33132E",
+          "textPrimary": "#F7EDF3",
+          "textSecondary": "#CFB2C4",
+          "error": "#F79289",
+          "success": "#74CE9C"
+        },
+        "typography": {
+          "headingFont": "Fraunces",
+          "bodyFont": "Literata",
+          "monoFont": "Spline Sans Mono"
+        },
+        "dials": {
+          "visual_density": 4,
+          "motion_intensity": 3,
+          "design_variance": 6
+        },
+        "characteristics": "10px radius on beat panels only; one long soft vertical ambient; spacious; body 18px / 1.75; the nine tokens describe the ROOT system and the crown is a documented zone inversion.",
+        "ground": "split / travelling — plum-900 #1E0A1C at Beat 1 to blush #FBF3F1 at Beat 7, with a ~120px crossover seam near #7A3350",
+        "gradientRole": "the page ground ITSELF, vertically, across the whole scroll",
+        "contrastComputed": [
+          "ROOT — textPrimary #F7EDF3 on background 16.46:1 / on surface 14.42:1 — AA body",
+          "ROOT — textSecondary #CFB2C4 on background 9.70:1 / on surface 8.50:1 — AA body",
+          "ROOT — gold #E9C87E on background 11.68:1 — AA body · error #F79289 8.45:1 · success #74CE9C 9.91:1",
+          "ROOT — functional border #916787 on background 4.03:1 — clears SC 1.4.11 (3:1)",
+          "SEAM (#7A3350) — blush #FBF3F1 7.94:1 · gold #E9C87E 5.39:1 — both AA body, so the ascent has no dead band",
+          "CROWN (#FBF3F1 / #FFFFFF) — textPrimary inverts to #241021 at 16.39:1 / 17.93:1; textSecondary to #5A4353 at 8.12:1; error to #A82219 at 6.60:1; success to #12693B at 6.17:1; magenta-deep #C2187A at 5.18:1 — all AA body",
+          "CROWN — functional border #8F7887 on blush 3.69:1 — clears SC 1.4.11 (3:1)",
+          "SHARED — CTA label #FFFFFF on magenta-deep fill 5.67:1 in BOTH zones — AA body"
+        ],
+        "rejectedByComputation": [
+          "primary #C2187A as TYPE in the root zone = 3.32:1 on background and 2.91:1 on the root surface — it misses AA body on both and misses even the 3:1 non-text floor on the surface. It is a FILL colour in the root zone (white label = 5.67:1) and a text colour only from the seam upward",
+          "gold #E9C87E above the seam = 1.47:1 on the crown ground — fails AA body AND the 3:1 large-text and non-text floors. Gold is root-and-seam only; the crown re-assigns secondary to #C2187A"
+        ],
+        "nonTextOnly": [
+          "gold #E9C87E anywhere above the crossover seam — not type, not a rule, not a border, not an icon stroke"
+        ],
+        "imageryTreatment": "The plates live in the ROOT half where their darkness IS the ground rather than a contrast. aura-two-people at Root needs no treatment; aura-light-in-a-room at Sacral is the last full-dark plate; through Beats 3–5 the plates step down in scale as the ground lifts, so imagery hands over to typography exactly as the page brightens. aura-radiant-portrait returns at Crown on blush — the only plate that works there, because its subject is a face lifted into light. aura-field-abstract supplies the root-end ground texture."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§20 Settled as defaults — the seven beats “ascend root → crown so the page ends in light. That is a requirement (§11). How a direction expresses the ascent is a design decision made per direction and chosen at Gate 2.”"
+        },
+        {
+          "source": "brief",
+          "ref": "§11 beat 7 (Crown) — “The call to action, at the brightest point of the page, resolving the specific thing beat 1 opened.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the palette default is a near-white or cream ground for the ENTIRE page in 5 of 6 measured sites, with progression expressed (if at all) through section dividers"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 36 Rothko Chapel + Insp. 37 Albers Homage to the Square — progression created by adjacency and value rather than by spectrum; “if fourteen can hold a sequence without changing hue, seven can”"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 3 Long Dusk — the two cross-zone hazards verified independently: gold dies as it ascends (11.68 → 5.39 → 1.47) and #C2187A is a fill-only colour in the root zone (3.32:1 as type)"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — the two magentas INVERT between ground families; neither magenta is a body-text colour on a dark ground"
+        }
+      ]
+    },
+    {
+      "name": "the-hour-logged",
+      "governingIdea": "A practitioner with no institutional logos to borrow buys credibility with a record, not a claim — so the site is built as a kept log of one hour, with a measured time-scale down the margin and every passage pinned at the minute it describes.",
+      "singleMindedProposition": "Here is the hour, minute by minute, written down — decide from the record rather than from the promise.",
+      "narrativeSpine": {
+        "openWound": "You cannot tell a serious practitioner from a hobbyist, because they all write the same paragraph about energy and none of them will tell you what physically occurs between the moment you arrive and the moment you leave. So you have no way to judge, and judging is the only thing you are trying to do.",
+        "openLoop": "The margin scale starts at 00:00 and the first mark is annotated: you keep your coat on the back of the chair. Sixty marks are visible down the page. Most of them are still empty — what fills them?",
+        "villainStakes": "The villain is the unfalsifiable claim: language so general that nothing could ever contradict it, which is comfortable for the practitioner and useless to you. What it costs is your ability to decide at all, so you don't, and it stays open in a tab.",
+        "guideEntrance": "She enters at the 34-minute mark, where the log records what she is doing rather than who she is — and the paragraph beneath is hers, in her own plain words, empathy before qualification. (Name, years and training UNVERIFIED per brief §20.1 — visibly-marked placeholders.)",
+        "staircaseBeats": [
+          "Root — 00:00 to 04:00, the densest cluster of marks on the page. Arrival: coat, chair, clothes, distance. The scale is at its tightest here and the annotations are at their plainest.",
+          "Sacral — register change from log to first-person recollection: what the next ten minutes are like from inside the chair, set at reading measure across the wide column while the scale keeps ticking beside it.",
+          "Solar plexus — register change to instrument operations: clearing, charging, repairing, restructuring, each pinned at its minute with a hairline leader out to the scale.",
+          "Heart — register change to a photograph and a paragraph. The practitioner, at the point in the hour where she is doing the most and saying the least.",
+          "Throat — register change to a boxed marginal note in the register of a correction notice: what this is NOT, what is not being claimed, and the complementary-not-a-substitute statement, set as a permanent annotation on the record rather than as a disclaimer at the bottom.",
+          "Third eye — register change to prose at wide measure with the scale falling silent for the first time: one person, before and after.",
+          "Products — register change to a second scale: the same tabular treatment applied to real dates and prices, three kinds at equal billing, aligned on their digits.",
+          "Crown — 60:00. The only mark on the page annotated with a question rather than a description."
+        ],
+        "transformationBridge": "Before: a man who has spent two months unable to tell whether this is a serious practice or someone with a website, because nothing he has read could be checked against anything. After: someone who has been through the hour once, has an accurate account of it, and can tell a friend precisely what happened in the order it happened — including the parts that did nothing for him.",
+        "closedLoop": "The last mark, 60:00, is the only annotation on the record that is a question instead of a description — “when are you free?” — and the live free-slot picker is what fills it. The log that began by telling you your coat stays on ends by asking for a time, in the same numerals."
+      },
+      "interfaceCraftEmphasis": [
+        "I-3 scan hierarchy from TABULAR ALIGNMENT: every time, price, duration, capacity and count is set in lining tabular figures aligned on the digit, so the owner reads a column of holds and sessions without reading a word",
+        "I-4 progressive disclosure — the availability pattern, buffer, lead time and booking horizon are set rarely and live behind their own screen; the calendar shows the 80% path and never dumps configuration on it",
+        "I-5 density calibrated HIGH but not hostile: the merged calendar is the densest surface in the product because it is the screen she lives in, and the data-ink discipline means no chrome competes with a block"
+      ],
+      "excludes": [
+        "No dark ground. Cosmic credibility on this project comes from DATED EVIDENCE, not from darkness — ESA/Webb's own site is a light ground and the lesson is inverted on purpose",
+        "No adjectives on the record: an annotation says what happens, never how good it is",
+        "No mystical framing, no diagram of a subtle body, no sacred geometry watermark — the log's authority is that it could be checked",
+        "No proportional figures anywhere a number appears; a column of times that does not align cannot be scanned and the whole move dies",
+        "No claim without a mark on the scale — if it cannot be placed in the hour, it does not go on the page"
+      ],
+      "layoutArchetype": "A measured time-scale pinned in the left margin — hairline minute marks and tabular numerals running the whole height of the document — with each passage hung at the position in the hour it describes, figures aligned on their digits, prose in one wide column beside the scale.",
+      "signatureMove": "The margin scale: a hairline rule of sixty minute-marks running the full height, with leaders out to each annotation — and the same scale reappearing as the spine of the free-slot picker, the course session list and the admin calendar, so the practice's whole product is read on one instrument.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "kept record — instrumented, exact, quietly proud of the hour",
+      "visualToneIndicators": [
+        "warm paper ground, never cream and never white — the register is a logbook, not a brochure",
+        "2px radius maximum; a single hairline frame around plate insets; no shadow above a 1px warm rule",
+        "font-variant-numeric: tabular-nums lining-nums declared globally, not per component",
+        "the only chromatic marks on the page are the live-now indicator and the price",
+        "dense at the root, opening as the hour proceeds — the crown is the most spacious region on the record"
+      ],
+      "theUnaskedQuestionAnswer": "It is answered as the first four entries in the log, at 00:00–04:00, in the same annotation format as everything else — “00:00 you keep your coat on the back of the chair · 00:02 you sit down · 00:04 she stands about a metre away · she does not touch you at any point in the next fifty-six minutes.” The fear is disarmed by being made ordinary: it is just the beginning of a procedure that was written down.",
+      "ascentMechanic": "elapsed time plus density — the scale is the ascent, and the marks thin out as the hour proceeds so the record opens from a dense cluster at arrival to a single wide mark at the close",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#5B1C4E",
+          "secondary": "#C2187A",
+          "accent": "#77591C",
+          "background": "#F2EEE6",
+          "surface": "#FBF9F5",
+          "textPrimary": "#1F1A22",
+          "textSecondary": "#4F4756",
+          "error": "#A3231B",
+          "success": "#12633A"
+        },
+        "typography": {
+          "headingFont": "Newsreader",
+          "bodyFont": "IBM Plex Sans",
+          "monoFont": "IBM Plex Mono"
+        },
+        "dials": {
+          "visual_density": 7,
+          "motion_intensity": 2,
+          "design_variance": 5
+        },
+        "characteristics": "2px radius maximum; one hairline frame, no shadow beyond a 1px warm rule; dense-but-legible; body 17px / 1.65; IBM Plex chosen because it ships true tabular figures across sans and mono, which this whole direction depends on.",
+        "ground": "light warm paper #F2EEE6 — deliberately NOT the category's cream, and deliberately not white",
+        "gradientRole": "absent from the interface; the artwork's gradient appears only in the logo lockup and inside the plates",
+        "contrastComputed": [
+          "textPrimary #1F1A22 on background 14.76:1 / on surface 16.25:1 — AA body",
+          "textSecondary #4F4756 on background 7.66:1 / on surface 8.43:1 — AA body",
+          "primary #5B1C4E on background 10.55:1 / on surface 11.60:1 — AA body",
+          "secondary magenta-deep #C2187A on background 4.90:1 / on surface 5.39:1 — AA body on both (note it costs 0.28 against the blush figure of 5.18 — computed, not assumed)",
+          "accent derived gold #77591C on background 5.62:1 / on surface 6.18:1 — AA body on both",
+          "error #A3231B 6.45:1 / 7.10:1 · success #12633A 6.32:1 / 6.95:1 — AA body (factory #16A34A rejected)",
+          "CTA label #FBF9F5 on primary fill 11.60:1 — AA body",
+          "focus ring #5B1C4E 10.55:1 · functional border #6F6672 on background 4.75:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "the README's derived gold #8A6A22 measures only 4.36:1 on this paper — it FAILS AA body here even though it clears at 4.61:1 on blush. #77591C derived instead at 5.62:1",
+          "rose #E85D9B on this paper = 2.80:1 and artwork gold #E9C87E = 1.39:1 — both fail every floor; neither is used"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are EVIDENCE with a caption contract borrowed from ESA/Webb: every plate carries what it is and when in the hour it occurs. They sit inset at 3:2 inside a single hairline frame, at moderate scale, in the wide column beside the scale — never full-bleed, because a full-bleed plate would drown the record. aura-two-people is the exception and runs at the top of the log at double width. aura-hands-between is excluded."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 6 ESA/Webb — “the honest lesson is inverted and therefore more useful — Webb's own site is a LIGHT ground. So the credibility does not come from darkness; it comes from treating the imagery as evidence with a date on it.” Plus Insp. 8's caption contract"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 31 NHS “What happens at your appointment” — the procedure stated in flat declaratives in order of occurrence; Insp. 24 Gaia House — take the completeness of the data model, reject the raw-table typography"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Industry Best Practices — “Answer procedure before philosophy. Every site that leads with what the modality IS rather than what HAPPENS to you leaves the real question open.”"
+        },
+        {
+          "source": "brief",
+          "ref": "§11 admin-calendar — the operational heart and “the screen she will live in”; §15 owner-independence — block a personal afternoon in under 30 seconds, publish a workshop in under 5 minutes"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — one factory default to override: success #16A34A measures 3.30:1 on white and fails AA body; this direction substitutes #12633A at 6.32:1"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md §Cross-cutting constraints — the gold trap: on light grounds gold is a DECORATIVE colour only, never text, never a functional border, never a focus ring; a derived value must be stated with its measured figure"
+        }
+      ]
+    },
+    {
+      "name": "one-lamp-amber",
+      "governingIdea": "Certainty reads as the absence of persuasion, so the interface gives up its own colour entirely — one warm hue on deep brown and nothing else — in order that the only magenta a visitor ever sees is the light inside the practitioner's own photographs.",
+      "singleMindedProposition": "Nothing here is trying to convince you; the only bright thing on the page is the work itself.",
+      "narrativeSpine": {
+        "openWound": "You have been sold to all week by people who use the word journey, and you are so tired of being persuaded that you have started distrusting warmth itself — which is a problem, because the thing you are actually looking for is a quiet person who will not make a fuss of you.",
+        "openLoop": "Everything on this page is one colour. Then a photograph arrives and it is full of gold and magenta light. Why is that the only colour in the entire place?",
+        "villainStakes": "The villain is the outcome-adjective list — Confident, Happy, Calm, Relaxed, Loved, Safe — a promise wearing a word cloud, which is both the category's habit and, under the CAP Code, its legal exposure. What it costs you is the ability to believe anything on any of these sites.",
+        "guideEntrance": "She enters late and small: one paragraph at reading measure, on the same brown as everything else, saying what she does and declining to say what it will do for you. No portrait retouched into the palette, no credential wall. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the tightest, lowest-contrast setting on the site: the three facts in amber on brown, close-set, at the pace of someone speaking carefully.",
+          "Sacral — register change to the FIRST plate, full-height and ungraded, arriving after a screen of amber-on-brown with all of its gold and magenta intact. The shock of colour is the whole beat.",
+          "Solar plexus — register change back to type-only. Four verbs, one line each, no list markers, no rules.",
+          "Heart — register change to a paragraph in the first person at wide measure. The quietest thing on the page.",
+          "Throat — register change to a hard stop: what this is not, set as the shortest section on the site, with more air above and below it than anything else has.",
+          "Third eye — register change to one before-and-after paragraph, still amber, still one column.",
+          "Products — register change to figures: dates and prices in amber tabular numerals with a 2px gold underline as the only rule in the system.",
+          "Crown — aura-radiant-portrait full-height, the single brightest frame on the site, with the one solid gold control beneath it."
+        ],
+        "transformationBridge": "Before: someone who has developed an allergy to wellness language and therefore cannot get to anything real underneath it, and who has decided that anyone this warm is probably selling something. After: someone who spent an hour in a low-lit room with a person who did not once tell her how she would feel afterwards, and who found that more convincing than any of it.",
+        "closedLoop": "The last plate is a face lifted into light and the only coloured control on the entire site sits directly under it: Ask for a time. The colour was never withheld — it was being saved for the work, and the CTA is the first moment the interface allows itself any."
+      },
+      "interfaceCraftEmphasis": [
+        "I-5 density done right at the Tufte end — one hue means no decorative chrome can exist, so the data-ink ratio on the admin's booking queue and subscriber list is as high as the product gets",
+        "I-2 one primary action per screen made trivially obvious: the solid gold fill is the ONLY filled control in the entire system, so the eye finds it in well under two seconds",
+        "I-6 affordance legibility from a single 2px gold underline vocabulary — links, focus and active state are all the same mark at different weights, which is learnable in one screen"
+      ],
+      "excludes": [
+        "No gradient anywhere in the interface — the gold→magenta axis is deliberately WITHHELD, and the withholding is the concept",
+        "No colour-grading of the commissioned plates into the amber world: that would destroy the magenta the client paid for, which is the one thing this direction exists to protect",
+        "No plum. This is a deep warm BROWN and the distance from the brand's own plum is deliberate — it is also the distance from Othership's #372338",
+        "No elevation, no shadow, no second accent, no motion beyond a focus ring: motion_intensity is 1 and literally nothing moves",
+        "No condensed display face and no acid accent — take Othership's courage, never its costume"
+      ],
+      "layoutArchetype": "A single narrow reading measure held on deep brown for the entire page, broken only by full-height plates that reach both margins; there are no rules, no boxes, no second column and no second colour, so an arriving photograph is the only event in the composition.",
+      "signatureMove": "The interface surrenders its chroma so the photographs can keep theirs: the entire UI is one gold hue on brown, and the only magenta and coral anywhere on the site live inside the six commissioned plates — so a plate reads as the work breaking through a very quiet room.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "amber austerity — certain, undecorated, almost silent",
+      "visualToneIndicators": [
+        "2px radius on the gold CTA fill and nowhere else; every other element in the system is square",
+        "flat — no elevation anywhere; the only light in the composition comes out of the photographs",
+        "copy set tight and low-contrast in rhythm, so the page reads at the pace of someone speaking carefully",
+        "a textured screen-first book serif for display — the opposite end of the serif spectrum from the category's ultralight didones",
+        "one hue family, no gradient, no second accent: the discipline IS the design"
+      ],
+      "theUnaskedQuestionAnswer": "The copy answers it first, in amber on brown, with no picture anywhere near it — and then the FIRST plate in the whole site arrives immediately underneath, ungraded, and shows it. The reassurance is stated in the quietest register available and corroborated by the loudest thing the site will ever do.",
+      "ascentMechanic": "colour temperature — the brown warms and the amber brightens by measured steps toward the crown, a warm-dim curve rather than a value ramp (inspirations.md §Four non-rainbow mechanics, row 2; Insp. 39 Tala's engineered warm-dim relationship between brightness and temperature)",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#E9C87E",
+          "secondary": "#C99A3F",
+          "accent": "#EFD9A8",
+          "background": "#1B1310",
+          "surface": "#241A16",
+          "textPrimary": "#F2E9DE",
+          "textSecondary": "#BFAE9B",
+          "error": "#F0857A",
+          "success": "#6FC48F"
+        },
+        "typography": {
+          "headingFont": "Spectral",
+          "bodyFont": "Karla",
+          "monoFont": "Chivo Mono"
+        },
+        "dials": {
+          "visual_density": 7,
+          "motion_intensity": 1,
+          "design_variance": 3
+        },
+        "characteristics": "2px radius on the gold CTA only, everything else square; flat, zero elevation; compact; body 17px / 1.7; a 2px gold underline is the entire link, focus and active-state vocabulary.",
+        "ground": "dark warm brown #1B1310 — adjacent to the brand's dark without being its plum",
+        "gradientRole": "absent from the interface entirely; the only magenta on the whole site is inside a photograph",
+        "contrastComputed": [
+          "textPrimary #F2E9DE on background 15.24:1 / on surface 14.17:1 — AA body",
+          "textSecondary #BFAE9B on background 8.49:1 / on surface 7.89:1 — AA body",
+          "primary gold #E9C87E on background 11.36:1 / on surface 10.55:1 — AA body",
+          "secondary gold-deep #C99A3F on background 7.13:1 — AA body (the same value that fails at 2.35:1 on blush)",
+          "accent #EFD9A8 on background 13.22:1 — AA body",
+          "error #F0857A 7.27:1 / 6.76:1 · success #6FC48F 8.69:1 / 8.08:1 — AA body (factory #16A34A rejected)",
+          "CTA label #1B1310 on gold fill 11.36:1 — AA body",
+          "focus ring gold 11.36:1 · functional border #8A755F on background 4.18:1 — both clear SC 1.4.11 (3:1)",
+          "This is the only direction of the ten in which EVERY colour in the palette clears AA body on its own ground, gold-deep included. Restricting to one hue family is what buys that."
+        ],
+        "rejectedByComputation": [],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are NOT graded, and that is the concept. Full-bleed at 0px radius with no overlay, no tint and no scrim. Arriving at aura-two-people after a screen of amber-on-brown type, the plate's gold-to-magenta field is the most colourful thing the visitor has seen. aura-radiant-portrait closes the Crown as the single brightest frame on the site. aura-hands-between is excluded entirely."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§2 Voice — “Warm, unhurried, quietly certain”; §1 principle 3 — “Prefer honesty over persuasion where they diverge. Naming what the work is not buys more trust than one more testimonial would.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The copy default — outcome-promising (“Confident, Happy, Calm, Relaxed, Loved, Safe”), and Competitor 6's caution: Othership sits at #372338, one step from this brief's plum; “take the courage, not the volume”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The chromatic gap — “not one competitor in the set uses magenta or a gold→magenta gradient”, which makes the gradient a legitimate signature AND makes deliberately withholding it a legitimate signature"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — gold-deep #C99A3F measures 2.35:1 on blush and 7.13:1 on this brown; the whole palette's legality is decided by which ground it sits on"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 9 Low Amber — differentiates from Othership on three measured axes at once: not plum, not condensed, not acid; motion_intensity 1, the stillness pole of the set"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 11 Vitsœ — copy that argues against its own sale, “the most credible commercial voice on the web precisely because it declines to persuade”; Insp. 39 Tala warm-dim as a designed curve"
+        }
+      ]
+    },
+    {
+      "name": "the-mark-is-the-grid",
+      "governingIdea": "The client already owns the strongest structural idea she has and it is sitting unused inside her own logo — concentric light running outward from a centre — so the mark is promoted from something placed in a header to the layout system the whole site is composed on.",
+      "singleMindedProposition": "You can crop the logo out of a screenshot of this site and still know exactly whose it is.",
+      "narrativeSpine": {
+        "openWound": "Everything in this category looks like everything else in this category, so when you finally find someone you might trust you have no way to tell whether she is different or just better at the same template — and the one thing you are trying to judge is whether this particular person is serious.",
+        "openLoop": "Every edge on this page is part of a circle whose centre is somewhere off the side of the screen. The arcs keep implying it. Where is the centre?",
+        "villainStakes": "The villain is the platform's own composition — Wix strips, Elementor blocks, Squarespace sections — a vertical stack of full-width bands that makes every practitioner's site the same shape regardless of who she is. What is lost is any way for a real practice to look like itself.",
+        "guideEntrance": "She enters inside a circle of her own, at the same radius as the first plate — a portrait masked to the mark's geometry with her paragraph set on the arc beneath it, empathy first, training in the small ring below. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the smallest aperture on the site: aura-two-people masked to a 480px circle with the three reassuring sentences set on an arc struck from the SAME centre as the field in the photograph.",
+          "Sacral — register change to a wide, low band of type running tangent to a much larger arc; the circle is bigger and now mostly off-screen.",
+          "Solar plexus — register change to four small concentric rings, one per verb, the only place in the composition where circles repeat rather than nest.",
+          "Heart — register change to a face inside a circle and prose set on its arc.",
+          "Throat — register change to the ONE rectangle on the entire site: aura-field-abstract full-bleed at the Beat 3/4 hinge, carrying what this is not. The single break in the geometry is the detail that rewards attention.",
+          "Third eye — register change back to circular, larger again, a single before-and-after paragraph at the centre of an open ring.",
+          "Products — register change to nested arcs rather than a row of cards: three offering kinds at equal billing as three concentric bands, dates and prices set along them.",
+          "Crown — the arc finally closes: the first complete circle on the site, with the request at its centre."
+        ],
+        "transformationBridge": "Before: a woman who has opened eleven practitioner sites this month and cannot remember one of them apart from the other, and has concluded that this whole field is interchangeable. After: someone who describes it to a friend as “the one with the rings”, and who books because she could tell the difference between one practice and the next — which turned out to be the thing she had actually been trying to do.",
+        "closedLoop": "At the Crown the circle completes for the first and only time, and the request form sits at its exact centre. The centre the arcs have been implying since the first screen turns out to be the visitor: the field runs outward from where she is sitting."
+      },
+      "interfaceCraftEmphasis": [
+        "I-2 one primary action per screen, marked by a single concentric ring behind it — the CTA is literally the centre of its own field on every surface including the admin",
+        "I-1 state-completeness in the round: the empty calendar, the zero-workshop index and the empty subscriber list are composed as an OPEN ring with the invitation at the centre, so nothing ever reads as a broken grid with one item in it",
+        "I-4 progressive disclosure by radius — the default view holds the inner ring only, and advanced controls (availability, bulk actions, publish scope) live one ring out, revealed on intent"
+      ],
+      "excludes": [
+        "No full-width horizontal strip anywhere in the composition — the strip stack IS the platform default this direction exists to reject",
+        "No three-up service-card grid, in any form, on any surface",
+        "Gold #E9C87E may draw arcs and nothing else: at 1.47:1 on this ground it is barred from type, functional borders and focus rings without exception. The focus ring is magenta-deep",
+        "No circular crop of aura-hands-between under any circumstance — masking cupped hands into a circle produces the exact category cliché the inventory warns about",
+        "No radius on containers: media is masked to TRUE circles and boxes stay at 0px. Radius is the motif, never the chrome"
+      ],
+      "layoutArchetype": "Arcs struck from centres that sit outside the canvas, so every region is a fragment of one enormous circle; media is masked to true circles at large scale and no horizontal band ever crosses the page from side to side.",
+      "signatureMove": "Every composition on the site is a fragment of one very large circle struck from an off-canvas centre — the mark operating as the grid — with media masked to true circles at 480–720px and a single concentric ring marking the primary action on every screen.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "luminous geometry — deliberate, spacious, brand-native",
+      "visualToneIndicators": [
+        "the airiest direction of the ten: an 8px base on a spacing ramp that reaches 256px",
+        "an inset ring-shadow so circular apertures read as openings cut INTO the page rather than as stickers placed on it",
+        "a geometric, slightly eccentric display face whose curves rhyme with the arcs, appearing in no researched competitor",
+        "gold appears only as a 1px gradient arc stroke; magenta-deep does every job that carries meaning",
+        "the circular mask is also the light-ground solution — it crops away the plates' dark rectangular edges and keeps only the concentric field at their centres"
+      ],
+      "theUnaskedQuestionAnswer": "The reassurance is set ON an arc struck from the same centre as the field inside aura-two-people — so the sentence and the photograph are literally concentric, and the visitor's eye travels the same circle through both. The three facts are the innermost, tightest, highest-contrast ring on the site.",
+      "ascentMechanic": "aperture radius — each beat's governing arc is struck from a further-away centre, so the implied circle grows monotonically until it closes at the Crown",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#C2187A",
+          "secondary": "#3A1233",
+          "accent": "#E9C87E",
+          "background": "#FBF3F1",
+          "surface": "#FFFFFF",
+          "textPrimary": "#2B0E28",
+          "textSecondary": "#63495D",
+          "error": "#B02418",
+          "success": "#0F6B3D"
+        },
+        "typography": {
+          "headingFont": "Syne",
+          "bodyFont": "Hanken Grotesk",
+          "monoFont": "Martian Mono"
+        },
+        "dials": {
+          "visual_density": 2,
+          "motion_intensity": 5,
+          "design_variance": 9
+        },
+        "characteristics": "media masked to true circles, containers at 0px; inset ring-shadow only; the airiest density in the set; body 18px / 1.7; highest design_variance of the ten, offered deliberately so Gate 2 spans a real range.",
+        "ground": "light blush #FBF3F1 with white surfaces",
+        "gradientRole": "STROKE FILL ONLY — a gold→magenta gradient on 1px arcs; never a fill, never a background, never type",
+        "contrastComputed": [
+          "textPrimary #2B0E28 on background 16.04:1 / on surface 17.56:1 — AA body (the brand's own ground colour used as ink)",
+          "textSecondary #63495D on background 7.27:1 / on surface 7.95:1 — AA body",
+          "primary magenta-deep #C2187A on background 5.18:1 / on surface 5.67:1 — AA body",
+          "secondary plum-700 #3A1233 on background 14.60:1 — AA body",
+          "error #B02418 6.17:1 / 6.75:1 · success #0F6B3D 6.01:1 / 6.58:1 — AA body (factory #16A34A rejected)",
+          "CTA label #FFFFFF on magenta-deep fill 5.67:1 — AA body",
+          "focus ring #C2187A on background 5.18:1 · functional border #8A7285 on background 3.98:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "accent gold #E9C87E on this ground = 1.47:1 — fails AA body, the 3:1 large-text floor AND the SC 1.4.11 non-text floor. This is the direction most exposed to the README's trap, because its signature element is gold on a light ground, so the separation is made STRUCTURAL: gold draws arcs, magenta-deep does every job that carries meaning"
+        ],
+        "nonTextOnly": [
+          "gold #E9C87E — decorative arc strokes ONLY; never type, never a functional border, never a focus ring, never an icon stroke that carries meaning"
+        ],
+        "imageryTreatment": "The circular mask is this direction's answer to the light-ground problem: plates are masked to true circles at 480–720px, which crops away the dark rectangular edges that would otherwise fight blush and leaves only the concentric field at each plate's centre. aura-two-people becomes a large circle at Root with the reassurance on a matching arc. aura-field-abstract is the one plate permitted to break the mask, full-bleed at the Beat 3/4 hinge — the single rewarding detail. aura-hands-between is excluded outright."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md + docs/asset-inventory.json — “The mark is a radiating field — concentric light running outward from a centre”; six lockups exist in dark- and light-ground variants so either choice stays open"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md — Aura Quartz is a stack of full-width Wix strips (“the composition is the tool's, not the practice's”); Omnes carries 2,497 Elementor markers; Squarespace prescribes the three-up service-card grid every measured competitor ships"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 6 Concentric — built on circular geometry with no full-width strip anywhere, reserving gold strictly for arcs, which is possible only because the arcs carry no information; design_variance 9, the highest of the set"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md computed — gold #E9C87E on blush 1.47:1, failing AA body AND the 3:1 large-text and non-text floors; magenta-deep #C2187A on blush 5.18:1 is the light-ground text-safe magenta"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 3 Little Sun (Olafur Eliasson) — one radiating form used at every scale, doing the work a logo usually needs a system to do, warm and unembarrassed rather than mystical"
+        }
+      ]
+    },
+    {
+      "name": "the-refusal-column",
+      "governingIdea": "This practice earns belief by subtraction, so every claim on the site is delivered attached to its own limit: the page is set as two aligned columns — what does not happen beside what does — and the argument is what survives the subtraction.",
+      "singleMindedProposition": "Here is everything this is not. What is left is an hour, on a date, at a price.",
+      "narrativeSpine": {
+        "openWound": "You have read “heal your life” so many times that you now discount everything anyone in this field says, including the true parts — and somewhere under all that discounting is a genuine, unglamorous problem you have been carrying since your mother died, which nobody has offered to simply sit with.",
+        "openLoop": "The left-hand column is much longer than the right-hand one: there are far more things this work is not than things it is. Does anything survive the subtraction at all?",
+        "villainStakes": "The villain is overclaim, and it is not abstract — three of six researched sites make a claim that would need clinical substantiation, and two ASA rulings are already on the record. What it costs you is that you cannot tell the honest practitioners from the rest, so you treat all of them the same and see none of them.",
+        "guideEntrance": "She enters in the right-hand column only, opposite a left column that lists what she is not qualified to do — and the pairing is the introduction: the limits are hers, stated by her, first. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders, and the admin's editor carries the permanent CAP reminder beside them.)",
+        "staircaseBeats": [
+          "Root — the widest left column on the page. You do not undress · nobody touches you · nothing is asked of your beliefs — set against a short right column: you sit in a chair, in your own clothes, for an hour.",
+          "Sacral — register change: the left column falls to a single line and the right opens into continuous prose about what the hour is actually like.",
+          "Solar plexus — register change to the four verbs in the right column, each opposite what it is not, so the method is defined by its boundary.",
+          "Heart — register change to a photograph spanning both columns for the first time; the practitioner's paragraph beneath it, in the right column, with her limits opposite.",
+          "Throat — register change to the page's structural climax, where the two columns are exactly equal in width for the only time: not therapy, not medicine, not a replacement for either, and the complementary-not-a-substitute statement in full.",
+          "Third eye — register change as the left column thins to nothing: one before-and-after paragraph running unopposed at wide measure.",
+          "Products — register change to figures: real dates and prices in the right column, with the left carrying only the honest inline caveats (places available, not a live seat count).",
+          "Crown — one column. One sentence and one control, where two columns used to be."
+        ],
+        "transformationBridge": "Before: a man of 58 who tells people he is fine and has been fine for two years, and who has an unopened bereavement-support leaflet in a drawer because accepting help would mean admitting there is something to help with. After: someone who booked an hour with a person who told him plainly that she could not fix any of it, and found that the only offer in the whole category he could accept.",
+        "closedLoop": "By the Crown the left column has run out — there is nothing left to refuse — and one column remains: a single sentence and a date field. What survived the subtraction is exactly what beat 1 said it would be: an hour, in your own clothes, on a day, at a price you can read.",
+        "loopMechanics": "R-1: the opening question (does anything survive?) is paid off structurally, not verbally — the two columns literally converge to one at the CTA, so the answer is visible before it is read."
+      },
+      "interfaceCraftEmphasis": [
+        "I-6 affordance legibility with GUARDED destruction: the pairing pattern is reused as the admin's confirm-guard vocabulary — the irreversible act on the right, exactly what it will do on the left (send to n recipients; delete this document, which 2 issues reference)",
+        "I-2 one primary action per screen with its consequence stated beside it rather than after it — publish, send, decline and delete each carry their limit in the adjacent column",
+        "I-1 state-completeness including the reference view before deletion (brief §12 — she can see what would break), which is this direction's pairing pattern doing real operational work"
+      ],
+      "excludes": [
+        "No claim without its limit. Any sentence on the site that would sit in the right column with an empty left column does not ship",
+        "No named medical condition and no treat / cure / diagnose / prevent / alleviate verb, physical or psychological — this is a CAP position, not a style preference",
+        "No testimonial wall and no borrowed authority: a sole operator cannot borrow spa residencies and Nike logos, and this direction refuses the substitute rather than faking it",
+        "No cream or ivory ground — the mid-value warm ash is what keeps a page of refusals from reading as either clinical white or spa-soft",
+        "No soft-focus imagery and no euphemism: “you'll be completely comfortable” is not a refusal, it is a soothing adjective standing where a fact should be"
+      ],
+      "layoutArchetype": "Two aligned columns read as a pair — the left states what does not happen and what is not promised, the right states what does — line against line down the document, the left narrowing and the right widening as the argument climbs, until a single column remains at the close.",
+      "signatureMove": "The antiphonal pair: every statement on the site has a limit set on the same baseline beside it, and the two columns converge across the scroll — the refusal column narrowing beat by beat until, at the call to action, only one column is left.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "candid argument — unsentimental, generous, earning belief by subtraction",
+      "visualToneIndicators": [
+        "a mid-value warm ash ground with the right column raised onto a lighter surface — the refusals sit down in the page, the offers sit up out of it",
+        "an editorial serif with a real italic: the left column is set in italic throughout and the right in roman, so voice is carried by cut rather than by colour",
+        "one hairline vertical rule between the columns, at exactly the SC 1.4.11 floor, and no other rule in the system",
+        "0px radius; no shadow except the single step that lifts the right column",
+        "comfortable density at a strict measure — neither column ever exceeds 62 characters"
+      ],
+      "theUnaskedQuestionAnswer": "It is answered as the site's first refusal pair, and it is the widest left column on the page: “You do not undress · nobody touches you · nothing is asked of your beliefs” set line-against-line with “you sit in a chair, in your own clothes, for an hour”. The fear is disarmed by being answered in the same grammar as everything else, which tells the visitor this is simply how this practice talks.",
+      "ascentMechanic": "structural convergence — the left column's measure narrows and the right's widens by a fixed step per beat, so the composition visibly opens as the argument climbs and resolves to a single column at the Crown",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#2B0E28",
+          "secondary": "#A61468",
+          "accent": "#6E5418",
+          "background": "#E7DFDD",
+          "surface": "#F6F1F0",
+          "textPrimary": "#1C1319",
+          "textSecondary": "#4A3F47",
+          "error": "#93190F",
+          "success": "#0D5C34"
+        },
+        "typography": {
+          "headingFont": "Libre Caslon Text",
+          "bodyFont": "Public Sans",
+          "monoFont": "Roboto Mono"
+        },
+        "dials": {
+          "visual_density": 6,
+          "motion_intensity": 1,
+          "design_variance": 6
+        },
+        "characteristics": "0px radius; one elevation step (the right column lifts onto the lighter surface) and nothing else; comfortable density at ≤62 characters per column; body 17px / 1.65; the CTA is a plum-filled rectangle and the only fill in the system.",
+        "ground": "mid-value warm ash #E7DFDD — the one non-cream, non-white, non-dark ground in the set; nobody in the researched category is on a mid-value ground",
+        "gradientRole": "absent from the interface; the gradient survives only inside the logo lockup and the plates",
+        "contrastComputed": [
+          "textPrimary #1C1319 on background 13.83:1 / on surface 16.22:1 — AA body",
+          "textSecondary #4A3F47 on background 7.64:1 / on surface 8.96:1 — AA body",
+          "primary plum-800 #2B0E28 on background 13.37:1 / on surface 15.68:1 — AA body",
+          "secondary #A61468 on background 5.48:1 / on surface 6.42:1 — AA body on both",
+          "accent derived gold #6E5418 on background 5.43:1 / on surface 6.37:1 — AA body on both",
+          "error #93190F 6.70:1 / 7.86:1 · success #0D5C34 6.16:1 / 7.22:1 — AA body (factory #16A34A rejected)",
+          "CTA label #F6F1F0 on plum fill 15.68:1 — AA body",
+          "focus ring #2B0E28 13.37:1 · column rule / functional border #6B6167 on background 4.53:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "magenta-deep #C2187A — the light-ground text-safe magenta at 5.18:1 on blush — measures only 4.32:1 on this ash ground and FAILS AA body. #A61468 was derived instead and clears at 5.48:1. The mid-value ground costs contrast that a designer working from the README's blush figure would never see",
+          "artwork gold #E9C87E on ash = 1.23:1, the lowest figure anywhere in this set; gold is absent from this direction entirely"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates appear rarely and always span BOTH columns, at 0px radius, with no scrim — a photograph is the one thing on this site that is not paired against a refusal, because a picture cannot overclaim. aura-two-people opens the Root pair at double width; aura-light-in-a-room spans the Heart beat; aura-radiant-portrait is the single image in the crown's one-column region. aura-hands-between is excluded."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§14 — the site “must not state or imply that the work treats, cures, diagnoses, prevents or alleviates any named medical condition”; beat 5 “is the compliance surface as well as the trust surface”; a visible complementary-not-a-substitute statement is required"
+        },
+        {
+          "source": "brief",
+          "ref": "§1 principle 3 — “Prefer honesty over persuasion where they diverge. This category is full of overclaim. Naming what the work is not buys more trust than one more testimonial would.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Regulatory Baseline — compliance scoreboard: visible disclaimer 1 of 6, claims needing substantiation 3 of 6; upheld rulings Allan Sweeney Reiki (20 July 2011) and Healing on the Streets – Bath (13 June 2013)"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 14 Mettle Health — “We can't change your situation, but we can help you live with it”; “We don't offer easy answers…”; plus the pain named in the visitor's own quoted sentences. Insp. 11 Vitsœ — copy that argues against its own sale"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 17 Marie Curie — plain nouns for hard things, no euphemism and no softening imagery, “which reads as more respectful, not less”"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — “Re-measure before trusting any contrast claim in this file”; this direction's ash ground drops magenta-deep from 5.18:1 to 4.32:1, which is exactly the class of drift the brief says is invisible by eye"
+        }
+      ]
+    },
+    {
+      "name": "fixed-band-editable-field",
+      "governingIdea": "The product's load-bearing rule is configurable content inside a fixed structure, so the design makes that rule VISIBLE: a permanent dark band is the part nobody can change and the light field beside it is the part she can, on the public site, in the admin and in every mailed issue.",
+      "singleMindedProposition": "One structure she learns once and then recognises everywhere — so the design cannot decay in month two and the visitor never meets a foreign body.",
+      "narrativeSpine": {
+        "openWound": "You arrive on a practitioner's site, read something that almost persuades you, click Book — and land in something that is visibly a different piece of software, in a different typeface, with a different idea of a corner radius. The seam tells you nobody is really in charge here, at the exact moment you were deciding whether to trust someone.",
+        "openLoop": "The dark band down the side has said the same three things since you arrived, and it has not moved once while everything beside it has changed. What is it eventually going to ask you for?",
+        "villainStakes": "The villain is the stitch — Squarespace plus Acuity plus Eventbrite plus Mailchimp, four registers and four logins bolted together, measured in this category as a visible foreign body every single time. What it costs is the practitioner's credibility at the exact moment of the ask, and it costs her evenings maintaining four things.",
+        "guideEntrance": "She enters in the light field at the Heart beat, in editable content — which is the point: the band that never changes carries the promise, and the woman who can change her own words is beside it. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the band is at its widest and carries a tall plate with the three facts over it; the light field beside it holds one short paragraph. The fixed part is bigger than the editable part, once, at the top.",
+          "Sacral — register change: the field opens into continuous prose and the band narrows a step, holding only the reassurance line and the mark.",
+          "Solar plexus — register change to structure in the field: the four verbs, spaced, while the band shows the first date in the diary.",
+          "Heart — register change to a portrait and a paragraph in the field, both owner-editable; the band goes quiet.",
+          "Throat — register change to the field's only shaded block: what this is not, in the field because she must be able to edit it, with the permanent CAP reminder rendered beside it in the admin's mirror of this exact composition.",
+          "Third eye — register change to one before-and-after paragraph at the field's widest measure; the band is now a hairline.",
+          "Products — register change to figures rendered live from the Offering records: dates and prices, three kinds at equal billing, in the field, with no second edit needed to publish one.",
+          "Crown — the band widens once more and becomes the form: the fixed structure is what does the asking."
+        ],
+        "transformationBridge": "Before: a practitioner who has not published a workshop since January because doing it means logging into two systems and she is not sure which one owns the date — and a visitor who can feel that hesitation in the gaps on the page. After: an owner who published a dated, priced workshop in four minutes on a Sunday and watched it appear on the public page with no second edit, and a visitor who never once left one design.",
+        "closedLoop": "At the Crown the band widens into the request form and asks for exactly three things — a name, an email, and a time that suits you. The thing that never changed all the way down the page turns out to be the promise it opened with: nothing else is ever asked of you, and the person who replies is the person who wrote every word in the field."
+      },
+      "interfaceCraftEmphasis": [
+        "I-2 one primary action per screen, always at the same place in the band — so the owner's muscle memory transfers from the landing sections editor to the calendar to the newsletter composer without re-learning",
+        "I-4 progressive disclosure by ZONE: the band holds navigation and today's counts, the field holds the one task; buffer, lead time and horizon live on their own screen beside the pattern they modify, never on settings",
+        "I-6 affordance legibility from the colour-zone rule — gold only ever appears on the band, magenta-deep only ever in the field, so the palette is self-policing and neither colour is ever asked to work on the ground where it fails",
+        "I-1 state-completeness across BOTH zones: a band with no counts and a field with no rows are two different empty states and both are designed"
+      ],
+      "excludes": [
+        "No third-party booking widget, ever — owning the slot picker is the entire point and an embedded Calendly or Momence would destroy the concept in one click",
+        "No single-column vertical stack with a top nav: that is the category's composition and the band is the refusal of it",
+        "Gold #E9C87E must never appear in the light field (1.47:1) and magenta-deep #C2187A must never appear on the band (3.10:1) — every colour has exactly one legal zone",
+        "No design controls in the admin: no type picker, no colour picker, no spacing control, no add / delete / reorder on the seven beats. The band is what she cannot edit and that is the product",
+        "No separate newsletter template design — the issue is the same band and field, so there is no way to send something off-brand"
+      ],
+      "layoutArchetype": "A permanent dark vertical band of identity and navigation beside a light reading field, present unchanged across the public site, the owner's admin and the mailed issue: the band is the part nobody can edit and the field is the part she can, so the product's fixed-versus-configurable rule is visible at a glance.",
+      "signatureMove": "One structure, three surfaces: the same dark band and light field carries the public page, the admin and the newsletter — so the owner learns the product once, and the visitor never crosses a seam between the site and the thing that takes her booking.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "operable warmth — structured, legible, built to be run by one person",
+      "visualToneIndicators": [
+        "8px radius on light-field cards and 0px in the band: the radius itself tells you which zone you are in",
+        "three warm-tinted elevation levels in the field and ZERO in the band, which is flat by definition because it is a ground and not a surface",
+        "a body face designed for maximum character disambiguation, chosen for the 35–65 audience and the reading-glasses-elsewhere note",
+        "the band collapses to a top strip under 768px without changing which colour lives where",
+        "every screen carries both a large dark image and a bright legible reading surface at the same time"
+      ],
+      "theUnaskedQuestionAnswer": "The band answers it and then never stops answering it. The three facts are set in the fixed band at the Root, over the tall plate — and the reassurance line stays in the band at every scroll position and on every interior page, so the answer is CHROME rather than content. A visitor who lands on a workshop detail page from a search result still gets it.",
+      "ascentMechanic": "zone proportion — the band narrows and the field widens by a measured step per beat, so the page opens as it climbs, and the band widens once at the Crown to become the form",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#C2187A",
+          "secondary": "#E9C87E",
+          "accent": "#2B0E28",
+          "background": "#F8F4F0",
+          "surface": "#FFFFFF",
+          "textPrimary": "#26121F",
+          "textSecondary": "#5C4757",
+          "error": "#AE2018",
+          "success": "#0E6A3C"
+        },
+        "typography": {
+          "headingFont": "Epilogue",
+          "bodyFont": "Atkinson Hyperlegible",
+          "monoFont": "JetBrains Mono"
+        },
+        "dials": {
+          "visual_density": 6,
+          "motion_intensity": 3,
+          "design_variance": 4
+        },
+        "characteristics": "8px radius in the field, 0px in the band; three warm elevation levels in the field and none on the band; comfortable density; body 17px / 1.65. The nine tokens describe the LIGHT FIELD; the band is a documented second zone with its own computed figures.",
+        "ground": "duotone — a permanent plum-800 #2B0E28 band beside a light field #F8F4F0, on all three surfaces",
+        "gradientRole": "the band's vertical falloff only; the light field is achromatic apart from its one accent",
+        "contrastComputed": [
+          "FIELD — textPrimary #26121F on background 16.14:1 / on surface 17.67:1 — AA body",
+          "FIELD — textSecondary #5C4757 on background 7.69:1 / on surface 8.42:1 — AA body",
+          "FIELD — primary magenta-deep #C2187A on background 5.18:1 / on surface 5.67:1 — AA body",
+          "FIELD — error #AE2018 6.36:1 / 6.95:1 · success #0E6A3C 6.10:1 / 6.68:1 — AA body (factory #16A34A rejected)",
+          "FIELD — CTA label #FFFFFF on magenta-deep fill 5.67:1 — AA body; focus ring #C2187A 5.18:1; functional border #8A7383 3.95:1 — clears SC 1.4.11 (3:1)",
+          "BAND (#2B0E28) — band textPrimary #F3E4EC 14.31:1 · band textSecondary #D2B4C5 9.26:1 · gold #E9C87E 10.89:1 — all AA body",
+          "BAND — band border / focus #996E8C on band 4.15:1 — clears SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "gold #E9C87E in the light field = 1.47:1 — fails every floor, so gold is barred from the field entirely and lives only on the band at 10.89:1",
+          "magenta-deep #C2187A on the band = 3.10:1 — fails AA body, so it is barred from the band and lives only in the field at 5.18:1. This is the direction that turns the README's split into an asset: the measured fact tells you which zone you are in, and the failure becomes impossible rather than merely avoided"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The band is dark, so the plates get a dark home on a light-ground direction — the one place in the composition where they need no accommodation at all. The band carries a single tall plate at 3:4 running its full height (aura-two-people on home, aura-field-abstract elsewhere) with the dark-ground lockup over it. In the light field the plates appear at 8px radius, moderate scale, with a warm hairline — treated as content rather than atmosphere. aura-hands-between: reserve."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§5 — “The admin is not a CMS… She can change every word and picture on the seven landing beats; she cannot add a beat, delete a beat, reorder the beats, or change type, colour, or spacing. This is the load-bearing distinction of the whole product… Configurable content, fixed design.”"
+        },
+        {
+          "source": "brief",
+          "ref": "§12 — “Her branding is not authored here — it is the template: logo, palette, type and footer are applied automatically to every issue, so there is no way to send something off-brand.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §UX Patterns — third-party booking widget bolted onto a self-hosted site: Blossom → Calendly popup, Re:Mind → Momence; “it works functionally and breaks visually every time: different type, different colour, different corner radius, different motion. Owning the slot picker is a visible quality difference.”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md Competitor 9 Mailchimp — “an issue built from a Mailchimp template does not look like her site”; double opt-in is an off-by-default toggle in a settings panel she will never find"
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — gold fails on light (1.47:1) and inverts to 10.89:1 on plum-800; magenta-deep is the reverse (5.18:1 on blush, 3.10:1 on plum-800). Giving each colour one legal zone makes the failure structurally impossible"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 8 Warm Ledger — “the persistent dark rail is a composition no measured competitor uses, and it is deliberately the same composition that carries the newsletter and the admin. Where every competitor has three visual worlds, this has one.”"
+        }
+      ]
+    },
+    {
+      "name": "no-seam-nightfield",
+      "governingIdea": "The practice's competence is the product a sceptic can actually verify, so the working machinery leads the design language: the merged calendar, the free-slot picker and the self-expiring hold are one instrument, and the public page is that instrument's face.",
+      "singleMindedProposition": "There are real free times on her calendar tonight, and the thing that shows them to you was built by the same person who will answer.",
+      "narrativeSpine": {
+        "openWound": "You cannot judge whether someone is a serious practitioner or a person with a website, and the only evidence you are given is adjectives. Meanwhile the actual practical questions — what does it cost, when is she free, how long does it take — are all behind a form, which reads as evasive to exactly the sort of person who checks.",
+        "openLoop": "Every price, every duration and every date on this page is already there without asking anyone, and some of the times on it are tonight. Who is on the other end of that?",
+        "villainStakes": "The villain is enquiry-gated pricing and the client-rendered schedule — half the researched category publishes no price at all, and one studio's booking page returns “No results found” to a static fetch, so its dates do not exist for a crawler, a slow connection or a screen reader. What it costs is the visitor who wanted to check before committing, which is the only visitor this practice can afford to lose.",
+        "guideEntrance": "She enters as the person visibly attached to the machine: a small portrait beside the response commitment, and one paragraph in her own words. Her authority here is that the calendar in front of you is hers and it is accurate. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the densest, tightest block of rows on the site: the three facts set as three declarative rows with a gradient hairline down their left edge, above the fold, before any picture.",
+          "Sacral — register change, hard: one plate at 100vw and full viewport height, uninterrupted, no type on it. Warmth arrives in a single sustained dose after precision.",
+          "Solar plexus — register change back to rows: four verbs as four labelled operations with what each one is doing to the field.",
+          "Heart — register change to a portrait inset in a 1px frame with a paragraph at reading measure — the only place on the page where the type relaxes.",
+          "Throat — register change to an unlit block: what this is not, set with the achromatic border and no gradient hairline anywhere near it. The one region colour does not mark.",
+          "Third eye — register change to prose at wide measure, one person, before and after.",
+          "Products — register change to the instrument at full strength: real dates as headers, times as standalone tappable objects, prices in tabular figures, three kinds at equal billing, all server-rendered in the initial HTML.",
+          "Crown — the free-slot picker itself, live, with tonight on it."
+        ],
+        "transformationBridge": "Before: a project manager of 44 who checks everything and has therefore booked nothing, because every site in this field asked her to make contact before it would tell her a price, and she reads that as something to hide. After: someone who picked a Thursday at 6pm off a real calendar, got told plainly that it was held rather than booked for 48 hours, and got a reply from a human the next morning — and whose first thought was that this person is organised.",
+        "closedLoop": "The last row on the page is a real time on a real day, and requesting it holds that time for 48 hours and says so on the confirmation, in the same numerals — held, not booked, until she replies, and a person does reply. The instrument the page opened with turns out to have been attached to a human being the whole way down."
+      },
+      "interfaceCraftEmphasis": [
+        "I-5 density done right at the highest setting in the set — the merged calendar is the centre of gravity and the data-ink discipline means confirmed bookings, pending holds, derived session blocks and personal blocks are distinguishable at a glance with no decorative chrome competing",
+        "I-1 state-completeness as the defining lever: the empty calendar of a new practitioner, a densely booked week, and a day with an expired hold on it are three separately-composed states, per brief §11",
+        "I-3 scan hierarchy with tabular figures everywhere a time, price or count appears — nothing about a date is ever ambiguous, and free time is legible AS free",
+        "I-6 affordance legibility with a hard rule: the aesthetically tempting hairline #2A222B measures 1.27:1 and is permitted only between non-interactive regions — every input, control and focus boundary uses #7E7182 at 4.27:1"
+      ],
+      "excludes": [
+        "No third-party widget in a foreign register anywhere in the product — the slot picker, the calendar and the mailed issue are the same design system as the landing page or the concept is void",
+        "No enquiry-gated price and no “from” price: every offering's fee is a fact stated on the listing, not a badge and not a conversation",
+        "No date that exists only after JavaScript — every date, time and price is in the initial HTML; a client fetch may refresh live availability but must never be what puts the date on the page",
+        "No plum ground and no condensed display face: this is a near-black with a plum bias precisely so it is not Othership's #372338 in a technical costume",
+        "No decorative colour: one gradient hairline marks whichever region is live and everything else is achromatic, so colour always means something"
+      ],
+      "layoutArchetype": "A compact instrument shell of rule-separated rows set in tabular figures at a tight rhythm, one gradient hairline marking whichever region is live, everything else achromatic — slot picker, merged calendar and mailed issue built from the same rows as the public page.",
+      "signatureMove": "The gradient hairline: a single 1px gold→magenta rule that marks whichever region is live — the selected slot, the active calendar day, the row that needs her today — and is the only chromatic element in an otherwise achromatic instrument, so colour on this site always means something is happening.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "nocturnal instrument — precise, competent, warm only at the edges",
+      "visualToneIndicators": [
+        "3px radius on inputs and cards, 0px on the calendar grid because a dense time grid reads faster square",
+        "1px borders and zero shadow at every elevation — the cockpit convention",
+        "tabular figures everywhere a time, a price or a count appears",
+        "the imagery ratio inverts by surface: small 3:2 insets in a 1px frame on the admin, one plate per beat at full viewport height on the public site",
+        "16px body minimum at 1.6 — the legibility floor is respected even in the densest direction of the ten"
+      ],
+      "theUnaskedQuestionAnswer": "It is answered as three DATA ROWS, in the same rule-separated format as a price or a duration — clothing: your own · contact: none · belief: not required — set above the fold before any photograph. The fear is disarmed by being demoted to a specification: it is a fact about the service, filed with the other facts about the service, and that flatness is the reassurance.",
+      "ascentMechanic": "rhythm and openness — the row rhythm starts at its tightest and the rules space out step by step, so the instrument literally relaxes as the page climbs and the crown is a single wide row",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#E9C87E",
+          "secondary": "#E85D9B",
+          "accent": "#F5876F",
+          "background": "#0F0A10",
+          "surface": "#171018",
+          "textPrimary": "#EDE6EA",
+          "textSecondary": "#A99DA7",
+          "error": "#F4746B",
+          "success": "#5CC98E"
+        },
+        "typography": {
+          "headingFont": "Space Grotesk",
+          "bodyFont": "Figtree",
+          "monoFont": "Azeret Mono"
+        },
+        "dials": {
+          "visual_density": 8,
+          "motion_intensity": 2,
+          "design_variance": 3
+        },
+        "characteristics": "3px radius on inputs and cards, 0px on the calendar grid; flat, 1px borders and no shadow at any elevation; compact; body 16px minimum / 1.6; a 2/4/8/12 spacing base, the tightest in the set.",
+        "ground": "dark near-black #0F0A10 with a plum bias — warm without being the brand's own plum",
+        "gradientRole": "a 1px RULE — a gold→magenta gradient hairline, the only chromatic element in the interface",
+        "contrastComputed": [
+          "textPrimary #EDE6EA on background 15.97:1 / on surface 15.22:1 — AA body",
+          "textSecondary #A99DA7 on background 7.53:1 / on surface 7.18:1 — AA body",
+          "primary gold #E9C87E on background 12.16:1 / on surface 11.59:1 — AA body",
+          "secondary rose #E85D9B on background 6.04:1 / on surface 5.76:1 — AA body",
+          "accent coral #F5876F on background 8.01:1 — AA body",
+          "error #F4746B 7.05:1 / 6.72:1 · success #5CC98E 9.52:1 / 9.08:1 — AA body (factory #16A34A rejected)",
+          "CTA label #0F0A10 on gold fill 12.16:1 — AA body",
+          "focus ring gold 12.16:1 · functional / input border #7E7182 on background 4.27:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "magenta #D6338A on this ground = 4.39:1 — fails AA body; rose #E85D9B substituted at 6.04:1",
+          "the aesthetically tempting hairline #2A222B measures 1.27:1 and fails SC 1.4.11 — permitted ONLY as a decorative divider between non-interactive regions, and forbidden as an input, control or focus boundary"
+        ],
+        "nonTextOnly": [
+          "#2A222B — decorative divider between non-interactive regions only"
+        ],
+        "imageryTreatment": "Inverted by surface. On the ADMIN the plates are evidence at small scale: 3:2 insets in a 1px frame as offering thumbnails, media-library tiles and beat previews, where the job is recognition at 64px — which the plates' strong concentric composition survives better than most photography would. On the PUBLIC site the ratio flips hard: exactly one plate per beat, full-bleed at 100vw and full viewport height, uninterrupted, so warmth arrives in large sustained doses between precise, dense, quiet type. aura-field-abstract textures the near-black at very low opacity.",
+        "honestTrade": "This is the CREDIBILITY pole of the ten. It will score highest on “she runs a real practice” and lowest on the client's own 20-second affective test (brief §15's primary metric). Flagged here rather than sold evenly — if the felt-experience bar is the deciding criterion at Gate 2, this is not the direction."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§5 — “A held slot is not a confirmed slot… The hold expires by itself and the slot returns to the calendar. A hold is a courtesy to prevent double-offering, not a reservation — the visitor is told exactly that on the confirmation screen.”"
+        },
+        {
+          "source": "brief",
+          "ref": "§15 — “The calendar never lies. Zero double-offers… This is a defect count, and the target is zero, not low.” Plus §11 admin-calendar's three required states: the empty calendar, a densely booked week, and a day with an expired hold"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md Competitor 4 — Re:Mind's /book-class schedule returned “No results found” to a static fetch because Momence renders it client-side; “dates that only exist after JavaScript are dates that don't exist for crawlers, slow connections, or assistive tech”"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md Competitor 8 Acuity — “it self-books; it does not request”; class series “must book all of the classes as a group”; publishing a workshop does not subtract that time from 1:1 availability unless the owner blocks it by hand. No incumbent models a request-with-a-self-expiring-hold"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 5 Nightfield Terminal — “there is no seam”; against Othership it takes a near-black rather than plum and a technical grotesk rather than a condensed display face; the executor note that #2A222B measures 1.27:1 and fails SC 1.4.11"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 22 Metrograph — the standalone timecode as a typographic anchor, solving scan-by-time and scan-by-event in one layout; Insp. 25 Barbican, the instructive failure where dates are pushed behind filters"
+        }
+      ]
+    },
+    {
+      "name": "plate-sequence-captioned",
+      "governingIdea": "Six commissioned plates are an unusually strong asset for a sole practitioner, so the site is built as a photo essay in which every picture is captioned and therefore makes a claim — photography used as evidence rather than as atmosphere.",
+      "singleMindedProposition": "Look at what actually happens, in order, with someone telling you plainly what you are looking at.",
+      "narrativeSpine": {
+        "openWound": "You have looked at forty pictures of candles, crystals and empty treatment rooms this week and not one of them showed you a person having the thing done to them — so you still do not know what it looks like, and what you cannot picture, you cannot agree to.",
+        "openLoop": "The first plate is captioned like evidence: she is dressed, her coat is on the chair, the hands are twenty centimetres above her shoulders, nothing is touching her. The captions keep counting down the page. What is the last picture?",
+        "villainStakes": "The villain is photography with nothing asked of it — soft-focus interiors placed behind a headline to set a mood, which is the measured imagery default of this entire category. What it costs is the one medium that could have answered a procedural question faster than any sentence, spent instead on atmosphere.",
+        "guideEntrance": "She enters as a photograph with a caption in the third person and a paragraph in the first — a real named human with a face, before any explanation of the modality, empathy first and training after. (Name, years, training UNVERIFIED per brief §20.1 — marked placeholders.)",
+        "staircaseBeats": [
+          "Root — aura-two-people at 100vw, the first thing on the site, with a caption that states what is in the frame and what is not touching whom.",
+          "Sacral — register change from caption to prose: a passage at reading measure on the pale ground with no image at all, so the eye rests before the next plate.",
+          "Solar plexus — register change to a plate with FOUR captions, one per verb, keyed to regions of the same image — the only annotated frame on the site.",
+          "Heart — register change to a portrait and a first-person paragraph, the caption in her own voice for the only time.",
+          "Throat — register change to aura-field-abstract, the one non-figurative plate, as a deliberate pause: a picture of nobody, captioned with what the work is not.",
+          "Third eye — register change to the widest measure on the site with no picture, one person, before and after.",
+          "Products — register change to figures beneath a plate: real dates and prices, three kinds at equal billing, in the same caption typography as the photographs.",
+          "Crown — aura-radiant-portrait at full viewport, the brightest frame in the sequence, its caption the last line of the essay."
+        ],
+        "transformationBridge": "Before: a woman who cannot picture the thing and therefore keeps postponing it, and who has quietly assumed it involves a table, a gown and someone's hands on her back. After: someone who has seen exactly what the hour looks like before she agreed to it, sat through it in her own coat, and afterwards described it to her daughter as much more ordinary than she expected.",
+        "closedLoop": "The last plate is a face lifted into the light and its caption is the only one written in the second person — the end of an hour, in her own clothes, nothing having touched her. The request form is set directly beneath it, so the question the first caption opened is closed by the last picture rather than by a sentence."
+      },
+      "interfaceCraftEmphasis": [
+        "I-1 state-completeness with the empty state as a first-class composition — a zero-workshop index reads as a programme with one entry rather than a grid with one card, because a sequence degrades gracefully and a grid never does",
+        "I-6 affordance legibility under photography: every control sits on the pale ground and never on a plate, so an interactive element is never competing with an image for the eye",
+        "I-5 density kept low and the data-ink discipline strict — the admin's media library is the one screen where this direction's whole thesis is operationally load-bearing, because §12's auto-crop and palette treatment is what stops one phone snapshot destroying the essay"
+      ],
+      "excludes": [
+        "No uncaptioned photograph anywhere on the site — an image with nothing asked of it is atmosphere, and atmosphere is the category default this direction rejects",
+        "No type laid over a plate and no scrim, ever: type sits on the pale ground, images sit alone, and they alternate rather than overlap",
+        "No cream, sand or off-white ground — the pale plum keeps the light direction inside the brand's own hue instead of borrowing the category's, and it reads as a dimming rather than a collision against the dark plates",
+        "No headline larger than the photograph beside it; no headline over 56px anywhere",
+        "aura-hands-between appears nowhere in the essay — in a photo-led direction it would be the most exposed possible placement of the category's most-reproduced composition"
+      ],
+      "layoutArchetype": "A sequence of plates that bleed to the viewport edge on pale plum, each followed by a captioned pause at reading scale, so the site is paced like a photo book — picture, claim, silence, picture — and no headline is ever permitted to outsize the photograph beside it.",
+      "signatureMove": "Every plate is captioned and the caption makes a claim: a 15px line beneath each image with a 3px magenta-deep rule at its left edge, stating what is in the frame in flat procedural language — so the photography argues instead of decorating, and the sequence of captions is the site's spine.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "photographic quiet — spacious, evidential, type deliberately subordinate",
+      "visualToneIndicators": [
+        "0px radius throughout; plates bleed to the viewport edge with nothing rounded anywhere",
+        "one soft under-image shadow so a full-bleed plate lifts fractionally off the pale ground, and no other elevation exists",
+        "a geometric sans set wide-tracked and lowercase at moderate size — display QUIETNESS, so type never competes with a photograph",
+        "the 3px magenta-deep caption rule is the only chromatic element in the entire interface",
+        "sequenced like a photo book: image, caption, silence, image — the seven beats are its chapters"
+      ],
+      "theUnaskedQuestionAnswer": "The caption does it. The first plate on the site is aura-two-people at 100vw and its caption states, in flat procedural language, exactly what is and is not happening in the frame — she is dressed, her coat is on the chair, the hands are twenty centimetres above her shoulders, nothing is touching her. The picture and its caption make the same claim, one for the skimmer and one for the reader.",
+      "ascentMechanic": "image scale and brightness — each plate in the sequence is larger and brighter than the one before, ending on the radiant portrait at full viewport as the brightest frame on the site",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#3A1233",
+          "secondary": "#C2187A",
+          "accent": "#C99A3F",
+          "background": "#F4EEF2",
+          "surface": "#FCFAFB",
+          "textPrimary": "#221020",
+          "textSecondary": "#584A56",
+          "error": "#A9221A",
+          "success": "#0F6539"
+        },
+        "typography": {
+          "headingFont": "Jost",
+          "bodyFont": "Manrope",
+          "monoFont": "Overpass Mono"
+        },
+        "dials": {
+          "visual_density": 3,
+          "motion_intensity": 3,
+          "design_variance": 6
+        },
+        "characteristics": "0px radius throughout; one soft under-image shadow and no other elevation; spacious; body 17px / 1.7; no headline exceeds 56px and the largest thing on any screen is always a photograph.",
+        "ground": "light pale plum #F4EEF2 — a light ground inside the brand's own hue; the category's light ground is cream, sand or off-white in every measured case",
+        "gradientRole": "absent from the interface; it exists only inside the photographs and the logo lockup",
+        "contrastComputed": [
+          "textPrimary #221020 on background 15.79:1 / on surface 17.37:1 — AA body",
+          "textSecondary #584A56 on background 7.26:1 / on surface 7.99:1 — AA body",
+          "primary plum-700 #3A1233 on background 13.97:1 — AA body",
+          "secondary magenta-deep #C2187A on background 4.95:1 / on surface 5.45:1 — AA body on both. Note it measures 4.95 here rather than the 5.18 it reaches on blush: the plum-tinted ground costs contrast, computed rather than assumed from the README figure",
+          "error #A9221A 6.26:1 / 6.89:1 · success #0F6539 6.24:1 / 6.87:1 — AA body (factory #16A34A rejected)",
+          "CTA label #F4EEF2 on plum fill 13.97:1 — AA body",
+          "focus ring #3A1233 13.97:1 · functional border #806C7E on background 4.21:1 — both clear SC 1.4.11 (3:1)"
+        ],
+        "rejectedByComputation": [
+          "accent gold-deep #C99A3F on this ground = 2.25:1 — fails AA body, the 3:1 large-text floor and the SC 1.4.11 non-text floor. It is a decorative caption hairline only; never type, never a border, never a focus ring",
+          "artwork gold #E9C87E on this ground = 1.41:1 — absent from the direction entirely"
+        ],
+        "nonTextOnly": [
+          "gold-deep #C99A3F — decorative caption hairlines only"
+        ],
+        "imageryTreatment": "The treatment IS the design. All plates run full-bleed at 100vw, 0px radius, uncropped where possible and cropped only to the declared ratio, each with a 15px caption beneath and a 3px magenta-deep rule at the caption's left edge. The pale plum ground mediates between the dark plates and a light page: at #F4EEF2 it is closer in hue to the plates' own shadows than cream would be, so the transition reads as a dimming rather than a collision. Sequence fixed to the beats: aura-two-people (Root, first thing on the site), aura-light-in-a-room (Sacral), aura-seated-figure (Solar plexus/Heart), aura-field-abstract (Throat), aura-radiant-portrait (Crown, full viewport). aura-hands-between never appears."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§20 Beat 1 imagery — aura-two-people, “hands hovering over a seated, clothed person — does the reassurance work faster than the copy will”; §12 uploads are auto-cropped and palette-treated so anything she adds lands inside the site's visual world"
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the imagery default is “soft-focus interiors, crystals, hands, candles, and low-saturation photography of empty rooms”: photography used as atmosphere, placed behind a headline, with nothing asked of it"
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 6/8 ESA/Webb + STScI — the caption contract: every image carries what it is, when it was captured, and what you are actually looking at; Insp. 29 Le Cinéma Club — a programme built around what is on now degrades gracefully to one item where a card grid does not"
+        },
+        {
+          "source": "asset",
+          "ref": "docs/asset-inventory.json — six commissioned plates at 2528x1696 / 2752x1536, with aura-hands-between marked RESERVE ONLY: “it is the single most-reproduced composition in this category and reads as stock. Never a hero or a beat anchor.”"
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 10 Plate Study — every plate captioned so the photography makes a claim rather than setting a mood, on a pale plum ground because “nobody in the set is on a plum ground at either end of the value scale”; magenta-deep computed at 4.95:1 here rather than the README's 5.18:1 on blush"
+        }
+      ]
+    },
+    {
+      "name": "the-surveyed-field",
+      "governingIdea": "Fifteen years in the same field means she could draw it from memory, so the site IS that drawing — a survey of a field of light, contour rings measured off the real centre of each photograph, in which every ring breaks open wherever a word meets it, because on a real survey the line always yields to the label.",
+      "singleMindedProposition": "Someone has been here often enough to draw the map, and she has printed the key.",
+      "narrativeSpine": {
+        "openWound": "You have opened eleven of these pages this month and every one of them told you how it would make you FEEL and not one of them told you what would be DONE — so you are trying to tell a serious practice from a nice-sounding one using only the pictures, at eleven at night, without being able to ask the one question you actually have.",
+        "openLoop": "Every plate on this page has rings drawn over it, tightening toward one point, each ring carrying a small measured figure. Something is being surveyed. The tightest ring on the whole site is the first thing you read. What is at its centre?",
+        "villainStakes": "The villain is the category's habit of asserting instead of showing — a field in which the benefit is always described and the procedure never is, so a sceptical adult has no way to separate fifteen years of practice from six weeks of a certificate. What is lost is the person who would have come and could not tell.",
+        "guideEntrance": "She enters as the surveyor: hers is the one plate whose rings are struck from HER centre rather than the visitor's, with the plainest paragraph on the site set beside it and her training printed as three entries in the margin key — no borrowed logos, no press, no client wall. (Name, years and training are UNVERIFIED per brief §20.1 and ship as visibly-marked placeholders until the client confirms.)",
+        "staircaseBeats": [
+          "Root — the summit, and the closest-set contours on the site: rings at 24px intervals over aura-two-people, enclosing three flat sentences, every ring visibly breaking around every line; the key in the margin reads clothed · no contact · no belief required.",
+          "Sacral — register change from drawing to plate: aura-light-in-a-room full-bleed, carrying only three rings at 180px intervals, one long near-voice paragraph in the widest band and no figures at all.",
+          "Solar plexus — register change to type as the structure: the four verbs at 96px, one per interval, each set flush-left in its own band with the ring opening around it — clearing, charging, repairing, restructuring, read outward from the centre.",
+          "Heart — register change to portrait and margin: her plate at half width with rings struck from her own centre, prose at 19px in one 62-character measure beside it, credentials as three key entries.",
+          "Throat — register change to the one region of the site with NO geometry on it at all: what this is not, set as plain ink on bare paper inside a ruled key box at the foot of the survey, the way a map states what it does not show. The absence of drawing is the detail that rewards attention.",
+          "Third eye — register change back to the drawing at its most open: two rings only, 400px apart, one named before-and-after paragraph in the band between them.",
+          "Products — register change to a schedule drawn onto the survey: courses, workshops and services at equal billing as three labelled bands at three radii, with real dates and prices in tabular figures set INSIDE the ring breaks — never in cards, never behind a filter.",
+          "Crown — the survey opens all the way out: one ring at the widest interval on the site encloses the whole viewport, the magenta-deep centre dot sits beneath the request, and the key is reprinted under it unchanged."
+        ],
+        "transformationBridge": "Before: a woman who has been unable to decide for three weeks, because everything she reads is a promise and there is no way to check a promise. After: a woman who spent an hour in a chair with her coat on, who can tell you exactly what happened and exactly what did not, and who has stopped trying to work out whether to believe in it — because she has a description now instead of a claim. Nothing was cured. The guessing was.",
+        "closedLoop": "The centre the rings have been tightening toward since the first screen is finally named at the Crown: it is the chair, and the person sitting in it is the visitor. The request sits on that centre, and the key printed beneath it is the same three lines the innermost ring enclosed — clothed, no contact, no belief required — so the page closes by repeating its opening measurement rather than by making a new promise."
+      },
+      "interfaceCraftEmphasis": [
+        "I-6 affordance legibility as a drawn convention she can learn in one sitting: everything interactive is enclosed by a ring that BREAKS for its own label, a disabled control's ring is closed and carries one line saying why, and the destructive confirmations (send to N confirmed subscribers; delete an offering three newsletters reference) are the only rings drawn in the error sienna.",
+        "I-3 scan hierarchy for a woman crossing her own kitchen: the admin dashboard's single most important datum — how many new requests, and which holds expire today — is set at 56px at the centre of the innermost ring and is readable from four feet away, before any list exists on the screen.",
+        "I-1 state-completeness drawn rather than blanked: the empty calendar, the zero-workshop index and the empty subscriber list are each a ring with one key entry and one control inside it, so day one of a brand-new practice reads as surveyed-and-currently-empty instead of as a broken page (brief §11's explicit day-one requirement).",
+        "I-5 density calibrated per screen rather than globally: the merged calendar is close-set, with contours tightening where the week is busy, while the landing-section editor is wide-interval and one field at a time — she reads her week fast and edits her copy slowly, and the drawing should know the difference."
+      ],
+      "excludes": [
+        "NO STROKE MAY CROSS A GLYPH — the binding rule of this territory. Every ring, rule and arc terminates one em before a word's bounding box and resumes one em after it, and the break is genuinely drawn, never faked with a matching-colour rectangle over the line. A contour running through a paragraph or down a price column is a drafting error; it is the specific rendered failure of `the-mark-is-the-grid` that this child exists to correct.",
+        "No region enclosed by a ring may be empty. Every band carries prose, a plate, a key entry or a figure — a ring drawn around nothing is a dead field and gets cut before the composition ships. Negative space here is a measured interval, not a gap.",
+        "No type set on a curve, anywhere, ever. The rings are geometry and the words stay horizontal. Body 19px, secondary 17px, key entries and elevation figures 15px, and nothing on any surface below 14px.",
+        "No equally-spaced radial spokes, no compass rose, no mandala, no sacred geometry. The intervals are UNEQUAL and derived from each plate's own falloff, which is what makes this a measurement rather than an ornament — and ornament is precisely what the Carrier reads as 'you are being asked to believe something'.",
+        "Gold #E9C87E is barred from this paper outright at 1.36:1 — not 'non-text only', barred: it misses even the 3:1 SC 1.4.11 non-text floor here, so it cannot draw a ring, a rule, an edge or a focus state. Gold exists on this direction only INSIDE the photographs.",
+        "No card, no shadow, no rounded rectangle, no three-up service grid. Enclosure is a broken ring at a stated radius; there are no boxes anywhere on this site."
+      ],
+      "layoutArchetype": "A surveyed contour field printed on warm paper: measured concentric rings registered to the real centre of light inside each full-bleed plate, drawn at intervals that widen beat by beat, every ring breaking open around any word it meets so ink never touches a glyph; prose sits in the band between two rings, and a printed key holds the outer margin of every page.",
+      "signatureMove": "The broken contour ring — every rule, divider, enclosure and section edge on the site is an arc at a measured radius that TERMINATES a clear em before any glyph and resumes after it, cartographic convention, the line always yielding to the label. It is what lets the geometry run everywhere without ever crossing a word, and it reuses identically as the admin's enclosure, divider and focus primitive.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "cartographic warmth — hand-drawn accuracy on warm paper, nothing hidden and everything labelled",
+      "visualToneIndicators": [
+        "the densest direction of the family — an 8px base on a compact 4/8/12/20/32/52 ramp, because a survey is legible by being close-set, not by being empty",
+        "sienna #9C3418 is the only ink that draws: rings, rules, key entries and the primary action are all the same colour, so the whole drawing reads as one hand",
+        "gold does not exist as ink on this paper at all — it lives only inside the photographs, which is exactly why the plates look lit and the page looks printed",
+        "one 8px magenta-deep dot at the true centre of every ring set: the person the field runs outward from. The only pure chroma on the page and the one detail that rewards a close look",
+        "elevation figures and key entries in IBM Plex Mono at 15px, set into the ring breaks — never smaller, because the reading glasses are somewhere else in the house"
+      ],
+      "theUnaskedQuestionAnswer": "It is answered twice in the first viewport, in two different registers, and both are borrowed from map-making. The three facts are enclosed by the tightest contour on the entire site — the summit, the highest measured point — and the SAME three facts are reprinted as the map's key in the outer margin: clothed · no contact · no belief required. A key is a promise that nothing on the drawing is unexplained, which is the exact reassurance a sceptical adult needs before she reads a single claim.",
+      "ascentMechanic": "contour interval — the spacing between rings widens monotonically root to crown (24px at Root, 400px at Third Eye, one ring enclosing the viewport at Crown), so the survey opens out as the page climbs. Steep, close and urgent where the fear is; wide, open and quiet where the invitation is. inspirations.md §Four non-rainbow mechanics row 4 (density progression), realised as a drawn interval rather than as whitespace.",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#9C3418",
+          "secondary": "#3A1233",
+          "accent": "#C2187A",
+          "background": "#F5EADC",
+          "surface": "#FDF8F1",
+          "textPrimary": "#1E0A1C",
+          "textSecondary": "#57413A",
+          "error": "#A3221A",
+          "success": "#14663C"
+        },
+        "typography": {
+          "headingFont": "Fraunces",
+          "bodyFont": "Public Sans",
+          "monoFont": "IBM Plex Mono"
+        },
+        "dials": {
+          "visual_density": 6,
+          "motion_intensity": 2,
+          "design_variance": 7
+        },
+        "characteristics": "0px radius on every container (there are no containers — enclosure is a broken ring); zero shadow; the densest direction of the family at visual_density 6; body 19px / 1.65; one 8px magenta-deep centre dot as the single rewarding detail.",
+        "ground": "warm map paper #F5EADC — deliberately warmer and deeper than the brand's blush #FBF3F1 so the page reads as printed stock rather than as a screen, and distinct from every other light ground in the set",
+        "gradientRole": "NONE as chrome. The gold→magenta gradient exists only inside the photographs; the drawing over them is single-ink sienna. This is the direction that refuses to put the gradient on the page at all, which is why the plates read as the only light source.",
+        "contrastComputed": [
+          "textPrimary #1E0A1C on background 15.86:1 / on surface 17.82:1 — AA body",
+          "textSecondary #57413A on background 7.96:1 / on surface 8.94:1 — AA body",
+          "primary sienna #9C3418 on background 6.06:1 / on surface 6.81:1 — AA body; contour rings, rules, key rules and the primary action all clear SC 1.4.11 (3:1) with margin",
+          "secondary plum-700 #3A1233 on background 13.46:1 / on surface 15.12:1 — AA body",
+          "accent magenta-deep #C2187A on background 4.77:1 / on surface 5.36:1 — AA body (the centre dot and the focus ring)",
+          "error #A3221A on background 6.31:1 · success #14663C on background 5.90:1 — AA body (factory default success #16A34A = 3.30:1 on white, rejected)",
+          "reverse label #F5EADC on sienna fill #9C3418 = 6.06:1 — AA body",
+          "functional border / hairline #7A6754 on background 4.54:1 — clears SC 1.4.11 (3:1) and AA body",
+          "re-measured with the README's own WCAG 2.x relative-luminance method, which reproduces every figure in that file exactly (gold on plum-800 10.89:1, magenta-deep on blush 5.18:1, rose on plum-700 4.92:1, factory success on white 3.30:1) — so these derived-paper figures are computed on a verified method, not estimated"
+        ],
+        "rejectedByComputation": [
+          "gold #E9C87E on this paper = 1.36:1 — worse than the README's 1.47:1 on blush because the paper is warmer; it fails AA body, the 3:1 large-text floor AND the 3:1 non-text floor, so it is barred from ink entirely rather than reserved for strokes",
+          "gold-deep #C99A3F = 2.16:1 — fails the non-text floor as well; not used",
+          "bistre #8A6A22 = 4.25:1 — clears 3:1 but misses AA body by 0.25, so it is not adopted; the drawing uses sienna at 6.06:1 instead rather than shipping a colour that is legal for rules and illegal for the labels beside them",
+          "the factory success default #16A34A = 3.30:1 on white and is banned project-wide; #14663C substituted at 5.90:1"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are the terrain and they are full-bleed and uncropped — the whole point is that the rings are REGISTERED to the real centre of light inside each photograph rather than imposed on it, so a viewer who looks closely can see the drawing agrees with the picture. aura-two-people at Root under the tightest contours; aura-light-in-a-room at Sacral under three; aura-radiant-portrait at Crown under one; aura-seated-figure on offering detail; aura-field-abstract is the selectable background at low opacity. aura-hands-between is excluded outright — a set of contour rings drawn over cupped hands around an orb would produce the exact sacred-geometry reading this direction bans."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§3 Problem statement — 'they cannot tell a serious practitioner from a hobbyist, they cannot tell what actually happens in the room'; §6 The Carrier's top task (1) 'find out what physically happens in the room'. A survey shows the procedure instead of asserting the benefit."
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md — the eleven sampled values plus the computed light/dark tables, and its instruction 'Re-measure before trusting any contrast claim in this file'. Every figure above was recomputed on the README's own method, which reproduces its published ratios exactly; gold measures 1.36:1 on this warmer paper and is therefore barred from ink, not merely from type."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §The Category Template — the Squarespace order 'full-bleed soft-focus hero → mission statement → three-up service cards → bio → testimonials → CTA', 5 of 6 sites; and §Opportunities — 3 of 6 publish no price, Re:Mind's /book-class returns 'No results found' to a static fetch. A drawn schedule with figures in the ring breaks is the inverse of both."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 6 Concentric — circular geometry with no full-width strip anywhere; this territory takes the geometry and inverts the parent's fatal detail by making the stroke YIELD to type rather than run through it. styles.md Style 8 Warm Ledger supplies the warm-paper ground register."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 37 Josef & Anni Albers Foundation — 'progression created by adjacency, not by spectrum… each beat's ground shifts one measured step against the beat immediately before it'; and Insp. 4 Studio Olafur Eliasson — 'let the six plates be the only chroma and keep the chrome achromatic', which is why the drawing is single-ink and the gradient stays inside the photographs."
+        }
+      ]
+    },
+    {
+      "name": "the-lit-clearing",
+      "governingIdea": "The room is dark and there is one clearing of light in it the exact size of a seated person, and everything this site has to say is said from inside that clearing — while the practitioner's hands stay at its edge and never cross.",
+      "singleMindedProposition": "Nothing crosses this edge — not her hands, not a rule, not a line of type.",
+      "narrativeSpine": {
+        "openWound": "The thing you cannot ask is not whether it works. It is whether you will have to take your clothes off, and whether a stranger is going to put her hands on you, and you have closed four tabs this month at exactly the moment you understood that the page was never going to say.",
+        "openLoop": "A woman is sitting in the light with her coat still on, and there is a pair of hands at the edge of it that have not come in. Four words underneath: nothing crosses this edge. Whose rule is that, and does it hold for the whole hour?",
+        "villainStakes": "The villain is the tab you close at 11:40pm — the category's habit of answering everything except the procedure, so the decision gets made by your embarrassment instead of by you. What it costs is another eight months of carrying the thing you arrived with, and calling that thinking about it.",
+        "guideEntrance": "She arrives at the fourth beat inside the smallest clearing on the site — close-cropped, at reading distance, her own plain sentences first and her training on one 15px line beneath, with no borrowed logos and no client wall. She is the person who drew the edge, and she says so plainly. (Name, years and training are UNVERIFIED per brief §20.1 and ship as visibly-marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the clearing at the size of one seated person: aura-two-people full-bleed in near-black with the pool cut around the chair, three flat sentences and a four-word caption on the light. Dense and close: six elements in the pool.",
+          "Sacral — register change to a wide low pool over aura-light-in-a-room: five elements, one long paragraph at near-voice about what the hour is like from inside the chair, nothing else lit.",
+          "Solar plexus — register change to type as the entire content of the light: four verbs at 88px stacked in one pool with nothing else in it whatsoever — clearing, charging, repairing, restructuring — the plate visible all the way around them.",
+          "Heart — register change to the smallest clearing on the site: her face, one paragraph, one 15px line of training. Four elements.",
+          "Throat — register change AND an inversion: what this is not is the one beat set OUTSIDE the light, in blush type on the bare plate, with that beat's pool sitting empty beside it. The honesty is the one thing the light is not asked to carry, and it is the detail that rewards attention.",
+          "Third eye — register change back into a wide pool holding one named before-and-after paragraph and nothing else at all. Two elements.",
+          "Products — register change to a schedule on the light: three offering kinds at equal billing as rule-separated rows with real dates and prices in tabular figures, in the widest pool yet, still one column and still no cards.",
+          "Crown — the clearing has opened past all four edges and the page is light: one sentence, one control, two elements, and the plate survives only in the corners."
+        ],
+        "transformationBridge": "Before: someone who has had a practitioner's contact page open in another tab since March and has never scrolled it to the bottom, because she is waiting for a sentence that never comes. After: someone who spent an hour in a chair with her coat over the back of it, who can say exactly what happened and exactly what did not, and who found the whole thing considerably less strange than the version she had been imagining for six months. Nothing was cured. The bracing was.",
+        "closedLoop": "The Crown answers the caption the first pool made. The hands never came in, the edge held for the whole hour, and the request now sits on open light with the same four words printed beneath it. What is being asked for is an hour in the clearing — not a belief, and not your clothes off."
+      },
+      "interfaceCraftEmphasis": [
+        "I-2 one primary action per screen made structural rather than stylistic: the clearing contains exactly ONE primary control, always, on every admin screen — so the answer to 'what do I do here' is permanently 'the thing in the light', and she learns it once and never relearns it.",
+        "I-4 progressive disclosure BY the edge, which is the lever that decides whether she can run this: the 80% path is whatever is lit, and everything rare — availability rules, publish scope, bulk actions, CSV export, hold duration — lives outside the pool at 15px and comes into the light on intent. It is how a nine-field settings screen stops looking like software to someone who is not comfortable with software (brief §6).",
+        "I-1 state-completeness with day one designed FIRST: the empty merged calendar, the zero-workshop index and the empty booking queue are each a clearing holding one sentence and one control, so a brand-new practice's admin looks composed rather than broken — brief §11's explicit requirement that a page with zero workshops is still worth landing on.",
+        "I-6 affordance legibility on a two-value system a non-technical owner can state out loud: anything on the light is operable, anything on the plate is information. The irreversible guards — send to N confirmed subscribers, delete an offering three newsletters reference — state the exact count and the exact consequence inside their own clearing, before the control rather than after it."
+      ],
+      "excludes": [
+        "NOTHING CROSSES THE POOL'S BOUNDARY — the binding rule, and it is simultaneously the concept and the typographic fix. No rule, arc, stroke, divider or line of type may touch or span the edge; every element is wholly inside the light or wholly outside it, and type keeps a 32px clear band inside the boundary. Strokes and words never meet here because they never occupy the same region — which is the parent territory's arcs-through-paragraphs failure made structurally impossible.",
+        "No bare dark. Every pixel outside a clearing carries a plate at reduced luminance — the dark is photographic, always, everywhere. A flat black region is a failed render rather than restraint, and this territory has none on any screen including the admin.",
+        "No second clearing per viewport. Two pools cancel each other and the concept dies with them: one pool, and it is where the eye goes.",
+        "No scrim, tint or overlay laid over a plate to make type sit on it. If a word needs the picture darkened in order to be read, that word belongs in the clearing instead — which is what the clearing is for.",
+        "No drop shadow, no card, no rounded rectangle, no three-up grid. The edge of the light is the only boundary in the entire system, and adding a second kind of boundary would make the first one ordinary.",
+        "Body 18px inside the pool, 17px minimum anywhere, plate-side captions 15px and never smaller. Gold #E9C87E is barred INSIDE the pool (1.47:1) and magenta-deep #C2187A is barred OUTSIDE it (3.45:1) — each colour belongs to one side of the edge and crossing is a contrast failure as well as a concept failure."
+      ],
+      "layoutArchetype": "Near-black throughout, with one hard-edged clearing of blush light cut into a full-bleed plate per viewport; all reading happens on the light inside that clearing, the dark around it is never bare because it is always the photograph, and each beat the clearing holds fewer elements and more air than the beat before it.",
+      "signatureMove": "One hard-edged pool of blush light per viewport, cut clean out of a full-bleed plate, carrying every word and every control on the screen in plum ink — and nothing ever crosses its boundary: not a rule, not a stroke, not a line of type, and not the practitioner's hands, which enter the frame at the pool's edge in the plate and stop there. The pool reuses verbatim as the admin's panel, dialog, form and empty-state primitive.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "held clearing — near-black all around, and everything that matters read from inside one pool of light",
+      "visualToneIndicators": [
+        "the sharpest edge in the family: the pool's boundary is a hard 1px transition with no feather, no glow and no falloff — this is a cut, not a bloom, and that is the whole difference from its dark parent",
+        "true light-on-dark inversion inside a dark world: the page ground is #160712 and reading happens on #FBF3F1 at 17.21:1, which is also the highest reading contrast available to a 35–65 audience anywhere in the set",
+        "the pool's element COUNT is the composition's unit — six at Root, two at Crown — so restraint is countable rather than a matter of taste",
+        "the one motion is the pool's edge drifting a few pixels on a ~14-second cycle, because a real pool of light in a real room is never perfectly still; under prefers-reduced-motion the edge sits at its beat's fixed position and the composition is whole",
+        "0px radius on everything that is not the pool; the pool is a true circle or a true rounded-rectangle clipped to the content it holds, never a decorative shape looking for something to contain"
+      ],
+      "theUnaskedQuestionAnswer": "The composition answers it before a word is read, and the caption only names what is already visible. At Root the clearing is exactly the size of a seated, fully-clothed woman with her coat still on, and the practitioner's hands enter the frame at the pool's edge and STOP — visibly outside the light, in the plate. The three flat sentences sit on the light beside her, and the caption under the pool is four words: nothing crosses this edge. The picture and the sentence make the same claim simultaneously, so it survives a skim by someone who reads nothing.",
+      "ascentMechanic": "density / emptying — the clearing holds monotonically fewer elements and more air from Root (six) to Crown (two), so the climb is felt as things being taken away rather than as light being turned up. inspirations.md §Four non-rainbow mechanics row 4: 'Root is dense and close-set; crown is spacious and open'. No radius ramp and no luminance ramp — both belong to other territories.",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#C2187A",
+          "secondary": "#E9C87E",
+          "accent": "#F5876F",
+          "background": "#160712",
+          "surface": "#260F20",
+          "textPrimary": "#FBF3F1",
+          "textSecondary": "#D8BFC9",
+          "error": "#F58A80",
+          "success": "#6FCB99"
+        },
+        "typography": {
+          "headingFont": "Cormorant Garamond",
+          "bodyFont": "Source Sans 3",
+          "monoFont": "Azeret Mono"
+        },
+        "dials": {
+          "visual_density": 4,
+          "motion_intensity": 3,
+          "design_variance": 8
+        },
+        "characteristics": "One hard-edged pool per viewport, 1px transition, no feather; zero drop shadow anywhere (a cut edge is the only elevation); 0px radius on all non-pool elements; body 18px / 1.7 on the light, plate-side captions 15px in blush.",
+        "ground": "the deepest ground in the whole set — #160712, plum-900 taken one step further down, so the blush pool cut into it reads as an actual opening rather than as a panel. The page ground is ALWAYS a plate at reduced luminance over that value; the flat colour is never seen bare.",
+        "gradientRole": "NONE as chrome, and this is the direction's discipline: the gradient exists only inside the plates. The 'emanation' here is a hard-edged CUT rather than a falloff — the one territory in the family that refuses the soft radial entirely, which is exactly what separates it from `the-room-you-are-standing-in`.",
+        "pool": "#FBF3F1",
+        "poolText": "#1E0A1C",
+        "poolTextSecondary": "#5A4356",
+        "contrastComputed": [
+          "DARK SIDE — textPrimary #FBF3F1 on background 17.88:1 / on surface 16.38:1 — AA body",
+          "DARK SIDE — textSecondary #D8BFC9 on background 11.38:1 / on surface 10.43:1 — AA body (the plate-side captions)",
+          "DARK SIDE — secondary gold #E9C87E on background 12.14:1 · accent coral #F5876F on background 7.99:1 — AA body",
+          "DARK SIDE — functional border / hairline #8E6A82 on background 4.22:1 / on surface 3.87:1 — both clear SC 1.4.11 (3:1)",
+          "POOL — poolText plum-900 #1E0A1C on pool #FBF3F1 17.21:1 — AA body, and the highest reading contrast in the set",
+          "POOL — poolTextSecondary #5A4356 on pool 8.09:1 — AA body",
+          "POOL — primary magenta-deep #C2187A on pool 5.18:1 — AA body; reverse label #FBF3F1 on a magenta-deep fill 5.18:1 — AA body; focus ring on pool 5.18:1, clears SC 1.4.11",
+          "POOL — pool-side border #8A7285 on pool 3.98:1 — clears SC 1.4.11 (3:1)",
+          "POOL — error #A3221A on pool 6.85:1 · success #0F6B3D on pool 6.01:1 — AA body. These are the POOL-side state colours; every form, error summary and confirmation in this system lives in the pool, so they are the ones that actually render. The 9-token error/success above (#F58A80 8.23:1 and #6FCB99 9.95:1 on the ground) are the plate-side variants for inline notices outside the light.",
+          "the pool's own edge against the ground measures 17.88:1 — far past the 3:1 non-text floor, which is why the boundary can be a 1px cut with no glow",
+          "computed with the README's WCAG 2.x relative-luminance method, verified against its published figures (gold on plum-800 10.89:1, magenta-deep on blush 5.18:1, factory success on white 3.30:1)"
+        ],
+        "rejectedByComputation": [
+          "magenta-deep #C2187A on the ground = 3.45:1 (and 3.16:1 on surface) — fails AA body, so the primary colour is structurally POOL-ONLY. That is not a workaround, it is the concept: the colour that marks action cannot exist outside the light.",
+          "gold #E9C87E inside the pool = 1.47:1 and coral #F5876F inside the pool = 2.24:1 — both fail everything on blush, so the dark side's two chromas are barred from the light. The palette enforces the edge in both directions.",
+          "magenta #D6338A is absent entirely — it fails AA body on both ground families per the README (4.08:1 on blush, 3.93:1 on plum-800) and there is no ground in this direction where it works.",
+          "factory success #16A34A = 3.30:1 on white — banned; #0F6B3D (6.01:1 on the pool) and #6FCB99 (9.95:1 on the ground) substituted per side."
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "The plates are not decoration here, they are the ground itself — every screen is a plate at reduced luminance with a clearing cut into it, so there is no such thing as an unillustrated surface and no such thing as a dead field. aura-two-people at Root with the pool cut around the chair and the hands stopping at its edge; aura-light-in-a-room at Sacral; aura-seated-figure at Third Eye and on offering detail; aura-radiant-portrait at Crown, where the clearing has opened past the frame; aura-field-abstract is the default admin and selectable-background plate. aura-hands-between is excluded outright — a pool of light cut around cupped hands and an orb is the category cliché rendered at maximum size."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "asset",
+          "ref": "docs/asset-inventory.json — assets/images/aura-two-people.png: 'Practitioner standing, hands hovering above the shoulders of a seated, fully clothed woman'; briefRole 'Answers the unasked question (clothed, untouched) visually.' This territory's whole composition is that photograph's own fact — the hands at the edge of the light, not crossing it — promoted to the layout rule."
+        },
+        {
+          "source": "brief",
+          "ref": "§2 Emotional register — 'Night-side rather than daylight — the work happens in low light, in stillness'; §11 beat 1's job, 'You stay clothed, nobody touches you, nothing is asked of your beliefs'; §15 the ≥80% unprompted-recall metric that beat 1 is the lever on."
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md computed tables — magenta-deep #C2187A is the light-ground text-safe magenta (5.18:1 on blush) and the WORST performer on dark (3.10:1 on plum-800); gold inverts the other way (1.47:1 on blush, 10.89:1 on plum-800). This direction makes that documented inversion the compositional law rather than a trap to avoid."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Opportunities — 0 of 6 homepages contain the words clothed / undress / touch / hands-off / believe, and the one site that answers well buries it at /faq/; §The Category Template — 'the imagery default: soft-focus interiors, crystals, hands, candles, low-saturation photography of empty rooms'. A hard-cut pool over a real commissioned plate is the measured opposite of soft focus."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 1 Field Emanation supplies the night-side ground; styles.md Style 10 Plate Study supplies the plate-as-primary-content posture. The differentiating move against its own parent `the-room-you-are-standing-in` is arithmetic and visible: a HARD-EDGED cut with binary in/out placement, versus a soft radial bloom with graded distance placement."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 5 Dan Flavin Art Institute — 'fluorescent light installed as architecture, so the room becomes the artwork… the ground IS the field and content sits inside it'; and §Four non-rainbow mechanics row 4 (density progression) which supplies this direction's ascent without touching luminance or radius."
+        }
+      ]
+    },
+    {
+      "name": "nothing-lit-from-the-front",
+      "governingIdea": "Every person, panel and control on this site is lit from behind at its edge and never from the front, because the fear this brand has to answer is the fear of being exposed — and a page where nothing is floodlit says that, before any sentence does.",
+      "singleMindedProposition": "You can see the shape of a person here without anything being exposed, and that is not a metaphor — it is how the page is lit.",
+      "narrativeSpine": {
+        "openWound": "What actually stops you is not doubt, it is the picture in your head of standing in a bright room in a paper gown while a stranger looks at you — and because that picture is embarrassing, you have never typed the question, so you have spent four months deciding on the basis of an image you invented yourself.",
+        "openLoop": "The first screen is a person whose whole shape you can see and none of whose detail you can: lit from behind, coat on, face in shadow. There is a thin line of light along one edge. It is clearly travelling. Where does it end up?",
+        "villainStakes": "The villain is exposure — the assumption running through this entire category that being helped means being looked at. It wins by never once being contradicted, and it costs this practice the exact person it exists for: the adult who half-expects to be embarrassed and leaves before finding out that she would not have been.",
+        "guideEntrance": "She enters at the fourth beat lit exactly the way the visitor is — her own portrait rim-lit with her face in shadow, her plain sentences at 19px beside it, her training on one 15px line beneath. The guide stands under the same lighting as the hero, which is the entire point: nobody on this site is floodlit, including her. (Name, years and training are UNVERIFIED per brief §20.1 and ship as visibly-marked placeholders.)",
+        "staircaseBeats": [
+          "Root — the thinnest crescent on the site: aura-two-people inside a 520px disc lit along one edge only, three facts at 44px flush-left beside it, and a caption naming the lighting itself — nothing here is lit from the front.",
+          "Sacral — register change to a wide low disc at 1100px with the light now a quarter of the way round, one long near-voice paragraph at 19px about what the hour is actually like, set beside it.",
+          "Solar plexus — register change to display type carrying the beat alone: the four verbs at 104px in four stacked flush-left lines, each with its own small disc at a further phase to its left — clearing, charging, repairing, restructuring — the only place on the site where the rim appears four times at once.",
+          "Heart — register change to portrait: her disc at 640px with the light halfway round, prose in a single 60-character measure beside it, credentials at 15px.",
+          "Throat — register change to the one screen with NO disc and NO rim at all: what this is not, set as plain blush prose on bare dusk, edge-lit only by a single coral hairline the width of the measure. The beat where nothing is lit is the detail that rewards attention.",
+          "Third eye — register change back to a disc at three-quarter rim, one named before-and-after paragraph beside it and nothing else on the screen.",
+          "Products — register change to a lit schedule: the three offering kinds at equal billing as rule-separated rows whose left edges are lit to the phase of the beat, with real dates and prices in tabular figures — no cards, no disc, no filter.",
+          "Crown — the light has come all the way round: the first and only complete rim on the site, aura-radiant-portrait inside it, one sentence and one control, and that control is the one other element with a complete rim of its own."
+        ],
+        "transformationBridge": "Before: a woman who has been picturing a bright room and a paper gown for four months and has therefore never gone, and who could not tell a single person that this is what stopped her. After: a woman who sat in a low-lit room in her own clothes for an hour with nobody's hands on her, who now knows the picture in her head was of a completely different appointment, and who books the next one without thinking about it. Nothing was cured. The picture was replaced with a memory.",
+        "closedLoop": "The line of light that began as a crescent on the first screen closes into a complete ring at the Crown, and the request sits inside it. What the rim was travelling toward turns out to be the invitation — and nothing along the way, including the invitation, was ever lit from the front."
+      },
+      "interfaceCraftEmphasis": [
+        "I-6 affordance legibility carried entirely by the rim, which is the lever that decides whether she can run her business on this: a COMPLETE coral rim is the one primary action on the screen, a partial rim is secondary, an unlit rim is disabled and carries a one-line reason — and the guarded destructive actions (send to N confirmed subscribers; delete an offering that three newsletters reference) are rimmed in the error hue at 8.41:1 and state the count BEFORE the control, not after it.",
+        "I-5 density done right on the screen she will live in: the merged calendar separates confirmed bookings, pending holds, derived session blocks and personal blocks by four RIM treatments with no fills competing anywhere on the grid, so a densely-booked week stays readable and free time stays legible as free. This is the Tufte case exactly — on this ground a fill would be the only thing on the grid with any weight, and it would win against the data.",
+        "I-3 scan hierarchy for a non-technical owner who opens her admin once a month: the dashboard answers 'what needs me today' in a single rim-lit block at 44px — new requests, and holds about to expire — before any table exists on the screen at all.",
+        "I-2 one primary action per screen with a mechanical test rather than a taste judgement: count the complete rims. If there is more than one on a screen, the hierarchy has failed and one of them gets demoted to a partial.",
+        "I-1 state-completeness with the empty states composed FIRST: an empty week, a zero-workshop index and an empty subscriber list are a rim with one sentence inside it — a shape, not an absence — which is brief §11's day-one requirement met by composition rather than by an apology."
+      ],
+      "excludes": [
+        "NOTHING IS LIT FROM THE FRONT. There is not one solid button, filled card, white panel or filled chip anywhere in the system — separation is a lit EDGE, always, and a single filled rectangle would break the whole grammar in one element. The only exception is a plate, which is a photograph and carries its own light.",
+        "NO STROKE CROSSES A WORD. A rim belongs to an OBJECT and closes on that object's own edge; type sits inside an object or beside it, never across a rim, and no rule, arc or divider is ever drawn through a text block or down a price column. The parent territory's arcs running through paragraphs is the exact failure this clause exists to make impossible.",
+        "No moon phases, no crescent as a decorative motif, no astrology, no mandala, no sacred geometry. The travelling rim is PHOTOGRAPHIC backlight — what a portrait photographer does to give a subject an edge without exposing a face — and the moment it reads as lunar this brand has walked back into the category it is leaving.",
+        "No condensed display face and no flat acid accent on this ground: Othership ships exactly that combination at #372338 and this ground sits one measured step from it. Bricolage Grotesque runs at normal or wide width only, never condensed.",
+        "No dead dusk. Any region without content carries a plate at reduced luminance or one edge-lit hairline; a flat expanse of plum with nothing in it is a failed render and gets composed or cut. Negative space here is a lit interval, not an absence.",
+        "Body 18px, secondary 17px, captions and figures 15px, nothing below 14px on any surface including the admin — the audience skews 35–65 and the reading glasses are somewhere else in the house.",
+        "Magenta #D6338A (3.58:1) and magenta-deep #C2187A (2.82:1) are barred on this ground outright; magenta-deep misses even the 3:1 non-text floor here, which is the README's own dark-ground warning made binding rather than advisory."
+      ],
+      "layoutArchetype": "Dusk plum held at one value across the whole site, with objects separated from the ground by a lit edge instead of by a fill: one large disc carries the image on each beat, its bright rim running further around the circumference at every step of the climb, and display lines stack flush-left beside it at full measure with no type ever set on a curve.",
+      "signatureMove": "Rim light as the entire elevation and affordance currency: nothing is filled and nothing is floodlit, every disc, panel, field and control is separated from the dusk by a coral edge-light, and how far that light has travelled around an object's circumference is what tells you what the object is — a complete rim is the one primary action, a partial rim is secondary, an unlit rim is disabled and says why.",
+      "signatureMoveScope": "kit-pattern",
+      "toneRegister": "rim-lit reserve — lit from behind, never from the front, and warm at every edge",
+      "visualToneIndicators": [
+        "surfaces differ from the ground by 1.04:1 and are separated ENTIRELY by their lit edge at 6.53:1 — the palette itself refuses front-lighting, and the separation still clears the 3:1 non-text floor twice over",
+        "the four verbs get the largest type in the family at 104px, each with its own disc at its own phase — this is the territory that gives the practitioner's own vocabulary real typographic weight",
+        "one continuous ground value from the header to the footer of every page, public and admin: dusk plum #3A1233, the brand's own third plum, used as a ground by nothing else in the set",
+        "the one motion is the rim's brightest point travelling a few degrees on a ~16-second cycle; under prefers-reduced-motion it sits at that beat's fixed phase and the composition is whole and still legible as a step in the climb",
+        "coral #F5876F rather than gold as the light, because gold on plum is the parent's colour and coral is warmer, more photographic and reads as a real backlight rather than as a metal"
+      ],
+      "theUnaskedQuestionAnswer": "The LIGHTING answers it before the copy gets a chance. Every figure on this site is edge-lit and clothed with the face in soft shadow, and no plate anywhere is lit from the front — so the visitor's own invented picture of a bright room and a paper gown is contradicted by the first thing on the screen. Beside that first thin crescent the three facts are set at 44px in blush: you stay dressed, nobody touches you, nothing is asked of your beliefs. The caption names the mechanism rather than the reassurance — nothing here is lit from the front — which is a more credible thing to say than 'don't worry'.",
+      "ascentMechanic": "angular travel — the arc of lit rim runs further around the disc at each beat, from a thin crescent at Root to the first and only complete ring at Crown. No radius change, no luminance ramp, no hue rotation and no density ramp: the climb is measured in degrees, which is a mechanic nothing else in the set uses.",
+      "derivedStyle": {
+        "palette": {
+          "primary": "#F5876F",
+          "secondary": "#E9C87E",
+          "accent": "#E85D9B",
+          "background": "#3A1233",
+          "surface": "#3F1437",
+          "textPrimary": "#FBF3F1",
+          "textSecondary": "#E8CFC0",
+          "error": "#F9A79E",
+          "success": "#7FD3A6"
+        },
+        "typography": {
+          "headingFont": "Bricolage Grotesque",
+          "bodyFont": "Schibsted Grotesk",
+          "monoFont": "Spline Sans Mono"
+        },
+        "dials": {
+          "visual_density": 5,
+          "motion_intensity": 4,
+          "design_variance": 8
+        },
+        "characteristics": "Zero fills and zero shadows anywhere — every boundary is a 1.5px edge-light at partial or complete arc; surface differs from ground by 1.04:1 on purpose so the rim does all the separating; body 18px / 1.7; the four verbs at 104px are the largest type in the family.",
+        "ground": "dusk plum #3A1233 — the brand's own plum-700, one measured step lighter and warmer than the parent's midnight #2B0E28, and used as a page ground by no other direction in the set. Dusk rather than midnight, which is what lets a coral rim read as backlight instead of as neon.",
+        "gradientRole": "EDGE ONLY. The gold→magenta gradient appears solely as the falloff along an object's lit rim — coral at the brightest point of the arc easing to gold at its tail — so the brand's gradient is expressed as a light source's temperature rather than as a fill, a swatch, or a background wash.",
+        "contrastComputed": [
+          "textPrimary #FBF3F1 on background 14.60:1 / on surface 14.04:1 — AA body",
+          "textSecondary #E8CFC0 on background 10.74:1 / on surface ~10.4:1 — AA body",
+          "primary coral #F5876F on background 6.53:1 / on surface 6.28:1 — AA body, and as the rim it clears SC 1.4.11 (3:1) by more than double",
+          "secondary gold #E9C87E on background 9.91:1 — AA body (the rim's cool tail and the eyebrow rules)",
+          "accent rose #E85D9B on background 4.92:1 / on surface 4.73:1 — AA body on both, and it is the README's designated dark-ground text-safe pink",
+          "error #F9A79E on background 8.41:1 · success #7FD3A6 on background 8.96:1 — AA body (factory success #16A34A = 3.30:1 on white, rejected)",
+          "functional border / unlit-edge #A47C99 on background 4.51:1 — clears SC 1.4.11 (3:1) and AA body, so a disabled rim is still visible rather than merely absent",
+          "surface #3F1437 against background #3A1233 = 1.04:1 — DELIBERATE and stated: panels are not separated by fill value at all, they are separated by their coral rim at 6.53:1, which is what SC 1.4.11 actually requires and what the concept demands",
+          "computed with the README's WCAG 2.x relative-luminance method, verified against its published figures (rose on plum-700 4.92:1, gold on plum-700 9.91:1, magenta-deep on plum-700 2.82:1)"
+        ],
+        "rejectedByComputation": [
+          "magenta-deep #C2187A on plum-700 = 2.82:1 — misses AA body AND the 3:1 non-text floor, exactly as the README warns; barred outright, including as a rim, a focus ring or an icon stroke",
+          "magenta #D6338A on plum-700 = 3.58:1 — fails AA body; barred as type. rose #E85D9B at 4.92:1 is the pink that ships",
+          "gold #E9C87E was rejected as the PRIMARY rim colour despite measuring 9.91:1, because gold-on-plum is the parent territory's signature and reusing it would collapse the two directions into one look. Coral at 6.53:1 clears every floor and is the warmer, more photographic light.",
+          "factory success #16A34A = 3.30:1 on white and is banned project-wide; #7FD3A6 substituted at 8.96:1 on this ground"
+        ],
+        "nonTextOnly": [],
+        "imageryTreatment": "Every plate is presented inside a disc and lit from behind — the crop is chosen so the figure's EDGE survives at every breakpoint even when the face does not, because the edge is what carries the reassurance. aura-two-people at Root inside the thinnest crescent, cropped so the clothed body and the gap between hands and shoulders both survive; aura-light-in-a-room at Sacral; aura-seated-figure at Third Eye and on offering detail; aura-radiant-portrait at Crown inside the one complete rim, and it is the only front-lit-looking plate on the site precisely because the light has finally come all the way round. aura-field-abstract is the reduced-luminance ground that keeps every otherwise-empty region alive. aura-hands-between is excluded outright — a rim-lit disc containing cupped hands and an orb would read as an occult sigil, which is the worst available outcome for a brand whose visitor fears being asked to believe something."
+      },
+      "paletteSource": "derived",
+      "citations": [
+        {
+          "source": "brief",
+          "ref": "§2 The category truth this brand must defeat — 'Prospective clients arrive carrying a specific fear — that this involves undressing, being touched, or being asked to believe something. Every visual decision is made in front of an adult who half-expects to be embarrassed.' This territory makes the LIGHTING the decision, so the answer arrives before any copy is read."
+        },
+        {
+          "source": "asset",
+          "ref": "assets/brand/README.md dark-ground table — rose #E85D9B on plum-700 4.92:1 (the dark-ground text-safe pink), gold 9.91:1, coral 6.53:1, magenta-deep 2.82:1 which 'fails even the 3:1 large-text and non-text floor'. Plum-700 #3A1233 is taken as the page ground on the strength of those measured figures, and magenta-deep is barred on them."
+        },
+        {
+          "source": "competitor",
+          "ref": "competitors.md §Competitor 6 Othership + §The Category Template — 'Dark grounds: 1 of 6, and it is the non-UK, non-energy-healing outlier (Othership #372338)… a dark direction that also reaches for a condensed display face and a bright accent risks reading as an Othership derivative. Take the courage, not the costume.' Hence dusk plum with a wide-width display face and a warm backlight rather than a flat acid accent."
+        },
+        {
+          "source": "differentiation-move",
+          "ref": "styles.md Style 9 Low Amber supplies the warm low-light register; the differentiating move against its own parent `the-room-you-are-standing-in` is that light here belongs to OBJECTS at their edges rather than to the page as a single source — no bloom, no falloff across the field, no placement-by-distance, and a mechanic measured in degrees rather than in radius."
+        },
+        {
+          "source": "domain-research",
+          "ref": "inspirations.md Insp. 3 Little Sun (Olafur Eliasson) — 'light as a warm, useful, unembarrassed object… never mystical'; and §Four non-rainbow mechanics, which this direction answers with a fifth that none of the four names: angular travel of a lit edge, chosen precisely because luminance, temperature, aperture and density are each already carried by another territory in this set."
+        }
+      ]
+    }
+  ]
+}

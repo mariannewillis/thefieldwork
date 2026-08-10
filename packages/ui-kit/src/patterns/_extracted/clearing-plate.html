@@ -1,0 +1,73 @@
+<!--
+  Pattern: clearing-plate — THE SIGNATURE MOVE (signatureMoveScope: kit-pattern)
+  Extracted from: home.html .beat / .plate / .pool (every viewport section)
+                  + admin-dashboard.html .main-field + .pool.on-pool
+  "One hard-edged pool of blush light per viewport, cut clean out of a
+  full-bleed plate, carrying every word and every control on the screen in
+  plum ink — and nothing ever crosses its boundary." (docs/selected-style.json)
+
+  Rules encoded here:
+  - The photograph is ALWAYS full-bleed behind the pool, never a background
+    color. It is dimmed at SOURCE via a brightness filter on the <img> —
+    never via a scrim/overlay div.
+  - The pool has ZERO radius, ZERO shadow, ZERO border. Its only edge
+    treatment is the hard cut against the photograph.
+  - The pool anchors to ONE side (left OR right) per viewport; alternation
+    across viewports is a page-composition concern, not this pattern's.
+  - This pattern IS the Card default (see .components-shapes.json Card) —
+    every dialog / form / empty-state / data panel in the admin reuses this
+    exact shape verbatim, just placed on the dimmed .main-field plate instead
+    of a hero-scale one.
+-->
+<section
+  data-pattern="clearing-plate"
+  data-anchor="left"
+  class="relative flex min-h-[100svh] items-end overflow-hidden px-6 sm:px-[var(--spacing-24,6rem)]"
+>
+  <img
+    src="/assets/images/new/marianne-room-aglow.png"
+    alt=""
+    class="absolute inset-0 h-full w-full object-cover [filter:brightness(.5)_saturate(1.14)_contrast(1.05)]"
+  />
+
+  <div
+    class="relative z-[2] w-full max-w-[380px] bg-pool-surface text-pool-text px-6 py-8 sm:px-8 sm:py-10"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-accent-500 mb-3">
+      Aura healing &middot; hands-off &middot; one hour
+    </p>
+    <h1 class="font-display text-3xl leading-tight text-pool-text mb-4">
+      You keep your clothes on.
+    </h1>
+    <p class="text-sm text-pool-text-secondary">Nothing crosses this edge.</p>
+    <a
+      href="#"
+      class="mt-4 inline-block text-sm text-accent-500 underline decoration-1 underline-offset-4"
+    >
+      Read what the hour is like
+    </a>
+  </div>
+</section>
+
+<!-- Admin reuse: the same pool shape, smaller scale, sitting on a dimmed
+     ambient field image instead of a hero-scale portrait plate. -->
+<div class="relative">
+  <img
+    src="/assets/images/new/aura-field-abstract.png"
+    alt=""
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[.55] [filter:brightness(.42)_saturate(1.04)]"
+  />
+  <article
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    class="relative z-[1] bg-pool-surface text-pool-text px-6 py-7 sm:px-8"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Booking request &middot; hold ends today at 10:02
+    </p>
+    <p class="font-display text-2xl sm:text-3xl text-pool-text mt-2">
+      Sena Okafor is waiting on Reading the Field.
+    </p>
+  </article>
+</div>

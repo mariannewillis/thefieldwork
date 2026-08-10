@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@0.0.74"]
+    },
+    "icons8": {
+      "url": "https://mcp.icons8.com/mcp/",
+      "transport": "sse"
+    },
+    "unsplash": {
+      "command": "npx",
+      "args": ["@drumnation/unsplash-smart-mcp-server"],
+      "env_refs": ["UNSPLASH_ACCESS_KEY"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["chrome-devtools-mcp@latest"]
+    }
+  }
+}
