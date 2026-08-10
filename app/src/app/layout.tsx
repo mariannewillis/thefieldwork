@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
+import { SITE_URL } from "@/content/site";
 
 /**
  * The mockup loaded these from the Google Fonts CDN with a <link>. next/font
@@ -23,6 +24,12 @@ const body = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
+  // Makes every relative URL in metadata resolve against the real domain —
+  // canonical tags and share previews included. Without it Next resolves them
+  // against whatever host served the request, so a link shared from the
+  // Replit preview URL would point people at the preview forever.
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   title: "The Field Work — aura healing, hands-off, one hour",
   description:
     "You keep your clothes on. Nobody touches you. Nothing is asked of your beliefs. Aura healing with Marianne — one hour, seated and clothed throughout.",
