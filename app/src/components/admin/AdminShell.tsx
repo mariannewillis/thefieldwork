@@ -3,11 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  ADMIN_NAV,
-  SESSION_PLACEHOLDER,
-  type NavItem,
-} from "@/content/admin-nav";
+import { ADMIN_NAV, type NavItem } from "@/content/admin-nav";
+import { signOut } from "@/app/(admin)/actions";
 
 /**
  * The portal chrome: a persistent rail, a utility header, and the working
@@ -70,9 +67,11 @@ function NavLink({
 /** The rail's contents — shared by the desktop aside and the mobile drawer. */
 function RailBody({
   pathname,
+  username,
   onNavigate,
 }: {
   pathname: string;
+  username: string;
   onNavigate?: () => void;
 }) {
   return (
@@ -108,9 +107,9 @@ function RailBody({
       </nav>
 
       <p className="mt-auto fig font-mono text-[15px] leading-relaxed text-plate-soft">
-        Signed in as {SESSION_PLACEHOLDER.name}
+        Signed in as {username}
         <br />
-        {SESSION_PLACEHOLDER.role}
+        Owner
       </p>
     </>
   );
@@ -156,8 +155,10 @@ function Clock() {
 }
 
 export default function AdminShell({
+  username,
   children,
 }: {
+  username: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -193,15 +194,6 @@ export default function AdminShell({
         Skip to the main content
       </a>
 
-      {/* Temporary. The portal has no sign-in yet, so anyone with the address
-          can open it. Removed the moment authentication lands. */}
-      <p
-        role="status"
-        className="bg-gold px-6 lg:px-11 py-2 fig font-mono text-[15px] text-ink"
-      >
-        Not protected yet — anyone with this address can open the portal.
-        Sign-in is the next thing to build.
-      </p>
 
       <div className="flex min-h-screen">
         {/* ---- the rail, desktop -------------------------------------- */}
@@ -210,7 +202,7 @@ export default function AdminShell({
           aria-label="Admin sections"
         >
           <div className="relative z-10 flex flex-col gap-7 h-full">
-            <RailBody pathname={pathname} />
+            <RailBody pathname={pathname} username={username} />
           </div>
         </aside>
 
@@ -276,17 +268,25 @@ export default function AdminShell({
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-gold fig font-mono text-[15px] font-bold text-ink"
                   aria-hidden="true"
                 >
-                  {SESSION_PLACEHOLDER.name.slice(0, 1)}
+                  {username.slice(0, 1).toUpperCase()}
                 </span>
                 <span className="text-left">
                   <span className="block text-[17px] font-semibold text-plate-text">
-                    {SESSION_PLACEHOLDER.name}
+                    {username}
                   </span>
                   <span className="block text-[15px] text-plate-soft">
-                    {SESSION_PLACEHOLDER.role}
+                    Owner
                   </span>
                 </span>
               </span>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="t min-h-[44px] text-[17px] font-medium text-plate-soft underline decoration-plate-rule hover:text-plate-text hover:decoration-plate-text"
+                >
+                  Sign out
+                </button>
+              </form>
             </div>
           </header>
 
@@ -339,6 +339,7 @@ export default function AdminShell({
             </button>
             <RailBody
               pathname={pathname}
+              username={username}
               onNavigate={() => setMenuOpen(false)}
             />
           </div>

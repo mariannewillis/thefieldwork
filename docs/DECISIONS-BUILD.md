@@ -205,3 +205,63 @@ The header clock and the Today greeting DO ship, because they read a real
 clock. Both are fixed to Europe/London rather than the browser's timezone:
 Marianne's diary is in London, and a booking time that shifts when she travels
 would be wrong in the one place it must not be.
+
+## D-10 · Admin sign-in (2026-08-10)
+
+One user, one password she owns. Username defaults to `mariannevwillis`
+(`ADMIN_USERNAME` overrides), temporary password `test1234`.
+
+**The temporary password cannot be used to run the portal.** Signing in with it
+lands on a forced change screen, and every admin page redirects back there
+until it is replaced — enforced in the layout, not just after login, so it
+cannot be stepped around by typing a URL. An eight-character password that
+appears in a handover note is a handover mechanism, not a password; treating it
+as one for even a week is how it ends up permanent.
+
+How it is built, and why each part is there:
+
+- **scrypt** (Node's own, no dependency) for hashing, with the cost parameters
+  stored inside each hash so they can be raised later without locking her out.
+- **Signed session cookie**, httpOnly + secure + sameSite=lax, 12-hour life.
+  Stateless, but every token carries a **credential version** that is checked
+  against the stored record — so changing the password instantly kills every
+  session ever issued, including one on a laptop she no longer has. A stateless
+  session without that is a session you cannot revoke.
+- **Two gates.** Middleware refuses forged and expired tokens before a page
+  renders; the admin layout does the authoritative check, because only it can
+  read the credential file and see a revocation. Either alone would do; both
+  means removing one by accident is not a breach.
+- **One error message** for a wrong username and a wrong password, and both
+  checks always run, so neither the wording nor the response time reveals which
+  usernames exist.
+- **Throttling** — per-caller lockout with doubling backoff, plus a global
+  limiter that only ever slows things down, so a flood of deliberate failures
+  cannot lock the owner out of her own portal.
+- **Password rules**: 12 characters minimum, no composition rules. Length is
+  what buys strength; "one capital, one symbol" produces Password1! and is no
+  longer recommended by NCSC or NIST.
+
+Verified by `scripts/auth-smoke.mjs` — 22 checks, all passing, including
+revocation of a pre-change session, rejection of a tampered signature, refusal
+to redirect off-site after sign-in, and lockout after 7 wrong guesses.
+
+**`AUTH_SECRET` is required in production and the app refuses to start without
+it.** The tempting alternative — inventing a random secret at boot — signs
+everyone out on every restart and nobody ever works out why.
+
+### The open problem: this does not survive a redeploy
+
+The credential is a JSON file. On a Replit Reserved VM that survives restarts,
+but a REDEPLOY builds a fresh container — so unless `DATA_DIR` points at
+storage that outlives the deployment, changing the password and then
+redeploying silently restores `test1234`.
+
+That is a real security hole, not a rough edge, and it is the reason a database
+is now the next priority rather than a later one. Until it is fixed, treat
+every redeploy as a password reset and check afterwards.
+
+### Still to build
+
+Forgotten-password reset by email (the approved screens exist; it needs Resend
+wired first), and the username/password controls on the Settings screen, which
+currently only points at this flow.

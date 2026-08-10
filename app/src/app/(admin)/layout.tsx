@@ -4,7 +4,9 @@ import {
   Cormorant_Garamond,
   Source_Sans_3,
 } from "next/font/google";
+import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
+import { getSession } from "@/lib/auth/server";
 import "./admin.css";
 
 /**
@@ -45,14 +47,25 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // THE authoritative check. Middleware already refused forged and expired
+  // tokens, but only this can see the credential file — so only this knows
+  // whether a validly-signed session was revoked by a password change.
+  const session = await getSession();
+  if (!session) redirect("/admin/login");
+
+  // The temporary password opens the sign-in form and nothing else. Enforced
+  // here rather than only after login, so it cannot be stepped around by
+  // navigating straight to a section.
+  if (session.mustChangePassword) redirect("/admin/change-password");
+
   return (
     <div className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <AdminShell>{children}</AdminShell>
+      <AdminShell username={session.username}>{children}</AdminShell>
     </div>
   );
 }

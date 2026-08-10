@@ -144,18 +144,3 @@ export const ADMIN_NAV: NavItem[] = [
     ),
   },
 ];
-
-/**
- * Who is signed in. A PLACEHOLDER until authentication exists — there is no
- * session to read yet, so this is a constant, not a lie dressed as state.
- *
- * The name is deliberately the only field here. The approved screen also
- * showed "session ends 2 Sep"; that has been left out on purpose, because a
- * fabricated expiry on a portal with no sessions is the kind of detail an
- * owner trusts and shouldn't. It comes back when auth does, reading a real
- * session. Marianne sets the name herself in Settings (DECISIONS-BUILD D-8).
- */
-export const SESSION_PLACEHOLDER = {
-  name: "Marianne",
-  role: "Owner",
-} as const;

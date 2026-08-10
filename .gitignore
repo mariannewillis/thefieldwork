@@ -81,3 +81,6 @@ AGENTS.md
 app/CLAUDE.md
 app/AGENTS.md
 companion/
+
+# Runtime state. Holds the admin password hash — never commit it.
+app/data/
