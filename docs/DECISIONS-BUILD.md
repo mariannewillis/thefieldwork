@@ -150,3 +150,58 @@ Originals stay under `assets/images/new/` as masters and are NOT served.
 **This same treatment must apply to HER uploads** — §13 already requires it
 ("images are re-encoded on the server rather than stored as received"). The
 media module runs the identical pipeline, plus the palette treatment.
+
+## D-7 · Marianne configures her own identity; workshops are paid in full (2026-08-10)
+
+Three answers from the operator, recorded so they aren't re-litigated:
+
+- **Her name is a CMS field, not a constant.** It appears on the site, in the
+  portal chrome and in every email, and she can change it herself in Settings
+  without anyone touching the code. Nothing hardcodes "Marianne" except the
+  placeholder in `src/content/admin-nav.tsx`, which is marked as such and dies
+  when authentication lands.
+- **Workshops are paid IN FULL at booking.** Courses take a deposit; sessions
+  are paid after. Three payment shapes, one checkout — see D-5.
+- **Images come in through the portal.** The photographs currently on the site
+  are seeded from `assets/`, but from here on Marianne adds and replaces them
+  in Pictures. No image is ever added by editing code.
+
+## D-8 · Tailwind is scoped to the portal; the public site stays bespoke (2026-08-10)
+
+The admin screens were composed against Tailwind utilities; the public site was
+composed as bespoke CSS. Rather than converting one to the other, each keeps
+what it was designed in, and the boundary is enforced by where the stylesheet
+is imported: `app/(admin)/admin.css` is imported only by the admin layout, so
+Next emits it as a route-scoped chunk that never loads on the site.
+
+This is load-bearing, not tidiness. Tailwind's preflight resets margins the
+site's `home.css` depends on, and BOTH stylesheets define a `.pool` class for
+different jobs — the site's is a blush hero panel, the portal's is a working
+surface. Loaded together, one would silently win.
+
+The two type systems are kept apart the same way. next/font instances in the
+admin layout carry `--admin-display` / `--admin-body` / `--admin-mono`, so they
+cannot shadow the site's `--font-display` / `--font-body` even if a future
+change made both stylesheets load at once.
+
+**Type system, resolved:** Cormorant Garamond + Source Sans 3 + Azeret Mono.
+32 of the 33 approved screens use it. `admin-dashboard.html` is the single
+screen that drifted to Newsreader + Karla; the majority is canonical and the
+outlier was not followed.
+
+## D-9 · The portal shows no state it cannot read (2026-08-10)
+
+The approved admin screens carry three pieces of fabricated status: an "All
+changes published" indicator, a "2" badge on Requests, and "session ends 2 Sep"
+in the rail. None has a source yet, and the Today greeting was hardcoded to
+"Thursday morning" — which contradicted the live clock four inches above it the
+moment the portal was opened on a Monday.
+
+None of them shipped. A status light that is green because it is painted green
+teaches the owner to stop reading it, and the day she needs it to mean
+something is the day it lies to her. Each returns when something real backs it.
+
+The header clock and the Today greeting DO ship, because they read a real
+clock. Both are fixed to Europe/London rather than the browser's timezone:
+Marianne's diary is in London, and a booking time that shifts when she travels
+would be wrong in the one place it must not be.

@@ -1,0 +1,189 @@
+/* ===========================================================================
+   The Field Work — admin portal stylesheet
+   ---------------------------------------------------------------------------
+   Imported ONLY by app/(admin)/layout.tsx. Next emits it as a route-scoped
+   CSS chunk, so nothing here reaches the public site — which matters, because
+   Tailwind's preflight would reset margins the site's bespoke home.css relies
+   on, and because both stylesheets define a `.pool` class with different jobs.
+
+   The design is The Lit Clearing ported to a portal: a dark plum ground, a
+   hard-cut blush panel ("pool") per unit of work, zero radius and zero shadow
+   anywhere. Colour is context-locked — gold labels the dark chrome and never
+   appears inside a panel; magenta works inside a panel and never on the dark.
+   The single sanctioned curve in the whole system is the avatar circle.
+   =========================================================================== */
+
+@import "tailwindcss";
+
+@theme {
+  /* --- palette ---------------------------------------------------------
+     Lifted from the approved admin screens' Tailwind config. Names are the
+     roles, not the hues, so a colour can never be used out of context by
+     accident: `plate-*` is for the dark ground, `pool-*` for inside a panel. */
+  --color-ground: #160712;
+  --color-surface: #260f20;
+  --color-pool: #fbf3f1;
+  --color-ink: #1e0a1c;
+  --color-ink-soft: #5a4356;
+  --color-action: #c2187a;
+  --color-plate-text: #fbf3f1;
+  --color-plate-soft: #d8bfc9;
+  --color-plate-rule: #8e6a82;
+  --color-pool-rule: #8a7285;
+  --color-pool-error: #a3221a;
+  --color-pool-success: #0f6b3d;
+  --color-gold: #e9c87e;
+  --color-coral: #f5876f;
+  --color-plate-error: #f58a80;
+  --color-plate-success: #6fcb99;
+
+  /* --- type ------------------------------------------------------------
+     The families come in as CSS variables from next/font (see the admin
+     layout), which self-hosts them. They are deliberately NOT the same
+     variable names the public site uses, so the two type systems can never
+     shadow each other if a future change makes both stylesheets load at once.
+
+     Cormorant Garamond + Source Sans 3 + Azeret Mono is the system 32 of the
+     33 approved screens use. admin-dashboard.html is the lone screen that
+     drifted to Newsreader + Karla; the majority wins. */
+  --font-display: var(--admin-display), Georgia, serif;
+  --font-body: var(--admin-body), system-ui, sans-serif;
+  --font-mono: var(--admin-mono), ui-monospace, monospace;
+}
+
+/* --- ground ------------------------------------------------------------ */
+
+html {
+  background-color: var(--color-ground);
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- the working panel -------------------------------------------------
+   Hard-cut blush. Nothing crosses a panel edge; no radius, no shadow. */
+
+.pool {
+  background-color: var(--color-pool);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Figures line up in columns — tabular numerals everywhere a number can
+   sit above another number. */
+.fig,
+.font-mono,
+td,
+th {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+/* Focus is gold on the dark ground and magenta inside a panel, because gold
+   on blush fails contrast. Same rule as the rest of the colour system. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+.on-pool a:focus-visible,
+.on-pool button:focus-visible {
+  outline: 2px solid var(--color-action);
+}
+
+/* --- skip link --------------------------------------------------------- */
+
+.skip {
+  position: absolute;
+  left: 20px;
+  top: -200px;
+  z-index: 60;
+}
+
+.skip:focus {
+  top: 20px;
+}
+
+/* --- transitions -------------------------------------------------------
+   Colour only. Nothing moves; the design has no motion vocabulary beyond a
+   state change reading as instant-but-not-jarring. */
+.t {
+  transition:
+    background-color 140ms linear,
+    color 140ms linear,
+    text-decoration-color 140ms linear;
+}
+
+/* --- navigation --------------------------------------------------------
+   The current item inverts to a blush panel — the same "this is the working
+   surface" move the content panels make, applied to the rail. */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 14px;
+  color: var(--color-plate-soft);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  color: var(--color-plate-text);
+  background-color: rgb(233 200 126 / 0.08);
+}
+
+.nav-item[aria-current="page"] {
+  background-color: var(--color-pool);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.nav-item svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* --- loading skeleton --------------------------------------------------
+   Flat blocks at ground brightness. No shimmer — a shimmer is motion that
+   says "something is happening" when nothing is. */
+.skel {
+  background: var(--color-plate-soft);
+  opacity: 0.14;
+}
+
+/* --- the field ---------------------------------------------------------
+   The working pane sits on the aura-field image, held far back so the blush
+   panels and the gold chrome labels keep their contrast. */
+.main-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
+  filter: brightness(0.42) saturate(1.04);
+  opacity: 0.55;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
