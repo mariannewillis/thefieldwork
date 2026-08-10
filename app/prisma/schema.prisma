@@ -1,0 +1,37 @@
+// The Field Work — database schema.
+//
+// One model for now: the admin credential. It moves here from a JSON file
+// because a file does not survive a Replit redeploy, which silently restored
+// the temporary password every time the site was published.
+//
+// Models for bookings, offerings, subscribers and page content land alongside
+// it as each section of the portal is built.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7 moved the connection URL out of the schema — it lives in
+// prisma.config.ts for migrations, and reaches the client through a driver
+// adapter. That also means no query-engine binary to ship, which is one less
+// thing to go wrong on Replit's Nix environment.
+datasource db {
+  provider = "postgresql"
+}
+
+/// The single admin account. There is exactly one, enforced by pinning the
+/// primary key to 1 — every write is an upsert against that row, so two
+/// simultaneous first-boot requests cannot create two accounts.
+model AdminCredential {
+  id                 Int      @id @default(1)
+  username           String   @unique
+  passwordHash       String
+  /// Bumped on every credential change. Baked into each session token and
+  /// checked on every request, so changing the password instantly invalidates
+  /// every session issued before it.
+  credentialVersion  Int      @default(1)
+  /// True while the seeded temporary password is still in use.
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

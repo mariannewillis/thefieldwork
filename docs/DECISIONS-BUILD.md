@@ -249,7 +249,7 @@ to redirect off-site after sign-in, and lockout after 7 wrong guesses.
 it.** The tempting alternative — inventing a random secret at boot — signs
 everyone out on every restart and nobody ever works out why.
 
-### The open problem: this does not survive a redeploy
+### The open problem: this does not survive a redeploy — CLOSED by D-11
 
 The credential is a JSON file. On a Replit Reserved VM that survives restarts,
 but a REDEPLOY builds a fresh container — so unless `DATA_DIR` points at
@@ -265,3 +265,49 @@ every redeploy as a password reset and check afterwards.
 Forgotten-password reset by email (the approved screens exist; it needs Resend
 wired first), and the username/password controls on the Settings screen, which
 currently only points at this flow.
+
+## D-11 · The database is Postgres, inside Replit (2026-08-10)
+
+The admin credential moves from a JSON file to Postgres, via Prisma. This
+closes the hole left open in D-10: a Replit redeploy rebuilds the container, so
+a file-backed password was silently restored to `test1234` every time the site
+was published.
+
+**Contained in Replit — no outside provider.** The architect had specified Neon
+in London (`docs/_architect-decisions.json`), chosen when the deploy target was
+Vercel. The operator's call supersedes it: production uses Replit's own
+Postgres, so there is one account, one bill, and one thing for Marianne to own.
+Portability is preserved anyway — it is plain Postgres, `pg_dump` moves it, and
+the schema lives in this repo rather than in the host.
+
+**Local and production are separate databases sharing one schema.** Development
+runs a Postgres on the developer's machine; production runs Replit's. They
+share migrations through the repo and no data. `DATABASE_URL` is the only
+difference between them.
+
+- `npm run db:migrate` — author a migration locally against the dev database
+- `npm run db:deploy` — apply committed migrations; wired into `.replit`'s
+  build so a publish can never run against an un-migrated database
+
+`prisma migrate deploy` only ever plays forward migration files that are
+committed. It never derives a change from the schema, so a deploy cannot alter
+production in a way nobody reviewed.
+
+**Prisma 7 with the `pg` driver adapter**, not the classic client. Prisma 7
+moved the connection URL out of the schema, and the adapter route means no
+query-engine binary is shipped — one less thing to fail on Replit's Nix
+environment.
+
+**A missing `DATABASE_URL` is fatal and says so.** No fallback to a local file,
+however tempting: a silent fallback is precisely the failure mode that made the
+file store dangerous, and it would reintroduce it invisibly.
+
+Verified: the full 22-check `app/e2e/auth-smoke.mjs` suite passes against
+Postgres, and — the point of the exercise — after killing the app, rebuilding
+from scratch and restarting, `test1234` is refused while the password set
+before the rebuild still works.
+
+### Left over
+
+`app/data/admin-credential.json` may still exist on a developer machine from
+the file-store era. Nothing reads it. It is gitignored and safe to delete.

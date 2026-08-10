@@ -24,7 +24,11 @@ channel = "stable-24_11"
 # One instance is also right-sized: this is a sole practitioner's site.
 [deployment]
 deploymentTarget = "vm"
-build = ["sh", "-c", "cd app && npm ci && npm run build"]
+# `prisma migrate deploy` applies any pending migration BEFORE the build.
+# It only ever plays forward the migration files committed to the repo — it
+# never invents a change from the schema, so a deploy cannot silently alter
+# the database in a way nobody reviewed.
+build = ["sh", "-c", "cd app && npm ci && npx prisma migrate deploy && npm run build"]
 run = ["sh", "-c", "cd app && npm run start"]
 
 # Next binds the port Replit provides via $PORT (see app/package.json start).
