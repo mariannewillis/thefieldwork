@@ -829,6 +829,39 @@ button:focus-visible {
   }
 }
 
+/* mobile-fix 2026-08-10 — stacks the beats that are flex ROWS on desktop.
+
+   AT 900px, NOT 760px. The existing mobile block breaks at 760, but these
+   three sections need more room than that: at 768px (iPad portrait) the
+   offering columns still rendered 103px each and .turn__col 148px, both
+   unreadable, because 768 falls outside a max-width:760 query. Three offering
+   columns want roughly 250px each plus gaps, and .turn .pool carries a fixed
+   flex-basis of clamp(460px, 48vw, 680px).
+
+   .throat already stacks in the 760 block. .sacral and .turn were missed when
+   the composition was reviewed at desktop: their on-plate text and their pool
+   sat side by side as flex items, and at 390px .turn__col collapsed to ZERO
+   width while the pool spilled to 118% of the viewport — invisible only
+   because body carries overflow-x: hidden.
+
+   The desktop three-up composition above 900px is untouched. */
+@media (max-width: 900px) {
+  .sacral,
+  .turn {
+    flex-direction: column;
+  }
+  .turn .pool {
+    flex: 1 1 auto;
+    max-width: 100%;
+  }
+  .turn__col {
+    max-width: 100%;
+  }
+  .schedule__cols {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* cta-contrast-fix: the in-pool link rule (.pool a) outranks .cta and
          would otherwise paint the button's label in its own background
          colour. This restores the label. */

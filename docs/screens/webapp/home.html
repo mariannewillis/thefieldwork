@@ -871,6 +871,30 @@
         color: var(--blush);
         text-decoration: none;
       }
+
+      /* mobile-fix 2026-08-10 — stacks the beats that are flex ROWS on desktop.
+         AT 900px, NOT 760px: at 768px (iPad portrait) the offering columns still
+         rendered 103px each and .turn__col 148px, because 768 falls outside a
+         max-width:760 query. Three offering columns want ~250px each plus gaps,
+         and .turn .pool carries a fixed flex-basis of clamp(460px,48vw,680px).
+         .throat already stacks in the 760 block; .sacral and .turn were missed
+         when the composition was reviewed at desktop. Desktop is untouched. */
+      @media (max-width: 900px) {
+        .sacral,
+        .turn {
+          flex-direction: column;
+        }
+        .turn .pool {
+          flex: 1 1 auto;
+          max-width: 100%;
+        }
+        .turn__col {
+          max-width: 100%;
+        }
+        .schedule__cols {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
 
