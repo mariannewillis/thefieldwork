@@ -84,3 +84,10 @@ companion/
 
 # Runtime state. Holds the admin password hash — never commit it.
 app/data/
+
+# ── Replit-side build artefacts ──────────────────────────────────────────────
+# Generated inside the Replit workspace, not part of the source. Ignored so a
+# Replit -> GitHub sync never drags them in. NOTE: .replit itself IS tracked on
+# purpose — it carries the deployment build command, including the
+# --include=dev that stops NODE_ENV=production deleting the build toolchain.
+artifacts/
