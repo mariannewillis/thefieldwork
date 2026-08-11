@@ -76,9 +76,9 @@ export async function login(
 
   if (!user || !passwordOk) {
     recordFailure(caller);
-    // One message for both failures. "No such user" would confirm which
-    // usernames exist, and this portal has exactly one worth guessing.
-    return { error: "That username and password do not match." };
+    // One message for both failures. "No such account" would confirm which
+    // addresses have accounts, and one of them is the owner's.
+    return { error: "That email address and password do not match." };
   }
 
   recordSuccess(caller);

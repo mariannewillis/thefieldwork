@@ -23,11 +23,11 @@ export default function LoginForm({ next }: { next: string }) {
 
       <label className="flex flex-col gap-2">
         <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
-          Username
+          Email address
         </span>
         <input
           name="username"
-          type="text"
+          type="email"
           required
           autoComplete="username"
           autoCapitalize="none"

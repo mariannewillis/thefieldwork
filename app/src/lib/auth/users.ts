@@ -21,7 +21,14 @@ export type AdminUser = {
 };
 
 /** Marianne's account: the one that ships with a temporary password. */
-export const DEFAULT_USERNAME = process.env.ADMIN_USERNAME ?? "mariannevwillis";
+export const DEFAULT_USERNAME =
+  process.env.ADMIN_USERNAME ?? "marianne@thefieldwork.co.uk";
+
+/**
+ * Usernames this code has previously seeded. Same rule as PREVIOUSLY_SEEDED
+ * below: we correct our own past guesses, never a name someone chose.
+ */
+const PREVIOUSLY_SEEDED_USERNAMES = ["mariannevwillis"];
 export const DEFAULT_PASSWORD = "test1234";
 
 /**
@@ -57,14 +64,32 @@ const PREVIOUSLY_SEEDED = ["mariannevwillis@gmail.com"];
  * way into this account is a reset link sent to its address, which is exactly
  * the thing it exists to test.
  */
-const TEST_USERNAME = process.env.ADMIN_TEST_USERNAME ?? "davidmorgan";
+const TEST_USERNAME =
+  process.env.ADMIN_TEST_USERNAME ?? "nagrom.1990@gmail.com";
+const PREVIOUSLY_SEEDED_TEST_USERNAMES = ["davidmorgan"];
 const TEST_EMAIL = process.env.ADMIN_TEST_EMAIL ?? "nagrom.1990@gmail.com";
 
 /** Creates the accounts that should exist and have not been created yet. */
 export async function ensureSeeded(): Promise<void> {
+  // Look for the account under its current name OR any name we seeded before,
+  // so a rename finds the existing row instead of creating a second account.
   const owner = await prisma.adminUser.findFirst({
-    where: { username: DEFAULT_USERNAME },
+    where: {
+      OR: [
+        { username: DEFAULT_USERNAME },
+        { username: { in: PREVIOUSLY_SEEDED_USERNAMES } },
+      ],
+    },
   });
+
+  if (owner && owner.username !== DEFAULT_USERNAME) {
+    // Renaming does NOT sign her out: sessions carry the account id, not the
+    // name, which is exactly why they were built that way.
+    await prisma.adminUser.update({
+      where: { id: owner.id },
+      data: { username: DEFAULT_USERNAME },
+    });
+  }
 
   if (!owner) {
     await prisma.adminUser.create({
@@ -90,8 +115,20 @@ export async function ensureSeeded(): Promise<void> {
 
   if (TEST_USERNAME && TEST_EMAIL) {
     const already = await prisma.adminUser.findFirst({
-      where: { OR: [{ username: TEST_USERNAME }, { email: TEST_EMAIL }] },
+      where: {
+        OR: [
+          { username: TEST_USERNAME },
+          { username: { in: PREVIOUSLY_SEEDED_TEST_USERNAMES } },
+          { email: TEST_EMAIL },
+        ],
+      },
     });
+    if (already && already.username !== TEST_USERNAME) {
+      await prisma.adminUser.update({
+        where: { id: already.id },
+        data: { username: TEST_USERNAME },
+      });
+    }
     if (!already) {
       await prisma.adminUser.create({
         data: {

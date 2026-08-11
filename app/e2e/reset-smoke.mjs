@@ -106,7 +106,7 @@ ok("the link cannot be used twice", (await r.locator("text=/link has expired/i")
 // 9 — the new password works at the normal sign-in
 const s = await page();
 await s.goto(`${BASE}/admin/login`);
-await s.fill('input[name="username"]', "davidmorgan");
+await s.fill('input[name="username"]', "nagrom.1990@gmail.com");
 await s.fill('input[name="password"]', NEWPW);
 await s.click('button[type="submit"]');
 await s.waitForTimeout(2500);

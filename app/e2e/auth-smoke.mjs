@@ -32,7 +32,7 @@
 import { chromium } from "playwright";
 
 const BASE = process.argv[2];
-const USER = "mariannevwillis";
+const USER = "marianne@thefieldwork.co.uk";
 const TEMP = "test1234";
 const STRONG = "clearing-lamp-quiet-hour";
 

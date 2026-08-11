@@ -32,7 +32,7 @@ export function validateNewPassword(
     return "That is the temporary password. Please choose a different one.";
   }
   if (p.toLowerCase() === username.toLowerCase()) {
-    return "Please choose something other than your username.";
+    return "Please choose something other than your email address.";
   }
   return null;
 }
