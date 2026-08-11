@@ -2,8 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { timingSafeEqual } from "node:crypto";
-import { getCredential } from "@/lib/auth/credentials";
+import { findByUsername, ensureSeeded } from "@/lib/auth/users";
 import { verifyPassword } from "@/lib/auth/password";
 import { startSession } from "@/lib/auth/server";
 import {
@@ -15,13 +14,14 @@ import {
 
 export type LoginState = { error: string | null };
 
-/** Constant-time string compare, so username guesses leak nothing via timing. */
-function sameString(a: string, b: string): boolean {
-  const ab = Buffer.from(a);
-  const bb = Buffer.from(b);
-  if (ab.length !== bb.length) return false;
-  return timingSafeEqual(ab, bb);
-}
+/**
+ * A real scrypt hash of a value nobody knows, used when the username does not
+ * exist so the work done — and therefore the time taken — matches a genuine
+ * wrong-password attempt.
+ */
+const DUMMY_HASH =
+  "scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$" +
+  "Ej5rMhU7VYQm8QbqUu0Xk1lZ0YKcQ2mS3nR4tV5wX6y7Z8a9B0c1D2e3F4g5H6i7J8k9L0m1N2o3P4q5R6s7T8u9V0w=";
 
 /**
  * Only ever send her to a path inside this site.
@@ -62,18 +62,19 @@ export async function login(
     await new Promise((r) => setTimeout(r, verdict.delayMs));
   }
 
-  const credential = await getCredential();
+  await ensureSeeded();
+  const user = await findByUsername(username);
 
-  // BOTH checks always run, even when the username is already wrong. Returning
-  // early on a bad username would make it answer faster than a bad password,
-  // and that difference is enough to work out the username by measurement.
-  const usernameOk = sameString(
-    username.toLowerCase(),
-    credential.username.toLowerCase(),
+  // A password check ALWAYS runs, even when there is no such account — against
+  // a dummy hash if need be. Returning early on an unknown username would make
+  // it answer faster than a wrong password, and that difference alone is
+  // enough to work out which usernames exist by measurement.
+  const passwordOk = await verifyPassword(
+    password,
+    user?.passwordHash ?? DUMMY_HASH,
   );
-  const passwordOk = await verifyPassword(password, credential.passwordHash);
 
-  if (!usernameOk || !passwordOk) {
+  if (!user || !passwordOk) {
     recordFailure(caller);
     // One message for both failures. "No such user" would confirm which
     // usernames exist, and this portal has exactly one worth guessing.
@@ -81,10 +82,10 @@ export async function login(
   }
 
   recordSuccess(caller);
-  await startSession(credential.username, credential.credentialVersion);
+  await startSession(user.id, user.credentialVersion);
 
   // The forced change is enforced by the admin layout, so it cannot be skipped
   // by navigating straight to a page — but sending her there directly saves a
   // pointless bounce.
-  redirect(credential.mustChangePassword ? "/admin/change-password" : next);
+  redirect(user.mustChangePassword ? "/admin/change-password" : next);
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { getCredential } from "./credentials";
+import { findById } from "./users";
 import {
   SESSION_COOKIE,
   sessionCookieOptions,
@@ -17,7 +17,9 @@ import {
  * is the check that actually decides.
  */
 export type AdminSession = {
+  userId: number;
   username: string;
+  email: string | null;
   mustChangePassword: boolean;
 };
 
@@ -26,24 +28,26 @@ export async function getSession(): Promise<AdminSession | null> {
   const payload = await verifySessionToken(jar.get(SESSION_COOKIE)?.value);
   if (!payload) return null;
 
-  const credential = await getCredential();
+  const user = await findById(payload.sub);
+  if (!user) return null;
 
   // The revocation check. A token signed before the last password change is
   // refused even though its signature is perfectly valid.
-  if (payload.cv !== credential.credentialVersion) return null;
-  if (payload.sub !== credential.username) return null;
+  if (payload.cv !== user.credentialVersion) return null;
 
   return {
-    username: credential.username,
-    mustChangePassword: credential.mustChangePassword,
+    userId: user.id,
+    username: user.username,
+    email: user.email,
+    mustChangePassword: user.mustChangePassword,
   };
 }
 
 export async function startSession(
-  username: string,
+  userId: number,
   credentialVersion: number,
 ): Promise<void> {
-  const token = await createSessionToken(username, credentialVersion);
+  const token = await createSessionToken(userId, credentialVersion);
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, sessionCookieOptions());
 }

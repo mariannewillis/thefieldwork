@@ -344,3 +344,57 @@ in favour of "one image, one source" quietly restores the mud.
 `assets/` and never reaches a browser: AVIF at 32KB (desktop) / 29KB (portrait),
 WebP behind it for anything that cannot read AVIF. Verified by watching what the
 browser actually requested, not by trusting the markup.
+
+## D-13 · Password reset, and a second account (2026-08-11)
+
+Accounts gain an email address, reset-by-link exists, and there is now more
+than one account. This supersedes the "there is exactly one user" line in D-10
+and D-11 — the model allows several, though in practice there are two.
+
+**The second account has no usable password.** It is seeded with 32 random
+bytes that are hashed and immediately forgotten, so the only way in is a reset
+link sent to its address. A second admin sharing the same guessable temporary
+password would simply be a second front door; this way the account is exactly
+as strong as the mailbox behind it. It exists so the reset flow can be tested
+against an inbox we control, since Marianne's is not available to us.
+Controlled by `ADMIN_TEST_USERNAME` / `ADMIN_TEST_EMAIL`; blank the username
+and it is never created.
+
+**Email is optional on an account, on purpose.** An account with no address
+cannot be reset by email. That is safer than seeding a plausible-looking
+address nobody controls — a reset link to `marianne@…` would be a live route
+into her account through a mailbox that may not exist. Hers stays empty until
+she sets it in Settings.
+
+**The migration renames rather than recreates.** Production already held her
+live account, and Prisma's automatic diff for this change drops
+`AdminCredential` and creates `AdminUser` — deleting the password she had set.
+`20260811093000_admin_users_and_reset_tokens` is hand-written to `ALTER TABLE
+… RENAME`, so every existing row survives. Verified against a copy of the live
+shape before applying.
+
+**Only the hash of a reset token is stored**, so a leaked dump of that table
+cannot reset anything — the usable secret exists only in the email. SHA-256
+rather than scrypt, deliberately: the token is already 256 bits of randomness,
+so there is nothing to brute-force and nothing a slow hash would protect.
+Links last an hour, work exactly once, and asking for a new one kills the old.
+Spending the token and setting the password happen in one transaction.
+
+**The answer is identical whether or not the address exists.** Otherwise the
+form becomes a way to discover which addresses have accounts. Delivery failures
+are logged, never shown, for the same reason.
+
+**Sending is a port with two adapters**, chosen by whether `RESEND_API_KEY` is
+set — not by `NODE_ENV`, so a production deploy without a key cannot silently
+pretend to send. Without the key, links are printed to the server log marked
+"not sent", which is what makes the flow testable before the sending domain's
+DNS is verified.
+
+Verified by `app/e2e/reset-smoke.mjs` — 13 checks — plus the existing 22 in
+`auth-smoke.mjs` re-run against the new model. 35 passing.
+
+### Still needed for real email
+
+`RESEND_API_KEY` in Replit Secrets, and a sending domain verified in Resend
+(DNS records on GoDaddy). Until both are in place the flow works end to end but
+the link only reaches the server log.

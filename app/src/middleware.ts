@@ -2,7 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 
 /** The sign-in page must never require a sign-in, or it redirects to itself. */
-const PUBLIC_ADMIN_PATHS = new Set(["/admin/login"]);
+const PUBLIC_ADMIN_PATHS = new Set([
+  "/admin/login",
+  // Reset is for people who CANNOT sign in. Requiring a session here would
+  // make the whole flow unreachable by the only people who need it.
+  "/admin/forgot-password",
+  "/admin/reset-password",
+]);
 
 /**
  * The early gate.

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage({
@@ -19,6 +20,12 @@ export default async function LoginPage({
 
       {/* Sanitised again on the server — this is only for the round trip. */}
       <LoginForm next={next?.startsWith("/admin") ? next : "/admin"} />
+
+      <p className="mt-7 text-[17px] text-ink-soft">
+        <Link href="/admin/forgot-password" className="text-action underline">
+          Forgotten your password?
+        </Link>
+      </p>
     </div>
   );
 }

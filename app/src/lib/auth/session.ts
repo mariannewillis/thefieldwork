@@ -17,8 +17,9 @@ export const SESSION_COOKIE = "tfw_session";
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12; // 12 hours
 
 export type SessionPayload = {
-  /** username at time of issue */
-  sub: string;
+  /** the account's id. An id rather than a username, so renaming an account
+   *  does not sign its owner out. */
+  sub: number;
   /** credential version — the revocation lever */
   cv: number;
   /** issued at (seconds) */
@@ -76,7 +77,7 @@ async function key(usage: "sign" | "verify"): Promise<CryptoKey> {
 }
 
 export async function createSessionToken(
-  sub: string,
+  sub: number,
   cv: number,
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
