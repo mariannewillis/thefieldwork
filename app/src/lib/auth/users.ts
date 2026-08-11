@@ -25,6 +25,18 @@ export const DEFAULT_USERNAME = process.env.ADMIN_USERNAME ?? "mariannevwillis";
 export const DEFAULT_PASSWORD = "test1234";
 
 /**
+ * Her email address. Reset links go here, so it has to be a mailbox she
+ * actually reads — a gmail address is fine and is one less thing that breaks
+ * if the domain's email is ever reconfigured.
+ *
+ * Backfilled onto the account only when it has NO address yet. It never
+ * overwrites one, because once she has changed it in Settings that is her
+ * decision, and an env var quietly reverting it would redirect her reset links
+ * to an address she had deliberately moved away from.
+ */
+const DEFAULT_EMAIL = process.env.ADMIN_EMAIL ?? "mariannevwillis@gmail.com";
+
+/**
  * A second account, for testing the reset flow against a mailbox we actually
  * control. Set ADMIN_TEST_USERNAME="" to stop it being created.
  *
@@ -39,14 +51,24 @@ const TEST_EMAIL = process.env.ADMIN_TEST_EMAIL ?? "nagrom.1990@gmail.com";
 
 /** Creates the accounts that should exist and have not been created yet. */
 export async function ensureSeeded(): Promise<void> {
-  const existing = await prisma.adminUser.count();
-  if (existing === 0) {
+  const owner = await prisma.adminUser.findFirst({
+    where: { username: DEFAULT_USERNAME },
+  });
+
+  if (!owner) {
     await prisma.adminUser.create({
       data: {
         username: DEFAULT_USERNAME,
+        email: DEFAULT_EMAIL || null,
         passwordHash: await hashPassword(DEFAULT_PASSWORD),
         mustChangePassword: true,
       },
+    });
+  } else if (!owner.email && DEFAULT_EMAIL) {
+    // Only ever fills a blank. See DEFAULT_EMAIL above.
+    await prisma.adminUser.update({
+      where: { id: owner.id },
+      data: { email: DEFAULT_EMAIL },
     });
   }
 
