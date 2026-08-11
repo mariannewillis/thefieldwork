@@ -28,7 +28,10 @@ deploymentTarget = "vm"
 # It only ever plays forward the migration files committed to the repo — it
 # never invents a change from the schema, so a deploy cannot silently alter
 # the database in a way nobody reviewed.
-build = ["sh", "-c", "cd app && npm ci && npx prisma migrate deploy && npm run build"]
+# --include=dev is deliberate: the build toolchain lives in devDependencies,
+# and this makes the install correct even if NODE_ENV=production is set by
+# the platform rather than by this file.
+build = ["sh", "-c", "cd app && npm ci --include=dev && npx prisma migrate deploy && npm run build"]
 run = ["sh", "-c", "cd app && npm run start"]
 
 # Next binds the port Replit provides via $PORT (see app/package.json start).
@@ -36,5 +39,15 @@ run = ["sh", "-c", "cd app && npm run start"]
 localPort = 3000
 externalPort = 80
 
-[env]
-NODE_ENV = "production"
+# NO [env] NODE_ENV HERE — ON PURPOSE.
+#
+# Setting NODE_ENV=production makes npm skip devDependencies, which silently
+# omits the entire build toolchain: @tailwindcss/postcss, tailwindcss, the
+# prisma CLI and typescript all live there. The failure is confusing, because
+# package.json and the lockfile both list them correctly and `npm install`
+# cheerfully reports "up to date" while node_modules/@tailwindcss is empty.
+#
+# It is also unnecessary. `next build` and `next start` both set
+# NODE_ENV=production themselves. Verified rather than assumed: with NODE_ENV
+# unset, the session cookie still comes back Secure — which is the one thing
+# that would have mattered if Next did not.
