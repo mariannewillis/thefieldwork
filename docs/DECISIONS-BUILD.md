@@ -311,3 +311,29 @@ before the rebuild still works.
 
 `app/data/admin-credential.json` may still exist on a developer machine from
 the file-store era. Nothing reads it. It is gitignored and safe to delete.
+
+## D-12 · The sign-in screens get the photograph (2026-08-11)
+
+`assets/images/new/window-last-light.png` — a lamp lit against a window at dusk
+— becomes the ground for sign-in and the password-change screen. It is the
+literal image the whole design is named for, and it is the ONE place in the
+portal that gets a photographic background. The working screens stay plain: a
+picture behind a data table is noise. A threshold can be a room.
+
+Two things worth keeping when this is next touched:
+
+**The panel sits RIGHT on wide screens, not centred.** The lamp is left of
+centre in the frame, and a centred form covers the light source — the only
+thing in the picture that means anything.
+
+**Narrow screens get a genuinely different crop, not a resize.** A portrait
+phone crops a landscape interior down to a narrow column; centring it lost the
+lamp entirely and left dark smears at the edges that read as a failed image
+load. `auth-window-portrait.avif` is framed on the lamp and window and served
+via a `media` query in the `<picture>`. This is art direction, and deleting it
+in favour of "one image, one source" quietly restores the mud.
+
+**Only converted derivatives are served.** The 7.8MB source PNG stays in
+`assets/` and never reaches a browser: AVIF at 32KB (desktop) / 29KB (portrait),
+WebP behind it for anything that cannot read AVIF. Verified by watching what the
+browser actually requested, not by trusting the markup.

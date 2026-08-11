@@ -187,3 +187,70 @@ button:focus-visible,
     animation-iteration-count: 1 !important;
   }
 }
+
+/* --- the sign-in field -------------------------------------------------
+   A photograph of a lamp lit against a window at dusk — the literal image
+   the whole design is named for. It is the ONE place in the portal that
+   gets a photographic ground: the working screens stay plain because a
+   picture behind a data table is noise, but the sign-in screen is a
+   threshold, and a threshold can be a room.
+
+   Held back with brightness and a scrim so it reads as atmosphere rather
+   than competing with the panel. The lamp sits left of centre in the frame,
+   which is why the panel is placed to the RIGHT on wide screens — covering
+   the light source with a form would waste the photograph. */
+.auth-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Keeps the lamp and window in frame as the viewport narrows. */
+  object-position: 38% 50%;
+  filter: brightness(0.62) saturate(1.02);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Deepens the plum toward the right, where the panel lands, so the panel's
+   hard cut edge stays legible against the wall behind it. */
+.auth-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      100deg,
+      rgb(22 7 18 / 0.15) 0%,
+      rgb(22 7 18 / 0.45) 48%,
+      rgb(22 7 18 / 0.78) 100%
+    );
+}
+
+@media (max-width: 900px) {
+  /* A portrait phone crops a landscape interior down to a narrow column, so
+     the panel covers nearly all of it. Centring the frame here put the lamp
+     behind the panel and left only muddy dark edges showing — the photograph
+     may as well not have loaded.
+
+     So the crop moves to the lamp itself, and it is deliberately lifted so the
+     glow lands in the band BELOW the panel. What is left is a warm base under
+     the form rather than an unreadable smear. Brighter than the desktop
+     treatment for the same reason: less of the picture is visible, so what
+     shows has to carry it. */
+  .auth-field {
+    /* The portrait crop is already framed on the lamp, so this only needs to
+       favour the upper half — the panel sits over the middle. */
+    object-position: 50% 34%;
+    filter: brightness(0.74) saturate(1.05);
+  }
+  .auth-scrim {
+    background: linear-gradient(
+      180deg,
+      rgb(22 7 18 / 0.62) 0%,
+      rgb(22 7 18 / 0.42) 55%,
+      rgb(22 7 18 / 0.22) 100%
+    );
+  }
+}

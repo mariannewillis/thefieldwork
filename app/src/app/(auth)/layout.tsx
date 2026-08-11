@@ -45,8 +45,46 @@ export default function AuthLayout({
     <div
       className={`${display.variable} ${body.variable} ${mono.variable} bg-ground text-plate-text font-body`}
     >
-      <main className="flex min-h-screen items-center justify-center px-6 py-16">
-        <div className="w-full max-w-[440px]">{children}</div>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-16 lg:justify-end lg:pr-[9vw]">
+        {/* The converted derivatives only — the 7.8MB source PNG in assets/
+            is never served. AVIF first at 32KB, WebP at 59KB for anything
+            that cannot read it, and the smaller pair for narrow screens. */}
+        <picture>
+          {/* A portrait phone crops a landscape interior to a narrow column and
+              loses the lamp entirely, which is the only thing in the frame that
+              means anything. So narrow screens get a genuinely different crop —
+              art direction, not a resize. */}
+          <source
+            media="(max-width: 900px)"
+            type="image/avif"
+            srcSet="/media/auth-window-portrait.avif"
+          />
+          <source
+            media="(max-width: 900px)"
+            type="image/webp"
+            srcSet="/media/auth-window-portrait.webp"
+          />
+          <source
+            type="image/avif"
+            srcSet="/media/auth-window-1100.avif 1100w, /media/auth-window-2000.avif 2000w"
+            sizes="100vw"
+          />
+          <source
+            type="image/webp"
+            srcSet="/media/auth-window-1100.webp 1100w, /media/auth-window-2000.webp 2000w"
+            sizes="100vw"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/media/auth-window-2000.webp"
+            alt=""
+            aria-hidden="true"
+            className="auth-field"
+          />
+        </picture>
+        <div className="auth-scrim" aria-hidden="true" />
+
+        <div className="relative z-10 w-full max-w-[440px]">{children}</div>
       </main>
     </div>
   );
