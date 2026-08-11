@@ -12,18 +12,34 @@ run = "cd app && npm run dev"
 channel = "stable-24_11"
 
 # ── Deployment ───────────────────────────────────────────────────────────────
-# deploymentTarget = "vm" means ONE always-on instance with a real filesystem.
+# deploymentTarget = "autoscale".
 #
-# Autoscale would be cheaper and is the usual default, but it is WRONG for this
-# app: Next's ISR cache is per-instance. On autoscale a page Marianne publishes
-# would appear on some requests and not others depending on which instance
-# served them, and the cache resets on every scale event. "I published it and
-# it's not showing" is the worst bug to explain to a client, and it would be
-# intermittent — the hardest kind to diagnose.
+# This was "vm" (Reserved VM), chosen because Next's ISR cache is per-instance
+# and a page Marianne published could otherwise appear on some requests and not
+# others. Reserved VM turns out to need a paid Replit plan — selecting it makes
+# the Publish button disappear — so autoscale it is.
 #
-# One instance is also right-sized: this is a sole practitioner's site.
+# That is fine TODAY, and the reason is worth writing down rather than
+# assuming: the public site currently has ZERO ISR. The homepage is fully
+# static, prerendered at build (0 uses of revalidate / unstable_cache in
+# src/), so there is no per-instance cache to disagree about. Sessions are
+# stateless and signed with AUTH_SECRET, so they work across instances.
+#
+# TWO THINGS TO REVISIT when they land:
+#
+#  1. The login throttle in src/lib/auth/throttle.ts holds its counters IN
+#     MEMORY, so each instance enforces its own allowance. On one instance
+#     that is honest; across N instances a brute-force attempt gets roughly
+#     5xN free guesses before any lockout, and lockouts do not propagate.
+#     Moving those counters into Postgres fixes it.
+#
+#  2. When the editable-page CMS (D-2/D-3) makes the homepage database-backed,
+#     it will want ISR — and per-instance caching becomes exactly the "I
+#     published it and it is not showing" problem that picked Reserved VM in
+#     the first place. Use on-demand revalidation deliberately, or revisit the
+#     plan.
 [deployment]
-deploymentTarget = "vm"
+deploymentTarget = "autoscale"
 # `prisma migrate deploy` applies any pending migration BEFORE the build.
 # It only ever plays forward the migration files committed to the repo — it
 # never invents a change from the schema, so a deploy cannot silently alter
