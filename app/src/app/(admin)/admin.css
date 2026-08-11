@@ -200,9 +200,11 @@ button:focus-visible,
    which is why the panel is placed to the RIGHT on wide screens — covering
    the light source with a form would waste the photograph. */
 .auth-logo {
-  /* Matches the homepage masthead's own sizing rule, so the mark is the same
-     size relative to the page on both sides of the site. */
-  height: clamp(44px, 4.4vw, 68px);
+  /* Larger than the homepage masthead's own rule, deliberately. On the public
+     site the logo is one element competing with a full page; here it is the
+     only thing above the panel, and at masthead size it read as a caption
+     rather than the thing you have arrived at. */
+  height: clamp(68px, 7.4vw, 112px);
   width: auto;
   display: block;
 }
