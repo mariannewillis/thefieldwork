@@ -21,6 +21,8 @@ export type Mail = {
   to: string;
   subject: string;
   text: string;
+  /** Where replies should land. Defaults to EMAIL_REPLY_TO. */
+  replyTo?: string;
 };
 
 export type SendResult = {
@@ -35,6 +37,20 @@ export type SendResult = {
  */
 const FROM = process.env.EMAIL_FROM ?? "The Field Work <hello@thefieldwork.co.uk>";
 
+/**
+ * Where replies go.
+ *
+ * thefieldwork.co.uk has NO MX record, so nothing can receive mail at
+ * hello@thefieldwork.co.uk — a reply to it is rejected outright, and the
+ * sender gets a bounce they will read as "this business ignored me".
+ *
+ * Reply-To sidesteps that entirely: mail still comes FROM the domain, which is
+ * what DKIM and DMARC align against, but a reply is addressed to a mailbox
+ * that actually exists. This stays useful even once a real mailbox is set up —
+ * it just changes to point at it.
+ */
+const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "mariannevwillis@gmail.com";
+
 export async function sendMail(mail: Mail): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
 
@@ -44,8 +60,9 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
       [
         "",
         "──────────── EMAIL (not sent — no RESEND_API_KEY) ────────────",
-        `To:      ${mail.to}`,
-        `Subject: ${mail.subject}`,
+        `To:       ${mail.to}`,
+        `Reply-To: ${mail.replyTo ?? REPLY_TO}`,
+        `Subject:  ${mail.subject}`,
         "",
         mail.text,
         "──────────────────────────────────────────────────────────────",
@@ -60,6 +77,7 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
     const { error } = await resend.emails.send({
       from: FROM,
       to: mail.to,
+      replyTo: mail.replyTo ?? REPLY_TO,
       subject: mail.subject,
       text: mail.text,
     });
