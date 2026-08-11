@@ -40,16 +40,16 @@ const FROM = process.env.EMAIL_FROM ?? "The Field Work <hello@thefieldwork.co.uk
 /**
  * Where replies go.
  *
- * thefieldwork.co.uk has NO MX record, so nothing can receive mail at
- * hello@thefieldwork.co.uk — a reply to it is rejected outright, and the
- * sender gets a bounce they will read as "this business ignored me".
+ * The site sends FROM hello@thefieldwork.co.uk, which is not itself a mailbox
+ * — it exists so mail comes from the domain, which is what DKIM and DMARC
+ * align against. Replies go to marianne@thefieldwork.co.uk, which is a real
+ * Microsoft 365 mailbox she reads.
  *
- * Reply-To sidesteps that entirely: mail still comes FROM the domain, which is
- * what DKIM and DMARC align against, but a reply is addressed to a mailbox
- * that actually exists. This stays useful even once a real mailbox is set up —
- * it just changes to point at it.
+ * Making hello@ an alias on that mailbox would let this be dropped entirely.
+ * Until then, a reply to hello@ would bounce and the sender would read that as
+ * being ignored.
  */
-const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "mariannevwillis@gmail.com";
+const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "marianne@thefieldwork.co.uk";
 
 export async function sendMail(mail: Mail): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;

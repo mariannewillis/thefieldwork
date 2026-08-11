@@ -34,7 +34,18 @@ export const DEFAULT_PASSWORD = "test1234";
  * decision, and an env var quietly reverting it would redirect her reset links
  * to an address she had deliberately moved away from.
  */
-const DEFAULT_EMAIL = process.env.ADMIN_EMAIL ?? "mariannevwillis@gmail.com";
+const DEFAULT_EMAIL = process.env.ADMIN_EMAIL ?? "marianne@thefieldwork.co.uk";
+
+/**
+ * Addresses this code has previously auto-filled.
+ *
+ * The rule is "never overwrite an address SHE chose" — but an address WE
+ * guessed is not her choice, and leaving a stale guess in place would send her
+ * reset links to the wrong mailbox forever. So a stored address is replaced
+ * only when it is one of our own past defaults. The moment she sets anything
+ * else in Settings, it stops matching this list and is never touched again.
+ */
+const PREVIOUSLY_SEEDED = ["mariannevwillis@gmail.com"];
 
 /**
  * A second account, for testing the reset flow against a mailbox we actually
@@ -64,8 +75,13 @@ export async function ensureSeeded(): Promise<void> {
         mustChangePassword: true,
       },
     });
-  } else if (!owner.email && DEFAULT_EMAIL) {
-    // Only ever fills a blank. See DEFAULT_EMAIL above.
+  } else if (
+    DEFAULT_EMAIL &&
+    owner.email !== DEFAULT_EMAIL &&
+    (!owner.email || PREVIOUSLY_SEEDED.includes(owner.email))
+  ) {
+    // Fills a blank, or corrects an address we ourselves guessed earlier.
+    // Never touches one she has chosen. See PREVIOUSLY_SEEDED above.
     await prisma.adminUser.update({
       where: { id: owner.id },
       data: { email: DEFAULT_EMAIL },
