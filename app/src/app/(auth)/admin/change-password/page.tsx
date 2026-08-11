@@ -11,7 +11,7 @@ export default async function ChangePasswordPage() {
   return (
     <div className="pool on-pool px-8 py-10 sm:px-10">
       <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-ink-soft">
-        {forced ? "One thing first" : "The Field Work"}
+        {forced ? "One thing first" : "Your account"}
       </p>
       <h1 className="mt-3 font-display text-[38px] font-normal leading-[1.05] text-ink">
         {forced ? "Choose your password" : "Change your password"}

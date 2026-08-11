@@ -45,7 +45,7 @@ export default function AuthLayout({
     <div
       className={`${display.variable} ${body.variable} ${mono.variable} bg-ground text-plate-text font-body`}
     >
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-16 lg:justify-end lg:pr-[9vw]">
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-16">
         {/* The converted derivatives only — the 7.8MB source PNG in assets/
             is never served. AVIF first at 32KB, WebP at 59KB for anything
             that cannot read it, and the smaller pair for narrow screens. */}
@@ -84,7 +84,20 @@ export default function AuthLayout({
         </picture>
         <div className="auth-scrim" aria-hidden="true" />
 
-        <div className="relative z-10 w-full max-w-[440px]">{children}</div>
+        <div className="relative z-10 flex w-full max-w-[440px] flex-col items-center">
+          {/* The same mark the public homepage wears in its header, and the
+              same file — so arriving at the private side still reads as her
+              site rather than a generic admin login. */}
+          <a href="/" aria-label="The Field Work — home" className="mb-9 block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-horizontal.svg"
+              alt="The Field Work"
+              className="auth-logo"
+            />
+          </a>
+          <div className="w-full">{children}</div>
+        </div>
       </main>
     </div>
   );

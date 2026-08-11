@@ -199,6 +199,14 @@ button:focus-visible,
    than competing with the panel. The lamp sits left of centre in the frame,
    which is why the panel is placed to the RIGHT on wide screens — covering
    the light source with a form would waste the photograph. */
+.auth-logo {
+  /* Matches the homepage masthead's own sizing rule, so the mark is the same
+     size relative to the page on both sides of the site. */
+  height: clamp(44px, 4.4vw, 68px);
+  width: auto;
+  display: block;
+}
+
 .auth-field {
   position: absolute;
   inset: 0;
@@ -219,12 +227,15 @@ button:focus-visible,
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* A vignette centred on the LAMP, not on the page. It keeps the light
+     source bright and deepens the plum outward, so the panel's hard cut edge
+     stays legible in the middle without flattening the photograph. */
   background:
-    linear-gradient(
-      100deg,
-      rgb(22 7 18 / 0.15) 0%,
-      rgb(22 7 18 / 0.45) 48%,
-      rgb(22 7 18 / 0.78) 100%
+    radial-gradient(
+      ellipse 90% 85% at 26% 52%,
+      rgb(22 7 18 / 0.12) 0%,
+      rgb(22 7 18 / 0.5) 55%,
+      rgb(22 7 18 / 0.8) 100%
     );
 }
 

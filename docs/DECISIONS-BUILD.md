@@ -322,9 +322,16 @@ picture behind a data table is noise. A threshold can be a room.
 
 Two things worth keeping when this is next touched:
 
-**The panel sits RIGHT on wide screens, not centred.** The lamp is left of
-centre in the frame, and a centred form covers the light source — the only
-thing in the picture that means anything.
+**The panel is centred, under the homepage's own logo** (`/logo-horizontal.svg`
+— the same file the public masthead uses, so the private side still reads as
+her site rather than a generic admin login). At 1440 the centred panel spans
+x=500–940 and the lamp sits at roughly x=360, so it stays clear; that was
+measured, not assumed. An earlier version placed the panel right to protect the
+lamp — unnecessary once checked.
+
+**The panel carries no brand eyebrow.** With the logo above it, "THE FIELD
+WORK" appeared twice in four lines. The logo says it; the panel goes straight
+to "Sign in".
 
 **Narrow screens get a genuinely different crop, not a resize.** A portrait
 phone crops a landscape interior down to a narrow column; centring it lost the
