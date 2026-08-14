@@ -956,3 +956,107 @@ stamped with another host is answered 200 and does NOTHING — no booking, no
 email, no refund attempted — and does nothing again when redelivered; one with
 no stamp books normally; and one stamped with this host for a workshop that is
 genuinely absent still refunds and still says the day is no longer running.
+
+---
+
+## D-20 · An event is acted on once whatever it turned out to be (2026-08-14)
+
+The event id is Stripe's idempotency handle. If the webhook acted on an event —
+booked a place, sent money back, wrote to somebody — that has to be durable, and
+it has to be durable on every path and not only the one that writes a `Booking`.
+
+### What prompted it, and what was actually found
+
+Deliveries had been returning 404 for days on an unrelated routing fault. When
+that was fixed the whole backlog arrived at once and cleared as a wave of
+refunds and apology emails to a real inbox. A real buyer was told twice that her
+day was no longer running. Then a workshop of the same name was created again in
+the live database, which makes the sharper question the live one: a replay of one
+of those events would now FIND a workshop where there had been none, take the
+booking path, and confirm a payment that was refunded days earlier.
+
+**The row turned out to already be written.** `confirmPaidBooking` writes the
+event id as the first act of its transaction, and the `workshopGone` branch
+RETURNS rather than throwing — and returning from a Prisma interactive
+transaction commits it. So the refund path was already recorded and already
+protected. That was checked against the running database before anything was
+changed, not assumed.
+
+So what was missing was not the row. It was this:
+
+- **Nothing said so.** The guarantee rested entirely on `return` and not
+  `throw`, three lines apart, with no comment naming it and the schema's own
+  note framing it as "one event, one booking" — the booking, not the refund.
+- **Nothing tested it.** Redelivery was only ever exercised on the booking path.
+- **The row could not say what it did.** Four rows existed against one `Booking`
+  and there is now no way to learn what happened to the other three.
+
+### What changed
+
+**An `outcome` on `StripeEvent`** — `booked`, `noPlace` or `workshopGone` —
+stamped inside the same transaction, at the point the answer is known. It is the
+PATH TAKEN, not the result: whether Stripe accepted the refund arrives after the
+transaction has committed, and it is already in the log and in the email
+Marianne gets, which says REFUND DID NOT GO THROUGH in as many words. A column
+repeating that would be a second thing to keep in step with no second question
+to answer. It is nullable, and the four rows that predate it stay null — an
+outcome nobody recorded should read as unknown rather than as a guess.
+
+The stamp also puts a visible write to `StripeEvent` inside the `workshopGone`
+branch, which is what makes the ordering hard to lose by accident.
+
+**A replay is named as one.** `ALREADY SEEN — event evt_… was acted on when it
+first arrived, so nothing has been done again: no booking, no refund, no email.`
+Its own opening words, because this is the line that has to be findable when a
+backlog clears: it is the difference between a wave of redeliveries costing
+nothing and a buyer being apologised to twice. The response carries
+`replay: true` alongside `acted: false`.
+
+### The ordering, and which way it fails
+
+Recorded first, then acted on. Every side effect — the refund, the confirmation,
+the apology — happens in the route, after the transaction has committed.
+
+| If the process dies | What is left |
+| --- | --- |
+| After recording, before refunding | An event recorded and not finished, a payment for a person to sort out, and a log line naming it |
+| After refunding, before recording | Money returned and an apology sent with nothing written down — and Stripe redelivers for days, so the same buyer is apologised to again |
+
+The first is recoverable by somebody reading the log. The second is the thing
+that happened. That is the whole reason for the order.
+
+### What is deliberately NOT recorded
+
+The foreign-event guard (D-19), the unpaid branch, and the unusable-metadata
+branch write nothing, and that is unchanged. None of them takes any action, so
+there is no action to protect from happening twice, and a redelivery landing
+there again is a second helping of nothing.
+
+### What it is verified by
+
+`app/e2e/bookings-smoke.mjs` — now 85 assertions, signed with Stripe's own
+helper against a secret the script chose. No live Stripe call, no email
+delivered, no data of the operator's touched.
+
+Four claims: a `workshopGone` event delivered twice attempts one refund and
+sends one pair of emails, the second delivery a recognised no-op at 200; a
+booking event delivered twice still makes exactly one booking; the same
+`workshopGone` event replayed AFTER a workshop exists at that id again creates
+no booking and sends no confirmation; and the foreign guard still records
+nothing at all, not even that the event arrived.
+
+**These were proved to bite, not assumed to.** The plausible refactor — bail out
+of the missing-workshop branch by throwing instead of returning — was applied on
+purpose and the suite run against it. Nine assertions failed, and they failed by
+reproducing the incident exactly: two refunds, two apologies, and a real
+`Booking` written against the resurrected workshop for a payment that had
+already been sent back. Reverted, and 85 of 85 pass.
+
+### Applying it
+
+The migration is additive and nullable: a new enum type and one new column on a
+table of four rows. Locally it is applied. On Replit:
+
+```
+npm run db:deploy
+```

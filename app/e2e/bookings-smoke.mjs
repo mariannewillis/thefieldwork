@@ -10,6 +10,12 @@
 // saying what they should, and the panel refusing to offer a button when this
 // server cannot take money.
 //
+// AND ONE MORE, ADDED AFTER IT WENT WRONG (D-20): an event is acted on exactly
+// once WHATEVER it turned out to be. A withdrawn-workshop refund is not issued
+// twice, its apology is not sent twice, and a replay arriving after the
+// workshop has been created again does not turn a refunded payment into a
+// booking.
+//
 // It is a sibling of auth-smoke.mjs and workshops-smoke.mjs, and it runs the
 // same way — except that this one STARTS ITS OWN dev server, three times, with
 // three different Stripe configurations, because half the claims are about what
@@ -218,15 +224,28 @@ const day = (offset) => {
   return d;
 };
 
-async function makeWorkshop({ slug, name, dayOffset, capacity, refundDays }) {
+/**
+ * `id` is given only for the resurrection case at the end of the run, where a
+ * workshop has to appear at the exact id an already-refunded event names. An
+ * explicit id does not advance the sequence, and the one used is far above
+ * anything autoincrement will reach.
+ */
+async function makeWorkshop({
+  id,
+  slug,
+  name,
+  dayOffset,
+  capacity,
+  refundDays,
+}) {
   const { rows } = await db.query(
     `INSERT INTO "Workshop"
        (slug, name, summary, "bodyHtml", date, "startTime", "endTime",
         "venueName", "addressLines", postcode, "gettingThere",
-        capacity, "priceGBP", "refundDays", published, "updatedAt")
+        capacity, "priceGBP", "refundDays", published, "updatedAt"${id ? ", id" : ""})
      VALUES ($1,$2,$3,$4,$5,'10:00','16:30','The Garden Room',
              'Fromefield\nFrome', 'BA11 2QN', 'Step-free from the pavement.',
-             $6, 9500, $7, true, now())
+             $6, 9500, $7, true, now()${id ? ", $8" : ""})
      RETURNING id`,
     [
       slug,
@@ -236,6 +255,7 @@ async function makeWorkshop({ slug, name, dayOffset, capacity, refundDays }) {
       day(dayOffset),
       capacity,
       refundDays,
+      ...(id ? [id] : []),
     ],
   );
   return rows[0].id;
@@ -306,6 +326,12 @@ const bookings = (workshopId) =>
       workshopId,
     ])
     .then((r) => r.rows);
+
+/** What the app recorded about one event, or null if it recorded nothing. */
+const eventRow = (id) =>
+  db
+    .query(`SELECT * FROM "StripeEvent" WHERE id = $1`, [id])
+    .then((r) => r.rows[0] ?? null);
 
 // ── the run ──────────────────────────────────────────────────────────────────
 
@@ -431,6 +457,15 @@ try {
   ok(
     "and does not make a second booking",
     (await bookings(ids.main)).length === 1,
+  );
+  ok(
+    "and is answered as the replay it is",
+    (await again.json()).replay === true,
+  );
+  ok(
+    "the event is on the record, saying it became a place",
+    (await eventRow(first.id))?.outcome === "booked",
+    String((await eventRow(first.id))?.outcome),
   );
 
   // ── the emails ─────────────────────────────────────────────────────────────
@@ -801,6 +836,10 @@ try {
     countOf(afterForeign, "[bookings] withdrawn-workshop refund") === 0,
   );
   ok(
+    "nothing at all was recorded — not even that the event arrived",
+    (await eventRow(`evt_smoke_foreign_${stamp}`)) === null,
+  );
+  ok(
     "the log says whose event it was and that it was left alone",
     afterForeign.includes("NOT THIS SITE'S EVENT") &&
       afterForeign.includes(OTHER_HOST) &&
@@ -837,15 +876,16 @@ try {
   //
   // This site's own session, for a workshop this site no longer has. The path
   // the outage abused is still exactly here, and still refunds and apologises.
-  const withdrawn = await postEvent(
-    checkoutEvent({
-      eventId: `evt_smoke_gonewk_${stamp}`,
-      sessionId: `cs_smoke_gonewk_${stamp}`,
-      workshopId: MISSING_WORKSHOP,
-      places: 1,
-      name: "The Day That Was Taken Down",
-    }),
-  );
+  // The event is kept, because everything after this asks what happens when it
+  // arrives a second and a third time.
+  const withdrawnEvent = checkoutEvent({
+    eventId: `evt_smoke_gonewk_${stamp}`,
+    sessionId: `cs_smoke_gonewk_${stamp}`,
+    workshopId: MISSING_WORKSHOP,
+    places: 1,
+    name: "The Day That Was Taken Down",
+  });
+  const withdrawn = await postEvent(withdrawnEvent);
   ok(
     "a payment for a withdrawn workshop is accepted",
     withdrawn.status === 200,
@@ -878,6 +918,84 @@ try {
     "and says nothing about crossed keys, because test keys off the live domain are right",
     !withdrawnLog.includes("LIVE KEYS ON") &&
       !withdrawnLog.includes("TEST KEYS ON THE LIVE SITE"),
+  );
+  // No Booking was written on this path, so the event row is the only record
+  // there is of a payment having been taken and sent back.
+  ok(
+    "the withdrawal is on the record, and the row says what was done",
+    (await eventRow(withdrawnEvent.id))?.outcome === "workshopGone",
+    String((await eventRow(withdrawnEvent.id))?.outcome),
+  );
+
+  // ── the same withdrawal, delivered again (D-20) ────────────────────────────
+  //
+  // What actually happened: deliveries had been 404ing for days on a routing
+  // fault, and when it was fixed the whole backlog arrived at once. The refund
+  // survives being repeated — its idempotency key is the session — but an
+  // apology does not, and a real buyer was told twice that her day was off.
+  const replayed = await postEvent(withdrawnEvent);
+  ok("a redelivered withdrawal is accepted", replayed.status === 200);
+  ok(
+    "and is answered as the replay it is",
+    (await replayed.json()).replay === true,
+  );
+  await sleep(750);
+  const replayLog = server.out();
+  ok(
+    "no second refund is attempted",
+    countOf(replayLog, "WORKSHOP WITHDRAWN") === 1,
+    String(countOf(replayLog, "WORKSHOP WITHDRAWN")),
+  );
+  ok(
+    "and nobody is apologised to twice",
+    countOf(replayLog, "[bookings] withdrawn-workshop refund") === 1 &&
+      countOf(replayLog, "[bookings] withdrawn-workshop notice") === 1,
+    `${countOf(replayLog, "[bookings] withdrawn-workshop refund")} refund, ${countOf(replayLog, "[bookings] withdrawn-workshop notice")} notice`,
+  );
+  ok(
+    "the log says it has seen this event before, in words of its own",
+    countOf(replayLog, `ALREADY SEEN — event ${withdrawnEvent.id}`) === 1,
+  );
+
+  // ── and again, once a workshop exists at that id once more (D-20) ──────────
+  //
+  // THE ONE THAT WOULD HAVE BITTEN. After the refunds went out, a workshop of
+  // the same name was created again. A replay of one of those events now finds
+  // a workshop where there was none, and without the event id on the record
+  // nothing would stop it booking a place and confirming a payment that was
+  // sent back days earlier.
+  await makeWorkshop({
+    id: MISSING_WORKSHOP,
+    slug: `smoke-booking-again-${stamp}`,
+    name: "The Day That Was Taken Down",
+    dayOffset: 60,
+    capacity: 5,
+    refundDays: 14,
+  });
+  const confirmationsBefore = countOf(
+    server.out(),
+    "[bookings] confirmation →",
+  );
+  const resurrected = await postEvent(withdrawnEvent);
+  ok(
+    "the replay is still accepted, and still does nothing",
+    resurrected.status === 200 && (await resurrected.json()).acted === false,
+    String(resurrected.status),
+  );
+  await sleep(750);
+  ok(
+    "no booking is made against the workshop that came back",
+    (await bookings(MISSING_WORKSHOP)).length === 0,
+    String((await bookings(MISSING_WORKSHOP)).length),
+  );
+  ok(
+    "and no confirmation is sent for a payment that was refunded",
+    countOf(server.out(), "[bookings] confirmation →") === confirmationsBefore,
+  );
+  ok(
+    "the row still reads as the refund it was, not as a booking",
+    (await eventRow(withdrawnEvent.id))?.outcome === "workshopGone",
+    String((await eventRow(withdrawnEvent.id))?.outcome),
   );
 } finally {
   await stopServer(server);

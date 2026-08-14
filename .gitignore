@@ -128,3 +128,6 @@ docs/screens/workshopflow/_gen-awb.mjs
 # Dropped 2026-08-12: admin-offerings' Workshops tab subsumed it.
 docs/screens/workshopflow/admin-workshops-list.html
 docs/screens/workshopflow/_frag/admin-workshops-list.html
+
+# Agent scratch at the app root (probe-tmp, check-tmp and friends).
+app/*-tmp.mjs

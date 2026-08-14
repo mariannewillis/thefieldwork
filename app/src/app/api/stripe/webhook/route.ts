@@ -39,10 +39,13 @@ import {
  *  - The signature is checked against STRIPE_WEBHOOK_SECRET before the payload
  *    is looked at. An unverified body is refused with a 400 and read no
  *    further; anyone can POST to this address.
- *  - Delivery happens more than once. Stripe retries until it gets a 2xx, and
- *    sends duplicates of its own accord. The event id is written inside the
- *    same transaction as the booking, so a redelivery cannot make a second
- *    booking or a second pair of emails (see confirmPaidBooking).
+ *  - Delivery happens more than once. Stripe retries until it gets a 2xx,
+ *    sends duplicates of its own accord, and the dashboard can replay one by
+ *    hand. The event id is written FIRST inside the transaction that confirms
+ *    the payment, before the workshop is looked for — so it is recorded on
+ *    every path that goes on to act, not only the one that writes a Booking.
+ *    A second delivery collides on it and this handler does nothing: no
+ *    booking, no refund, no email (D-20, and see confirmPaidBooking).
  *  - Capacity is counted again HERE, under a lock, not trusted from when the
  *    checkout was opened (D-16).
  *  - A session opened by a DIFFERENT deployment is put down untouched. One
@@ -141,6 +144,11 @@ export async function POST(request: Request): Promise<Response> {
     // payment link, or an invoice she made in the dashboard. Deliberately NOT
     // refunded: automatically returning money we cannot account for is worse
     // than leaving it for a person to look at.
+    //
+    // Nothing is written, for the same reason as the foreign guard above: this
+    // branch takes no action, so there is no action to protect from happening
+    // twice, and a redelivery landing here again is a second helping of
+    // nothing. The same is true of the unpaid branch before it.
     console.error(
       `[stripe] session ${session.id} completed with no usable metadata (workshopId=${session.metadata?.workshopId}, places=${session.metadata?.places}). No booking written. If this was a workshop payment it needs sorting out by hand.`,
     );
@@ -170,10 +178,15 @@ export async function POST(request: Request): Promise<Response> {
 
   switch (result.outcome) {
     case "alreadyHandled":
+      // Its own line, and its own opening words, because this is the one that
+      // has to be findable after a backlog clears: it is the difference
+      // between a wave of redeliveries costing nothing and a buyer being
+      // apologised to twice. A retry, a duplicate and a dashboard replay all
+      // arrive looking exactly like this.
       console.info(
-        `[stripe] event ${event.id} had already been acted on; nothing done twice.`,
+        `[stripe] ALREADY SEEN — event ${event.id} (session ${session.id}) was acted on when it first arrived, so nothing has been done again: no booking, no refund, no email. Its outcome the first time is on the StripeEvent row.`,
       );
-      return Response.json({ received: true, acted: false });
+      return Response.json({ received: true, acted: false, replay: true });
 
     case "confirmed": {
       const { booking, token } = result;
@@ -232,7 +245,14 @@ export async function POST(request: Request): Promise<Response> {
       // Rare: the day was taken off the site while somebody was at the
       // checkout. There is no Booking to write — the workshop it would point
       // at is gone — so the refund is issued straight against the payment and
-      // the log plus these two emails are the whole record of it.
+      // the log, these two emails and the StripeEvent row are the record.
+      //
+      // REACHED ONCE PER EVENT. The transaction that found the workshop
+      // missing recorded the event id and stamped it `workshopGone` before
+      // returning, so everything below runs on the first delivery and on no
+      // other. The refund would survive a repeat by itself — its idempotency
+      // key is the session — but the emails would not, and an apology
+      // arriving twice is the thing a buyer actually notices (D-20).
       //
       // THIS SITE'S OWN SESSION, on a workshop this site no longer has. The
       // foreign-event case above looks identical from in here — a workshopId

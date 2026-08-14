@@ -192,7 +192,8 @@ export type ConfirmResult =
  *
  * Everything that has to be atomic is in one transaction:
  *
- *  1. The event id goes in first. Its primary key is the idempotency guard: a
+ *  1. The event id goes in first — before the workshop is looked for, before
+ *     anything is counted. Its primary key is the idempotency guard: a
  *     redelivered event collides here and takes the whole transaction down
  *     with it, so one event can never become two bookings or two emails.
  *  2. The workshop row is LOCKED. Two people paying for the last place at the
@@ -200,6 +201,18 @@ export type ConfirmResult =
  *     queue, so the second one counts places the first has already taken. A
  *     plain count without the lock would let both read "1 left".
  *  3. Places are counted and the answer decides which booking gets written.
+ *  4. The outcome is stamped onto the event row, so the record says what was
+ *     done and not merely that something was.
+ *
+ * RECORDED BEFORE ANYTHING IRREVERSIBLE, AND THAT ORDER IS THE POINT (D-20).
+ * Every side effect the webhook has — the refund, the confirmation, the
+ * apology — happens in the caller, after this transaction has committed. So a
+ * process that dies mid-way has recorded an event it did not finish acting on,
+ * which leaves a payment for a person to sort out with a log line naming it.
+ * The other order loses that: money returned and an apology sent with nothing
+ * written down, and the next delivery — Stripe retries for days — sends the
+ * same apology to the same buyer again. That is the failure this shape exists
+ * to make impossible, and it is not hypothetical (D-20).
  *
  * The amount is Stripe's `amount_total`, not our recomputed figure: what they
  * were actually charged is what has to be refunded. The two are compared and a
@@ -233,7 +246,20 @@ export async function confirmPaidBooking(input: {
         { id: number; capacity: number; priceGBP: number }[]
       >`SELECT id, capacity, "priceGBP" FROM "Workshop" WHERE id = ${input.workshopId} FOR UPDATE`;
       const workshop = locked[0];
-      if (!workshop) return { outcome: "workshopGone" as const };
+      if (!workshop) {
+        // RETURNING, NOT THROWING, AND THE WHOLE PATH DEPENDS ON IT. There is
+        // no Booking to write here — the workshop it would point at is gone —
+        // so this row is the only trace the event leaves, and returning is
+        // what commits it. A throw would roll it back, and the caller's
+        // refund and two apology emails would run again on every redelivery.
+        // The stamp below is here to say so in code rather than in a comment:
+        // whatever else this branch changes, it still writes to StripeEvent.
+        await tx.stripeEvent.update({
+          where: { id: input.eventId },
+          data: { outcome: "workshopGone" },
+        });
+        return { outcome: "workshopGone" as const };
+      }
 
       const expected = workshop.priceGBP * input.places;
       if (expected !== input.amountPence) {
@@ -272,6 +298,11 @@ export async function confirmPaidBooking(input: {
         include: { workshop: true },
       });
 
+      await tx.stripeEvent.update({
+        where: { id: input.eventId },
+        data: { outcome: hasRoom ? "booked" : "noPlace" },
+      });
+
       return hasRoom
         ? { outcome: "confirmed" as const, booking, token }
         : { outcome: "noPlace" as const, booking };
@@ -280,6 +311,13 @@ export async function confirmPaidBooking(input: {
     // The event id or the session id was already there: this payment has been
     // dealt with. Both are unique on purpose, and either collision means the
     // same thing.
+    //
+    // This is the answer for EVERY path, not only the one that books. An event
+    // that was refunded and apologised for the first time comes back here on
+    // its second delivery and is turned away before the workshop is looked
+    // for — which matters most when the workshop has since come back: without
+    // this the replay would find it, book a place, and confirm a payment that
+    // was refunded weeks ago.
     if (isUniqueViolation(error)) return { outcome: "alreadyHandled" };
     throw error;
   }
