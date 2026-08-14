@@ -51,11 +51,17 @@ export type ThrottleVerdict =
 
 export function checkThrottle(caller: string): ThrottleVerdict {
   const now = Date.now();
-  const a = fresh(perCaller.get(caller) ?? { failures: 0, firstAt: now, lockedUntil: 0 }, now);
+  const a = fresh(
+    perCaller.get(caller) ?? { failures: 0, firstAt: now, lockedUntil: 0 },
+    now,
+  );
   perCaller.set(caller, a);
 
   if (a.lockedUntil > now) {
-    return { allowed: false, retryAfterSeconds: Math.ceil((a.lockedUntil - now) / 1000) };
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.ceil((a.lockedUntil - now) / 1000),
+    };
   }
 
   fresh(global, now);
@@ -67,7 +73,10 @@ export function checkThrottle(caller: string): ThrottleVerdict {
 
 export function recordFailure(caller: string): void {
   const now = Date.now();
-  const a = fresh(perCaller.get(caller) ?? { failures: 0, firstAt: now, lockedUntil: 0 }, now);
+  const a = fresh(
+    perCaller.get(caller) ?? { failures: 0, firstAt: now, lockedUntil: 0 },
+    now,
+  );
   a.failures += 1;
   a.lockedUntil = now + lockFor(a.failures);
   perCaller.set(caller, a);

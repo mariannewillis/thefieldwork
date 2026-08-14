@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Rewrite any heading or paragraph by clicking it on the page",
         "Swap a photograph for another from your pictures",
-        "See exactly how it will look before anyone else does, then publish"
+        "See exactly how it will look before anyone else does, then publish",
       ]}
     />
   );

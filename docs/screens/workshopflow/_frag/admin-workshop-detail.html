@@ -1,0 +1,1828 @@
+<!-- ============ THE ONE QUESTION ============ -->
+<section class="pt-8 pb-1" aria-labelledby="form-h">
+  <p
+    data-pattern="eyebrow"
+    class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+  >
+    New workshop
+  </p>
+  <h1
+    id="form-h"
+    data-kit-component="Heading"
+    data-kit-variant="display"
+    class="font-display font-normal text-3xl sm:text-4xl text-text-primary mt-3 leading-tight"
+  >
+    Nothing is saved yet.<br />
+    <span class="text-secondary-500"
+      >Five things to fill in before this can go on the site.</span
+    >
+  </h1>
+  <p class="mt-3 max-w-[68ch] text-sm text-text-secondary">
+    What follows is the workshop&rsquo;s own page, in the order people will read
+    it. The five marked <span class="italic">Needed</span> are the ones that
+    stop it going live. Everything else already has an answer, or can wait.
+  </p>
+
+  <p
+    data-kit-component="SaveState"
+    data-state="unsaved"
+    class="mt-5 flex items-center gap-2.5 font-mono text-xs uppercase tracking-wide text-danger"
+  >
+    <span class="h-1.5 w-1.5 shrink-0 bg-danger" aria-hidden="true"></span>
+    Not saved &middot; nothing here has left this page yet
+  </p>
+</section>
+
+<!-- ============ THE MASTHEAD — the picture behind the title ============ -->
+<section class="mt-10" aria-labelledby="masthead-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="masthead-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      The top of the page
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      The picture, then the name, then the sentence underneath
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="Form"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <!-- HERO IMAGE — empty -->
+    <div
+      data-kit-component="HeroPicker"
+      data-state="empty"
+      class="flex flex-wrap items-start gap-6"
+    >
+      <div
+        class="flex h-[180px] w-full max-w-[320px] shrink-0 items-center justify-center border border-dashed border-pool-border px-6 text-center"
+      >
+        <p class="text-sm text-pool-text-secondary">No picture yet</p>
+      </div>
+      <div class="min-w-[18rem] flex-1">
+        <p
+          class="flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-pool-text-secondary"
+        >
+          The picture behind the title
+          <span
+            data-kit-component="RequiredMark"
+            class="font-mono text-xs uppercase tracking-wide text-accent-500"
+            >Needed</span
+          >
+        </p>
+        <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+          This one sits full width behind the workshop&rsquo;s name, dimmed so
+          the words stay readable. It sets the mood of the day rather than
+          showing a detail &mdash; the room, the light, the circle of chairs.
+        </p>
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="secondary"
+          class="mt-4 min-h-[44px] rounded-none border border-pool-text px-6 py-3 text-sm font-semibold text-pool-text transition-colors duration-normal hover:bg-pool-text hover:text-pool-surface"
+        >
+          Choose one from your pictures
+        </button>
+      </div>
+    </div>
+
+    <div
+      data-kit-component="FormField"
+      class="mt-6 border-t border-pool-border/[.22] pt-6"
+    >
+      <label
+        for="w-hero-alt"
+        class="block text-sm font-medium text-pool-text-secondary"
+        >What is in that picture</label
+      >
+      <input
+        id="w-hero-alt"
+        name="hero_alt"
+        type="text"
+        value=""
+        disabled
+        aria-describedby="w-hero-alt-help"
+        class="mt-1.5 w-full cursor-not-allowed rounded-none border-0 border-b border-dashed border-pool-border bg-transparent px-0 py-3 text-lg text-pool-text-secondary"
+      />
+      <p id="w-hero-alt-help" class="mt-1.5 text-sm text-pool-text-secondary">
+        You can write this once a picture is chosen. No picture goes on the site
+        without a line saying what is in it.
+      </p>
+    </div>
+
+    <!-- NAME + DESCRIPTION -->
+    <div
+      data-kit-component="FormField"
+      class="mt-6 border-t border-pool-border/[.22] pt-6"
+    >
+      <label
+        for="w-name"
+        class="flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-pool-text-secondary"
+      >
+        Name
+        <span
+          data-kit-component="RequiredMark"
+          class="font-mono text-xs uppercase tracking-wide text-accent-500"
+          >Needed</span
+        >
+      </label>
+      <input
+        id="w-name"
+        name="name"
+        type="text"
+        value=""
+        autocomplete="off"
+        class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-display text-3xl text-pool-text"
+      />
+      <p class="mt-1.5 text-sm text-pool-text-secondary">
+        The largest words on the page, and the subject line of every
+        confirmation email.
+      </p>
+    </div>
+
+    <div data-kit-component="FormField" class="mt-6">
+      <label
+        for="w-description"
+        class="block text-sm font-medium text-pool-text-secondary"
+        >The sentence underneath</label
+      >
+      <textarea
+        id="w-description"
+        name="description"
+        rows="2"
+        class="mt-1.5 w-full resize-none rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 text-lg text-pool-text"
+      ></textarea>
+      <p class="mt-1.5 max-w-[56ch] text-sm text-pool-text-secondary">
+        One or two lines, directly under the name. This is also what shows on
+        the workshops list, so it has to make sense on its own.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE FACTS — when, how much, how many ============ -->
+<section class="mt-10" aria-labelledby="facts-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="facts-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      The facts
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      The four lines people look for first
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="Form"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div data-kit-component="FormField">
+      <label
+        for="w-date"
+        class="flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-pool-text-secondary"
+      >
+        Date
+        <span
+          data-kit-component="RequiredMark"
+          class="font-mono text-xs uppercase tracking-wide text-accent-500"
+          >Needed</span
+        >
+      </label>
+      <input
+        id="w-date"
+        name="date"
+        type="date"
+        value=""
+        class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-3xl tabular-nums text-pool-text sm:w-auto sm:min-w-[19rem]"
+      />
+    </div>
+
+    <div class="mt-6 grid gap-6 sm:grid-cols-2">
+      <div data-kit-component="FormField">
+        <label
+          for="w-start"
+          class="flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-pool-text-secondary"
+        >
+          Starts
+          <span
+            data-kit-component="RequiredMark"
+            class="font-mono text-xs uppercase tracking-wide text-accent-500"
+            >Needed</span
+          >
+        </label>
+        <input
+          id="w-start"
+          name="start_time"
+          type="time"
+          value=""
+          class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-xl tabular-nums text-pool-text"
+        />
+      </div>
+      <div data-kit-component="FormField">
+        <label
+          for="w-end"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Ends</label
+        >
+        <input
+          id="w-end"
+          name="end_time"
+          type="time"
+          value=""
+          class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-xl tabular-nums text-pool-text"
+        />
+      </div>
+    </div>
+
+    <p class="mt-5 max-w-[62ch] text-sm text-pool-text-secondary">
+      Once this is on the site, the day goes into your calendar on its own and
+      nothing else can be booked over it. Move the date, or take the workshop
+      down, and the block moves with it. You never have to block out your own
+      workshops by hand.
+    </p>
+
+    <div
+      class="mt-7 border-t border-pool-border/[.22] pt-6 grid gap-6 sm:grid-cols-2"
+    >
+      <div data-kit-component="FormField">
+        <label
+          for="w-price"
+          class="flex flex-wrap items-baseline gap-x-3 text-sm font-medium text-pool-text-secondary"
+        >
+          Price a place
+          <span
+            data-kit-component="RequiredMark"
+            class="font-mono text-xs uppercase tracking-wide text-accent-500"
+            >Needed</span
+          >
+        </label>
+        <div
+          class="mt-1.5 flex items-baseline gap-2 border-b border-pool-border"
+        >
+          <span
+            class="font-mono text-2xl text-pool-text-secondary"
+            aria-hidden="true"
+            >&pound;</span
+          >
+          <input
+            id="w-price"
+            name="price"
+            type="text"
+            inputmode="numeric"
+            value=""
+            class="w-full rounded-none border-0 bg-transparent px-0 py-3 font-mono text-4xl tabular-nums text-pool-text"
+          />
+        </div>
+        <p class="mt-1.5 text-sm text-pool-text-secondary">
+          Per place. Someone booking two places pays twice this, in full, at the
+          time they book.
+        </p>
+      </div>
+
+      <div data-kit-component="FormField">
+        <label
+          for="w-capacity"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Places</label
+        >
+        <input
+          id="w-capacity"
+          name="capacity"
+          type="number"
+          value="10"
+          min="1"
+          class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-4xl tabular-nums text-pool-text"
+        />
+        <p class="mt-1.5 text-sm text-pool-text-secondary">
+          Ten is what the Garden Room takes comfortably.
+        </p>
+      </div>
+    </div>
+
+    <div
+      data-kit-component="FormField"
+      class="mt-7 border-t border-pool-border/[.22] pt-6"
+    >
+      <p class="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <label
+          for="w-refund"
+          class="text-sm font-medium text-pool-text-secondary"
+          >Refund up to</label
+        >
+        <input
+          id="w-refund"
+          name="refund_days"
+          type="number"
+          value="14"
+          min="0"
+          aria-describedby="w-refund-help"
+          class="w-20 rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-xl tabular-nums text-pool-text"
+        />
+        <span class="text-md text-pool-text-secondary"
+          >days before the day</span
+        >
+      </p>
+      <p
+        id="w-refund-help"
+        class="mt-1.5 max-w-[54ch] text-sm text-pool-text-secondary"
+      >
+        Fourteen days is what your other workshops use, and you can set this one
+        differently. Once the date is in, the page works out the last day to
+        cancel and says it plainly. Set it to 0 if this one can&rsquo;t be
+        refunded at all &mdash; the page then says so instead of giving a date.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHERE IT IS — the location picker and what it draws ============ -->
+<section class="mt-10" aria-labelledby="where-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="where-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      Where it is
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      Puts a map and a written address on the page
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="LocationPicker"
+    data-state="set"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div data-kit-component="FormField">
+      <label
+        for="w-venue"
+        class="block text-sm font-medium text-pool-text-secondary"
+        >Find the place</label
+      >
+      <input
+        id="w-venue"
+        name="venue_search"
+        type="search"
+        value="The Garden Room, Fromefield"
+        aria-describedby="w-venue-help"
+        class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 text-lg text-pool-text"
+      />
+      <p id="w-venue-help" class="mt-1.5 text-sm text-pool-text-secondary">
+        Type a name or a postcode. Places you have used before come up first.
+      </p>
+    </div>
+
+    <!-- SOMEWHERE SHE HAS USED BEFORE — offered, not retyped -->
+    <div class="mt-5">
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        You have used these before
+      </p>
+      <ul class="mt-2 border-t border-pool-border/[.22]">
+        <li class="border-b border-pool-border/[.22]">
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="row"
+            data-kit-props="selected"
+            aria-pressed="true"
+            class="flex min-h-[44px] w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 text-left"
+          >
+            <span class="text-md font-semibold text-pool-text"
+              >The Garden Room, Fromefield</span
+            >
+            <span class="font-mono text-xs text-pool-text-secondary"
+              >used on 4 workshops &middot; chosen</span
+            >
+          </button>
+        </li>
+        <li class="border-b border-pool-border/[.22]">
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="row"
+            class="flex min-h-[44px] w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 text-left"
+          >
+            <span class="text-md text-pool-text"
+              >Rook Lane Chapel, Bath Street</span
+            >
+            <span class="font-mono text-xs text-pool-text-secondary"
+              >used once</span
+            >
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- WHAT IT PRODUCES — the map and the address as they will read -->
+    <div
+      class="mt-7 border-t border-pool-border/[.22] pt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] items-start"
+    >
+      <figure data-kit-component="MapPreview" class="border border-pool-border">
+        <div
+          role="img"
+          aria-label="Map preview, centred on The Garden Room, Fromefield, Frome"
+          class="relative h-[190px] w-full bg-pool-surface"
+        >
+          <svg
+            viewBox="0 0 320 190"
+            class="absolute inset-0 h-full w-full text-pool-text"
+            aria-hidden="true"
+          >
+            <g
+              stroke="currentColor"
+              stroke-width="1"
+              opacity="0.28"
+              fill="none"
+            >
+              <path d="M0 58h320M0 132h320M78 0v190M212 0v190" />
+              <path d="M212 96 320 40M78 132 0 172" />
+            </g>
+            <g
+              stroke="currentColor"
+              stroke-width="1.6"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M160 108s16-17.2 16-27.2a16 16 0 1 0-32 0c0 10 16 27.2 16 27.2Z"
+              />
+              <circle cx="160" cy="80" r="5.5" />
+            </g>
+          </svg>
+        </div>
+        <figcaption
+          class="border-t border-pool-border px-4 py-3 font-mono text-xs text-pool-text-secondary"
+        >
+          Drawn from the address below. Drag the pin if it lands on the wrong
+          door.
+        </figcaption>
+      </figure>
+
+      <div>
+        <p
+          class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+        >
+          On the page it reads
+        </p>
+        <p class="mt-2 font-display text-2xl leading-snug text-pool-text">
+          The Garden Room, Fromefield
+        </p>
+        <address class="mt-1 not-italic text-md text-pool-text-secondary">
+          Fromefield, Frome, Somerset BA11 2QN
+        </address>
+        <div data-kit-component="FormField" class="mt-5">
+          <label
+            for="w-getting-there"
+            class="block text-sm font-medium text-pool-text-secondary"
+            >Getting there</label
+          >
+          <textarea
+            id="w-getting-there"
+            name="getting_there"
+            rows="2"
+            class="mt-1.5 w-full resize-none rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 text-md text-pool-text"
+          >
+Ground floor, step-free, with an accessible toilet. There is parking on Fromefield, two minutes' walk away.</textarea>
+          <p class="mt-1.5 text-sm text-pool-text-secondary">
+            Sits under the map. Say the things people write to ask about.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A PLACE SHE HAS NOT USED BEFORE -->
+  <div
+    data-kit-component="LocationPicker"
+    data-state="new"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-6 mt-4"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-accent-500">
+      Somewhere new
+    </p>
+    <p class="mt-2 text-lg font-semibold text-pool-text">
+      Trinity Hall, Vicarage Street
+    </p>
+    <p class="mt-2 max-w-[56ch] text-sm text-pool-text-secondary">
+      Found from the postcode. Check the pin is on the right door before you
+      save it, and it will be offered to you next time.
+    </p>
+    <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        class="min-h-[44px] rounded-none bg-accent-500 px-8 py-4 text-sm font-semibold text-pool-surface hover:bg-pool-text"
+      >
+        Use this address
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="ghost"
+        class="min-h-[44px] text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+      >
+        Look for somewhere else
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT THE DAY IS — the long body, the largest region ============ -->
+<section class="mt-10" aria-labelledby="body-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="body-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      What the day is
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      The long part &mdash; write as much as it needs
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="RichTextEditor"
+    data-state="populated"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div
+      data-kit-component="EditorToolbar"
+      role="toolbar"
+      aria-label="Text structure"
+      aria-controls="w-body"
+      class="flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-pool-border pb-3"
+    >
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="toolbar"
+        aria-pressed="false"
+        class="min-h-[44px] rounded-none px-4 py-2 font-display text-xl text-pool-text hover:bg-pool-text hover:text-pool-surface"
+      >
+        Heading
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="toolbar"
+        aria-pressed="false"
+        class="min-h-[44px] rounded-none px-4 py-2 font-display text-lg text-pool-text hover:bg-pool-text hover:text-pool-surface"
+      >
+        Sub-heading
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="toolbar"
+        aria-pressed="true"
+        class="min-h-[44px] rounded-none bg-pool-text px-4 py-2 text-sm font-semibold text-pool-surface"
+      >
+        Paragraph
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="toolbar"
+        aria-pressed="false"
+        class="min-h-[44px] rounded-none px-4 py-2 text-sm font-medium text-pool-text hover:bg-pool-text hover:text-pool-surface"
+      >
+        Bulleted list
+      </button>
+      <p class="ml-auto font-mono text-xs text-pool-text-secondary">
+        Structure only &mdash; the type and colours are already set
+      </p>
+    </div>
+
+    <div
+      id="w-body"
+      data-kit-component="EditorSurface"
+      contenteditable="true"
+      spellcheck="true"
+      role="textbox"
+      aria-multiline="true"
+      aria-labelledby="body-h"
+      class="mt-6 max-w-[68ch] rounded-none"
+    >
+      <h3 class="font-display text-2xl leading-tight text-pool-text">
+        What the day is
+      </h3>
+      <p class="mt-3 text-md leading-relaxed text-pool-text">
+        You arrive at ten. There is coffee, and a circle of chairs, and nine
+        other people who also did not quite know what to expect. The morning is
+        spent on attention &mdash; how to tell the difference between what you
+        are sensing and what you are supplying.
+      </p>
+      <p class="mt-3 text-md leading-relaxed text-pool-text">
+        After lunch you work in pairs. You stay clothed, seated, and at
+        arm&rsquo;s length throughout. Nothing is asked of your beliefs, and you
+        can stop at any point without explaining why.
+      </p>
+
+      <h4 class="mt-7 font-display text-xl leading-tight text-pool-text">
+        Practicalities
+      </h4>
+      <ul class="mt-3 list-disc pl-5 text-md leading-relaxed text-pool-text">
+        <li>Lunch, coffee and tea are included.</li>
+        <li>Tell us about anything you cannot eat when you book.</li>
+        <li>Wear whatever you can sit comfortably in for a day.</li>
+      </ul>
+
+      <h4 class="mt-7 font-display text-xl leading-tight text-pool-text">
+        Before you come
+      </h4>
+      <p class="mt-3 text-md leading-relaxed text-pool-text">
+        A short note comes with your confirmation &mdash; two pages on what to
+        expect and one question to sit with beforehand. You do not have to do
+        anything with it.
+      </p>
+    </div>
+
+    <p class="mt-5 max-w-[62ch] text-sm text-pool-text-secondary">
+      Headings and sub-headings become the section titles on the
+      workshop&rsquo;s page. There is nothing here for changing type or colour,
+      because those are already decided and stay the same across the whole site.
+    </p>
+  </div>
+
+  <!-- the same region, empty -->
+  <div
+    data-kit-component="RichTextEditor"
+    data-state="empty"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-6 mt-4"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-accent-500">
+      Empty
+    </p>
+    <p class="mt-2 text-xl font-semibold text-pool-text">
+      Nothing written yet.
+    </p>
+    <p class="mt-2 max-w-[56ch] text-sm text-pool-text-secondary">
+      Start with what happens, in the order it happens: what time they arrive,
+      what the morning is, what the afternoon is, when it ends. A heading every
+      few paragraphs is enough.
+    </p>
+  </div>
+</section>
+
+<!-- ============ PICTURES AND FILM ============ -->
+<section class="mt-10" aria-labelledby="gallery-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="gallery-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      Pictures and film
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      One film &middot; as many pictures as you like
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="Gallery"
+    data-state="populated"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <!-- THE ONE FILM -->
+    <p
+      class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+    >
+      The film
+    </p>
+    <div
+      data-kit-component="VideoSlot"
+      data-state="set"
+      class="mt-4 flex flex-wrap items-start gap-6"
+    >
+      <figure
+        class="relative w-full max-w-[300px] shrink-0 border border-pool-border"
+      >
+        <img
+          src="../../../assets/images/new/work-wide-the-room.png"
+          alt="Poster frame: the full circle of chairs, seen from the doorway"
+          width="300"
+          height="169"
+          class="h-[169px] w-full rounded-none object-cover"
+        />
+        <span
+          class="absolute inset-0 flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 48 48"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            class="h-11 w-11 text-pool-surface"
+          >
+            <circle cx="24" cy="24" r="15" />
+            <path d="m20 17 12 7-12 7Z" />
+          </svg>
+        </span>
+        <figcaption
+          class="border-t border-pool-border px-3 py-2 font-mono text-xs tabular-nums text-pool-text-secondary"
+        >
+          2:04 &middot; captions added
+        </figcaption>
+      </figure>
+      <div class="min-w-[17rem] flex-1">
+        <p class="text-md font-semibold text-pool-text">
+          The room, and Marianne
+        </p>
+        <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+          Two minutes on what the day is actually like. The length is read from
+          the film itself. A workshop has one film &mdash; putting up another
+          replaces this one.
+        </p>
+        <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="secondary"
+            class="min-h-[44px] rounded-none border border-pool-text px-6 py-3 text-sm font-semibold text-pool-text hover:bg-pool-text hover:text-pool-surface"
+          >
+            Replace the film
+          </button>
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="ghost"
+            class="min-h-[44px] text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+          >
+            Choose a different poster frame
+          </button>
+        </div>
+        <p class="mt-3 font-mono text-xs text-pool-success">
+          Captions added &mdash; the page says so, because some people need to
+          know before they press play.
+        </p>
+      </div>
+    </div>
+
+    <!-- THE STILLS — three, composed across the page exactly as it ships -->
+    <p
+      class="mt-8 border-t border-pool-border/[.22] pt-6 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+    >
+      Pictures &middot; 3 of 12 &middot; composed across the page
+    </p>
+    <ul
+      data-kit-component="StillStrip"
+      data-kit-variant="composed"
+      class="mt-4 grid gap-5 sm:grid-cols-3"
+    >
+      <li>
+        <img
+          src="../../../assets/images/new/marianne-room-aglow.png"
+          alt="The Garden Room at dusk, lamps lit, chairs in a circle"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p class="mt-2 text-sm text-pool-text-secondary">
+          The Garden Room at dusk, lamps lit, chairs in a circle
+        </p>
+      </li>
+      <li>
+        <img
+          src="../../../assets/images/new/aura-light-in-a-room.png"
+          alt="Low winter light across the floor of the Garden Room"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p class="mt-2 text-sm text-pool-text-secondary">
+          Low winter light across the floor of the Garden Room
+        </p>
+      </li>
+      <li>
+        <img
+          src="../../../assets/images/new/chair-with-her-coat.png"
+          alt="A chair by the window with a coat over the back of it"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p class="mt-2 text-sm text-pool-text-secondary">
+          A chair by the window with a coat over the back of it
+        </p>
+      </li>
+    </ul>
+    <p class="mt-5 max-w-[62ch] text-sm text-pool-text-secondary">
+      Three sit across the page, side by side, and everybody sees all three. Add
+      a fourth and the strip starts to scroll instead.
+    </p>
+    <button
+      type="button"
+      data-kit-component="Button"
+      data-kit-variant="secondary"
+      class="mt-5 min-h-[44px] rounded-none border border-pool-text px-6 py-3 text-sm font-semibold text-pool-text hover:bg-pool-text hover:text-pool-surface"
+    >
+      Add a picture
+    </button>
+  </div>
+
+  <!-- ABOVE THREE — the strip becomes a carousel, and the order starts to matter -->
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="Gallery"
+    data-state="carousel"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Pictures &middot; 7 of 12 &middot; the strip now scrolls
+      </p>
+      <p class="font-mono text-xs tabular-nums text-pool-text-secondary">
+        5 more can be added
+      </p>
+    </div>
+
+    <p class="mt-3 max-w-[62ch] text-sm text-pool-text-secondary">
+      Now that there are more than three, the strip scrolls sideways on the
+      workshop&rsquo;s page. The first three are what somebody sees before they
+      scroll it, so the order matters from here on. Drag one of the others to
+      the front to change which three lead.
+    </p>
+
+    <ul
+      data-kit-component="StillStrip"
+      data-kit-variant="carousel"
+      class="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4"
+    >
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/marianne-room-aglow.png"
+          alt="The Garden Room at dusk, lamps lit, chairs in a circle"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <div class="mt-2 flex items-baseline justify-between gap-3">
+          <p
+            class="font-mono text-xs uppercase tracking-wide text-pool-success"
+          >
+            1 &middot; leads
+          </p>
+          <button
+            type="button"
+            data-kit-component="DragHandle"
+            class="min-h-[44px] cursor-grab px-1 text-pool-text-secondary hover:text-pool-text"
+            aria-label="Reorder picture 1, the Garden Room at dusk"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="6" r="1.2" />
+              <circle cx="15" cy="6" r="1.2" />
+              <circle cx="9" cy="12" r="1.2" />
+              <circle cx="15" cy="12" r="1.2" />
+              <circle cx="9" cy="18" r="1.2" />
+              <circle cx="15" cy="18" r="1.2" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-pool-text-secondary">
+          The Garden Room at dusk, lamps lit, chairs in a circle
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/aura-light-in-a-room.png"
+          alt="Low winter light across the floor of the Garden Room"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <div class="mt-2 flex items-baseline justify-between gap-3">
+          <p
+            class="font-mono text-xs uppercase tracking-wide text-pool-success"
+          >
+            2 &middot; leads
+          </p>
+          <button
+            type="button"
+            data-kit-component="DragHandle"
+            class="min-h-[44px] cursor-grab px-1 text-pool-text-secondary hover:text-pool-text"
+            aria-label="Reorder picture 2, low winter light across the floor"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="6" r="1.2" />
+              <circle cx="15" cy="6" r="1.2" />
+              <circle cx="9" cy="12" r="1.2" />
+              <circle cx="15" cy="12" r="1.2" />
+              <circle cx="9" cy="18" r="1.2" />
+              <circle cx="15" cy="18" r="1.2" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-pool-text-secondary">
+          Low winter light across the floor of the Garden Room
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/chair-with-her-coat.png"
+          alt="A chair by the window with a coat over the back of it"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <div class="mt-2 flex items-baseline justify-between gap-3">
+          <p
+            class="font-mono text-xs uppercase tracking-wide text-pool-success"
+          >
+            3 &middot; leads
+          </p>
+          <button
+            type="button"
+            data-kit-component="DragHandle"
+            class="min-h-[44px] cursor-grab px-1 text-pool-text-secondary hover:text-pool-text"
+            aria-label="Reorder picture 3, a chair by the window with a coat over it"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="6" r="1.2" />
+              <circle cx="15" cy="6" r="1.2" />
+              <circle cx="9" cy="12" r="1.2" />
+              <circle cx="15" cy="12" r="1.2" />
+              <circle cx="9" cy="18" r="1.2" />
+              <circle cx="15" cy="18" r="1.2" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-pool-text-secondary">
+          A chair by the window with a coat over the back of it
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/work-wide-the-room.png"
+          alt="The full circle of chairs, seen from the doorway"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p
+          class="mt-2 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+        >
+          4 &middot; scrolls to
+        </p>
+        <p class="text-sm text-pool-text-secondary">
+          The full circle of chairs, seen from the doorway
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/window-last-light.png"
+          alt="The last of the light at the window before the day ends"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p
+          class="mt-2 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+        >
+          5 &middot; scrolls to
+        </p>
+        <p class="text-sm text-pool-text-secondary">
+          The last of the light at the window before the day ends
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/work-close-hands.png"
+          alt="Two people working in pairs, hands at arm&rsquo;s length"
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p
+          class="mt-2 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+        >
+          6 &middot; scrolls to
+        </p>
+        <p class="text-sm text-pool-text-secondary">
+          Two people working in pairs, hands at arm&rsquo;s length
+        </p>
+      </li>
+      <li class="shrink-0 basis-[31.5%] snap-start">
+        <img
+          src="../../../assets/images/new/marianne-altar-light.png"
+          alt=""
+          width="300"
+          height="200"
+          class="h-[150px] w-full rounded-none object-cover"
+        />
+        <p
+          class="mt-2 font-mono text-xs uppercase tracking-wide text-pool-danger"
+        >
+          7 &middot; needs a line
+        </p>
+        <p class="text-sm text-pool-danger">
+          Say what is in this one before it can go on the site.
+        </p>
+      </li>
+    </ul>
+
+    <button
+      type="button"
+      data-kit-component="Button"
+      data-kit-variant="secondary"
+      class="mt-2 min-h-[44px] rounded-none border border-pool-text px-6 py-3 text-sm font-semibold text-pool-text hover:bg-pool-text hover:text-pool-surface"
+    >
+      Add a picture
+    </button>
+  </div>
+
+  <!-- nothing yet, and the twelfth picture -->
+  <div
+    data-pattern="state-panel"
+    data-kit-component="StatePanel"
+    class="mt-4 grid gap-4 lg:grid-cols-2 items-start"
+  >
+    <article
+      data-state="empty"
+      data-kit-component="EmptyState"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p class="font-mono text-xs uppercase tracking-wide text-accent-500">
+        Empty
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-text">
+        No pictures and no film yet.
+      </p>
+      <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+        The page works without them &mdash; it just shows the words. Three
+        pictures of the room is plenty to start with, and the film can come
+        later.
+      </p>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="secondary"
+        class="mt-4 min-h-[44px] rounded-none border border-pool-text px-6 py-3 text-sm font-semibold text-pool-text hover:bg-pool-text hover:text-pool-surface"
+      >
+        Add the first picture
+      </button>
+    </article>
+
+    <article
+      data-state="at-limit"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Full &middot; 12 of 12
+      </p>
+      <p class="mt-2 text-lg font-semibold text-pool-text">
+        Twelve pictures on this workshop
+      </p>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="secondary"
+        disabled
+        aria-describedby="gallery-limit-why"
+        class="mt-4 min-h-[44px] w-full cursor-not-allowed rounded-none border border-pool-border bg-transparent px-6 py-3 text-sm font-semibold text-pool-text-secondary"
+      >
+        Add a picture
+      </button>
+      <p
+        id="gallery-limit-why"
+        class="mt-2.5 max-w-[46ch] text-sm text-pool-text-secondary"
+      >
+        Twelve is as many as a page carries well &mdash; past that people stop
+        scrolling and the last ones are never seen. Take one out and you can put
+        another in.
+      </p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ PUTTING IT UP ============ -->
+<section class="mt-10" aria-labelledby="publish-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="publish-h"
+      data-pattern="eyebrow"
+      class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+    >
+      Putting it up
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      One button and one check
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="PublishPanel"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div class="grid gap-8 lg:grid-cols-2 items-start">
+      <div>
+        <p
+          class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+        >
+          What this makes
+        </p>
+        <p class="mt-3 font-mono text-sm text-pool-text-secondary">
+          thefieldwork.co.uk/workshops/<span aria-hidden="true"
+            >&mdash;&mdash;</span
+          ><span class="sr-only">address not set</span>
+        </p>
+        <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+          The address is made from the name. Once people have that link it stays
+          the same, so the name is worth getting right now.
+        </p>
+        <p class="mt-4 font-mono text-sm tabular-nums text-pool-text-secondary">
+          Full refund if you cancel by
+          <span aria-hidden="true">&mdash;&mdash;</span
+          ><span class="sr-only">date not set</span>
+        </p>
+        <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+          The last day someone can change their mind and get their money back.
+          It is worked out from the date, and it moves if the date moves.
+        </p>
+      </div>
+
+      <div>
+        <label
+          data-kit-component="Checkbox"
+          for="w-active"
+          class="flex items-start gap-3 text-md text-pool-text"
+        >
+          <input
+            id="w-active"
+            name="active"
+            type="checkbox"
+            disabled
+            class="mt-1 h-5 w-5 shrink-0 rounded-none accent-accent-500"
+          />
+          <span>
+            Show this on the site
+            <span class="mt-1 block text-sm text-pool-text-secondary"
+              >Publishing ticks this for you. You can untick it later to take
+              the workshop down.</span
+            >
+          </span>
+        </label>
+
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="primary"
+          data-kit-size="lg"
+          disabled
+          aria-describedby="w-publish-why"
+          class="mt-6 w-full min-h-[44px] cursor-not-allowed rounded-none border border-pool-border bg-transparent px-8 py-5 text-sm font-semibold text-pool-text-secondary"
+        >
+          Put this workshop on the site
+        </button>
+        <p id="w-publish-why" class="mt-2.5 text-sm text-pool-text-secondary">
+          This turns on once the five marked fields have something in them. Then
+          it is one button and one check &mdash; there is nothing else to do
+          afterwards.
+        </p>
+
+        <div
+          class="mt-6 border-t border-pool-border/[.22] pt-5 flex flex-wrap items-center gap-x-6 gap-y-3"
+        >
+          <button
+            type="button"
+            data-kit-component="Button"
+            data-kit-variant="ghost"
+            class="min-h-[44px] text-sm font-medium text-pool-text underline decoration-1 underline-offset-4 hover:text-accent-500"
+          >
+            Save as a draft
+          </button>
+          <a
+            href="/admin/offerings/workshops"
+            data-kit-component="Link"
+            class="min-h-[44px] inline-flex items-center text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+            >Leave without saving</a
+          >
+        </div>
+        <p class="mt-3 text-sm text-pool-text-secondary">
+          A draft is only ever visible to you.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EDITING ONE THAT HAS SOLD PLACES ============ -->
+<section class="mt-12" aria-labelledby="sold-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="sold-h"
+      data-pattern="eyebrow"
+      data-variant="muted"
+      class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+    >
+      The same page &mdash; editing one people have paid for
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      Reading the Field &middot; Sat 20 Sep &middot; 6 of 10 places sold
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    data-kit-component="Form"
+    data-state="editing"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <div class="flex flex-wrap items-start justify-between gap-6">
+      <div class="min-w-0">
+        <p
+          data-kit-component="SaveState"
+          data-state="saved"
+          class="flex items-center gap-2.5 font-mono text-xs uppercase tracking-wide text-pool-success"
+        >
+          <span
+            class="h-1.5 w-1.5 shrink-0 bg-pool-success"
+            aria-hidden="true"
+          ></span>
+          Saved &middot; on the site since Sat 12 July
+        </p>
+        <p class="mt-3 font-display text-3xl leading-tight text-pool-text">
+          Reading the Field
+        </p>
+        <p
+          class="mt-1.5 font-mono text-sm tabular-nums text-pool-text-secondary"
+        >
+          Sat 20 Sep &middot; 10:00&ndash;16:30 &middot; &pound;95 &middot;
+          thefieldwork.co.uk/workshops/reading-the-field
+        </p>
+      </div>
+      <a
+        href="/workshops/reading-the-field"
+        data-kit-component="Link"
+        class="min-h-[44px] inline-flex shrink-0 items-center text-sm font-medium text-pool-text underline decoration-1 underline-offset-4 hover:text-accent-500"
+        >See the public page</a
+      >
+    </div>
+
+    <div
+      class="mt-7 border-t border-pool-border/[.22] pt-6 grid gap-8 lg:grid-cols-2"
+    >
+      <div data-kit-component="FormField">
+        <label
+          for="e-date"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Date</label
+        >
+        <input
+          id="e-date"
+          name="date"
+          type="date"
+          value="2026-09-20"
+          readonly
+          aria-describedby="e-date-help"
+          class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-2xl tabular-nums text-pool-text sm:w-auto sm:min-w-[19rem]"
+        />
+        <p
+          id="e-date-help"
+          class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary"
+        >
+          Six people have this Saturday in their diary. Changing it is possible,
+          and everyone who paid is told.
+        </p>
+        <a
+          href="#date-change-guard"
+          data-kit-component="Button"
+          data-kit-variant="ghost"
+          aria-haspopup="dialog"
+          aria-controls="date-change-guard"
+          class="mt-3 min-h-[44px] inline-flex items-center text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+          >Move this workshop to another date</a
+        >
+      </div>
+
+      <div data-kit-component="FormField">
+        <label
+          for="e-capacity"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Places</label
+        >
+        <input
+          id="e-capacity"
+          name="capacity"
+          type="number"
+          value="10"
+          min="6"
+          aria-describedby="e-capacity-help"
+          class="mt-1.5 w-24 rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-4xl tabular-nums text-pool-text"
+        />
+
+        <div data-kit-component="PlacesMeter" class="mt-5 max-w-[420px]">
+          <div class="flex items-end gap-1.5" aria-hidden="true">
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full bg-pool-text"></span>
+            <span class="h-9 w-full border border-pool-border"></span>
+            <span class="h-9 w-full border border-pool-border"></span>
+            <span class="h-9 w-full border border-pool-border"></span>
+            <span class="h-9 w-full border border-pool-border"></span>
+          </div>
+          <div class="relative mt-1.5 h-2" aria-hidden="true">
+            <div
+              class="absolute left-0 top-0 h-px bg-pool-danger"
+              style="width: 60%"
+            ></div>
+            <div
+              class="absolute top-0 h-2 w-px bg-pool-danger"
+              style="left: calc(60% - 1px)"
+            ></div>
+          </div>
+          <p
+            class="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-4 font-mono text-xs tabular-nums text-pool-text-secondary"
+          >
+            <span class="text-pool-danger">6 paid for &mdash; the floor</span>
+            <span>4 still free</span>
+          </p>
+        </div>
+
+        <p
+          id="e-capacity-help"
+          class="mt-3 max-w-[46ch] text-sm text-pool-text-secondary"
+        >
+          You can raise this. You can&rsquo;t go below six, because six places
+          are paid for &mdash; there is nowhere for those people to go.
+        </p>
+      </div>
+    </div>
+
+    <!-- the refund window, and the date it produces -->
+    <div
+      data-kit-component="FormField"
+      class="mt-7 border-t border-pool-border/[.22] pt-6"
+    >
+      <p class="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <label
+          for="e-refund"
+          class="text-sm font-medium text-pool-text-secondary"
+          >Refund up to</label
+        >
+        <input
+          id="e-refund"
+          name="refund_days"
+          type="number"
+          value="14"
+          min="0"
+          aria-describedby="e-refund-help"
+          class="w-20 rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 font-mono text-xl tabular-nums text-pool-text"
+        />
+        <span class="text-md text-pool-text-secondary"
+          >days before the day</span
+        >
+      </p>
+      <p class="mt-3 font-display text-2xl leading-tight text-pool-text">
+        Which makes Saturday 6 September the last day to cancel.
+      </p>
+      <p
+        id="e-refund-help"
+        class="mt-2 max-w-[54ch] text-sm text-pool-text-secondary"
+      >
+        That date is on the workshop page and in all six confirmation emails.
+        The six who have paid keep the 6 September they booked under; a change
+        here applies to whoever books next. Nobody loses a refund they already
+        had.
+      </p>
+    </div>
+
+    <!-- the picture behind the title, in place -->
+    <div
+      data-kit-component="HeroPicker"
+      data-state="set"
+      class="mt-7 border-t border-pool-border/[.22] pt-6 flex flex-wrap items-start gap-6"
+    >
+      <img
+        src="../../../assets/images/new/marianne-room-aglow.png"
+        alt="The Garden Room at dusk, lamps lit, chairs in a circle"
+        width="300"
+        height="169"
+        class="h-[169px] w-full max-w-[300px] shrink-0 rounded-none object-cover"
+      />
+      <div class="min-w-[17rem] flex-1">
+        <label
+          for="e-hero-alt"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >What is in the picture behind the title</label
+        >
+        <input
+          id="e-hero-alt"
+          name="hero_alt"
+          type="text"
+          value="The Garden Room at dusk, lamps lit, chairs in a circle"
+          class="mt-1.5 w-full rounded-none border-0 border-b border-pool-border bg-transparent px-0 py-3 text-lg text-pool-text"
+        />
+        <p class="mt-1.5 text-sm text-pool-text-secondary">
+          Read out to anyone using a screen reader, and shown if the picture
+          doesn&rsquo;t load.
+        </p>
+      </div>
+    </div>
+
+    <!-- the active flag, live, with the honest consequence -->
+    <div
+      class="mt-7 border-t border-pool-border/[.22] pt-6 flex flex-wrap items-end justify-between gap-6"
+    >
+      <label
+        data-kit-component="Checkbox"
+        for="e-active"
+        class="flex max-w-[46ch] items-start gap-3 text-md text-pool-text"
+      >
+        <input
+          id="e-active"
+          name="active"
+          type="checkbox"
+          checked
+          class="mt-1 h-5 w-5 shrink-0 rounded-none accent-accent-500"
+        />
+        <span>
+          Show this on the site
+          <span class="mt-1 block text-sm text-pool-text-secondary"
+            >Untick it and the page comes down and no more places can be bought.
+            The six people who have paid keep their places and still come.</span
+          >
+        </span>
+      </label>
+
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        data-kit-size="lg"
+        aria-haspopup="dialog"
+        aria-controls="publish-guard"
+        class="min-h-[44px] rounded-none bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+      >
+        Save and put the changes on the site
+      </button>
+    </div>
+
+    <!-- taking it down — subordinate, and blocked while people hold places -->
+    <div
+      data-kit-component="DangerZone"
+      data-state="blocked"
+      class="mt-8 border-t border-pool-border pt-6"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Taking it down
+      </p>
+      <div
+        class="mt-3 flex flex-wrap items-start justify-between gap-x-8 gap-y-4"
+      >
+        <p class="max-w-[54ch] text-sm text-pool-text-secondary">
+          Deleting removes the page at
+          thefieldwork.co.uk/workshops/reading-the-field, and Saturday 20
+          September comes out of your calendar and is free to be booked again.
+          It can&rsquo;t be done while people are holding places.
+        </p>
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="danger"
+          disabled
+          aria-describedby="e-delete-why"
+          class="min-h-[44px] shrink-0 cursor-not-allowed rounded-none border border-pool-border bg-transparent px-8 py-4 text-sm font-semibold text-pool-text-secondary"
+        >
+          Delete this workshop
+        </button>
+      </div>
+      <p
+        id="e-delete-why"
+        class="mt-3 max-w-[54ch] text-sm text-pool-text-secondary"
+      >
+        Six people have paid for this day. Cancel and refund them on the
+        bookings page first &mdash; once nobody is holding a place, this turns
+        on.
+      </p>
+      <a
+        href="/admin/workshop-bookings"
+        data-kit-component="Link"
+        class="mt-3 min-h-[44px] inline-flex items-center text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4 hover:text-pool-text"
+        >Open the bookings for this workshop</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE OTHER STATES ============ -->
+<section class="mt-12" aria-labelledby="states-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="states-h"
+      data-pattern="eyebrow"
+      data-variant="muted"
+      class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+    >
+      The page &mdash; the other states
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      The same fields, holding a different situation
+    </p>
+  </div>
+
+  <!-- VALIDATION — beside the field, in plain words, never a toast -->
+  <div
+    data-state="invalid"
+    data-kit-component="Form"
+    data-kit-variant="with-errors"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-7 mt-4"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Three things need another look
+    </p>
+    <p class="mt-2 max-w-[62ch] text-sm text-pool-text-secondary">
+      Nothing has been lost. Everything else you typed is still here, and the
+      site is unchanged until all three are settled.
+    </p>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-3">
+      <div data-kit-component="FormField" data-state="invalid">
+        <label
+          for="x-end"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Ends</label
+        >
+        <input
+          id="x-end"
+          name="end_time"
+          type="time"
+          value="09:30"
+          aria-invalid="true"
+          aria-describedby="x-end-err"
+          class="mt-1.5 w-full rounded-none border-0 border-b-2 border-pool-danger bg-transparent px-0 py-3 font-mono text-xl tabular-nums text-pool-text"
+        />
+        <p
+          id="x-end-err"
+          data-kit-component="FieldError"
+          class="mt-2 max-w-[38ch] text-sm text-pool-danger"
+        >
+          This ends at 09:30, before its 10:00 start. One of the two is the
+          wrong way round.
+        </p>
+      </div>
+
+      <div data-kit-component="FormField" data-state="invalid">
+        <label
+          for="x-price"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >Price a place</label
+        >
+        <div
+          class="mt-1.5 flex items-baseline gap-2 border-b-2 border-pool-danger"
+        >
+          <span
+            class="font-mono text-2xl text-pool-text-secondary"
+            aria-hidden="true"
+            >&pound;</span
+          >
+          <input
+            id="x-price"
+            name="price"
+            type="text"
+            inputmode="numeric"
+            value="ninety-five"
+            aria-invalid="true"
+            aria-describedby="x-price-err"
+            class="w-full rounded-none border-0 bg-transparent px-0 py-3 font-mono text-2xl text-pool-text"
+          />
+        </div>
+        <p
+          id="x-price-err"
+          data-kit-component="FieldError"
+          class="mt-2 max-w-[38ch] text-sm text-pool-danger"
+        >
+          Write the price in numbers, like 95. Stripe needs a figure to charge.
+        </p>
+      </div>
+
+      <div data-kit-component="FormField" data-state="invalid">
+        <label
+          for="x-alt"
+          class="block text-sm font-medium text-pool-text-secondary"
+          >What is in the fourth picture</label
+        >
+        <input
+          id="x-alt"
+          name="image_alt"
+          type="text"
+          value=""
+          aria-invalid="true"
+          aria-describedby="x-alt-err"
+          class="mt-1.5 w-full rounded-none border-0 border-b-2 border-pool-danger bg-transparent px-0 py-3 text-lg text-pool-text"
+        />
+        <p
+          id="x-alt-err"
+          data-kit-component="FieldError"
+          class="mt-2 max-w-[38ch] text-sm text-pool-danger"
+        >
+          A picture is in the gallery but this is empty. Say what is in it, the
+          way you would describe it to someone on the phone.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVING · LOADING · ERROR · OVERFLOW -->
+  <div
+    data-pattern="state-panel"
+    data-kit-component="StatePanel"
+    class="mt-4 grid gap-4 lg:grid-cols-2 items-start"
+  >
+    <article
+      data-state="saving"
+      aria-busy="true"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Saving
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-text">
+        Putting Reading the Field on the site.
+      </p>
+      <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+        The page stays exactly where it is and nothing moves. When this
+        finishes, the line above turns green and says the time it saved.
+      </p>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        disabled
+        class="mt-4 min-h-[44px] cursor-not-allowed rounded-none border border-pool-border bg-transparent px-8 py-4 text-sm font-semibold text-pool-text-secondary"
+      >
+        Saving&hellip;
+      </button>
+    </article>
+
+    <article
+      data-state="loading"
+      data-kit-component="Skeleton"
+      aria-busy="true"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Loading
+      </p>
+      <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+        <div class="skel h-[68px] w-2/5" style="opacity: 0.22"></div>
+        <div class="skel h-3.5 w-1/4"></div>
+        <div class="skel h-9 w-3/5" style="opacity: 0.22"></div>
+        <div class="skel h-3.5 w-4/5"></div>
+        <div class="skel h-3.5 w-3/5"></div>
+      </div>
+      <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+        The page keeps its shape and stays still until the workshop&rsquo;s own
+        words and pictures arrive. Nothing pulses and nothing is typed into.
+      </p>
+    </article>
+
+    <article
+      data-state="error"
+      data-kit-component="ErrorState"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+        Error
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-danger">
+        That didn&rsquo;t save.
+      </p>
+      <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+        Everything you typed is still on this page and the site is unchanged.
+        Nobody has seen a half-finished workshop.
+      </p>
+      <div class="mt-4 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="primary"
+          class="min-h-[44px] rounded-none bg-accent-500 px-8 py-4 text-sm font-semibold text-pool-surface hover:bg-pool-text"
+        >
+          Try saving again
+        </button>
+        <p class="font-mono text-xs tabular-nums text-pool-text-secondary">
+          Last saved 09:02 &middot; 2 attempts since
+        </p>
+      </div>
+    </article>
+
+    <article
+      data-state="overflow"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Overflow &middot; a very long page
+      </p>
+      <p class="mt-2 font-display text-2xl leading-tight text-pool-text">
+        Reading the Field: a day of attention, noticing and the quiet between
+      </p>
+      <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+        A name this long runs onto three lines behind the picture. It is allowed
+        &mdash; this is what it will look like.
+      </p>
+      <p class="mt-3 font-mono text-xs tabular-nums text-pool-text-secondary">
+        What the day is &middot; 4,180 words &middot; 11 headings
+      </p>
+      <p class="mt-1 max-w-[46ch] text-sm text-pool-text-secondary">
+        All of it goes on the workshop&rsquo;s own page. The workshops list
+        shows only the sentence under the name, however long this gets.
+      </p>
+    </article>
+
+    <article
+      data-state="deletable"
+      data-kit-component="DangerZone"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Taking it down &middot; nobody has booked
+      </p>
+      <p class="mt-2 text-lg font-semibold text-pool-text">
+        No places sold on this one
+      </p>
+      <p class="mt-2 max-w-[46ch] text-sm text-pool-text-secondary">
+        The same workshop before anybody booked &mdash; and the state a
+        brand-new site starts in. With no money and nobody&rsquo;s Saturday
+        attached to it, it can simply go.
+      </p>
+      <a
+        href="#delete-guard"
+        data-kit-component="Button"
+        data-kit-variant="danger"
+        aria-haspopup="dialog"
+        aria-controls="delete-guard"
+        class="mt-4 min-h-[44px] inline-flex items-center rounded-none bg-pool-danger px-8 py-4 text-sm font-semibold text-pool-surface"
+        >Delete this workshop</a
+      >
+    </article>
+  </div>
+</section>

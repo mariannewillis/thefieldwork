@@ -194,7 +194,6 @@ export default function AdminShell({
         Skip to the main content
       </a>
 
-
       <div className="flex min-h-screen">
         {/* ---- the rail, desktop -------------------------------------- */}
         <aside

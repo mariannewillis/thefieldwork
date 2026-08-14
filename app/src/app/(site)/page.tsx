@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
-import { home, type Plate as PlateT } from "@/content/home";
+import { home, type LedgerRow, type Plate as PlateT } from "@/content/home";
+import { formatDayShort, formatMoney } from "@/lib/format";
+import { listWorkshopLedgerRows } from "@/lib/workshops";
 import "./home.css";
 
 /**
@@ -52,8 +54,29 @@ function Plate({
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const { root, sacral, method, throat, schedule, turn, crown, nav } = home;
+
+  // The Workshops column is DERIVED, as the comment on this beat has always
+  // said it would be: the rows come from what is published in Offerings, so a
+  // workshop she puts up appears here as well as on /workshops. Courses and
+  // Services keep their seeded rows because there are no models behind them
+  // yet — and a seeded row that says so plainly is better than an empty column
+  // that reads as a broken page.
+  const workshops = await listWorkshopLedgerRows();
+  const workshopRows: LedgerRow[] = workshops.map((workshop) => ({
+    href: `/workshops/${workshop.slug}`,
+    date: formatDayShort(workshop.date),
+    price: formatMoney(workshop.priceGBP),
+    title: workshop.name,
+    meta: [
+      `${workshop.startTime}${workshop.endTime ? `–${workshop.endTime}` : ""}`,
+      workshop.venueName,
+      `${workshop.capacity} places`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
+  }));
 
   return (
     <>
@@ -209,27 +232,42 @@ export default function HomePage() {
           </p>
         </div>
         <div className="schedule__cols">
-          {schedule.groups.map((group) => (
-            <div className="pool ink schedule-col" key={group.label}>
-              <p className="disp schedule-group__label">{group.label}</p>
-              <div className="ledger">
-                {group.rows.map((row) => (
-                  <a className="ledger-row" href={row.href} key={row.href}>
-                    <p className="ledger-row__top">
-                      <span className="small ledger-row__date">
-                        <span className="num">{row.date}</span>
-                      </span>
-                      <span className="ledger-row__price">
-                        <span className="disp amt num">{row.price}</span>
-                      </span>
+          {schedule.groups.map((group) => {
+            const derived = group.label === "Workshops";
+            const rows: readonly LedgerRow[] = derived
+              ? workshopRows
+              : group.rows;
+            return (
+              <div className="pool ink schedule-col" key={group.label}>
+                <p className="disp schedule-group__label">{group.label}</p>
+                <div className="ledger">
+                  {rows.length === 0 ? (
+                    // Only reachable on the derived column. A column that just
+                    // stops is indistinguishable from one that failed to load.
+                    <p className="small ledger-row__meta">
+                      Nothing in the diary just now. The next dates usually go
+                      up a couple of months ahead.
                     </p>
-                    <p className="disp ledger-row__title">{row.title}</p>
-                    <p className="small ledger-row__meta">{row.meta}</p>
-                  </a>
-                ))}
+                  ) : (
+                    rows.map((row) => (
+                      <a className="ledger-row" href={row.href} key={row.href}>
+                        <p className="ledger-row__top">
+                          <span className="small ledger-row__date">
+                            <span className="num">{row.date}</span>
+                          </span>
+                          <span className="ledger-row__price">
+                            <span className="disp amt num">{row.price}</span>
+                          </span>
+                        </p>
+                        <p className="disp ledger-row__title">{row.title}</p>
+                        <p className="small ledger-row__meta">{row.meta}</p>
+                      </a>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 

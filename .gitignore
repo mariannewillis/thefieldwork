@@ -17,6 +17,12 @@ next-env.d.ts
 !.env.example
 
 # ── local dev artefacts ──────────────────────────────────────────────────────
+# app/.smoke-app is a throwaway copy of the app that e2e/bookings-smoke.mjs
+# runs its own dev server from — Next refuses two dev servers on one directory,
+# and the copy has no .env.local, which is what guarantees the test can never
+# reach the real Resend key. The script deletes it; this is for when it does not.
+# The wildcard also covers any .smoke-*.png / .smoke-*.mjs left behind by a run.
+.smoke-*
 .storage/
 *.log
 .DS_Store
@@ -91,3 +97,34 @@ app/data/
 # purpose — it carries the deployment build command, including the
 # --include=dev that stops NODE_ENV=production deleting the build toolchain.
 artifacts/
+
+# ── scratch from agent verification runs ─────────────────────────────────────
+# Throwaway probes, built-module copies and screenshots. They are useful while
+# a change is being proved and worthless afterwards; they were nearly committed
+# once, which is why they are named here rather than remembered.
+app/_tmp-*/
+app/diag-tmp.mjs
+app/e2e/_*.mjs
+app/.smoke-*
+app/shot-*.png
+docs/screens/**/_verify*.mjs
+docs/screens/**/_splice-tmp.mjs
+docs/screens/**/_states/_verify-*.png
+
+# Superseded by the built page at docs/screens/webapp/workshop-detail.html.
+docs/screens/webapp/workshop-detail-reading-the-field.html
+
+# ── camera masters ───────────────────────────────────────────────────────────
+# C0260.MP4 is 604 MB of raw 4K straight off the camera. The web derivative
+# beside it (2.3 MB, 1280×720, faststart) is the one the pages reference, and
+# is small enough to keep. Masters stay on disk and out of the history.
+assets/videos/*.MP4
+assets/videos/*.mp4
+!assets/videos/the-room-web.mp4
+assets/videos/_contact.jpg
+docs/screens/**/_patch*-tmp.mjs
+docs/screens/workshopflow/_frag/_tmp-gallery.part
+docs/screens/workshopflow/_gen-awb.mjs
+# Dropped 2026-08-12: admin-offerings' Workshops tab subsumed it.
+docs/screens/workshopflow/admin-workshops-list.html
+docs/screens/workshopflow/_frag/admin-workshops-list.html

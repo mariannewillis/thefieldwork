@@ -1,887 +1,1493 @@
-<!--
-  Screen: workshop-detail (webapp) · surface: marketing · layout: Marketing
-  Direction: the-lit-clearing — signature move realized via data-pattern="clearing-plate"
-  (kit-pattern, verbatim): one hard-edged pool of blush light per viewport, cut
-  clean out of a full-bleed plate; nothing — no rule, no line of type — crosses
-  its edge.
-  Instance: Reading the Field — Sat 24 Oct, 10:00-16:00, Garden room, 10
-  places, £95 (matches the row already published on workshops-index.html).
-  Named question this screen answers (flow: reserve-a-workshop-place): what a
-  group day actually involves, when it runs and what it costs — with capacity
-  stated as information, never a live seat count (brief §5). Closed loop hands
-  off to booking-request.html.
-  Narrative spine (scoped to one workshop, not the full home spine): the day
-  named plainly in the hero (beat 1) → register change into the fact list,
-  denser, the "meat" (beat 2) → closed loop at the CTA, pays off beat 1 by
-  name (beat 3).
-  Imagery: aura-light-in-a-room.png (the day, ten people, ambient) →
-  work-down-the-body.png (the procedure the facts describe) →
-  chair-with-her-coat.png (the same plate booking-request.html opens on — the
-  same deliberate visual handoff service-detail.html already uses).
--->
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en-GB">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reading the Field — Workshop — The Field Work</title>
+    <meta name="color-scheme" content="dark" />
+    <title>Reading the Field — a one-day workshop · The Field Work</title>
     <meta
       name="description"
-      content="Saturday 24 October, 10:00-16:00, ten places, £95. What the day is split into, what's asked of your body, and how to ask for a place."
+      content="A full day of learning to notice what you already notice. Sat 24 October, 10:00–16:00, the garden room in Frome. £95, ten places."
     />
-    <link
-      rel="stylesheet"
-      href="../../../packages/ui-kit/src/styles/globals.css"
-    />
-
-    <!-- preview-bootstrap.html — inlined verbatim (packages/ui-kit/src/styles/preview-bootstrap.html).
-     SELF-CONTAINED — without these token var definitions every utility class
-     resolves to nothing when this file is opened via file://. -->
-    <style id="kit-tokens">
-      /**
-       * @repo/ui-kit — tokens.css
-       * Generated from tokens.json. Do not hand-edit; re-run /stylesheet.
-       *
-       * DARK-DEFAULT (see src/tokens/README.md before touching this file).
-       * :root already carries the dark/near-black values — there is no light-mode
-       * flip in this brand. The [data-theme="dark"] block below is an EXACT ALIAS
-       * of :root, kept only because the approved mockups literally set
-       * data-theme="dark" on <html> and the Tailwind config's darkMode selector
-       * references it — not because a second theme exists.
-       */
-
-      :root,
-      [data-theme="dark"] {
-        color-scheme: dark;
-
-        /* ---- color.neutral ---- */
-        --color-neutral-50: #fbf3f1;
-        --color-neutral-100: #e6dcdc;
-        --color-neutral-200: #d8bfc9;
-        --color-neutral-300: #b0a3a8;
-        --color-neutral-400: #95868d;
-        --color-neutral-500: #8e6a82;
-        --color-neutral-600: #64515d;
-        --color-neutral-700: #4e3a48;
-        --color-neutral-800: #3b2635;
-        --color-neutral-900: #260f20;
-        --color-neutral-950: #160712;
-
-        /* ---- color.accent (primary / magenta-deep — POOL-ONLY, see README) ---- */
-        --color-accent-50: #fbeff6;
-        --color-accent-100: #f7d9eb;
-        --color-accent-200: #f2badb;
-        --color-accent-300: #ed91c7;
-        --color-accent-400: #e75aac;
-        --color-accent-500: #c2187a;
-        --color-accent-600: #a51266;
-        --color-accent-700: #870d50;
-        --color-accent-800: #67093b;
-        --color-accent-900: #4b062a;
-        --color-accent-950: #2f041a;
-
-        /* ---- color.secondary (gold — PLATE-ONLY, see README) ---- */
-        --color-secondary-500: #e9c87e;
-        --color-secondary-600: #c99a3f;
-
-        /* ---- color.highlight (coral — locked, unobserved in approved mockups) ---- */
-        --color-highlight-300: #f8c9bf;
-        --color-highlight-500: #f5876f;
-
-        /* ---- color.semantic ---- */
-        --color-success: #6fcb99;
-        --color-warning: #e9c87e;
-        --color-danger: #f58a80;
-        --color-info: #e9c87e;
-
-        /* ---- color.surface ---- */
-        --color-surface-base: #160712;
-        --color-surface-raised: #260f20;
-        --color-surface-overlay: #1e0a1ce6;
-        --color-surface-inverted: #fbf3f1;
-
-        /* ---- color.text ---- */
-        --color-text-primary: #fbf3f1;
-        --color-text-secondary: #d8bfc9;
-        --color-text-tertiary: #8e6a82;
-        --color-text-inverted: #1e0a1c;
-
-        /* ---- color.border ---- */
-        --color-border-subtle: #4e3a48;
-        --color-border-default: #8e6a82;
-        --color-border-strong: #b0a3a8;
-
-        /* ---- color.pool (the inverted-context family — see README) ---- */
-        --color-pool-surface: #fbf3f1;
-        --color-pool-text: #1e0a1c;
-        --color-pool-text-secondary: #5a4356;
-        --color-pool-border: #8a7285;
-        --color-pool-danger: #a3221a;
-        --color-pool-success: #0f6b3d;
-
-        /* ---- typography.fontFamily ---- */
-        --font-family-sans:
-          "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
-        --font-family-mono:
-          "Azeret Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
-        --font-family-display: "Cormorant Garamond", Georgia, serif;
-
-        /* ---- typography.fontSize ---- */
-        --font-size-xs: 15px;
-        --font-size-sm: 17px;
-        --font-size-md: 18px;
-        --font-size-lg: 19px;
-        --font-size-xl: 21px;
-        --font-size-2xl: 24px;
-        --font-size-3xl: 28px;
-        --font-size-4xl: 36px;
-        --font-size-5xl: 48px;
-        --font-size-6xl: 64px;
-
-        /* ---- typography.fontWeight ---- */
-        --font-weight-regular: 400;
-        --font-weight-medium: 500;
-        --font-weight-semibold: 600;
-        --font-weight-bold: 700;
-
-        /* ---- typography.lineHeight ---- */
-        --line-height-tight: 1.05;
-        --line-height-snug: 1.2;
-        --line-height-normal: 1.6;
-        --line-height-relaxed: 1.7;
-
-        /* ---- typography.letterSpacing ---- */
-        --letter-spacing-tight: -0.005em;
-        --letter-spacing-normal: 0em;
-        --letter-spacing-wide: 0.18em;
-
-        /* ---- spacing ---- */
-        --spacing-0: 0px;
-        --spacing-0_5: 2px;
-        --spacing-1: 4px;
-        --spacing-2: 8px;
-        --spacing-3: 12px;
-        --spacing-4: 16px;
-        --spacing-5: 20px;
-        --spacing-6: 24px;
-        --spacing-8: 32px;
-        --spacing-10: 40px;
-        --spacing-12: 48px;
-        --spacing-16: 64px;
-        --spacing-20: 80px;
-        --spacing-24: 96px;
-
-        /* ---- radius (the direction uses --radius-none everywhere except a true
-           circle avatar, which uses --radius-full — see README §Shape law) ---- */
-        --radius-none: 0px;
-        --radius-sm: 2px;
-        --radius-md: 4px;
-        --radius-lg: 8px;
-        --radius-xl: 12px;
-        --radius-2xl: 16px;
-        --radius-full: 9999px;
-
-        /* ---- shadow (unused by this direction — kept for schema completeness) --- */
-        --shadow-xs: none;
-        --shadow-sm: none;
-        --shadow-md: none;
-        --shadow-lg: none;
-        --shadow-xl: none;
-
-        /* ---- motion ---- */
-        --motion-duration-instant: 80ms;
-        --motion-duration-fast: 120ms;
-        --motion-duration-normal: 150ms;
-        --motion-duration-slow: 220ms;
-        --motion-duration-slower: 320ms;
-        --motion-duration-ambient: 24000ms;
-        --motion-easing-linear: linear;
-        --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
-        --motion-easing-decel: cubic-bezier(0, 0, 0.2, 1);
-        --motion-easing-accel: cubic-bezier(0.4, 0, 1, 1);
-        --motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-        /* ---- zIndex ---- */
-        --z-base: 0;
-        --z-dropdown: 1000;
-        --z-sticky: 1100;
-        --z-overlay: 1200;
-        --z-modal: 1300;
-        --z-toast: 1400;
-        --z-tooltip: 1500;
-      }
-    </style>
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: ["class", '[data-theme="dark"]'],
         theme: {
           extend: {
             colors: {
-              neutral: {
-                50: "var(--color-neutral-50)",
-                100: "var(--color-neutral-100)",
-                200: "var(--color-neutral-200)",
-                300: "var(--color-neutral-300)",
-                400: "var(--color-neutral-400)",
-                500: "var(--color-neutral-500)",
-                600: "var(--color-neutral-600)",
-                700: "var(--color-neutral-700)",
-                800: "var(--color-neutral-800)",
-                900: "var(--color-neutral-900)",
-                950: "var(--color-neutral-950)",
-              },
-              accent: {
-                50: "var(--color-accent-50)",
-                100: "var(--color-accent-100)",
-                200: "var(--color-accent-200)",
-                300: "var(--color-accent-300)",
-                400: "var(--color-accent-400)",
-                500: "var(--color-accent-500)",
-                600: "var(--color-accent-600)",
-                700: "var(--color-accent-700)",
-                800: "var(--color-accent-800)",
-                900: "var(--color-accent-900)",
-                950: "var(--color-accent-950)",
-              },
-              secondary: {
-                500: "var(--color-secondary-500)",
-                600: "var(--color-secondary-600)",
-              },
-              highlight: {
-                300: "var(--color-highlight-300)",
-                500: "var(--color-highlight-500)",
-              },
-              success: "var(--color-success)",
-              warning: "var(--color-warning)",
-              danger: "var(--color-danger)",
-              info: "var(--color-info)",
-              surface: {
-                base: "var(--color-surface-base)",
-                raised: "var(--color-surface-raised)",
-                overlay: "var(--color-surface-overlay)",
-                inverted: "var(--color-surface-inverted)",
-              },
-              text: {
-                primary: "var(--color-text-primary)",
-                secondary: "var(--color-text-secondary)",
-                tertiary: "var(--color-text-tertiary)",
-                inverted: "var(--color-text-inverted)",
-              },
-              border: {
-                subtle: "var(--color-border-subtle)",
-                DEFAULT: "var(--color-border-default)",
-                strong: "var(--color-border-strong)",
-              },
-              pool: {
-                surface: "var(--color-pool-surface)",
-                text: "var(--color-pool-text)",
-                "text-secondary": "var(--color-pool-text-secondary)",
-                border: "var(--color-pool-border)",
-                danger: "var(--color-pool-danger)",
-                success: "var(--color-pool-success)",
-              },
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
             },
             fontFamily: {
-              sans: "var(--font-family-sans)",
-              mono: "var(--font-family-mono)",
-              display: "var(--font-family-display)",
-            },
-            fontSize: {
-              xs: "var(--font-size-xs)",
-              sm: "var(--font-size-sm)",
-              md: "var(--font-size-md)",
-              lg: "var(--font-size-lg)",
-              xl: "var(--font-size-xl)",
-              "2xl": "var(--font-size-2xl)",
-              "3xl": "var(--font-size-3xl)",
-              "4xl": "var(--font-size-4xl)",
-              "5xl": "var(--font-size-5xl)",
-              "6xl": "var(--font-size-6xl)",
-            },
-            fontWeight: {
-              regular: "var(--font-weight-regular)",
-              medium: "var(--font-weight-medium)",
-              semibold: "var(--font-weight-semibold)",
-              bold: "var(--font-weight-bold)",
-            },
-            lineHeight: {
-              tight: "var(--line-height-tight)",
-              snug: "var(--line-height-snug)",
-              normal: "var(--line-height-normal)",
-              relaxed: "var(--line-height-relaxed)",
-            },
-            letterSpacing: {
-              tight: "var(--letter-spacing-tight)",
-              normal: "var(--letter-spacing-normal)",
-              wide: "var(--letter-spacing-wide)",
-            },
-            spacing: {
-              0.5: "var(--spacing-0_5)",
-              1: "var(--spacing-1)",
-              2: "var(--spacing-2)",
-              3: "var(--spacing-3)",
-              4: "var(--spacing-4)",
-              5: "var(--spacing-5)",
-              6: "var(--spacing-6)",
-              8: "var(--spacing-8)",
-              10: "var(--spacing-10)",
-              12: "var(--spacing-12)",
-              16: "var(--spacing-16)",
-              20: "var(--spacing-20)",
-              24: "var(--spacing-24)",
-            },
-            borderRadius: {
-              none: "var(--radius-none)",
-              sm: "var(--radius-sm)",
-              DEFAULT: "var(--radius-md)",
-              md: "var(--radius-md)",
-              lg: "var(--radius-lg)",
-              xl: "var(--radius-xl)",
-              "2xl": "var(--radius-2xl)",
-              full: "var(--radius-full)",
-            },
-            boxShadow: {
-              xs: "var(--shadow-xs)",
-              sm: "var(--shadow-sm)",
-              DEFAULT: "var(--shadow-md)",
-              md: "var(--shadow-md)",
-              lg: "var(--shadow-lg)",
-              xl: "var(--shadow-xl)",
-            },
-            transitionDuration: {
-              instant: "var(--motion-duration-instant)",
-              fast: "var(--motion-duration-fast)",
-              DEFAULT: "var(--motion-duration-normal)",
-              normal: "var(--motion-duration-normal)",
-              slow: "var(--motion-duration-slow)",
-              slower: "var(--motion-duration-slower)",
-            },
-            transitionTimingFunction: {
-              linear: "var(--motion-easing-linear)",
-              standard: "var(--motion-easing-standard)",
-              decel: "var(--motion-easing-decel)",
-              accel: "var(--motion-easing-accel)",
-              spring: "var(--motion-easing-spring)",
-            },
-            zIndex: {
-              dropdown: "var(--z-dropdown)",
-              sticky: "var(--z-sticky)",
-              overlay: "var(--z-overlay)",
-              modal: "var(--z-modal)",
-              toast: "var(--z-toast)",
-              tooltip: "var(--z-tooltip)",
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
             },
           },
         },
       };
     </script>
-
     <style>
-      /* ═══════════════════════════════════════════════════════════════════
-         workshop-detail — three clearings, each cut from a full-bleed plate.
-         Signature move (clearing-plate, reproduced from styles.md): nothing
-         — no rule, no stroke, no line of type — crosses a pool's edge. The
-         day is named in beat 1; the closed loop pays it off by name in
-         beat 3. Motion budget: one 24s ambient drift on the hero plate only,
-         per stillness-as-motion-budget; suppressed under
-         prefers-reduced-motion, and the still frame is a finished frame.
-         ═══════════════════════════════════════════════════════════════════ */
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        padding: 0;
+      /* ── The Lit Clearing, applied to a page that has to take money ────────
+         The rule the whole site runs on: colour is context-locked. Gold labels
+         the dark ground and never appears inside a blush panel; magenta works
+         inside a panel and never on the dark. Zero radius, zero shadow — the
+         only curve in the system is an avatar circle, and there isn't one here.
+
+         The commercial job of this page is one decision: how many places.
+         Everything is arranged so that decision is never more than a scroll
+         away, and so the facts it depends on — date, price, spaces left, what
+         happens if you can't come — are visible at the moment you make it. */
+      html {
+        background-color: #160712;
       }
       body {
-        background: var(--color-surface-base);
-        overflow-x: hidden;
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
-      img {
-        display: block;
-        max-width: 100%;
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
       }
-      .plate {
+      .fig,
+      .font-mono,
+      td,
+      th {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible,
+      .on-pool input:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .skip {
+        position: absolute;
+        left: 20px;
+        top: -200px;
+        z-index: 60;
+      }
+      .skip:focus {
+        top: 20px;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+
+      /* The field photograph sits behind the masthead only — the page below is
+         plain, because a picture behind prose you are asking someone to read
+         before spending £95 is noise. */
+      .field {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: 50% 46%;
+        filter: brightness(0.5) saturate(1.04);
+        z-index: 0;
+        pointer-events: none;
       }
-      @media (prefers-reduced-motion: no-preference) {
-        .plate--hero {
-          transform: scale(1.045);
+      .field-scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.35) 0%,
+          rgb(22 7 18 / 0.55) 55%,
+          rgb(22 7 18 / 0.95) 100%
+        );
+      }
+
+      /* The quantity stepper. Deliberately large — this is the one control on
+         the page, and it gets used on a phone. */
+      .step {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #8a7285;
+        background: transparent;
+        color: #1e0a1c;
+        font-size: 24px;
+        line-height: 1;
+      }
+      .step:hover:not(:disabled) {
+        background: #1e0a1c;
+        color: #fbf3f1;
+      }
+      .step:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      .qty {
+        width: 72px;
+        height: 52px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        color: #1e0a1c;
+        font-size: 26px;
+        font-family: "Azeret Mono", ui-monospace, monospace;
+      }
+      .qty::-webkit-outer-spin-button,
+      .qty::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .qty {
+        -moz-appearance: textfield;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
         }
       }
-      @media (prefers-reduced-motion: reduce) {
-        .plate--hero {
-          transform: scale(1.045);
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+    <!-- regions the base purchase page does not carry: the long body,
+         the gallery carousel, the location map. -->
+    <style id="workshop-page-extra">
+      /* ── Only the three regions the base purchase page does not carry ────────
+         Everything else on this page is written in the base page's own
+         vocabulary — .pool / .on-pool, .field, .field-scrim, .page-field, .fig,
+         .step, .qty, and the plum/gold/action tokens. Nothing below duplicates
+         any of it. Zero radius and zero shadow throughout, same as the base. */
+
+      /* ── 2. THE STILLS RAIL ──────────────────────────────────────────────────
+         Three across at desktop, and the fourth visibly continuing past the
+         right edge — which is the only honest way to say "there are more"
+         without a word or an arrow. Below sm: one picture at ~85% with the next
+         one peeking in, so a phone gets the same message.
+
+         CSS only. Every picture is in the delivered HTML, painted, at full
+         opacity: nothing `hidden`, nothing at `opacity: 0` waiting for a
+         scroll. A static screenshot shows three composed and the fourth running
+         off the edge, which is the picture the page is meant to make, and it
+         shows the same with script switched off. Smooth scrolling is asked for
+         only where motion is welcome. */
+      .rail {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 14px;
+        scrollbar-width: thin;
+        scrollbar-color: #8e6a82 transparent;
+      }
+      .rail > li {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        /* Without this a flex item cannot go below its content's intrinsic width,
+     and the picture inside is 1600px wide. The rail then overflows instead of
+     laying out. Belt and braces, and it costs nothing. */
+        min-width: 0;
+      }
+      /* Stated here rather than left to the utility class on the element, so the
+   photographs sit inside the strip under this stylesheet alone. The fallback
+   in section 4 has to work with no script running at all, and the utilities
+   on these images are generated by one. */
+      .shot img {
+        max-width: 100%;
+        height: auto;
+      }
+      /* 80px = the three gaps between the first four pictures (36px) plus
+         44px of the fourth one, left showing on purpose. Sizing the items to
+         exactly a third makes three fit and the fourth vanish, and a strip
+         that looks like a finished row of three is a strip nobody scrolls. */
+      @media (min-width: 640px) {
+        .rail > li {
+          flex-basis: calc((100% - 80px) / 3);
+        }
+      }
+      .rail::-webkit-scrollbar {
+        height: 6px;
+      }
+      .rail::-webkit-scrollbar-thumb {
+        background-color: #8e6a82;
+      }
+      .rail::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .rail {
+          scroll-behavior: smooth;
+        }
+      }
+
+      /* WITHOUT SCRIPT — AND AN HONEST NOTE ABOUT WHAT THAT MEANS HERE.
+
+         THE LIMIT FIRST. This mockup is styled by `cdn.tailwindcss.com`, which
+         is itself a script: it generates the utility classes in the browser at
+         run time. So with JavaScript switched off, this page loses nearly all
+         its styling regardless of what the fallback below does. That is a
+         property of the MOCKUP, not of the design and not of the app that gets
+         built from it, which ships compiled CSS and degrades properly. Nothing
+         here can fix it and nothing here pretends to.
+
+         WHAT IS THEREFORE MADE SOUND IS THE STRUCTURE, which is what carries
+         over into the build: the six rail photographs are real `<img>`
+         elements with real descriptions, each wrapped in a real link to a real
+         id on the page. No script is needed for any of that to exist, and the
+         rule below — plain CSS in a plain `<style>` block, nothing generated —
+         is what opens the targeted one. Under compiled CSS it is the whole
+         fallback. Under the CDN it is the part that survives. Each picture in the rail is a
+         link to its own `<li id="photo-n">`, so following it is a plain
+         same-page anchor: the browser scrolls that picture into view and the
+         rule below opens it to the full measure of the rail, in place. Roughly
+         three times the size it was, from a photograph that was already painted
+         on the page. Nothing is revealed that was hidden.
+
+         With script, the click is intercepted before any of this happens — the
+         hash is never written, so `:target` never matches and the rail never
+         moves. This rule is the fallback and only the fallback. */
+      .rail > li:target {
+        flex-basis: 100%;
+      }
+
+      /* ── 3. THE PAGE GROUND ──────────────────────────────────────────────────
+         The ground is an abstract now, not a portrait of Marianne. The base
+         page's values (brightness .55 under a .70→.97 scrim) were tuned to hold
+         a photograph of a PERSON a long way back, so a face never competed with
+         the type. An abstract has nothing to compete with — and at those values
+         it reads as nothing at all, which is the same as having removed the
+         picture and put nothing in its place.
+
+         So: let it show. Brightness up, the top of the scrim eased off, the
+         foot of it kept heavy because that is where the long prose runs and
+         plate-soft body copy has to stay comfortable against it.
+
+         Mirrored, because the warm core sits low-left in the source and the
+         left is where every word on this page lives. Flipped, it falls in the
+         empty right-hand column below the booking panel — the one part of the
+         page with nothing in it. */
+      .page-field {
+        filter: brightness(0.92) saturate(1.06);
+        transform: scaleX(-1);
+      }
+      .page-scrim {
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.52) 0%,
+          rgb(22 7 18 / 0.76) 45%,
+          rgb(22 7 18 / 0.93) 100%
+        );
+      }
+
+      /* ── 4. THE PHOTOGRAPH MODAL ─────────────────────────────────────────────
+         Click a picture in the rail and it opens on a bounded plate over the
+         dimmed page, with the rest of the set a button away.
+
+         MECHANISM. One `<dialog>`, opened with `showModal()`. The rail click is
+         intercepted, so THE URL NEVER CHANGES — and Next and Previous swap the
+         picture and its caption IN PLACE, in the open dialog. Nothing is torn
+         down between photographs, so there is no flash of the page underneath
+         and no entry left in the back button for each picture looked at.
+
+         This replaces a `:target` lightbox that wrote a new hash on every step.
+         That mechanism could not be made to behave: a new hash is a navigation,
+         a navigation re-matches `:target`, and the overlay was destroyed and
+         rebuilt between every photograph. The operator saw the page flicker
+         through the scrim on each press, and was right. No CSS fixes it; the
+         mechanism was the fault.
+
+         WITHOUT SCRIPT the dialog never opens and is never shown — a `<dialog>`
+         with no `open` attribute is `display: none` in every browser. The rail
+         keeps its anchors and section 2's `:target` rule opens the picture to
+         the full measure in place. Nothing is lost and nothing is claimed.
+
+         WHAT THE STATIC RULE ASKS FOR IS UNTOUCHED. Every photograph in the
+         rail is still painted, at full opacity, in the delivered HTML, with its
+         description on it. The dialog is an interaction layer over a finished
+         composition — it holds no picture and no sentence you cannot already
+         reach on the page. The image is the same file; the caption is read off
+         the rail photograph's own alt text at open time, so the two can never
+         drift apart and there is no second caption to invent.
+
+         ACCESSIBILITY. `showModal()` gives the real thing rather than a
+         description of it: Escape closes, the page behind is inert, focus is
+         held inside, and focus returns to the photograph that opened the dialog
+         when it closes. Left and Right arrows move through the set. At the two
+         ends the corresponding button is disabled and drawn as an end — the set
+         does not wrap. A visually hidden status line announces the new position
+         and caption each time the picture swaps. */
+
+      /* Screen-reader-only text. Used three times: to tell somebody on a screen
+         reader that a rail picture opens larger, to carry the status line that
+         announces each swap, and to name the ends of the set. */
+      .vh {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* The rail picture as a control. It has to look like one: a photograph
+         that opens is a photograph you can tell is going to. */
+      .shot {
+        display: block;
+        position: relative;
+        outline-offset: -1px;
+      }
+      .shot img {
+        transition: filter 140ms linear;
+      }
+      .shot:hover img {
+        filter: brightness(1.12);
+      }
+      .shot:hover {
+        outline: 1px solid #e9c87e;
+      }
+
+      /* THE PLATE. The dialog element itself is the plate — its own solid plum
+   ground, a gold hairline, zero radius, centred by `margin: auto` in the top
+   layer. The page behind shows AROUND it through the backdrop, dimmed, which
+   is what a modal looks like; an opaque full-screen takeover reads as a new
+   page and was rejected as one. Nothing bleeds under the words because the
+   plate is not transparent.
+
+   No padding on the dialog itself: `.lb-inner` fills it edge to edge, so the
+   only clickable part of the dialog box that is not a child is the backdrop.
+   That is what makes click-outside-to-close exact rather than approximate. */
+      dialog.lb {
+        box-sizing: border-box;
+        width: min(1100px, 100%);
+        max-width: calc(100% - 2 * clamp(16px, 4vh, 48px));
+        max-height: calc(100% - 2 * clamp(16px, 4vh, 48px));
+        margin: auto;
+        padding: 0;
+        overflow: auto;
+        border: 1px solid rgb(233 200 126 / 0.28);
+        background-color: #160712;
+        color: #d8bfc9;
+      }
+      dialog.lb::backdrop {
+        background-color: rgb(22 7 18 / 0.86);
+      }
+      /* `showModal()` makes the page behind inert but does not stop it scrolling
+   under the plate. The script puts this class on the root while the dialog is
+   open and takes it off again on close. */
+      .lb-open {
+        overflow: hidden;
+      }
+      .lb-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 18px 20px 22px;
+      }
+      @media (min-width: 640px) {
+        .lb-inner {
+          padding: 24px 40px 28px;
+          gap: 20px;
+        }
+      }
+      .lb-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      /* The picture and its caption travel together as one object, so the words
+   sit under the photograph rather than being flung to the floor of the plate.
+   The description IS the figure's caption here, so the image takes an empty
+   alt rather than saying the same sentence twice to somebody on a screen
+   reader. The copy in the rail is untouched and still carries the description
+   as alt text, because there it has no visible caption to lean on. */
+      .lb-fig {
+        margin: 0;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      /* The ceiling. The plate has its own padding and border, so the picture
+   takes what is left of the small viewport height and no more — image,
+   caption and controls always sit inside one screen. A portrait and a
+   landscape both fit because the box is a maximum in both directions and the
+   fit is `contain`. */
+      .lb-fig > img {
+        max-width: 100%;
+        /* Three ceilings, whichever is lowest.
+       58svh   — the share of a tall screen a photograph should take.
+       600px   — an absolute stop, so it does not swell on a huge display.
+       100svh − 350px — the one that actually matters on a short screen. 350px
+                 is everything else on the plate, measured rather than guessed:
+                 272px of chrome (the counter bar, a two-line caption, the
+                 controls and the gaps between them), the plate's padding and
+                 border, and the ~60px margin the plate keeps from the viewport
+                 edge. Rounded up from the 336px the tightest case needed, so a
+                 caption that wraps one line further still fits.
+     Worth stating because it was measured twice. The two-ceiling version
+     overflowed by 29px at 1280x720, which put PREVIOUS and NEXT below the
+     plate's OWN fold — reachable only by scrolling inside the modal, which
+     nobody would think to do. A first correction at 330px still left 1-5px
+     over at 1280x720 and 1366x768. This value clears all seven tested sizes. */
+        max-height: min(58svh, 600px, calc(100svh - 350px));
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
+      .lb-cap {
+        align-self: flex-start;
+        max-width: 62ch;
+        font-size: 17px;
+        line-height: 1.6;
+        color: #d8bfc9;
+      }
+
+      /* Back on the left, forward on the right, as far apart as the measure
+         allows — the two controls that must never be mistaken for each other. */
+      .lb-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      /* Where you are in the set. Mono and tabular, like every other number on
+         this site, so 1 and 6 occupy the same width and the line does not jog
+         as you move along the strip. */
+      .lb-count {
+        font-family: "Azeret Mono", ui-monospace, monospace;
+        font-variant-numeric: tabular-nums lining-nums;
+        font-size: 15px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #e9c87e;
+      }
+
+      /* Controls. Gold on the dark plate, which is where gold is allowed;
+         magenta stays inside the booking pool where it belongs. Zero radius,
+         zero shadow, 56px tall so a thumb can find them. */
+      .lb-ctl {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 56px;
+        min-width: 56px;
+        padding: 0 18px;
+        border: 1px solid #8e6a82;
+        background: transparent;
+        color: #e9c87e;
+        font-family: "Azeret Mono", ui-monospace, monospace;
+        font-size: 14px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      /* Scoped past the disabled state on purpose. An unscoped `:hover` also
+   caught the inert end-of-set control — which then filled solid gold under
+   the pointer and looked like the liveliest thing on the screen while doing
+   nothing at all. A dead arrow that lights up is worse than no arrow. */
+      .lb-ctl:not(:disabled):hover {
+        background-color: #e9c87e;
+        border-color: #e9c87e;
+        color: #160712;
+      }
+      /* The end of the set, drawn as an end. Disabled rather than dimmed: there
+         is nowhere further to go, so it takes no click, no focus and no
+         pointer, and it says so by looking spent. */
+      .lb-ctl:disabled {
+        color: #8e6a82;
+        border-color: rgb(142 106 130 / 0.35);
+        cursor: default;
+      }
+      .lb-arrow {
+        font-size: 19px;
+        line-height: 1;
+      }
+
+      /* A fade of a seventh of a second on opening — a functional transition,
+         under the ceiling, not a spend against the page's one-move motion
+         budget. It fires on OPEN only. Moving between photographs is a swap in
+         place and is deliberately instant: the fade between pictures was what
+         made the old lightbox flash, and a picture that dissolves into the next
+         one is a picture you cannot compare with the last.
+
+         Anyone who has asked for less motion gets none, and the composition is
+         finished on the first frame either way. */
+      @media (prefers-reduced-motion: no-preference) {
+        dialog.lb[open],
+        dialog.lb[open]::backdrop {
+          animation: lb-open 140ms linear;
+        }
+      }
+      @keyframes lb-open {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
         }
       }
     </style>
   </head>
 
-  <body
-    data-kit-layout="Marketing"
-    data-screen-id="workshop-detail"
-    class="font-sans text-text-primary"
-  >
-    <main
-      data-kit-component="Layout"
-      data-kit-variant="content-wrapper"
-      class="relative mx-auto max-w-[1280px]"
-    >
-      <!-- ═══ BEAT 1 — the day named plainly, LEFT ══════════════════════════ -->
-      <section
-        data-pattern="clearing-plate"
-        data-anchor="left"
-        class="relative flex min-h-[100svh] items-end overflow-hidden px-6 sm:px-[var(--spacing-24,6rem)]"
-      >
-        <img
-          src="../../../assets/images/new/aura-light-in-a-room.png"
-          alt="A wide, warm pool of light lying across an empty room, ready for a group — no one in the frame yet."
-          class="plate plate--hero pointer-events-none"
-          style="filter: brightness(0.5) saturate(1.14) contrast(1.05)"
-        />
+  <body data-screen-id="workshop-detail" class="text-plate-text font-body">
+    <!-- The page ground: the aura field, fixed and scrimmed. An abstract rather
+       than a photograph on purpose — there is nobody in it to compete with the
+       type, and the warm core sits low-left where the page has no content. It
+       is decorative, so it carries no alt and is hidden from assistive tech. -->
+    <img
+      src="../../../assets/images/web/aura-field-abstract.jpg"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
 
-        <!-- masthead — absolute overlay, positioned on the header itself
-             (D8 audited rule 1); not persistent once beat 1 scrolls past -->
-        <header
-          data-kit-component="Header"
-          data-kit-variant="standard"
-          class="absolute inset-0 top-0 z-[3] flex items-start justify-between gap-6 px-6 pt-5 sm:px-[var(--spacing-24,6rem)] sm:pt-8"
-        >
-          <a
-            data-pattern="wordmark"
-            data-kit-component="Logo"
-            href="/"
-            aria-label="The Field Work — home"
-            class="inline-flex items-center min-h-[44px]"
-          >
+    <a
+      href="#book"
+      class="skip bg-gold px-5 py-3 text-[17px] font-semibold text-ink"
+    >
+      Skip to booking
+    </a>
+
+    <!-- ══ MASTHEAD ════════════════════════════════════════════════════════════
+       The picture, the name, the sentence underneath, then the facts — the
+       order the admin form fills them in, because this page is that form's
+       output and the two have to stay the same shape.
+
+       The hero photograph carries a real description rather than being hidden:
+       the form will not let a picture on to the site without a line saying what
+       is in it, so the page it produces cannot quietly do otherwise. The
+       object-position is pulled down off the base default so the lit floor —
+       the warm part, and the only part that says "a room with people coming to
+       it" — sits in the band the masthead actually crops to. -->
+    <header class="relative overflow-hidden">
+      <img
+        src="../../../assets/images/web/marianne-room-aglow.jpg"
+        alt="The garden room set for the day &mdash; a kilim on the floorboards, chairs and cushions drawn round it, one candle lit on the table under the window."
+        class="field"
+        style="object-position: 50% 56%"
+      />
+      <div class="field-scrim" aria-hidden="true"></div>
+
+      <div class="relative z-10 mx-auto max-w-[1180px] px-6 lg:px-10">
+        <div class="flex items-center justify-between py-7">
+          <a href="/" aria-label="The Field Work &mdash; home">
             <img
               src="../../../assets/brand/logo-horizontal.svg"
               alt="The Field Work"
-              class="h-[74px] w-auto sm:h-[104px]"
+              width="440"
+              height="120"
+              class="h-[52px] w-auto"
             />
           </a>
-
           <nav
-            data-kit-component="Nav"
-            data-kit-variant="marketing-masthead"
+            class="hidden items-center gap-8 text-[17px] md:flex"
             aria-label="Main"
-            class="hidden items-center gap-6 pt-3.5 sm:flex lg:gap-8"
           >
-            <a
-              href="/services"
-              class="border-b border-text-primary/30 pb-0.5 text-sm text-text-primary no-underline hover:border-secondary-500 hover:text-secondary-500"
-              >Services</a
+            <a class="t text-plate-soft hover:text-plate-text" href="/services"
+              >Sessions</a
             >
             <a
+              class="t text-plate-text underline decoration-gold underline-offset-8"
               href="/workshops"
               aria-current="page"
-              class="border-b border-secondary-500 pb-0.5 text-sm text-secondary-500 no-underline"
               >Workshops</a
             >
-            <a
-              href="/courses"
-              class="border-b border-text-primary/30 pb-0.5 text-sm text-text-primary no-underline hover:border-secondary-500 hover:text-secondary-500"
+            <a class="t text-plate-soft hover:text-plate-text" href="/courses"
               >Courses</a
             >
-            <a
-              href="/about"
-              class="border-b border-text-primary/30 pb-0.5 text-sm text-text-primary no-underline hover:border-secondary-500 hover:text-secondary-500"
+            <a class="t text-plate-soft hover:text-plate-text" href="/about"
               >About</a
             >
-            <a
-              href="/contact"
-              class="border-b border-text-primary/30 pb-0.5 text-sm text-text-primary no-underline hover:border-secondary-500 hover:text-secondary-500"
-              >Contact</a
-            >
-            <a
-              href="/contact"
-              data-kit-component="Button"
-              data-kit-variant="secondary"
-              data-kit-size="sm"
-              class="inline-flex items-center gap-2 border border-secondary-500 px-6 py-3 text-sm font-semibold text-secondary-500 no-underline transition-colors duration-fast hover:bg-secondary-500 hover:text-text-inverted"
-              >Request a place
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                class="h-[14px] w-[14px] shrink-0"
-              >
-                <path d="M5 12h14M13 6l6 6-6 6" /></svg
-            ></a>
           </nav>
+        </div>
 
-          <button
-            type="button"
-            data-kit-component="NavDrawer"
-            data-kit-variant="trigger"
-            aria-label="Open menu"
-            aria-haspopup="true"
-            aria-expanded="false"
-            class="flex min-h-[44px] min-w-[44px] items-center justify-center border border-text-primary/40 text-text-primary sm:hidden"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="h-[22px] w-[22px]"
-            >
-              <path d="M3 6h18M3 12h18M3 18h18" />
-            </svg>
-          </button>
-        </header>
-
-        <!-- the pool -->
-        <div
-          data-kit-component="OfferingHero"
-          class="relative z-[2] mb-[clamp(48px,7vh,96px)] w-full max-w-[400px] bg-pool-surface px-8 py-8 text-pool-text sm:max-w-[460px] sm:px-10 sm:py-10"
-        >
-          <a
-            href="/workshops"
-            data-kit-component="Link"
-            data-kit-variant="back"
-            class="mb-4 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-pool-text-secondary no-underline transition-colors duration-fast hover:text-accent-500"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="h-[16px] w-[16px] shrink-0"
-            >
-              <path d="m15 6-6 6 6 6" />
-            </svg>
-            Back to Workshops
-          </a>
-
+        <div class="pb-14 pt-10 lg:pb-16 lg:pt-16">
           <p
-            data-pattern="eyebrow"
-            data-variant="marketing-on-pool"
-            class="mb-3 flex flex-wrap items-center gap-x-1.5 font-sans text-sm font-semibold uppercase tracking-wide text-accent-500"
+            class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
           >
-            <span
-              data-kit-component="DateBadge"
-              class="inline-flex items-center gap-1.5 font-mono normal-case tracking-normal"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                class="h-[13px] w-[13px] shrink-0"
-              >
-                <rect x="3" y="4" width="18" height="17" />
-                <path d="M8 2v4M16 2v4M3 10h18" />
-              </svg>
-              Sat 24 Oct
-            </span>
-            &middot; ten places &middot; &pound;95
+            A one-day workshop
           </p>
           <h1
-            class="mb-4 font-display text-3xl leading-tight text-pool-text sm:text-4xl"
+            class="mt-4 max-w-[16ch] font-display text-[46px] font-normal leading-[1.02] text-plate-text sm:text-[60px] lg:text-[76px]"
           >
             Reading the Field
           </h1>
-          <p class="text-md leading-relaxed text-pool-text-secondary">
-            One Saturday, ten people, one room. Circle in the morning, mats in
-            the afternoon &mdash; you keep your clothes on for both.
-          </p>
-          <a
-            href="#the-day"
-            class="mt-4 inline-block text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
-          >
-            See what the day involves
-          </a>
-        </div>
-      </section>
-
-      <!-- ═══ BEAT 2 — the fact list, register change, widest pool, RIGHT ═══ -->
-      <section
-        data-pattern="clearing-plate"
-        data-anchor="right"
-        class="relative flex min-h-[100svh] items-center justify-end overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
-        id="the-day"
-      >
-        <img
-          src="../../../assets/images/new/work-down-the-body.png"
-          alt="Her hand held flat a few inches above a client's midsection under a white cover, tracing a slow line down the length of the body."
-          class="plate pointer-events-none"
-          style="filter: brightness(0.46) saturate(1.08) contrast(1.05)"
-        />
-
-        <div
-          class="relative z-[2] w-full max-w-[640px] bg-pool-surface px-8 py-8 text-pool-text sm:max-w-[720px] sm:px-10 sm:py-12"
-        >
           <p
-            data-pattern="eyebrow"
-            data-variant="marketing-on-pool"
-            class="mb-1.5 font-sans text-sm font-semibold uppercase tracking-wide text-accent-500"
+            class="mt-6 max-w-[52ch] text-[21px] leading-relaxed text-plate-soft"
           >
-            What happens, in order
-          </p>
-          <p class="mb-1 font-display text-3xl leading-tight text-pool-text">
-            Reading the Field
-          </p>
-          <p class="mb-6 text-md leading-relaxed text-pool-text-secondary">
-            Five facts, before you ask for a place.
+            A day of learning to notice what you already notice. You stay
+            clothed and seated, and nobody touches you.
           </p>
 
-          <dl
-            data-kit-component="DetailFactList"
-            class="divide-y divide-pool-border/[.22]"
-          >
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
+          <!-- Date, place and price above everything, because they are what
+             decides whether the rest is worth reading. -->
+          <dl class="mt-10 flex flex-wrap gap-x-12 gap-y-6">
+            <div>
               <dt
-                class="flex w-[180px] shrink-0 items-center gap-2 font-mono text-sm tabular-nums text-pool-text-secondary"
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  class="h-[15px] w-[15px] shrink-0"
-                >
-                  <rect x="3" y="4" width="18" height="17" />
-                  <path d="M8 2v4M16 2v4M3 10h18" />
-                </svg>
                 When
               </dt>
-              <dd class="m-0 text-md leading-snug text-pool-text">
-                Saturday 24 October, 10:00&ndash;16:00. One day &mdash; there is
-                no second session to follow it.
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                Sat 24 Oct &middot; 10:00&ndash;16:00
               </dd>
             </div>
-
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
+            <div>
               <dt
-                class="flex w-[180px] shrink-0 items-center gap-2 font-mono text-sm tabular-nums text-pool-text-secondary"
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  class="h-[15px] w-[15px] shrink-0"
-                >
-                  <path
-                    d="M12 22s7-7.58 7-12a7 7 0 1 0-14 0c0 4.42 7 12 7 12Z"
-                  />
-                  <circle cx="12" cy="10" r="2.5" />
-                </svg>
                 Where
               </dt>
-              <dd class="m-0 text-md leading-snug text-pool-text">
-                The garden room. Ten people, seated in a circle for the morning.
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                The Garden Room, Frome
               </dd>
             </div>
-
-            <!-- capacity — designed as the ERROR state (live-check
-                 unreachable), per screens.json §components: error-state.
-                 Capacity is information, never a live seat count (brief §5). -->
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
+            <div>
               <dt
-                class="flex w-[180px] shrink-0 items-center gap-2 font-mono text-sm tabular-nums text-pool-text-secondary"
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  class="h-[15px] w-[15px] shrink-0"
-                >
-                  <circle cx="9" cy="8" r="3" />
-                  <path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6" />
-                  <path d="M16 8a3 3 0 1 1 3 3" />
-                </svg>
-                Places
+                Price
               </dt>
-              <dd class="m-0">
-                <p
-                  data-kit-component="ErrorState"
-                  data-state="error"
-                  class="flex flex-wrap items-center gap-x-2 gap-y-1 text-md leading-snug text-pool-danger"
-                >
-                  Couldn&rsquo;t confirm live availability.
-                  <a
-                    href="#the-day"
-                    class="text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
-                  >
-                    Try again
-                  </a>
-                </p>
-                <p class="m-0 mt-1 font-mono text-xs text-pool-text-secondary">
-                  Showing the number last published: 10 places.
-                </p>
-              </dd>
-            </div>
-
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
-              <dt
-                class="flex w-[180px] shrink-0 items-center gap-2 font-mono text-sm tabular-nums text-pool-text-secondary"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  class="h-[15px] w-[15px] shrink-0"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 3" />
-                </svg>
-                What happens
-              </dt>
-              <dd class="m-0 text-md leading-snug text-pool-text">
-                Circle and reading in the morning, coats on. After lunch you lie
-                on a mat, fully clothed, while Marianne moves around the outside
-                of the group &mdash; she does not touch anyone during a workshop
-                day.
-              </dd>
-            </div>
-
-            <div class="flex flex-col gap-1 py-4 sm:flex-row sm:gap-6">
-              <dt
-                class="w-[180px] shrink-0 font-mono text-sm text-pool-text-secondary"
-              >
-                Not included
-              </dt>
-              <dd class="m-0 text-md leading-snug text-pool-text">
-                Lunch. Bring your own, or ask about the caf&eacute; next door.
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                &pound;95 a place
               </dd>
             </div>
           </dl>
-
-          <div
-            class="mt-6 flex flex-wrap items-baseline justify-between gap-4 border-t border-pool-border/[.22] pt-6"
-          >
-            <span
-              data-kit-component="PriceTag"
-              class="block font-display text-4xl leading-tight tabular-nums text-pool-text"
-              >&pound;95</span
-            >
-            <a
-              href="/book/workshop/reading-the-field"
-              data-kit-component="Button"
-              data-kit-variant="primary"
-              data-kit-size="md"
-              class="inline-flex min-h-[44px] items-center gap-2 bg-accent-500 px-8 py-4 text-sm font-semibold text-surface-inverted no-underline transition-colors duration-fast hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pool-text"
-            >
-              Request a place
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                class="h-[14px] w-[14px] shrink-0"
-              >
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </a>
-          </div>
         </div>
-      </section>
 
-      <!-- ═══ BEAT 3 — the closed loop, pays off beat 1 by name, CENTRED ════ -->
-      <section
-        data-pattern="clearing-plate"
-        data-anchor="left"
-        class="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-6 py-16 sm:px-[var(--spacing-24,6rem)]"
-        id="ask"
-      >
-        <img
-          src="../../../assets/images/new/chair-with-her-coat.png"
-          alt="A chair with a coat left over its back, in the garden room, no one in the frame."
-          class="plate pointer-events-none"
-          style="filter: brightness(0.44) saturate(1.06) contrast(1.04)"
-        />
-
-        <div
-          class="relative z-[2] w-full max-w-[540px] bg-pool-surface px-8 py-9 text-center text-pool-text sm:px-10 sm:py-12"
-        >
-          <h2
-            class="mx-auto mb-6 max-w-[24ch] font-display text-3xl leading-tight text-pool-text sm:text-4xl"
-          >
-            Ask for the Saturday you just read about. Nothing about the day
-            changes once you&rsquo;re in the room.
-          </h2>
-          <a
-            href="/book/workshop/reading-the-field"
-            data-kit-component="Button"
-            data-kit-variant="primary"
-            data-kit-size="lg"
-            class="inline-flex min-h-[44px] items-center gap-2 bg-accent-500 px-10 py-5 text-sm font-semibold text-surface-inverted no-underline transition-colors duration-fast hover:bg-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pool-text"
-          >
-            Request a place
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="h-[14px] w-[14px] shrink-0"
+        <!-- ══ HOW FULL IT IS ═══════════════════════════════════════════════
+           The count, plainly, as the line the photograph ends on. It used to
+           be drawn as ten marks; the operator asked for the count alone. -->
+        <div class="pb-12 lg:pb-16">
+          <p class="mt-4 fig font-mono text-[15px]">
+            <span class="text-gold">6 places left of 10</span>
+            <span class="text-plate-rule">
+              &middot; ten is what the room takes comfortably</span
             >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </a>
-          <p class="mt-4 text-sm text-pool-text-secondary">
-            Marianne replies herself, usually within a day.
           </p>
         </div>
-      </section>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
+      <div class="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
+        <div class="pt-14 lg:pt-20">
+          <!-- ══ WHERE IT IS ════════════════════════════════════════════════
+             Before the long body, because somebody who cannot get to Frome on
+             a Saturday should find that out before they read a thousand words.
+             The step-free line, the toilet, the parking and the buses used to
+             be four bullets in the middle of the prose; they belong here, next
+             to the address, and they are not said twice. -->
+          <section aria-labelledby="where">
+            <h2
+              id="where"
+              class="font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+            >
+              Where it is
+            </h2>
+
+            <div class="mt-7 grid gap-8 sm:grid-cols-[260px_minmax(0,1fr)]">
+              <div>
+                <h3
+                  class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+                >
+                  The address
+                </h3>
+                <address
+                  class="mt-4 not-italic text-[22px] leading-relaxed text-plate-text"
+                >
+                  The Garden Room<br />
+                  Fromefield<br />
+                  Frome<br />
+                  Somerset <span class="fig font-mono">BA11 2QN</span>
+                </address>
+                <a
+                  class="t mt-4 inline-block text-[17px] text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+                  href="https://www.google.com/maps/search/?api=1&amp;query=Fromefield%2C+Frome%2C+Somerset+BA11+2QN"
+                >
+                  Open this in a map
+                </a>
+              </div>
+
+              <div>
+                <h3
+                  class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+                >
+                  Getting there
+                </h3>
+                <ul
+                  class="mt-4 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+                >
+                  <li class="flex gap-4">
+                    <span
+                      aria-hidden="true"
+                      class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                    ></span>
+                    The room is on the ground floor, and it is step-free from
+                    the pavement to the chair you sit in.
+                  </li>
+                  <li class="flex gap-4">
+                    <span
+                      aria-hidden="true"
+                      class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                    ></span>
+                    There is an accessible toilet on the same floor.
+                  </li>
+                  <li class="flex gap-4">
+                    <span
+                      aria-hidden="true"
+                      class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                    ></span>
+                    There is parking on Fromefield, two minutes&rsquo; walk
+                    away.
+                  </li>
+                  <li class="flex gap-4">
+                    <span
+                      aria-hidden="true"
+                      class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                    ></span>
+                    It is eight minutes on foot from the market place, uphill on
+                    the way here.
+                  </li>
+                  <li class="flex gap-4">
+                    <span
+                      aria-hidden="true"
+                      class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                    ></span>
+                    The buses along Bath Road stop at the top of Fromefield.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- ══ WHAT THE DAY IS ════════════════════════════════════════════ -->
+          <section class="mt-16" aria-labelledby="what">
+            <h2
+              id="what"
+              class="font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+            >
+              What the day is
+            </h2>
+            <div
+              class="mt-6 flex max-w-[62ch] flex-col gap-5 text-[19px] leading-relaxed text-plate-soft"
+            >
+              <p>
+                You arrive at ten. There is coffee, a circle of ten chairs, and
+                nine other people who also did not quite know what to expect. We
+                go round the circle once, first names only, and you can say as
+                little as you like.
+              </p>
+              <p>
+                The morning is spent on attention &mdash; how to tell the
+                difference between what you are sensing and what you are
+                supplying. You work on your own hands first, then with the
+                person next to you. Most people find they have been doing this
+                for years without a name for it.
+              </p>
+              <p>
+                After lunch you work in pairs, and you swap halfway. You stay
+                clothed, seated and at arm&rsquo;s length throughout. Nobody
+                touches you. You can stop at any point, and you do not have to
+                say why.
+              </p>
+              <p>
+                No belief is asked of you. People arrive sceptical and leave
+                sceptical, and that is a perfectly good way to spend a Saturday.
+              </p>
+            </div>
+          </section>
+
+          <!-- ══ THE SHAPE OF THE DAY ═══════════════════════════════════════
+             Times are content on this site, not chrome: set in the mono face
+             with tabular figures so the column of hours actually aligns, on
+             rules that run the full measure. -->
+          <section class="mt-14" aria-labelledby="shape">
+            <h2
+              id="shape"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              The shape of the day
+            </h2>
+            <ul class="mt-6 border-t border-plate-rule/30">
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >10:00</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >Doors, coffee, and somewhere to put your coat.</span
+                >
+              </li>
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >10:30</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >The circle, and the morning&rsquo;s work on attention.</span
+                >
+              </li>
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >12:30</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >Lunch at the long table. An hour, and you can go
+                  outside.</span
+                >
+              </li>
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >13:30</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >Working in pairs, with a swap in the middle.</span
+                >
+              </li>
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >15:30</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >Back to the circle for whatever came up.</span
+                >
+              </li>
+              <li
+                class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+              >
+                <span
+                  class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                  >16:00</span
+                >
+                <span
+                  class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                  >We finish. There is tea for anyone who wants to stay.</span
+                >
+              </li>
+            </ul>
+          </section>
+
+          <!-- ══ WHAT TO BRING ══════════════════════════════════════════════ -->
+          <section class="mt-14" aria-labelledby="bring">
+            <h2
+              id="bring"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              What to bring
+            </h2>
+            <p
+              class="mt-5 max-w-[58ch] text-[19px] leading-relaxed text-plate-soft"
+            >
+              Almost nothing. There is nothing to buy on the day and nothing you
+              need to have read.
+            </p>
+            <ul
+              class="mt-6 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+            >
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Lunch, coffee and tea are included. Tell me what you cannot eat
+                when you book.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Wear whatever you can sit comfortably in for six hours.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Bring a notebook if you are someone who writes things down.
+                About half the room usually is.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Bring a jumper. The room is warm at eleven and cooler by four.
+              </li>
+            </ul>
+          </section>
+
+          <!-- The document that arrives with the confirmation email, named here
+             so it is not a surprise in an inbox. -->
+          <section class="mt-14" aria-labelledby="before">
+            <h2
+              id="before"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              Before you come
+            </h2>
+            <p
+              class="mt-5 max-w-[58ch] text-[19px] leading-relaxed text-plate-soft"
+            >
+              When you book, a short note comes with your confirmation &mdash;
+              two pages on what to expect, and one question to sit with
+              beforehand. You do not have to do anything with it, and nobody
+              asks about it on the day.
+            </p>
+          </section>
+
+          <!-- ══ THE ROOM, AND MARIANNE ═════════════════════════════════════
+             One film, given real size, then the stills. The order matters:
+             somebody deciding whether to spend a Saturday with a stranger wants
+             to see the room and hear the voice before they want a grid of
+             photographs. Nothing autoplays, and nothing loops. -->
+          <section class="mt-16" aria-labelledby="room">
+            <h2
+              id="room"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              The room, and Marianne
+            </h2>
+            <p
+              class="mt-4 max-w-[56ch] text-[19px] leading-relaxed text-plate-soft"
+            >
+              Forty seconds on the room and what the day is like. Worth it if
+              you have never done anything like this before.
+            </p>
+
+            <figure class="mt-7">
+              <!-- ⚠⚠ PLACEHOLDER FOOTAGE — DO NOT LET THIS REACH A LIVE SITE ⚠⚠
+                 the-room-web.mp4 is a stand-in clip: a man talking to camera
+                 against a brick wall. It is NOT Marianne and it is NOT the
+                 garden room. The poster frame is a frame of that same clip, so
+                 it shows him too. It is wired up as a real player rather than
+                 drawn as one so the region is honest about its own size and
+                 controls — swap the source and the poster together when the
+                 film is shot, and rewrite the running time in the caption in
+                 the same edit.
+
+                 Two things the earlier version of this page stated and should
+                 not have: the clip is 0:42, not 2:04, and there is no VTT
+                 anywhere in this project, so there is no track element here and
+                 no line claiming subtitles exist. -->
+              <video
+                class="block w-full bg-surface"
+                width="1600"
+                height="900"
+                controls
+                preload="metadata"
+                playsinline
+                poster="../../../assets/videos/the-room-poster.jpg"
+              >
+                <source
+                  src="../../../assets/videos/the-room-web.mp4"
+                  type="video/mp4"
+                />
+                <p
+                  class="px-6 py-8 text-[19px] leading-relaxed text-plate-soft"
+                >
+                  Your browser will not play this film here.
+                  <a
+                    class="text-gold underline decoration-gold underline-offset-4"
+                    href="../../../assets/videos/the-room-web.mp4"
+                    >Download it instead</a
+                  >
+                  &mdash; MP4, 2.3 MB.
+                </p>
+              </video>
+              <figcaption
+                class="mt-3 fig font-mono text-[15px] text-plate-rule"
+              >
+                0:42 &middot; no subtitles yet
+              </figcaption>
+            </figure>
+
+            <!-- The stills. Three are composed across the page and everybody sees
+               all three; the fourth is left visibly running off the right edge,
+               which is how the strip says there are more without an arrow, a
+               dot, or a word. Nothing is hidden and nothing waits for script. -->
+            <!-- No loading="lazy" on any of these on purpose: a lazy image below
+               the fold does not paint in a static full-page screenshot, and a
+               strip that reviews as an empty band is the same failure as one
+               gated behind a scroll-reveal. -->
+            <ul class="rail mt-9" id="stills">
+              <li id="photo-1">
+                <a class="shot" href="#photo-1">
+                  <img
+                    src="../../../assets/images/web/work-wide-the-room.jpg"
+                    alt="Marianne standing at the treatment table, her hands held a little above a man resting under a blanket."
+                    width="1600"
+                    height="900"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+              <li id="photo-2">
+                <a class="shot" href="#photo-2">
+                  <img
+                    src="../../../assets/images/web/chair-with-her-coat.jpg"
+                    alt="A wool coat over the back of a wooden chair, a canvas bag on the floor beside it."
+                    width="1600"
+                    height="1067"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+              <li id="photo-3">
+                <a class="shot" href="#photo-3">
+                  <img
+                    src="../../../assets/images/web/window-last-light.jpg"
+                    alt="A lit lamp and a spider plant on the deep sill of the window, the last blue daylight outside."
+                    width="1600"
+                    height="1067"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+              <li id="photo-4">
+                <a class="shot" href="#photo-4">
+                  <img
+                    src="../../../assets/images/web/work-close-hands.jpg"
+                    alt="Her hands held a hand&rsquo;s width above the blanket, their shadows falling on the cloth beneath."
+                    width="1600"
+                    height="1067"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+              <li id="photo-5">
+                <a class="shot" href="#photo-5">
+                  <img
+                    src="../../../assets/images/web/work-down-the-body.jpg"
+                    alt="Seen over her shoulder, down the length of someone lying still on the table."
+                    width="1600"
+                    height="1067"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+              <li id="photo-6">
+                <a class="shot" href="#photo-6">
+                  <img
+                    src="../../../assets/images/web/marianne-portrait-in-the-light.jpg"
+                    alt="Marianne, looking straight at the camera."
+                    width="1600"
+                    height="1067"
+                    class="aspect-[3/2] w-full object-cover"
+                  />
+                  <span class="vh">&mdash; open this photograph larger</span>
+                </a>
+              </li>
+            </ul>
+            <p
+              class="mt-4 max-w-[62ch] fig font-mono text-[15px] leading-relaxed text-plate-rule"
+            >
+              The Garden Room, Fromefield. Four of these are from one-to-one
+              sessions in the same room; the workshop photographs go up after
+              the October day.
+            </p>
+          </section>
+        </div>
+
+        <!-- ══ THE BOOKING PANEL ══════════════════════════════════════════════
+           The one blush pool on the page. It holds the single decision, and it
+           holds the cancellation terms with it — the moment somebody is
+           deciding to spend £95 is the moment they want to know what happens if
+           they cannot come. Putting that in a footer is how a practice ends up
+           arguing with people by email.
+
+           The ten marks from the masthead are repeated here at the size of the
+           control, in magenta rather than gold, because the ground changed and
+           in this system colour does a different job on each ground. -->
+        <aside id="book" class="lg:pt-20" aria-labelledby="book-h">
+          <div class="pool on-pool sticky top-8 px-7 py-8 sm:px-9">
+            <h2
+              id="book-h"
+              class="font-display text-[30px] font-normal leading-tight text-ink"
+            >
+              Take a place
+            </h2>
+
+            <div class="mt-5">
+              <p class="fig font-mono text-[16px] text-ink">
+                6 places left of 10
+              </p>
+            </div>
+
+            <div class="mt-7">
+              <label
+                for="qty"
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+              >
+                How many places
+              </label>
+              <div
+                class="mt-3 flex items-center border border-pool-rule"
+                role="group"
+                aria-label="Number of places"
+              >
+                <button
+                  type="button"
+                  class="step t"
+                  aria-label="One fewer place"
+                >
+                  &minus;
+                </button>
+                <input
+                  id="qty"
+                  class="qty"
+                  type="number"
+                  inputmode="numeric"
+                  value="2"
+                  min="1"
+                  max="6"
+                  aria-describedby="qty-cap"
+                />
+                <button
+                  type="button"
+                  class="step t"
+                  aria-label="One more place"
+                >
+                  +
+                </button>
+                <span class="ml-auto pr-5 fig font-mono text-[22px] text-ink"
+                  >&pound;190</span
+                >
+              </div>
+              <p
+                id="qty-cap"
+                class="mt-3 text-[15px] leading-relaxed text-ink-soft"
+              >
+                Up to 6 places &mdash; that is all that is left.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              class="t mt-7 min-h-[56px] w-full bg-action px-6 text-[19px] font-semibold text-pool hover:bg-ink"
+            >
+              Book 2 places &middot; &pound;190
+            </button>
+
+            <p class="mt-4 text-[15px] leading-relaxed text-ink-soft">
+              You pay through Stripe. I never see your card details.
+            </p>
+
+            <hr class="my-7 border-0 border-t border-pool-rule/40" />
+
+            <h3
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+            >
+              If you cannot come
+            </h3>
+            <p class="mt-3 text-[17px] leading-relaxed text-ink">
+              Cancel up to <strong class="font-semibold">14 days</strong> before
+              &mdash; by <span class="fig font-mono">Friday 10 October</span>
+              &mdash; and you are refunded in full. There is a link in your
+              confirmation email; you do not need to ask me.
+            </p>
+            <p class="mt-3 text-[17px] leading-relaxed text-ink-soft">
+              After that the place is held for you, and I cannot refund it.
+            </p>
+          </div>
+        </aside>
+      </div>
     </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work &middot; Frome, Somerset &middot; Complementary work.
+          Not a substitute for medical care.
+        </p>
+      </div>
+    </footer>
+
+    <!-- ══ THE PHOTOGRAPHS, OPENED ═══════════════════════════════════════════
+       ONE dialog for all six pictures, opened with `showModal()`. It replaces
+       six `:target` overlays that each wrote a new hash: every Next and
+       Previous was a navigation, so the overlay was destroyed and rebuilt
+       between pictures, the page flashed through the scrim on each press, and
+       the back button walked out through every photograph looked at. The URL
+       is now never written and the picture swaps in place.
+
+       It carries no picture and no sentence of its own. The image file and the
+       caption are read off the rail photograph that was clicked, at the moment
+       it is clicked, so the caption IS that photograph's description and the
+       two can never drift apart.
+
+       With script off this element is `display: none` — a `<dialog>` with no
+       `open` attribute always is — and the rail's anchors do the work
+       instead: see `.rail > li:target` in the stylesheet. -->
+    <dialog class="lb" id="lightbox" aria-label="Photograph, larger">
+      <div class="lb-inner">
+        <div class="lb-bar">
+          <p class="lb-count" id="lb-count">1 of 6</p>
+          <button class="lb-ctl t" type="button" id="lb-close" autofocus>
+            <span class="lb-arrow" aria-hidden="true">&times;</span>
+            Close
+          </button>
+        </div>
+        <figure class="lb-fig">
+          <img id="lb-img" alt="" width="1600" height="1067" />
+          <figcaption class="lb-cap" id="lb-cap"></figcaption>
+        </figure>
+        <div class="lb-foot">
+          <button class="lb-ctl t" type="button" id="lb-prev">
+            <span class="lb-arrow" aria-hidden="true">&larr;</span> Previous
+          </button>
+          <button class="lb-ctl t" type="button" id="lb-next">
+            Next <span class="lb-arrow" aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      </div>
+      <!-- One status line, not two. It says where you are and what you are
+         looking at, in that order, each time the picture changes. -->
+      <p class="vh" id="lb-say" role="status"></p>
+    </dialog>
+
+    <script>
+      /* THE PHOTOGRAPH MODAL
+       ────────────────────────────────────────────────────────────────────
+       The whole of the page's script. It gates nothing: every photograph,
+       every word and the entire composition are in the delivered HTML and
+       render whole with this file removed. All it does is intercept a click
+       on a rail photograph and open the dialog instead of following the
+       anchor.
+
+       Behaviour, deliberately:
+         · the URL never changes — the click is prevented, nothing is pushed
+         · Next / Previous swap src, alt and caption IN PLACE; the dialog is
+           never closed and reopened, so there is no flash and no history
+         · Escape closes it — native to showModal(), not reimplemented here
+         · Left / Right arrows move through the set
+         · focus enters the dialog on open and returns to the photograph that
+           opened it on close
+         · the ends do not wrap: at the first and last picture the button that
+           would go past it is disabled, so it takes no click and no focus
+         · clicking the backdrop closes it
+
+       Everything is guarded. If any of it is missing or throws, the function
+       returns and the rail keeps the plain-anchor behaviour it has without
+       script. A builder porting this to React should keep the shape: one
+       dialog, one index, no routing. */
+      (function () {
+        "use strict";
+        try {
+          var dlg = document.getElementById("lightbox");
+          var rail = document.getElementById("stills");
+          if (!dlg || !rail || typeof dlg.showModal !== "function") return;
+
+          var shots = Array.prototype.slice.call(
+            rail.querySelectorAll("a.shot"),
+          );
+          var img = document.getElementById("lb-img");
+          var cap = document.getElementById("lb-cap");
+          var count = document.getElementById("lb-count");
+          var say = document.getElementById("lb-say");
+          var prev = document.getElementById("lb-prev");
+          var next = document.getElementById("lb-next");
+          var closeBtn = document.getElementById("lb-close");
+          if (!shots.length || !img || !cap || !count || !say) return;
+          if (!prev || !next || !closeBtn) return;
+
+          var index = -1;
+          var opener = null;
+
+          /* Put picture i on the plate. The only place the dialog's contents are
+           ever written, so opening and stepping share one definition. */
+          function show(i) {
+            if (i < 0 || i >= shots.length) return false;
+            var source = shots[i].querySelector("img");
+            if (!source) return false;
+
+            var text = source.getAttribute("alt") || "";
+            img.setAttribute("src", source.getAttribute("src"));
+            img.setAttribute("width", source.getAttribute("width") || "1600");
+            img.setAttribute("height", source.getAttribute("height") || "1067");
+            cap.textContent = text;
+            count.textContent = i + 1 + " of " + shots.length;
+
+            /* The ends are ends. A disabled button is out of the tab order and
+             takes no pointer, and the stylesheet draws it spent. */
+            prev.disabled = i === 0;
+            next.disabled = i === shots.length - 1;
+
+            say.textContent = i + 1 + " of " + shots.length + ". " + text;
+            index = i;
+            return true;
+          }
+
+          function step(delta) {
+            var was = document.activeElement;
+            if (!show(index + delta)) return;
+            /* If the button just pressed has become an end, it has also lost
+             focus. Hand focus to the other one rather than dropping it on the
+             floor and stranding a keyboard user outside the controls. */
+            if (was && was.disabled) (was === prev ? next : prev).focus();
+          }
+
+          shots.forEach(function (link, i) {
+            link.addEventListener("click", function (event) {
+              /* Leave modified clicks alone — opening a photograph in a new tab
+               is a reasonable thing to want. */
+              if (
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+                return;
+              if (!show(i)) return;
+              event.preventDefault(); // the hash is never written
+              opener = link;
+              dlg.showModal();
+              document.documentElement.classList.add("lb-open");
+              closeBtn.focus();
+            });
+          });
+
+          prev.addEventListener("click", function () {
+            step(-1);
+          });
+          next.addEventListener("click", function () {
+            step(1);
+          });
+          closeBtn.addEventListener("click", function () {
+            dlg.close();
+          });
+
+          /* A click that lands on the dialog element itself is a click on the
+           backdrop: .lb-inner fills the plate edge to edge, so nothing else
+           can report the dialog as its target. */
+          dlg.addEventListener("click", function (event) {
+            if (event.target === dlg) dlg.close();
+          });
+
+          dlg.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              step(-1);
+            } else if (event.key === "ArrowRight") {
+              event.preventDefault();
+              step(1);
+            }
+            /* Escape is left to the dialog. */
+          });
+
+          /* Fires for the close button, the backdrop and Escape alike. */
+          dlg.addEventListener("close", function () {
+            document.documentElement.classList.remove("lb-open");
+            if (opener) {
+              opener.focus();
+              opener = null;
+            }
+          });
+        } catch (error) {
+          /* The rail keeps its anchors and its no-script behaviour. */
+        }
+      })();
+    </script>
   </body>
 </html>

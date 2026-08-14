@@ -1,11 +1,16 @@
 import type { ReactNode } from "react";
 
 /**
- * The admin rail — eleven sections, in the order the approved screens declare
+ * The admin rail — twelve sections, in the order the approved screens declare
  * them. The order is a claim about Marianne's day, not alphabetical filing:
- * what needs her attention first (Today, Calendar, Requests) sits above what
- * she edits occasionally (the page, offerings, pictures) above what she
- * configures once (availability, settings).
+ * what needs her attention first (Today, Calendar, Requests, Bookings) sits
+ * above what she edits occasionally (the page, offerings, pictures) above what
+ * she configures once (availability, settings).
+ *
+ * Requests and Bookings are two entries because they are two jobs (D-18).
+ * Requests is somebody asking for an hour and waiting for an answer; Bookings
+ * is money that has already moved. The approved screens put them next to each
+ * other and give them separate rows, which is the shape this follows.
  *
  * Icon markup is copied verbatim from docs/screens/admin/*.html. Redrawing
  * them by hand is how an icon set quietly drifts out of one visual world.
@@ -48,6 +53,16 @@ export const ADMIN_NAV: NavItem[] = [
       <>
         <path d="M22 12h-6l-2 3h-4l-2-3H2" />
         <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" />
+      </>
+    ),
+  },
+  {
+    href: "/admin/workshop-bookings",
+    label: "Bookings",
+    icon: (
+      <>
+        <path d="M2 9V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4Z" />
+        <path d="M13 5v2M13 11v2M13 17v2" strokeDasharray="0.1 4" />
       </>
     ),
   },

@@ -1,0 +1,1217 @@
+<!-- ============ MASTHEAD ============ -->
+<section class="pt-8" aria-labelledby="kinds-h">
+  <p
+    data-pattern="eyebrow"
+    class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+  >
+    Offerings
+  </p>
+  <h1
+    id="kinds-h"
+    data-kit-component="Heading"
+    data-kit-variant="display"
+    class="mt-4 max-w-[34ch] font-display text-4xl font-normal leading-tight text-text-primary sm:text-5xl"
+  >
+    Ten things you sell.<br />Three of them nobody can see yet.
+  </h1>
+  <p class="mt-5 max-w-[58ch] text-md leading-relaxed text-text-secondary">
+    Three kinds, one list each. Open any line to change it or to see who has
+    booked. Whether a thing is live on the site is marked on its own line.
+  </p>
+  <p
+    class="mt-5 max-w-[80ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+  >
+    &pound;2,545 taken since 1 July &middot; &pound;1,390 of that still
+    refundable &middot; 15 of 28 places gone across the three Saturdays
+  </p>
+</section>
+
+<!-- ============ TABS — links in their selected state ============ -->
+<nav
+  data-kit-component="Tabs"
+  aria-label="Kinds of offering"
+  class="mt-9 flex flex-wrap items-center gap-x-9 gap-y-1 border-b border-border"
+>
+  <a
+    href="/admin/offerings/services"
+    data-kit-component="Tab"
+    class="inline-flex min-h-[52px] items-center border-b-2 border-transparent font-mono text-md uppercase tracking-wide text-text-secondary transition-colors duration-fast hover:text-text-primary"
+    >Services <span class="ml-2 tabular-nums">4</span></a
+  >
+  <a
+    href="/admin/offerings/workshops"
+    data-kit-component="Tab"
+    data-kit-props="selected"
+    aria-current="page"
+    class="inline-flex min-h-[52px] items-center border-b-2 border-secondary-500 font-mono text-md uppercase tracking-wide text-secondary-500"
+    >Workshops <span class="ml-2 tabular-nums">4</span></a
+  >
+  <a
+    href="/admin/offerings/courses"
+    data-kit-component="Tab"
+    class="inline-flex min-h-[52px] items-center border-b-2 border-transparent font-mono text-md uppercase tracking-wide text-text-secondary transition-colors duration-fast hover:text-text-primary"
+    >Courses <span class="ml-2 tabular-nums">2</span></a
+  >
+</nav>
+
+<!-- ============ THE SELECTED TAB: WORKSHOPS ============ -->
+<section class="mt-9" aria-labelledby="coming-h">
+  <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
+    <div>
+      <h2
+        id="coming-h"
+        data-pattern="eyebrow"
+        class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+      >
+        Coming up
+      </h2>
+      <p class="mt-2 font-mono text-xs tabular-nums text-text-secondary">
+        3 Saturdays &middot; &pound;1,140 taken on the days themselves
+      </p>
+    </div>
+    <a
+      href="/admin/offerings/workshops/new"
+      data-kit-component="Button"
+      data-kit-variant="primary"
+      data-kit-size="lg"
+      class="inline-flex min-h-[56px] items-center gap-3 bg-secondary-500 px-9 text-md font-semibold text-text-inverted transition-colors duration-normal hover:bg-text-primary"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-4 w-4"
+        aria-hidden="true"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Put a new workshop in the diary
+    </a>
+  </div>
+
+  <div class="mt-8" data-kit-component="OfferingList">
+    <!-- The whole row is the link. She is often doing this on a
+                     phone between sessions; a small "edit" target is a miss. -->
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="workshop"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/workshops/reading-the-field"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          Sat 20 Sep<br /><span class="text-text-secondary"
+            >10:00&ndash;16:30</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/aura-seated-figure.png"
+          alt="A seated figure in low light, hands resting"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            Reading the Field
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            A day of learning to notice what you already notice. The morning on
+            attention, the afternoon in pairs.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <!-- one mark per real place -->
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="sold-6-of-10"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            One of the six came through the Autumn Course, so five were paid
+            against this day.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;95</p>
+          <p class="mt-1 text-sm text-text-primary">6 of 10 places gone</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;475
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p class="mt-3 text-xs text-text-secondary">
+            Refundable in full until Sat 6 Sep
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="workshop"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/workshops/grounding-for-beginners"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          Sat 11 Oct<br /><span class="text-text-secondary"
+            >10:00&ndash;16:00</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/work-down-the-body.png"
+          alt="Hands moving slowly down the length of the body"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            Grounding for Beginners
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            For anyone who has never done this before and would rather not be
+            the only one. Nothing assumed.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="sold-1-of-10"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            The one place is the Autumn Course place. Nobody has booked this
+            Saturday on its own yet.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;85</p>
+          <p class="mt-1 text-sm text-text-primary">1 of 10 places gone</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;0
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p class="mt-3 text-xs text-text-secondary">
+            Refundable in full until Sat 27 Sep
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <!-- Full, and still a link — the detail page holds the waiting
+                     list, which is the reason to open it. -->
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="workshop"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/workshops/the-long-attention"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          Sat 8 Nov<br /><span class="text-text-secondary"
+            >10:00&ndash;16:30</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/aura-hands-between.png"
+          alt="Two pairs of hands held a little apart"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            The Long Attention
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            A second day for people who have sat one before. Slower, and further
+            in.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="full-8-of-8-waiting-3"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="mx-2 block h-7 w-px bg-text-primary"></span>
+            <span class="block h-5 w-2 border border-text-primary"></span>
+            <span class="block h-5 w-2 border border-text-primary"></span>
+            <span class="block h-5 w-2 border border-text-primary"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            Three people are waiting, drawn past the line where the room ends.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;95</p>
+          <p class="mt-1 text-sm text-text-primary">Full &middot; 8 of 8</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;665
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p class="mt-3 text-xs text-text-secondary">
+            Refundable in full until Sat 18 Oct
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="neutral"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-text-primary md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-text-primary" aria-hidden="true"></span>
+            Live &middot; showing as full
+          </p>
+        </div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ WRITTEN, NOT YET DATED ============
+     A workshop with no day is not part of the run of Saturdays, so it sits
+     below them rather than inside them. Its own heading is what says so. -->
+<section class="mt-16" aria-labelledby="undated-h">
+  <h2
+    id="undated-h"
+    data-pattern="eyebrow"
+    data-variant="muted"
+    class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+  >
+    Written, no day yet
+  </h2>
+  <p
+    class="mt-2 max-w-[64ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+  >
+    Not a Saturday yet, so it sits under the three above rather than among them,
+    and is counted in none of their places or money
+  </p>
+
+  <div class="mt-8">
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="workshop"
+      data-kit-props="draft"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/workshops/coming-back"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-text-secondary">
+          No date<br />set yet
+        </p>
+        <p
+          class="flex aspect-[4/5] w-full max-w-[140px] items-center justify-center border border-border-strong p-3 text-center font-mono text-xs uppercase tracking-wide text-text-secondary"
+        >
+          No picture yet
+        </p>
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            Coming Back
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            For people who came to one of these a few years ago and then
+            stopped. I want it shorter than the others &mdash; a morning,
+            perhaps &mdash; and I have not settled that yet.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="sold-0-of-10"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            Ten places, and no day yet to hold them. Pick the Saturday and it
+            goes on the site.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;85</p>
+          <p class="mt-1 text-sm text-text-secondary">0 of 10 places gone</p>
+          <p class="mt-3 text-lg text-text-secondary">
+            &pound;0
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="neutral"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-text-secondary md:justify-end"
+          >
+            <span
+              class="h-1.5 w-1.5 bg-text-secondary"
+              aria-hidden="true"
+            ></span>
+            Not on the site
+          </p>
+        </div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ ALREADY HAPPENED ============ -->
+<section class="mt-20" aria-labelledby="past-h">
+  <h2
+    id="past-h"
+    data-pattern="eyebrow"
+    data-variant="muted"
+    class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+  >
+    Already happened
+  </h2>
+  <p class="mt-2 font-mono text-xs tabular-nums text-text-secondary">
+    Kept so the money and the room stay on the record
+  </p>
+
+  <div class="mt-8">
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="finished"
+      class="border-t border-border py-7"
+    >
+      <a
+        href="/admin/offerings/workshops/reading-the-field"
+        class="grid gap-4 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-text-secondary">
+          Sat 14 Jun
+        </p>
+        <p
+          class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+        >
+          Finished
+        </p>
+        <div>
+          <h3
+            class="font-display text-2xl font-normal leading-tight text-text-primary"
+          >
+            Reading the Field
+          </h3>
+          <p class="mt-2 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome &middot; 10 places &middot; 10 came
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-md text-text-primary">&pound;950</p>
+          <p class="mt-1 text-xs text-text-secondary">
+            Taken &middot; nothing outstanding
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="finished"
+      class="border-t border-border py-7"
+    >
+      <a
+        href="/admin/offerings/workshops/grounding-for-beginners"
+        class="grid gap-4 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-text-secondary">
+          Sat 22 Mar
+        </p>
+        <p
+          class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+        >
+          Finished
+        </p>
+        <div>
+          <h3
+            class="font-display text-2xl font-normal leading-tight text-text-primary"
+          >
+            Grounding for Beginners
+          </h3>
+          <p class="mt-2 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome &middot; 10 places &middot; 8 came, 2 went
+            unsold
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-md text-text-primary">&pound;680</p>
+          <p class="mt-1 text-xs text-text-secondary">
+            Taken &middot; nothing outstanding
+          </p>
+        </div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ THE COURSES TAB ============ -->
+<section class="mt-20" aria-labelledby="courses-h">
+  <p
+    data-pattern="eyebrow"
+    class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+  >
+    The Courses tab
+  </p>
+  <div class="mt-3 flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
+    <div>
+      <h2
+        id="courses-h"
+        class="font-display text-3xl font-normal leading-tight text-text-primary"
+      >
+        A run of Saturdays, sold once
+      </h2>
+      <p class="mt-2 font-mono text-xs tabular-nums text-text-secondary">
+        A course carries its sessions and a deposit, so the line holds dates
+        where a workshop holds one
+      </p>
+    </div>
+    <a
+      href="/admin/offerings/courses/new"
+      data-kit-component="Button"
+      data-kit-variant="primary"
+      data-kit-size="lg"
+      class="inline-flex min-h-[56px] items-center gap-3 bg-secondary-500 px-9 text-md font-semibold text-text-inverted transition-colors duration-normal hover:bg-text-primary"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-4 w-4"
+        aria-hidden="true"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Start a new course
+    </a>
+  </div>
+
+  <div class="mt-8">
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="course"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/courses/the-autumn-course"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          Sat 20 Sep<br />Sat 11 Oct<br />Sat 8 Nov<br /><span
+            class="text-text-secondary"
+            >3 sessions</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/work-wide-the-room.png"
+          alt="The whole room, chairs set out and waiting"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            The Autumn Course
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            The three autumn Saturdays taken together, in order. Same days, same
+            room, one payment.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="sold-1-of-6"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 bg-text-primary"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            The one person who has booked holds a seat in all three Saturdays,
+            counted once in each of them above.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;250</p>
+          <p class="mt-1 text-xs text-text-secondary">
+            &pound;60 deposit holds a place
+          </p>
+          <p class="mt-1 text-sm text-text-primary">1 of 6 places gone</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;250
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken in full</span
+            >
+          </p>
+          <p class="mt-3 text-xs text-text-secondary">
+            Refundable in full until Sat 23 Aug
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="course"
+      data-kit-props="draft"
+      class="border-t border-border py-9"
+    >
+      <a
+        href="/admin/offerings/courses/the-winter-course"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-text-secondary">
+          No dates<br />set yet
+        </p>
+        <p
+          class="flex aspect-[4/5] w-full max-w-[140px] items-center justify-center border border-border-strong p-3 text-center font-mono text-xs uppercase tracking-wide text-text-secondary"
+        >
+          No picture yet
+        </p>
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            The Winter Course
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            Three Saturdays in the new year, written but not yet dated. It goes
+            on the site once the dates are in.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+          <p
+            data-kit-component="PlaceMarks"
+            data-kit-variant="sold-0-of-6"
+            class="mt-4 flex items-end gap-1"
+            aria-hidden="true"
+          >
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+            <span class="block h-5 w-2 border border-border-strong"></span>
+          </p>
+          <p
+            class="mt-2 max-w-[52ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+          >
+            Nothing can be sold until it has dates.
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;250</p>
+          <p class="mt-1 text-xs text-text-secondary">
+            &pound;60 deposit holds a place
+          </p>
+          <p class="mt-1 text-sm text-text-secondary">0 of 6 places gone</p>
+          <p class="mt-3 text-lg text-text-secondary">
+            &pound;0
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="neutral"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-text-secondary md:justify-end"
+          >
+            <span
+              class="h-1.5 w-1.5 bg-text-secondary"
+              aria-hidden="true"
+            ></span>
+            Not on the site
+          </p>
+        </div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ THE SERVICES TAB ============ -->
+<section class="mt-20" aria-labelledby="services-h">
+  <p
+    data-pattern="eyebrow"
+    class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+  >
+    The Services tab
+  </p>
+  <div class="mt-3 flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
+    <div>
+      <h2
+        id="services-h"
+        class="font-display text-3xl font-normal leading-tight text-text-primary"
+      >
+        One person at a time
+      </h2>
+      <p
+        class="mt-2 max-w-[56ch] font-mono text-xs tabular-nums leading-relaxed text-text-secondary"
+      >
+        No date and no room to fill, so the line carries a length instead of a
+        day and a count of sessions instead of places &middot; 20 booked since 1
+        July &middot; &pound;1,155 taken
+      </p>
+    </div>
+    <a
+      href="/admin/offerings/services/new"
+      data-kit-component="Button"
+      data-kit-variant="primary"
+      data-kit-size="lg"
+      class="inline-flex min-h-[56px] items-center gap-3 bg-secondary-500 px-9 text-md font-semibold text-text-inverted transition-colors duration-normal hover:bg-text-primary"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-4 w-4"
+        aria-hidden="true"
+      >
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Add a new session
+    </a>
+  </div>
+
+  <div class="mt-8">
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="service"
+      class="border-t border-border py-8"
+    >
+      <a
+        href="/admin/offerings/services/the-hour"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          60 minutes<br /><span class="text-text-secondary"
+            >by appointment</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/aura-light-in-a-room.png"
+          alt="Late light across an otherwise dark room"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            The hour
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            The ordinary hour, for people who have been before. You stay clothed
+            and seated; nobody touches you.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome &middot; the busiest thing on this page
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;60</p>
+          <p class="mt-1 text-sm text-text-primary">9 sessions booked</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;540
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken since 1 July</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="service"
+      class="border-t border-border py-8"
+    >
+      <a
+        href="/admin/offerings/services/first-session"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          90 minutes<br /><span class="text-text-secondary"
+            >by appointment</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/marianne-room-aglow.png"
+          alt="The room lit low, before anyone arrives"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            First session
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            The longer opening session, for anyone who has not been before. Half
+            an hour of it is talking.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;75</p>
+          <p class="mt-1 text-sm text-text-primary">4 sessions booked</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;300
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken since 1 July</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="service"
+      class="border-t border-border py-8"
+    >
+      <a
+        href="/admin/offerings/services/follow-up"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-secondary-500">
+          45 minutes<br /><span class="text-text-secondary"
+            >by appointment</span
+          >
+        </p>
+        <img
+          src="../../../assets/images/new/window-last-light.png"
+          alt="The last of the daylight at a window"
+          width="140"
+          height="175"
+          class="aspect-[4/5] w-full max-w-[140px] object-cover"
+        />
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            Follow-up
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            A shorter sitting, usually within a fortnight of a session. Booked
+            by people who have just been.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            The Garden Room, Frome
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;45</p>
+          <p class="mt-1 text-sm text-text-primary">7 sessions booked</p>
+          <p class="mt-3 text-lg text-text-primary">
+            &pound;315
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken since 1 July</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="success"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-success md:justify-end"
+          >
+            <span class="h-1.5 w-1.5 bg-success" aria-hidden="true"></span>
+            Live on the site
+          </p>
+        </div>
+      </a>
+    </article>
+
+    <article
+      data-kit-component="OfferingRow"
+      data-kit-variant="service"
+      data-kit-props="draft"
+      class="border-t border-border py-8"
+    >
+      <a
+        href="/admin/offerings/services/an-hour-at-your-house"
+        class="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p class="font-mono text-md tabular-nums text-text-secondary">
+          60 minutes<br /><span>at your table</span>
+        </p>
+        <p
+          class="flex aspect-[4/5] w-full max-w-[140px] items-center justify-center border border-border-strong p-3 text-center font-mono text-xs uppercase tracking-wide text-text-secondary"
+        >
+          No picture yet
+        </p>
+        <div>
+          <h3
+            class="font-display text-3xl font-normal leading-tight text-text-primary"
+          >
+            An hour at your house
+          </h3>
+          <p
+            class="mt-3 max-w-[52ch] text-md leading-relaxed text-text-secondary"
+          >
+            The same hour, at your own kitchen table, within five miles of
+            Frome. Written, priced, and not yet shown to anyone.
+          </p>
+          <p class="mt-4 font-mono text-xs tabular-nums text-text-secondary">
+            Nobody can book it while it is off the site
+          </p>
+        </div>
+        <div class="font-mono tabular-nums md:text-right">
+          <p class="text-lg text-text-primary">&pound;85</p>
+          <p class="mt-1 text-sm text-text-secondary">0 sessions booked</p>
+          <p class="mt-3 text-lg text-text-secondary">
+            &pound;0
+            <span
+              class="block text-xs uppercase tracking-wide text-text-secondary"
+              >taken</span
+            >
+          </p>
+          <p
+            data-kit-component="StatusBadge"
+            data-kit-variant="neutral"
+            class="mt-3 flex items-center gap-2 text-xs uppercase tracking-wide text-text-secondary md:justify-end"
+          >
+            <span
+              class="h-1.5 w-1.5 bg-text-secondary"
+              aria-hidden="true"
+            ></span>
+            Not on the site
+          </p>
+        </div>
+      </a>
+    </article>
+  </div>
+</section>
+
+<!-- ============ THE OTHER STATES ============ -->
+<section class="mt-20" aria-labelledby="states-h">
+  <h2
+    id="states-h"
+    data-pattern="eyebrow"
+    data-variant="muted"
+    class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+  >
+    The same list, holding a different situation
+  </h2>
+
+  <!-- EMPTY — day one, and it still has to be worth arriving at -->
+  <div
+    data-state="empty"
+    data-kit-component="EmptyState"
+    class="mt-8 border-t border-border pt-8"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-secondary-500">
+      Empty &mdash; the first morning
+    </p>
+    <div
+      data-pattern="clearing-plate"
+      data-variant="admin-panel"
+      class="on-pool mt-6 grid max-w-[860px] gap-8 bg-pool-surface px-8 py-9 text-pool-text md:grid-cols-[160px_1fr] md:items-start"
+    >
+      <img
+        src="../../../assets/images/new/chair-with-her-coat.png"
+        alt="A single chair with a coat over the back of it"
+        width="160"
+        height="200"
+        class="aspect-[4/5] w-full max-w-[160px] object-cover"
+      />
+      <div>
+        <h3
+          class="font-display text-3xl font-normal leading-tight text-pool-text"
+        >
+          Nothing in the diary yet
+        </h3>
+        <p
+          class="mt-4 max-w-[48ch] text-md leading-relaxed text-pool-text-secondary"
+        >
+          Your Workshops, Courses and Services pages are already live, and they
+          are showing nothing. Put one Saturday in and the page writes itself
+          &mdash; the date, the price and the ten empty places all come from
+          what you type.
+        </p>
+        <a
+          href="/admin/offerings/workshops/new"
+          data-kit-component="Button"
+          data-kit-variant="primary"
+          data-kit-size="md"
+          class="mt-7 inline-flex min-h-[52px] items-center bg-accent-500 px-8 text-md font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+        >
+          Put a new workshop in the diary
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div
+    data-state="loading"
+    data-kit-component="Skeleton"
+    aria-busy="true"
+    class="mt-12 border-t border-border pt-8"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-text-secondary">
+      Loading
+    </p>
+    <div
+      class="mt-6 grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      aria-hidden="true"
+    >
+      <div class="flex flex-col gap-2">
+        <div class="skel h-4 w-24"></div>
+        <div class="skel h-3 w-20"></div>
+      </div>
+      <div class="skel aspect-[4/5] w-full max-w-[140px]"></div>
+      <div class="flex flex-col gap-3">
+        <div class="skel h-7 w-3/5"></div>
+        <div class="skel h-3.5 w-4/5"></div>
+        <div class="skel h-3.5 w-2/3"></div>
+        <p class="mt-1 flex items-end gap-1">
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+          <span class="block h-5 w-2 border border-border-strong"></span>
+        </p>
+      </div>
+      <div class="flex flex-col gap-2 md:items-end">
+        <div class="skel h-5 w-16"></div>
+        <div class="skel h-3.5 w-28"></div>
+      </div>
+    </div>
+    <p
+      class="mt-5 max-w-[60ch] font-mono text-xs leading-relaxed text-text-secondary"
+    >
+      The marks stay hollow until the count arrives. None of them is a guess,
+      and no price appears before it is read.
+    </p>
+  </div>
+
+  <!-- ERROR -->
+  <div
+    data-state="error"
+    data-kit-component="ErrorState"
+    class="mt-12 border-t border-border pt-8"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-danger">Error</p>
+    <h3
+      class="mt-3 font-display text-3xl font-normal leading-tight text-danger"
+    >
+      Couldn&rsquo;t load your offerings
+    </h3>
+    <p class="mt-3 max-w-[62ch] text-md leading-relaxed text-text-secondary">
+      Nothing on the public site has changed. People can still see the same
+      dates and prices they could a minute ago, and places can still be bought.
+      Only this page is out of reach.
+    </p>
+    <div class="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
+      <a
+        href="/admin/offerings"
+        data-kit-component="Link"
+        class="inline-flex min-h-[44px] items-center text-md font-medium text-secondary-500 underline decoration-1 underline-offset-4 transition-colors duration-fast hover:text-text-primary"
+        >Try again</a
+      >
+      <p class="font-mono text-xs tabular-nums text-text-secondary">
+        Last good read 08:52 &middot; 3 attempts since
+      </p>
+    </div>
+  </div>
+
+  <!-- OVERFLOW -->
+  <div
+    data-state="overflow"
+    data-kit-component="OverflowState"
+    class="mt-12 border-t border-border pt-8"
+  >
+    <p class="font-mono text-xs uppercase tracking-wide text-text-secondary">
+      Overflow
+    </p>
+    <h3
+      class="mt-3 font-display text-3xl font-normal leading-tight text-text-primary"
+    >
+      42 offerings on file
+    </h3>
+    <p class="mt-3 max-w-[62ch] text-md leading-relaxed text-text-secondary">
+      The 10 above are on sale or drafted. The other 32 have already happened.
+      They stay on file so the money taken and the people who came keep their
+      record.
+    </p>
+    <a
+      href="#past-h"
+      data-kit-component="Link"
+      class="mt-3 inline-flex min-h-[44px] items-center text-md font-medium text-secondary-500 underline decoration-1 underline-offset-4 transition-colors duration-fast hover:text-text-primary"
+    >
+      Show the 32 that have finished
+    </a>
+  </div>
+</section>

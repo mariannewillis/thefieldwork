@@ -25,24 +25,40 @@ const LOG = process.argv[3];
 const EMAIL = "nagrom.1990@gmail.com";
 const NEWPW = "window-lamp-dusk-sill";
 
-let pass = 0, fail = 0;
-const ok = (n, c, d = "") => { c ? (pass++, console.log(`  PASS  ${n}`)) : (fail++, console.log(`  FAIL  ${n}${d ? ` — ${d}` : ""}`)); };
+let pass = 0,
+  fail = 0;
+const ok = (n, c, d = "") => {
+  c
+    ? (pass++, console.log(`  PASS  ${n}`))
+    : (fail++, console.log(`  FAIL  ${n}${d ? ` — ${d}` : ""}`));
+};
 
 const b = await chromium.launch();
 const page = async () => (await b.newContext()).newPage();
 const path = (p) => new URL(p.url()).pathname;
 
 const linkFromLog = () => {
-  const m = [...fs.readFileSync(LOG, "utf8").matchAll(/\/admin\/reset-password\?token=([A-Za-z0-9_-]+)/g)];
+  const m = [
+    ...fs
+      .readFileSync(LOG, "utf8")
+      .matchAll(/\/admin\/reset-password\?token=([A-Za-z0-9_-]+)/g),
+  ];
   return m.length ? m[m.length - 1][0] : null;
 };
 
 // 1 — the flow is reachable without a session
 let p = await page();
 await p.goto(`${BASE}/admin/forgot-password`);
-ok("forgot-password is reachable signed out", path(p) === "/admin/forgot-password", path(p));
+ok(
+  "forgot-password is reachable signed out",
+  path(p) === "/admin/forgot-password",
+  path(p),
+);
 await p.goto(`${BASE}/admin/login`);
-ok("sign-in links to it", await p.locator('a[href="/admin/forgot-password"]').count() > 0);
+ok(
+  "sign-in links to it",
+  (await p.locator('a[href="/admin/forgot-password"]').count()) > 0,
+);
 
 // 2 — an address that is NOT registered gets the same answer
 const before = linkFromLog();
@@ -60,34 +76,54 @@ await p.fill('input[name="email"]', EMAIL);
 await p.click('button[type="submit"]');
 await p.waitForTimeout(2500);
 const link = linkFromLog();
-ok("a reset link is generated for the registered address", link !== null && link !== before);
-if (!link) { console.log(`\n  ${pass} passed, ${fail} failed`); await b.close(); process.exit(1); }
+ok(
+  "a reset link is generated for the registered address",
+  link !== null && link !== before,
+);
+if (!link) {
+  console.log(`\n  ${pass} passed, ${fail} failed`);
+  await b.close();
+  process.exit(1);
+}
 
 // 4 — a tampered token is refused
 const q = await page();
 await q.goto(`${BASE}${link.replace(/token=(.{8})/, "token=AAAAAAAA")}`);
-ok("a tampered token shows the expired screen", (await q.locator("text=/link has expired/i").count()) > 0);
+ok(
+  "a tampered token shows the expired screen",
+  (await q.locator("text=/link has expired/i").count()) > 0,
+);
 
 // 5 — too-short password is refused by the SERVER, and does not burn the link
 await p.goto(`${BASE}${link}`);
 await p.waitForSelector('input[name="password"]');
-await p.evaluate(() => document.querySelector('input[name="password"]').removeAttribute("minlength"));
+await p.evaluate(() =>
+  document.querySelector('input[name="password"]').removeAttribute("minlength"),
+);
 await p.fill('input[name="password"]', "short1");
 await p.fill('input[name="confirm"]', "short1");
 await p.click('button[type="submit"]');
 await p.waitForTimeout(1500);
-ok("server refuses a short password on reset", (await p.locator('p[role="alert"]').count()) > 0);
+ok(
+  "server refuses a short password on reset",
+  (await p.locator('p[role="alert"]').count()) > 0,
+);
 
 await p.goto(`${BASE}${link}`);
-ok("...and the link still works afterwards (not burned by a failed attempt)",
-   (await p.locator('input[name="password"]').count()) > 0);
+ok(
+  "...and the link still works afterwards (not burned by a failed attempt)",
+  (await p.locator('input[name="password"]').count()) > 0,
+);
 
 // 6 — mismatch refused
 await p.fill('input[name="password"]', NEWPW);
 await p.fill('input[name="confirm"]', NEWPW + "x");
 await p.click('button[type="submit"]');
 await p.waitForTimeout(1500);
-ok("mismatched confirmation is refused", (await p.locator('p[role="alert"]').count()) > 0);
+ok(
+  "mismatched confirmation is refused",
+  (await p.locator('p[role="alert"]').count()) > 0,
+);
 
 // 7 — the real reset
 await p.goto(`${BASE}${link}`);
@@ -95,13 +131,18 @@ await p.waitForSelector('input[name="password"]');
 await p.fill('input[name="password"]', NEWPW);
 await p.fill('input[name="confirm"]', NEWPW);
 await p.click('button[type="submit"]');
-await p.waitForURL((u) => new URL(u).pathname === "/admin", { timeout: 30000 }).catch(() => {});
+await p
+  .waitForURL((u) => new URL(u).pathname === "/admin", { timeout: 30000 })
+  .catch(() => {});
 ok("a valid reset signs you straight in", path(p) === "/admin", path(p));
 
 // 8 — single use
 const r = await page();
 await r.goto(`${BASE}${link}`);
-ok("the link cannot be used twice", (await r.locator("text=/link has expired/i").count()) > 0);
+ok(
+  "the link cannot be used twice",
+  (await r.locator("text=/link has expired/i").count()) > 0,
+);
 
 // 9 — the new password works at the normal sign-in
 const s = await page();
@@ -119,7 +160,10 @@ await t.fill('input[name="username"]', "mariannevwillis");
 await t.fill('input[name="password"]', NEWPW);
 await t.click('button[type="submit"]');
 await t.waitForTimeout(2000);
-ok("the reset did NOT change the other account's password", path(t) === "/admin/login");
+ok(
+  "the reset did NOT change the other account's password",
+  path(t) === "/admin/login",
+);
 
 await b.close();
 console.log(`\n  ${pass} passed, ${fail} failed`);

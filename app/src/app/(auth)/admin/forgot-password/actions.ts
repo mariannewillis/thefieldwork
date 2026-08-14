@@ -16,7 +16,8 @@ export type ForgotState = { sent: boolean; error: string | null };
  * them the owner's, that is worth knowing to an attacker. So the answer is
  * always "if it's here, it's on its way".
  */
-const ALWAYS = "If that address belongs to an account, a reset link is on its way. It expires in an hour.";
+const ALWAYS =
+  "If that address belongs to an account, a reset link is on its way. It expires in an hour.";
 
 export async function requestReset(
   _prev: ForgotState,
@@ -38,7 +39,10 @@ export async function requestReset(
   recordFailure(`reset:${caller}`);
 
   if (!email || !email.includes("@")) {
-    return { sent: false, error: "Please enter the email address for the account." };
+    return {
+      sent: false,
+      error: "Please enter the email address for the account.",
+    };
   }
 
   const user = await findByEmail(email);

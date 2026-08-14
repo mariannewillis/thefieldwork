@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Change the name shown across the site and in emails",
         "Update the address people reply to",
-        "Change your password"
+        "Change your password",
       ]}
     />
   );

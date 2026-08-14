@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "See who has joined and when",
         "Remove someone who has asked to be taken off",
-        "Export the list, so it is yours and not locked in here"
+        "Export the list, so it is yours and not locked in here",
       ]}
     />
   );

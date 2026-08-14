@@ -35,7 +35,8 @@ export type SendResult = {
  * Who mail comes from. Must be a domain verified in Resend — until the DNS
  * records are in place on the sending subdomain, Resend rejects anything else.
  */
-const FROM = process.env.EMAIL_FROM ?? "The Field Work <hello@thefieldwork.co.uk>";
+const FROM =
+  process.env.EMAIL_FROM ?? "The Field Work <hello@thefieldwork.co.uk>";
 
 /**
  * Where replies go.

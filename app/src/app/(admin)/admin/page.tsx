@@ -10,7 +10,7 @@ export default function Page() {
       next={[
         "See who is booked in today, at a glance",
         "Answer the requests that are waiting on your yes or no",
-        "Pick up anything that came in overnight"
+        "Pick up anything that came in overnight",
       ]}
     />
   );

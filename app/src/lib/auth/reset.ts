@@ -46,10 +46,13 @@ export type ResetOutcome =
 export async function inspectResetToken(token: string): Promise<ResetOutcome> {
   if (!token) return { ok: false, reason: "invalid" };
   const hash = createHash("sha256").update(token).digest("hex");
-  const row = await prisma.passwordResetToken.findUnique({ where: { tokenHash: hash } });
+  const row = await prisma.passwordResetToken.findUnique({
+    where: { tokenHash: hash },
+  });
   if (!row) return { ok: false, reason: "invalid" };
   if (row.usedAt) return { ok: false, reason: "used" };
-  if (row.expiresAt.getTime() < Date.now()) return { ok: false, reason: "expired" };
+  if (row.expiresAt.getTime() < Date.now())
+    return { ok: false, reason: "expired" };
 
   // The lookup above is by unique hash, so this comparison is belt and braces
   // against a future change that makes the lookup non-exact.

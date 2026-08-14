@@ -398,3 +398,394 @@ Verified by `app/e2e/reset-smoke.mjs` — 13 checks — plus the existing 22 in
 `RESEND_API_KEY` in Replit Secrets, and a sending domain verified in Resend
 (DNS records on GoDaddy). Until both are in place the flow works end to end but
 the link only reaches the server log.
+
+## D-14 · Pictures are uploaded; film is a pasted link (2026-08-13)
+
+**Operator decision:** _"Pictures I should be able to set from pictures on my
+computer … same with video"_. The two halves turn out to want opposite answers.
+
+**Pictures upload, and are re-encoded on the way in.** `scripts/_tmp-optimise-assets.mjs`
+is promoted into the app as `app/src/lib/media/` — same widths, same encoders,
+same qualities — so a photograph she adds is indistinguishable from one we
+generated, which is what D-6 said had to happen. She chooses a file; the server
+refuses anything whose first bytes are not a JPEG, PNG, WebP or AVIF, decodes
+it, applies the palette treatment (§12), and writes the six derivatives under a
+name it slugifies itself. The original is never stored and the name her file
+arrived with never becomes a path. Alt text stays required.
+
+**Where they are kept is a port with two adapters**, chosen by whether
+`MEDIA_BUCKET_ID` is set — the same rule as `RESEND_API_KEY`, and for the same
+reason. Without it, `app/public/media` on local disk. With it, Replit Object
+Storage, served through `/media/[file]`. **Local disk must not be the
+production store**: Replit's filesystem does not survive a redeploy, which is
+the failure that kept restoring the temporary admin password until the
+credential moved into Postgres (D-11) — except that here it takes the
+photographs with it. The bucket adapter is written and type-checks but has
+never made a real call; the first deploy that sets `MEDIA_BUCKET_ID` is its
+test.
+
+**Film is a LINK, not an upload.** Her source file is 604 MB. Accepting that
+would mean an encoding queue, somewhere to keep the output and a way to tell
+her it had finished — three things to go wrong in place of a provider that
+already does it. So she puts the film on Vimeo or YouTube and pastes the
+address; `filmUrl` holds what she pasted and `src/lib/film.ts` derives the
+player from it at render.
+
+**The still and the length are no longer hers to type.** Both belong to the
+film and both are read from the provider's oEmbed when the link is saved — a
+duration typed by hand is a figure with no source behind it (D-9). Vimeo
+reports a duration; YouTube does not, so a YouTube film simply says less.
+Neither can stop a save: an unreachable provider leaves both null and the page
+shows a plain plate, exactly as the address lookup never blocks a save (D-15).
+
+**The player is click-to-load, and the still is fetched rather than linked.**
+An ordinary embed reaches the provider when the page opens — cookies set, the
+read reported — on a page for a hands-off practice with a privacy notice on it.
+So the provider is not contacted until somebody presses play, and the poster
+frame is pulled through the media pipeline so even the still is served from
+here. Verified by counting off-site requests: none before the press, Vimeo's
+four hosts after it, and none at all with JavaScript off, where the still and a
+plain link to the film are still in the delivered HTML.
+
+**Prefer Vimeo.** `dnt=1` is a real do-not-track flag; `youtube-nocookie` is
+the least YouTube offers. The form says so in one line rather than leaving her
+to guess.
+
+## D-15 · An address is looked up from its postcode (2026-08-13)
+
+> **Superseded in part by D-16, the same day.** The endpoint this chose —
+> `GET /find/{postcode}` — no longer exists, and the reasoning below that
+> rejects a typeahead on cost was wrong about how getAddress bills. Read D-16.
+> What survives: the choice of getAddress over postcodes.io, and every rule
+> about absent keys, saves, saved venues and editability.
+
+**postcodes.io could never have done what the form implied.** It is the
+Ordnance Survey's open postcode data: it knows areas and coordinates, and has
+never heard of The Garden Room. It could confirm BA11 2QN was real and in
+Frome, and could not produce the two lines above it. What was asked for was
+typing an address and picking the actual building out of a list, and no amount
+of postcode data reaches that.
+
+**So the source is getAddress.io**, which resells Royal Mail's Postcode Address
+File — the register of front doors. `GETADDRESS_API_KEY` buys it.
+
+**Postcode → list, not typeahead.** getAddress sells both. The postcode is the
+thing she has to hand, and the key may never reach the browser, so a typeahead
+would be a round trip through our own server on every letter typed to arrive at
+the same address in twenty requests instead of one. The list flow is also
+closer to how a hall gives you its address in the first place.
+
+**postcodes.io is gone.** Its whole remaining sentence — "Real. It lands in
+Frome, Somerset — which is the area it covers, not the address" — existed to
+explain a limitation that no longer applies. Pressing Find on a wrong postcode
+now says nothing is listed there, which is the same warning arriving inside the
+gesture she was already making. Two answers under one field is the chrome the
+form was simplified to remove. What is lost: with no key configured, a typo in
+a postcode is no longer caught at all. It never blocked a save either way.
+
+**Absent key means the search is not offered**, on the same rule as
+`RESEND_API_KEY` and `MEDIA_BUCKET_ID` — presence of the key, never `NODE_ENV`.
+No button, no error, no dead control; the four fields are typed by hand as they
+always were. A key that is wrong or out of allowance is logged loudly, because
+a search that quietly answers "not just now" forever is how that survives for
+months.
+
+**The saved places stay, and stay first.** Nearly every workshop is in The
+Garden Room, and one press filling four fields beats any lookup. The search is
+for the rare new venue.
+
+**Nothing it fills is final.** Name, address lines and postcode all stay
+visible and editable after any fill — "we are in the church hall for this one,
+second door" has to be possible on top of whatever the register said.
+
+## D-16 · `/find` no longer exists, so the lookup is a typeahead (2026-08-13)
+
+**D-15 was built against an endpoint that has been withdrawn.** `GET
+/find/{postcode}?expand=true` — the one-request-per-postcode call the whole of
+D-15 rests on — now answers 404, with a valid key and with no key at all. It is
+absent from getAddress's documentation, which lists Autocomplete, Private
+Addresses, Validate, Location, Typeahead, Nearest, Distance and no Find. The
+JavaScript "Find" library still ships; the REST path behind it does not.
+
+**Nothing caught it, and the reason is the lesson.** D-15 was verified against
+a stubbed network call, and a stub answers whatever it was told to answer — it
+cannot report that the endpoint it is standing in for has been retired. A stub
+proves the parsing; only the live service proves the path. Both are needed and
+neither substitutes for the other.
+
+**What replaced it is the pair getAddress now documents:**
+
+    GET /autocomplete/{term}?api-key=…   → { suggestions: [ { address, url, id } ] }
+    GET /get/{id}?api-key=…              → postcode, formatted_address[],
+                                           building_name, sub_building_name,
+                                           line_1…line_4, locality,
+                                           town_or_city, county, district, …
+
+A suggestion carries a line to read and an id, and no address parts, so the
+second call is what turns the one she picked into filled fields.
+
+**Which makes it the typeahead she asked for in the first place** — "start
+typing an address and see options in a drop down I can select" — and D-15's
+argument against one is now moot twice over. It reasoned that a typeahead would
+spend twenty requests where the list flow spent one. It would not: **suggesting
+is free and only rate-limited, and only resolving the picked suggestion is
+billed**, so a whole address still costs exactly one look-up. The postcode-first
+flow was never cheaper; it was only ever the shape `/find` happened to have.
+
+**It is the FIELD, not a control beside it.** She types into "The name of the
+place"; suggestions appear under it; picking one fills the name, the lines and
+the postcode. No search box of its own, because that would be two places to
+type a venue where the form has one, and no button, because there is nothing
+left to press. The typeahead is less chrome than the button and results panel
+it replaces — one line of help under the field is the whole of it.
+
+**350ms after she stops, and not before three letters.** Every keystroke is a
+round trip through our own server, since the key may never reach the browser.
+350ms is longer than the gap between letters of someone typing a name they
+know, so a burst spends one request at the end rather than one per letter —
+measured at fifteen keystrokes to a single request. Three letters, because a
+two-letter term answers with whatever the country has most of. getAddress's own
+widget uses 500ms and two; ours is quicker to answer and slower to start, which
+is the right trade when the round trip is longer and the term is a venue name.
+
+**A refused key now says so in words.** This was rebuilt while the key was
+being refused 401 on every endpoint that exists, and "401" alone leaves whoever
+reads the log guessing — which is exactly the situation it was written in. The
+log names the status, the call, getAddress's own message, and the three things
+a 401 is ever caused by: an unactivated subscription, the admin key used in
+place of an API key, or a domain restriction that a server-side call can never
+satisfy because it carries no Origin. It still never logs the URL, because the
+key is in it — and the key is struck out of getAddress's message before that is
+passed through, since a service is free to echo back what it was sent.
+
+**Everything D-15 got right is unchanged**: absent key means the feature is not
+offered, chosen by presence of the key and never `NODE_ENV`; the action is
+session-guarded, and now for two reasons, since the billed half would otherwise
+be an address finder charged to her; nothing can stop a save; the saved-venue
+picker stays and stays first; and nothing it fills is final.
+
+## D-16 · Places are counted and capacity is ENFORCED; the loser of a race is refunded (2026-08-13)
+
+**This departs from the brief, deliberately.** `brief.md` says capacity is
+"displayed and never enforced". That was written for a request-a-place model,
+where Marianne read the requests and decided. Places are now bought with a card
+before she has seen anything, and selling the eleventh place of ten stops being
+an administrative untidiness and becomes taking money for a chair that does not
+exist — in a room, in front of nine other people, on the day.
+
+So capacity is enforced, in two places:
+
+- **When a Checkout Session is opened.** Stops somebody being sent to pay for a
+  place that has already gone, which is the common case. It cannot stop two
+  people paying for the last place at once, because at that moment neither has
+  paid.
+- **Again on the webhook, under a row lock**, before the Booking is written.
+  `SELECT … FOR UPDATE` on the workshop makes two simultaneous confirmations a
+  queue, so the second one counts the place the first has just taken. This is
+  the check that actually decides.
+
+### The race: refund the loser, automatically, and tell Marianne
+
+Two answers were available — oversell by one and alert her, or refund the loser.
+**The loser is refunded in full, automatically, and Marianne is told anyway.**
+
+Overselling puts a person in a room with no chair. That failure happens in
+public, on the day, to somebody who has travelled; and it happens to Marianne
+too, who has to be the one to say it. The alternative failure is an email
+arriving within seconds of paying that says the last place went while you were
+paying and your £95 is already on its way back. That is disappointing and
+complete: nobody is holding anything they should not, nobody is owed anything,
+and it is over before it is thought about.
+
+The window this happens in is a few seconds wide, on the last place of a day
+that is about to sell out. It will be rare and it must still be right.
+
+**When the automatic refund itself fails** — Stripe unreachable, the payment
+uncapturable — the booking is written `cancelledUnrefunded` with the reason
+`soldOut`, which is the ledger saying _cancelled, and we owe them_. The buyer's
+email says the money is owed and has not moved yet rather than claiming a
+refund that did not happen, and Marianne's says ACTION NEEDED with the amount
+and the address. `refundOwed()` in `src/lib/bookings.ts` is what tells that
+apart from a place given up after the refund date, where nothing was owed.
+
+### What follows from it
+
+- **`Workshop.capacity` is load-bearing now.** Lowering it below what is already
+  sold does not cancel anybody — it shows "Full" and stops further sales.
+- **Places left is real on both public pages**, counted as the sum of paid
+  bookings' places. A cancellation stops counting, so a released place appears
+  immediately with no second column to keep in step.
+- **A workshop with any booking against it cannot be deleted**, in the portal
+  and in the database (`onDelete: Restrict`). Cancelled bookings count for this:
+  they are the record of a refund, and it has to outlive the day.
+
+## D-17 · The webhook confirms a booking; the browser never does (2026-08-13)
+
+A paid `Booking` row is written by exactly one thing: a signature-verified
+`checkout.session.completed` arriving at `/api/stripe/webhook`. Not by the
+success page, and not by anything the browser says.
+
+The success URL Stripe returns somebody to can be typed by hand, kept from a
+previous purchase, or never reached at all because the payment finished on a
+phone that then lost signal. None of it is evidence that money moved. So
+`/workshops/<slug>/booked` writes nothing and believes nothing — it looks up
+the booking the webhook wrote and, if the webhook has not landed yet, says so
+and reloads itself rather than inventing a receipt.
+
+**Delivered more than once, on purpose by Stripe.** The event id is written
+inside the same transaction as the Booking (`StripeEvent`), and the checkout
+session id is unique on `Booking`. A redelivery collides on one or the other and
+the whole transaction rolls back, so one payment cannot become two bookings or
+two confirmation emails. On the refund side the guard is Stripe's own
+idempotency key, `refund-booking-<id>`: the cancellation link gets clicked
+twice, from two devices, by somebody upset, and the second click returns the
+refund that already exists rather than making a second one.
+
+**Amounts are never taken from the browser.** The client says which workshop and
+how many places; the price, the currency and the total are read from the
+workshop's own row. What is STORED is Stripe's `amount_total` — what they were
+actually charged, which is what has to be refunded — and it is compared against
+our own figure on the way in, with a loud log if they differ. The only way they
+can differ is a price edited while somebody was at the checkout.
+
+**The cancellation token is a bearer credential and only its hash is stored**,
+the same rule as password-reset links (D-13). Whoever holds the link can cancel
+that place and move that money, so a leaked dump of the table cannot do either.
+The cost is that the link cannot be reprinted: resending it issues a new one and
+retires the old, which is the right way round and is what the portal's bookings
+page will do when it is built.
+
+## D-18 · The paid-bookings ledger is its own screen, and delete is gated on cancellation rather than on the date (2026-08-14)
+
+### Two rail entries, because they are two jobs
+
+`/admin/bookings` is **Requests** — somebody asking for an hour and waiting to
+be answered. Confirm, decline, no money. `/admin/workshop-bookings` is
+**Bookings** — the ledger of places that have been paid for. Cancel, refund,
+delete, real money.
+
+They are separate screens because they have no action in common. Merging them
+would put a confirm/decline pair in the same table as a refund, and the one
+question that decides which control is safe to press — _has money moved?_ —
+would have to be read off the row before every action. The approved screen
+(`docs/screens/workshopflow/admin-workshop-bookings.html`) gives them separate
+rail rows and this follows it. Requests stays a stub; there is no Service model
+to make a request against.
+
+### Two tables, and nothing to file
+
+A booking is in "still to come" until its day has been and in the archive the
+morning after. That is derived from `workshop.date` at render — there is no
+column to keep in step, nothing that can get stuck in the wrong table, and
+nothing she has to move. Upcoming is soonest-first; the archive is most-recent
+first and shows five with an honest overflow line, because it only ever grows.
+
+### The empty columns stay, and say why once
+
+Type reads "Workshop" on every row and Deposit is empty on every row, because a
+workshop is the only thing that can be bought and only a course takes a deposit.
+Both columns stay — they are the shape the table those things will arrive into —
+and the page says so once, quietly, under the introduction. Inventing a Service
+row to make a column look busy would be a lie the size of a whole product.
+
+### The open question: a finished workshop's bookings
+
+**Delete is gated on `status !== "paid"` — on the booking having been
+CANCELLED — never on whether the day has passed.** That closes the hole.
+
+The worry was that "delete only after cancelled" would make a finished
+workshop's bookings deletable, erasing the record of money actually received.
+It does not, and the reason is the second rule the approved screen already
+carried: **a day that has been cannot be cancelled.** Cancel releases a place
+and changes somebody's plans; after the day there is no place to release and no
+plans to change, and a record saying she cancelled a workshop that had already
+run would be a false one. So an attended booking stays `paid` for ever, delete
+never enables on it, and the record of what was taken outlives the day.
+
+What she can still do to an archived booking is **refund** it — the only thing
+left that changes anything — and the row says exactly that when the disabled
+delete control is pressed: _"Delete stays out of reach — it is available once a
+booking is cancelled, and a day that has been cannot be cancelled, so this
+record stays."_
+
+Both halves are enforced on the server against the booking re-read at that
+moment, not against what the page was drawn with. A disabled button is a
+courtesy; `isCancellable` / `isDeletable` in `src/lib/bookings.ts` are the rule.
+
+### `CancelReason.marianne` — a migration
+
+The enum gains a third member. A row that only said "cancelled" could not answer
+the question she asks a month later — _did they drop out, or did I?_ — and it
+decides what the buyer's email says, because "the place is free for somebody
+else" is true when they cancelled and nonsense when she did.
+
+    npm run db:migrate -- --name add_marianne_cancel_reason   (applied locally)
+    npm run db:deploy                                          (Replit)
+
+### Refunding is not cancelling
+
+`refundId` is independent of `status`, and that is deliberate. Refunding a
+booking she is NOT cancelling is a real thing she does: somebody who is still
+coming and whom she has decided not to charge. That row stays `paid`, keeps
+counting against the room's capacity, and carries the refund as well — and the
+buyer's email says YOUR PLACE IS UNCHANGED in as many words, because somebody
+who reads "£95 refunded" and assumes they have been cancelled will not turn up.
+
+So `alreadyRefunded()` — has this `refundId` — is the honest test of "has the
+money gone back", and `status === "cancelledRefunded"` is a narrower question.
+
+### One refund path, not two
+
+`cancelBookingFromPortal` and `refundBookingFromPortal` sit beside the buyer's
+own `cancelBooking` and share its `refundInFull` — same Stripe call, same
+`refund-booking-<id>` idempotency key, same order: **Stripe first, then the
+record.** Repeating a refund under the same key costs nothing and moves nothing;
+a row claiming money went back when it did not is what somebody discovers weeks
+later. A standalone refund Stripe refuses writes NOTHING at all.
+
+The one thing the portal decides that the buyer's link does not is whether to
+refund, and it is only asked while the money is still hers to send back —
+measured against that booking's OWN `Workshop.refundDays`, never a site-wide
+rule.
+
+### Who gets told
+
+**Every admin-initiated cancel and refund emails the buyer.** They paid for
+something and something has changed about it; finding out by turning up, or by
+noticing a figure on a statement, is not a way to be told. What each email says
+about the money is read off the booking after the write, so none of them can
+claim a refund that did not happen.
+
+**Marianne gets exactly one email from this screen: a refund Stripe refused.**
+She made the cancellation and the row in front of her says what happened, so a
+notice about her own action would be noise. A refund that would not go through
+is different — the screen that said so will be closed in a minute and the money
+will still be outstanding, so there is a durable copy carrying the payment
+intent and the amount that refunding by hand in Stripe needs.
+
+### No "resend the cancellation link"
+
+Not built, on purpose. Only the SHA-256 of the token is stored (D-17), so the
+table cannot show or re-send the link that is in somebody's inbox — it can only
+mint a new one, which silently retires theirs. The approved screen has three
+actions and no fourth, and every one of them is now reachable from the row
+itself, so there is nothing she needs the buyer's link for. If it is ever added
+it must say plainly that it replaces the old link rather than repeating it.
+
+### Bulk "cancel this whole workshop and refund everyone" — NOT built
+
+Deferred deliberately, and it still looks right. See the report accompanying
+this decision: the case is a Saturday morning she cannot run, which is the worst
+possible moment to be asked for one guarded action per booking. It wants to be
+one confirmation naming the number of people and the total, then per-booking
+results — because each booking has its own refund period and some of them will
+be outside it, and a bulk action that hides a partial failure would be worse
+than the per-row loop it replaced.
+
+### What it is verified by
+
+`app/e2e/admin-bookings-smoke.mjs` — 53 assertions, its own dev server, Stripe
+replaced at the module boundary (`src/lib/stripe.ts` overwritten inside a
+throwaway copy) so both the succeeding and the failing refund branch can be
+exercised without touching anybody's account, and email intercepted by the
+module's own log adapter so nothing is delivered.

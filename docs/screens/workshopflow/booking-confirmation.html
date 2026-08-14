@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Your place is booked · The Field Work</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
+            },
+            fontFamily: {
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* ── The Lit Clearing · the moment after paying ───────────────────────
+         Someone has just spent £190 on a stranger's word. This page has one
+         job: make that feel like a good decision, and put everything they will
+         need to find again where they can find it.
+
+         So it does NOT lead with a green tick and "Success!". It leads with
+         the day itself, because the day is what they bought. */
+      html {
+        background-color: #160712;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .fig,
+      .font-mono {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+      .rule {
+        border-top: 1px solid rgba(138, 114, 133, 0.35);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+  </head>
+
+  <body data-screen-id="booking-confirmation" class="text-plate-text font-body">
+    <!-- warm and settled, for the moment after paying -->
+    <img
+      src="../../../assets/images/new/aura-light-in-a-room.png"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
+
+    <main class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+      <a href="/" aria-label="The Field Work — home" class="inline-block">
+        <img
+          src="../../../assets/brand/logo-horizontal.svg"
+          alt="The Field Work"
+          width="440"
+          height="120"
+          class="h-[56px] w-auto"
+        />
+      </a>
+
+      <div class="mt-14 grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-14">
+        <!-- ══ THE DAY THEY BOUGHT ═══════════════════════════════════════ -->
+        <div>
+          <p
+            class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
+          >
+            Your place is booked
+          </p>
+          <h1
+            class="mt-4 max-w-[16ch] font-display text-[46px] font-normal leading-[1.02] text-plate-text sm:text-[58px]"
+          >
+            Saturday, the twentieth
+          </h1>
+          <p
+            class="mt-6 max-w-[52ch] text-[21px] leading-relaxed text-plate-soft"
+          >
+            Two places on <em class="italic">Reading the Field</em>. There is
+            nothing else you need to do — a confirmation is on its way to
+            <span class="fig font-mono text-plate-text">sarah@example.com</span
+            >.
+          </p>
+
+          <dl class="rule mt-10 flex flex-wrap gap-x-12 gap-y-6 pt-8">
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                When
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                Sat 20 Sep · 10:00–16:30
+              </dd>
+            </div>
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Where
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                The Garden Room<br />Fromefield, Frome BA11
+              </dd>
+            </div>
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Reference
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                TFW-4417
+              </dd>
+            </div>
+          </dl>
+
+          <section class="rule mt-10 pt-8" aria-labelledby="next">
+            <h2
+              id="next"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              What happens now
+            </h2>
+            <ul
+              class="mt-6 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+            >
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Your confirmation email has the address, the times, and a short
+                note to read beforehand — two pages, and one question to sit
+                with. You do not have to do anything with it.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Marianne writes to everyone the week before with anything
+                practical that has changed.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Lunch is included. If you told us about something you cannot
+                eat, it is already noted.
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- ══ THE RECEIPT, AND THE WAY OUT ════════════════════════════════
+             The cancellation terms sit ON this page, not only in the email.
+             Someone who books on a phone in a hurry will close the tab and go
+             looking for "how do I cancel" long before they open the email. -->
+        <aside>
+          <div class="pool on-pool px-7 py-8 sm:px-9">
+            <h2
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+            >
+              What you paid
+            </h2>
+            <dl class="mt-5 flex flex-col gap-3 text-[18px] text-ink">
+              <div class="flex justify-between gap-4">
+                <dt>2 places at £95</dt>
+                <dd class="fig font-mono">£190.00</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-t border-pool-rule/40 pt-3 font-semibold"
+              >
+                <dt>Paid 14 Aug</dt>
+                <dd class="fig font-mono">£190.00</dd>
+              </div>
+            </dl>
+            <p class="mt-4 fig font-mono text-[15px] text-ink-soft">
+              Card ending 4242 · receipt from Stripe
+            </p>
+
+            <hr class="my-7 border-0 border-t border-pool-rule/40" />
+
+            <h3
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+            >
+              If you cannot come
+            </h3>
+            <p class="mt-3 text-[17px] leading-relaxed text-ink">
+              Cancel by <strong class="font-semibold fig">6 September</strong>
+              and you get the full £190 back. After that the place is held for
+              you and cannot be refunded.
+            </p>
+            <a
+              href="/booking/TFW-4417/cancel"
+              class="t mt-6 flex min-h-[52px] w-full items-center justify-center border border-ink px-6 text-[18px] font-semibold text-ink hover:bg-ink hover:text-pool"
+            >
+              Cancel this booking
+            </a>
+            <p class="mt-4 text-[15px] leading-relaxed text-ink-soft">
+              The same link is in your email, so you do not need to keep this
+              page.
+            </p>
+          </div>
+
+          <a
+            href="/workshops/reading-the-field.ics"
+            class="t mt-5 flex min-h-[52px] w-full items-center justify-center border border-plate-rule px-6 text-[18px] font-medium text-plate-text hover:border-gold hover:text-gold"
+          >
+            Put it in my calendar
+          </a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work · Frome, Somerset · Complementary work. Not a
+          substitute for medical care.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

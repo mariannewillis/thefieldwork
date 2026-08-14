@@ -1,0 +1,3592 @@
+<!-- ============ THE ONE QUESTION ============ -->
+<section class="pt-8 pb-1" aria-labelledby="ledger-h">
+  <p
+    data-pattern="eyebrow"
+    class="font-mono text-xs uppercase tracking-wide text-secondary-500"
+  >
+    Bookings
+  </p>
+  <h1
+    id="ledger-h"
+    data-kit-component="Heading"
+    data-kit-variant="display"
+    class="font-display font-normal text-3xl sm:text-4xl text-text-primary mt-3 leading-tight"
+  >
+    16 live bookings are for days that haven&rsquo;t happened yet, and
+    &pound;1,765 has already been paid for them.<br />
+    <span class="text-secondary-500"
+      >&pound;1,390 of it &mdash; the workshops and the course &mdash; is still
+      inside its refund period.</span
+    >
+  </h1>
+  <p class="mt-4 max-w-[80ch] text-sm text-text-secondary">
+    A booking sits in the first table until its day has been. The morning after,
+    it moves itself down to the archive &mdash; for a workshop or a course that
+    is the day printed on it, and for a one-to-one it is that session&rsquo;s
+    own hour. There is nothing to file.
+  </p>
+  <p class="mt-3 max-w-[80ch] text-sm text-text-secondary">
+    Every offering carries its own refund period, set when you make it: fourteen
+    days on Reading the Field, twenty-one on The Long Attention, twenty-eight on
+    the Autumn Course, two on a follow-up. Each row is measured against its own,
+    and says which.
+  </p>
+  <p class="mt-3 max-w-[80ch] text-sm text-text-secondary">
+    Cancel is the everyday one. It releases the place, and while the booking is
+    still inside its refund period it asks whether to send the money back as
+    well. Past that period it cancels without a refund and says so plainly.
+    Refund can also be used on its own, later, if you change your mind. Delete
+    stays out of reach until a booking has been cancelled &mdash; it takes the
+    record away altogether, and it cannot be undone.
+  </p>
+</section>
+
+<!-- ============ STILL TO COME ============ -->
+<section class="mt-9" aria-labelledby="upcoming-h">
+  <div
+    class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-border pt-6"
+  >
+    <div>
+      <h2
+        id="upcoming-h"
+        data-kit-component="Heading"
+        class="font-display font-normal text-3xl leading-tight text-text-primary"
+      >
+        Still to come
+      </h2>
+      <p
+        class="mt-1 max-w-[62ch] font-mono text-sm tabular-nums text-text-secondary"
+      >
+        18 rows &mdash; 16 live, 2 cancelled &middot; soonest first &middot;
+        &pound;95 of the cancelled money has not gone back yet
+      </p>
+    </div>
+    <p class="font-mono text-2xl tabular-nums text-secondary-500">
+      &pound;1,765 paid
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-2 mt-4"
+  >
+    <div class="overflow-x-auto">
+      <table
+        id="upcoming-table"
+        data-kit-component="DataTable"
+        data-kit-variant="bookings-upcoming"
+        class="w-full min-w-[940px] border-collapse text-left"
+      >
+        <caption class="sr-only">
+          Bookings for days that have not happened yet, soonest first. Columns:
+          name, email, type of offering, offering and date with its own refund
+          period, deposit for courses, money paid against the full price, and
+          the cancel, refund and delete actions available for that booking's
+          state.
+        </caption>
+        <thead>
+          <tr class="border-b-2 border-pool-text">
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Name
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Email
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Type
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Offering
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Deposit<span class="mt-0.5 block normal-case tracking-normal"
+                >courses only</span
+              >
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Paid<span class="mt-0.5 block normal-case tracking-normal"
+                >of the full price</span
+              >
+            </th>
+            <th
+              scope="col"
+              class="pb-3 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Actions<span class="mt-0.5 block normal-case tracking-normal"
+                >cancel &middot; refund &middot; delete</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Marcus Adeyemi-Hale
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              m.adeyemihale@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >First session</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >13 August &middot; 11:00&ndash;12:30</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-danger"
+                >Refund period 10 days &mdash; closed 3 Aug</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;75</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;75</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-past-period"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-past-period"
+                  aria-label="Cancel Marcus Adeyemi-Hale&rsquo;s first session on 13 August — past the refund period, so no money goes back"
+                  title="Cancel — past this offering's refund period, so the place is released and no money goes back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Marcus Adeyemi-Hale&rsquo;s first session on 13 August"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Fenella Grange
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              f.grange@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The hour</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >14 August &middot; 09:30&ndash;10:30</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-danger"
+                >Refund period 14 days &mdash; closed 31 Jul</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;60</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;60</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-past-period"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-past-period"
+                  aria-label="Cancel Fenella Grange&rsquo;s hour on 14 August — past the refund period, so no money goes back"
+                  title="Cancel — past this offering's refund period, so the place is released and no money goes back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Fenella Grange&rsquo;s hour on 14 August"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Bryn Latchford
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              b.latchford@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The hour</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >20 August &middot; 15:00&ndash;16:00</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; today is the last day</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;60</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;60</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Bryn Latchford&rsquo;s hour on 20 August — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Bryn Latchford&rsquo;s hour on 20 August"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Sena Okafor
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              s.okafor@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Follow-up</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >21 August &middot; 10:00&ndash;10:45</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 2 days &mdash; closes 19 Aug</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;45</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;45</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Sena Okafor&rsquo;s follow-up on 21 August — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Sena Okafor&rsquo;s follow-up on 21 August"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Joyce Ardagh
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              j.ardagh@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >First session</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >2 September &middot; 13:00&ndash;14:30</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 10 days &mdash; closes 23 Aug</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;75</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;75</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Joyce Ardagh&rsquo;s first session on 2 September — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Joyce Ardagh&rsquo;s first session on 2 September"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Tomasz Wierzbicki
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              t.wierzbicki@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The hour</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >4 September &middot; 09:30&ndash;10:30</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; closes 21 Aug</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;60</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;60</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Tomasz Wierzbicki&rsquo;s hour on 4 September — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Tomasz Wierzbicki&rsquo;s hour on 4 September"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Helen Prosser
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              h.prosser@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; 2 places</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; closes 6 Sep</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;190</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;190</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Helen Prosser&rsquo;s two places on Reading the Field, Sat 20 Sep — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Helen Prosser&rsquo;s two places on Reading the Field, Sat 20 Sep"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Duncan Reeve
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              d.reeve@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; closes 6 Sep</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Duncan Reeve&rsquo;s place on Reading the Field, Sat 20 Sep — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Duncan Reeve&rsquo;s place on Reading the Field, Sat 20 Sep"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Anne Fairclough
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              a.fairclough@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; closes 6 Sep</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Anne Fairclough&rsquo;s place on Reading the Field, Sat 20 Sep — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Anne Fairclough&rsquo;s place on Reading the Field, Sat 20 Sep"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Michael Tarrant
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              m.tarrant@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 14 days &mdash; closes 6 Sep</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Michael Tarrant&rsquo;s place on Reading the Field, Sat 20 Sep — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Michael Tarrant&rsquo;s place on Reading the Field, Sat 20 Sep"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="cancelled-refunded"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Rachel Boyd
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              r.boyd@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; 1 place, released</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Cancelled 25 July, inside the period &mdash; refunded the same
+                day</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-success"
+                >&pound;0</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >&pound;95 went back on 25 July</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — already cancelled on 25 July"
+                  title="Cancel — already done, on 25 July"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund-unavailable"
+                  aria-disabled="true"
+                  aria-label="Refund unavailable — the money already went back on 25 July"
+                  title="Refund — already sent back on 25 July"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" />
+                  </svg>
+                </button>
+                <a
+                  href="#delete-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete"
+                  aria-haspopup="dialog"
+                  aria-controls="delete-guard"
+                  aria-label="Delete Rachel Boyd&rsquo;s place on Reading the Field, Sat 20 Sep from the records"
+                  title="Delete — remove this record for good"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-danger text-pool-danger hover:bg-pool-danger hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" /></svg
+                ></a>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="course"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Rosalind Peake
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              r.peake@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Course
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Autumn Course</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 20 Sep &middot; Sat 11 Oct &middot; Sat 8 Nov</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >One seat in all three &middot; refund period 28 days &mdash;
+                closes 23 Aug</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span class="block font-mono text-sm tabular-nums text-pool-text"
+                >&pound;75</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >taken 12 July</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;250</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;250 &middot; balance paid 19 July</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Rosalind Peake&rsquo;s seat on The Autumn Course — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Rosalind Peake&rsquo;s seat on The Autumn Course"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="cancelled"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Iwan Beddoe
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              i.beddoe@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 1 place, released</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-danger"
+                >Cancelled 2 August &mdash; the money has not gone back</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-danger"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >still with you, not returned</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — already cancelled on 2 August"
+                  title="Cancel — already done, on 2 August"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Iwan Beddoe&rsquo;s place on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <a
+                  href="#delete-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete"
+                  aria-haspopup="dialog"
+                  aria-controls="delete-guard"
+                  aria-label="Delete Iwan Beddoe&rsquo;s place on The Long Attention, Sat 8 Nov from the records"
+                  title="Delete — remove this record for good"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-danger text-pool-danger hover:bg-pool-danger hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" /></svg
+                ></a>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Marguerite Okonjo
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              m.okonjo@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 2 places</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 21 days &mdash; closes 18 Oct</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;190</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;190</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Marguerite Okonjo&rsquo;s two places on The Long Attention, Sat 8 Nov — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Marguerite Okonjo&rsquo;s two places on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Gareth Whitlock
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              g.whitlock@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 2 places</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 21 days &mdash; closes 18 Oct</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;190</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;190</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Gareth Whitlock&rsquo;s two places on The Long Attention, Sat 8 Nov — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Gareth Whitlock&rsquo;s two places on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Priya Ramanathan
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              p.ramanathan@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 21 days &mdash; closes 18 Oct</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Priya Ramanathan&rsquo;s place on The Long Attention, Sat 8 Nov — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Priya Ramanathan&rsquo;s place on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Stephen Rudge
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              s.rudge@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Refund period 21 days &mdash; closes 18 Oct</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Stephen Rudge&rsquo;s place on The Long Attention, Sat 8 Nov — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Stephen Rudge&rsquo;s place on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="live"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Alan Prewett
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              a.prewett@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The Long Attention</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 8 Nov &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Took the place Iwan Beddoe released &mdash; the day is full
+                again</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <a
+                  href="#cancel-prompt"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel"
+                  aria-haspopup="dialog"
+                  aria-controls="cancel-prompt"
+                  aria-label="Cancel Alan Prewett&rsquo;s place on The Long Attention, Sat 8 Nov — you will be asked whether to refund"
+                  title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" /></svg
+                ></a>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Alan Prewett&rsquo;s place on The Long Attention, Sat 8 Nov"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once this booking is cancelled"
+                  title="Delete — available once this booking is cancelled"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHIVE ============ -->
+<section class="mt-12" aria-labelledby="archive-h">
+  <div
+    class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-border pt-6"
+  >
+    <div>
+      <h2
+        id="archive-h"
+        data-kit-component="Heading"
+        class="font-display font-normal text-3xl leading-tight text-text-secondary"
+      >
+        Archive
+      </h2>
+      <p
+        class="mt-1 max-w-[62ch] font-mono text-sm tabular-nums text-text-secondary"
+      >
+        32 bookings whose day has been &middot; 15 workshop bookings, 3
+        cancellations, 14 one-to-one sessions &middot; most recent first
+      </p>
+    </div>
+    <p class="font-mono text-2xl tabular-nums text-text-secondary">
+      &pound;2,410 taken
+    </p>
+  </div>
+
+  <div
+    data-pattern="clearing-plate"
+    data-variant="admin-panel"
+    class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-2 mt-4"
+  >
+    <div class="overflow-x-auto">
+      <table
+        id="archive-table"
+        data-kit-component="DataTable"
+        data-kit-variant="bookings-archive"
+        class="w-full min-w-[940px] border-collapse text-left"
+      >
+        <caption class="sr-only">
+          Bookings whose day has already been, most recent first. The same
+          columns as the table above. A day that has been cannot be cancelled,
+          so cancel is spent on every row here; refund is still available as a
+          goodwill decision, and delete only on a booking that was cancelled.
+        </caption>
+        <thead>
+          <tr class="border-b-2 border-pool-text">
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Name
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Email
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Type
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Offering
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Deposit<span class="mt-0.5 block normal-case tracking-normal"
+                >courses only</span
+              >
+            </th>
+            <th
+              scope="col"
+              class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Paid<span class="mt-0.5 block normal-case tracking-normal"
+                >of the full price</span
+              >
+            </th>
+            <th
+              scope="col"
+              class="pb-3 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+            >
+              Actions<span class="mt-0.5 block normal-case tracking-normal"
+                >cancel &middot; refund &middot; delete</span
+              >
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="service"
+            data-state="held"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Tomasz Wierzbicki
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              t.wierzbicki@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Service
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >The hour</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >29 July &middot; 09:30&ndash;10:30</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Came &middot; moved down on 30 July</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;60</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;60</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — The hour, 29 July has already happened"
+                  title="Cancel — unavailable, that day has been"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Tomasz Wierzbicki&rsquo;s hour on The hour, 29 July"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once a booking is cancelled, and a day that has been cannot be cancelled, so this record stays"
+                  title="Delete — available once a booking is cancelled. This day has been, so it cannot be cancelled and the record stays."
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="held"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Susan Ellery
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              s.ellery@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 14 Jun &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Came &middot; moved down on 15 June</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;95</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;95</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — Reading the Field, Sat 14 Jun has already happened"
+                  title="Cancel — unavailable, that day has been"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Susan Ellery&rsquo;s place on Reading the Field, Sat 14 Jun"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once a booking is cancelled, and a day that has been cannot be cancelled, so this record stays"
+                  title="Delete — available once a booking is cancelled. This day has been, so it cannot be cancelled and the record stays."
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="cancelled"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Owen Pomeroy
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              o.pomeroy@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 14 Jun &middot; 2 places, released</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-danger"
+                >Cancelled 5 June, past that workshop&rsquo;s 14 days &mdash;
+                nothing returned</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-danger"
+                >&pound;190</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >still with you, not returned</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — already cancelled on 5 June"
+                  title="Cancel — already done, on 5 June"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Owen Pomeroy&rsquo;s two places on Reading the Field, Sat 14 Jun"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <a
+                  href="#delete-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete"
+                  aria-haspopup="dialog"
+                  aria-controls="delete-guard"
+                  aria-label="Delete Owen Pomeroy&rsquo;s two places on Reading the Field, Sat 14 Jun from the records"
+                  title="Delete — remove this record for good"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-danger text-pool-danger hover:bg-pool-danger hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" /></svg
+                ></a>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="cancelled-refunded"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Gillian Marsh
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              g.marsh@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Reading the Field</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 14 Jun &middot; 1 place, released</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Cancelled 22 May, inside that workshop&rsquo;s 14 days</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-success"
+                >&pound;0</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >&pound;95 went back on 22 May</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — already cancelled on 22 May"
+                  title="Cancel — already done, on 22 May"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund-unavailable"
+                  aria-disabled="true"
+                  aria-label="Refund unavailable — the money already went back on 22 May"
+                  title="Refund — already sent back on 22 May"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" />
+                  </svg>
+                </button>
+                <a
+                  href="#delete-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete"
+                  aria-haspopup="dialog"
+                  aria-controls="delete-guard"
+                  aria-label="Delete Gillian Marsh&rsquo;s place on Reading the Field, Sat 14 Jun from the records"
+                  title="Delete — remove this record for good"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-danger text-pool-danger hover:bg-pool-danger hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" /></svg
+                ></a>
+              </div>
+            </td>
+          </tr>
+          <tr
+            data-kit-component="BookingRow"
+            data-kit-variant="workshop"
+            data-state="held"
+            class="border-t border-pool-border align-top"
+          >
+            <th
+              scope="row"
+              class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+            >
+              Nadia Whitcombe
+            </th>
+            <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+              n.whitcombe@&hellip;mail.com
+            </td>
+            <td
+              class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+            >
+              Workshop
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-display text-lg leading-tight text-pool-text"
+                >Grounding for Beginners</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Sat 22 Mar &middot; 1 place</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >Came &middot; moved down on 23 March</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block font-mono text-sm text-pool-text-secondary"
+                aria-hidden="true"
+                >&ndash;</span
+              >
+              <span class="sr-only"
+                >No deposit. This kind of booking is paid in full when it is
+                made.</span
+              >
+            </td>
+            <td class="py-5 pr-5">
+              <span
+                class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                >&pound;85</span
+              >
+              <span
+                class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                >of &pound;85</span
+              >
+            </td>
+            <td class="py-5">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="cancel-unavailable"
+                  aria-disabled="true"
+                  aria-label="Cancel unavailable — Grounding for Beginners, Sat 22 Mar has already happened"
+                  title="Cancel — unavailable, that day has been"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.6 8.6 6.8 6.8" />
+                  </svg>
+                </button>
+                <a
+                  href="#refund-guard"
+                  data-kit-component="IconButton"
+                  data-kit-variant="refund"
+                  aria-haspopup="dialog"
+                  aria-controls="refund-guard"
+                  aria-label="Refund Nadia Whitcombe&rsquo;s place on Grounding for Beginners, Sat 22 Mar"
+                  title="Refund — send the money back on its own"
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                    <path d="m8 6-4 4 4 4" /></svg
+                ></a>
+                <button
+                  type="button"
+                  data-kit-component="IconButton"
+                  data-kit-variant="delete-unavailable"
+                  aria-disabled="true"
+                  aria-label="Delete unavailable — available once a booking is cancelled, and a day that has been cannot be cancelled, so this record stays"
+                  title="Delete — available once a booking is cancelled. This day has been, so it cannot be cancelled and the record stays."
+                  class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-[19px] w-[19px]"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M9 7V5h6v2" />
+                    <path d="M6 7l1 13h10l1-13" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p
+      data-state="overflow"
+      class="max-w-[70ch] border-t border-pool-border py-6 text-sm text-pool-text-secondary"
+    >
+      Showing the 5 most recent. The other 27 are below, newest first. Nothing
+      leaves the archive by the passing of time &mdash; only by you.
+      <a
+        href="/admin/workshop-bookings?archive=all"
+        data-kit-component="Link"
+        class="font-medium text-accent-500 underline decoration-1 underline-offset-4"
+        >Show all 32</a
+      >.
+    </p>
+  </div>
+</section>
+
+<!-- ============ THE OTHER STATES ============ -->
+<section class="mt-12" aria-labelledby="states-h">
+  <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+    <h2
+      id="states-h"
+      data-pattern="eyebrow"
+      data-variant="muted"
+      class="font-mono text-xs uppercase tracking-wide text-text-secondary"
+    >
+      Both tables &mdash; the other states
+    </h2>
+    <p class="font-mono text-xs text-text-secondary">
+      The same table, holding a different situation
+    </p>
+  </div>
+
+  <!-- PART PAID — the Deposit column doing its job -->
+  <div class="mt-5">
+    <p class="font-mono text-xs uppercase tracking-wide text-secondary-500">
+      Row state &middot; a course, part paid
+    </p>
+    <p class="mt-2 max-w-[80ch] text-sm text-text-secondary">
+      Only a course takes a deposit. Workshops and one-to-one hours are paid in
+      full when they are booked, which is why their Deposit cell is empty rather
+      than filled with a nothing. Nobody is mid-balance today; this is the row
+      when somebody is.
+    </p>
+    <div
+      data-pattern="clearing-plate"
+      data-variant="admin-panel"
+      class="on-pool bg-pool-surface text-pool-text px-6 sm:px-8 py-2 mt-3"
+    >
+      <div class="overflow-x-auto">
+        <table
+          id="partpaid-table"
+          data-kit-component="DataTable"
+          data-kit-variant="bookings-partpaid"
+          class="w-full min-w-[940px] border-collapse text-left"
+        >
+          <caption class="sr-only">
+            One course booking shown part paid: the deposit has been taken and a
+            balance is still due.
+          </caption>
+          <thead>
+            <tr class="border-b-2 border-pool-text">
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Name
+              </th>
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Email
+              </th>
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Type
+              </th>
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Offering
+              </th>
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Deposit<span class="mt-0.5 block normal-case tracking-normal"
+                  >courses only</span
+                >
+              </th>
+              <th
+                scope="col"
+                class="pb-3 pr-5 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Paid<span class="mt-0.5 block normal-case tracking-normal"
+                  >of the full price</span
+                >
+              </th>
+              <th
+                scope="col"
+                class="pb-3 text-left align-bottom font-mono text-xs font-medium uppercase tracking-wide text-pool-text-secondary"
+              >
+                Actions<span class="mt-0.5 block normal-case tracking-normal"
+                  >cancel &middot; refund &middot; delete</span
+                >
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              data-kit-component="BookingRow"
+              data-kit-variant="course"
+              data-state="live"
+              class="border-t border-pool-border align-top"
+            >
+              <th
+                scope="row"
+                class="whitespace-nowrap py-5 pr-5 text-left font-sans text-sm font-semibold text-pool-text"
+              >
+                Frances Iyengar
+              </th>
+              <td class="py-5 pr-5 font-mono text-xs text-pool-text-secondary">
+                f.iyengar@&hellip;mail.com
+              </td>
+              <td
+                class="whitespace-nowrap py-5 pr-5 font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+              >
+                Course
+              </td>
+              <td class="py-5 pr-5">
+                <span
+                  class="block font-display text-lg leading-tight text-pool-text"
+                  >The Winter Course</span
+                >
+                <span
+                  class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                  >Three Saturdays &middot; dates not set</span
+                >
+                <span
+                  class="mt-1 block font-mono text-xs tabular-nums text-pool-danger"
+                  >Balance due before the first Saturday</span
+                >
+              </td>
+              <td class="py-5 pr-5">
+                <span
+                  class="block font-mono text-sm tabular-nums text-pool-text"
+                  >&pound;75</span
+                >
+                <span
+                  class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                  >taken 3 August</span
+                >
+              </td>
+              <td class="py-5 pr-5">
+                <span
+                  class="block whitespace-nowrap font-mono text-lg font-semibold tabular-nums text-pool-text"
+                  >&pound;75</span
+                >
+                <span
+                  class="mt-1 block font-mono text-xs tabular-nums text-pool-text-secondary"
+                  >of &pound;250 &middot; &pound;175 still due</span
+                >
+              </td>
+              <td class="py-5">
+                <div class="flex items-center gap-2">
+                  <a
+                    href="#cancel-prompt"
+                    data-kit-component="IconButton"
+                    data-kit-variant="cancel"
+                    aria-haspopup="dialog"
+                    aria-controls="cancel-prompt"
+                    aria-label="Cancel Frances Iyengar&rsquo;s seat on The Winter Course — you will be asked whether to refund"
+                    title="Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
+                    class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-accent-500 text-accent-500 hover:bg-accent-500 hover:text-pool-surface"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-[19px] w-[19px]"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="m8.6 8.6 6.8 6.8" /></svg
+                  ></a>
+                  <a
+                    href="#refund-guard"
+                    data-kit-component="IconButton"
+                    data-kit-variant="refund"
+                    aria-haspopup="dialog"
+                    aria-controls="refund-guard"
+                    aria-label="Refund Frances Iyengar&rsquo;s seat on The Winter Course"
+                    title="Refund — send the money back on its own"
+                    class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-pool-border text-pool-text hover:bg-pool-text hover:text-pool-surface"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-[19px] w-[19px]"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 10h11a4 4 0 0 1 0 8h-6" />
+                      <path d="m8 6-4 4 4 4" /></svg
+                  ></a>
+                  <button
+                    type="button"
+                    data-kit-component="IconButton"
+                    data-kit-variant="delete-unavailable"
+                    aria-disabled="true"
+                    aria-label="Delete unavailable — available once this booking is cancelled"
+                    title="Delete — available once this booking is cancelled"
+                    class="inline-flex h-11 w-11 items-center justify-center border transition-colors duration-fast border-dashed border-pool-border text-pool-text-secondary cursor-not-allowed"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-[19px] w-[19px]"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 7h16" />
+                      <path d="M9 7V5h6v2" />
+                      <path d="M6 7l1 13h10l1-13" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-pattern="state-panel"
+    data-kit-component="StatePanel"
+    class="mt-6 grid items-start gap-4 lg:grid-cols-2"
+  >
+    <!-- EMPTY — still to come -->
+    <article
+      data-state="empty-upcoming"
+      data-kit-component="EmptyState"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-7 sm:px-7"
+    >
+      <p class="font-mono text-xs uppercase tracking-wide text-accent-500">
+        Empty &middot; still to come
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-text">
+        Nothing is booked yet.
+      </p>
+      <p class="mt-2 max-w-[46rem] text-sm text-pool-text-secondary">
+        Your workshops, courses and one-to-one hours are live on the site and
+        nobody has booked one. The first booking appears here the minute someone
+        pays, with the money and that offering&rsquo;s refund date already
+        worked out.
+      </p>
+      <a
+        href="/admin/offerings"
+        data-kit-component="Link"
+        class="mt-4 inline-block py-3 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+      >
+        See what is on sale
+      </a>
+    </article>
+
+    <!-- EMPTY — archive -->
+    <article
+      data-state="empty-archive"
+      data-kit-component="EmptyState"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-7 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Empty &middot; archive
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-text">
+        Nothing has happened yet.
+      </p>
+      <p class="mt-2 max-w-[46rem] text-sm text-pool-text-secondary">
+        The archive fills itself. The first booking drops down here the morning
+        after its day, and everything that has ever been paid for stays in it.
+        There is nothing above that needs moving.
+      </p>
+    </article>
+
+    <!-- LOADING -->
+    <article
+      data-state="loading"
+      data-kit-component="Skeleton"
+      aria-busy="true"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Loading &middot; either table
+      </p>
+      <div class="mt-4 flex flex-col gap-3" aria-hidden="true">
+        <div class="flex items-center gap-4">
+          <div class="skel h-3 w-1/5"></div>
+          <div class="skel h-3 w-1/4"></div>
+          <div class="skel h-3 w-1/6"></div>
+          <div class="skel h-3 w-1/5"></div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="skel h-6 w-1/5" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/4" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/6" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/5" style="opacity: 0.22"></div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="skel h-6 w-1/5" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/4" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/6" style="opacity: 0.22"></div>
+          <div class="skel h-6 w-1/5" style="opacity: 0.22"></div>
+        </div>
+      </div>
+      <p class="mt-4 font-mono text-xs text-pool-text-secondary">
+        The table keeps its columns and stays at rest until the figures arrive.
+        Nothing pulses; no amount is guessed at, and no action is offered until
+        its row&rsquo;s state is known.
+      </p>
+    </article>
+
+    <!-- ERROR -->
+    <article
+      data-state="error"
+      data-kit-component="ErrorState"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+        Error &middot; either table
+      </p>
+      <p class="mt-2 text-xl font-semibold text-pool-danger">
+        Couldn&rsquo;t load the bookings.
+      </p>
+      <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+        Cancelling, refunding and deleting are unavailable until this loads
+        again. Nothing has been cancelled, no money has moved, and no record has
+        been removed.
+      </p>
+      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <a
+          href="/admin/workshop-bookings"
+          data-kit-component="Link"
+          class="py-3 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+          >Try again</a
+        >
+        <p class="font-mono text-xs tabular-nums text-pool-text-secondary">
+          Last good read 08:51 &middot; 2 attempts since
+        </p>
+      </div>
+    </article>
+
+    <!-- OVERFLOW -->
+    <article
+      data-state="overflow"
+      class="on-pool bg-pool-surface text-pool-text px-6 py-6 sm:px-7"
+    >
+      <p
+        class="font-mono text-xs uppercase tracking-wide text-pool-text-secondary"
+      >
+        Overflow &middot; either table
+      </p>
+      <p class="mt-2 text-lg font-semibold text-pool-text">
+        More rows than one screen holds
+      </p>
+      <p class="mt-2 max-w-[52ch] text-sm text-pool-text-secondary">
+        Still to come shows every booking, however many there are &mdash; you
+        need to see all of it. The archive only grows, so it shows the 5 most
+        recent and says how many sit behind them.
+      </p>
+      <a
+        href="/admin/workshop-bookings?archive=all"
+        data-kit-component="Link"
+        class="mt-2 inline-block py-3 text-sm font-medium text-accent-500 underline decoration-1 underline-offset-4"
+      >
+        Show all 32
+      </a>
+    </article>
+  </div>
+</section>

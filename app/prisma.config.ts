@@ -1,5 +1,17 @@
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
 import { defineConfig } from "prisma/config";
+
+/**
+ * Next reads `.env.local`; plain `dotenv/config` only reads `.env`, so the CLI
+ * used to fail locally with "Connection url is empty" while the app itself ran
+ * fine — the same variable, in a file only one of them looked at.
+ *
+ * Both are loaded here, `.env.local` first. dotenv never overwrites a variable
+ * that is already set, so on Replit — where the workspace injects DATABASE_URL
+ * into the real environment — neither file exists and nothing changes.
+ */
+loadEnv({ path: ".env.local" });
+loadEnv();
 
 /**
  * Prisma's own config — used by the CLI for migrations only. The running app

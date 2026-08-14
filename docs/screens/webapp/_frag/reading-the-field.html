@@ -1,0 +1,870 @@
+<body data-screen-id="workshop-detail" class="text-plate-text font-body">
+  <!-- The page ground: the aura field, fixed and scrimmed. An abstract rather
+       than a photograph on purpose — there is nobody in it to compete with the
+       type, and the warm core sits low-left where the page has no content. It
+       is decorative, so it carries no alt and is hidden from assistive tech. -->
+  <img
+    src="../../../assets/images/web/aura-field-abstract.jpg"
+    alt=""
+    aria-hidden="true"
+    class="page-field"
+  />
+  <div class="page-scrim" aria-hidden="true"></div>
+
+  <a
+    href="#book"
+    class="skip bg-gold px-5 py-3 text-[17px] font-semibold text-ink"
+  >
+    Skip to booking
+  </a>
+
+  <!-- ══ MASTHEAD ════════════════════════════════════════════════════════════
+       The picture, the name, the sentence underneath, then the facts — the
+       order the admin form fills them in, because this page is that form's
+       output and the two have to stay the same shape.
+
+       The hero photograph carries a real description rather than being hidden:
+       the form will not let a picture on to the site without a line saying what
+       is in it, so the page it produces cannot quietly do otherwise. The
+       object-position is pulled down off the base default so the lit floor —
+       the warm part, and the only part that says "a room with people coming to
+       it" — sits in the band the masthead actually crops to. -->
+  <header class="relative overflow-hidden">
+    <img
+      src="../../../assets/images/web/marianne-room-aglow.jpg"
+      alt="The garden room set for the day &mdash; a kilim on the floorboards, chairs and cushions drawn round it, one candle lit on the table under the window."
+      class="field"
+      style="object-position: 50% 56%"
+    />
+    <div class="field-scrim" aria-hidden="true"></div>
+
+    <div class="relative z-10 mx-auto max-w-[1180px] px-6 lg:px-10">
+      <div class="flex items-center justify-between py-7">
+        <a href="/" aria-label="The Field Work &mdash; home">
+          <img
+            src="../../../assets/brand/logo-horizontal.svg"
+            alt="The Field Work"
+            width="440"
+            height="120"
+            class="h-[52px] w-auto"
+          />
+        </a>
+        <nav
+          class="hidden items-center gap-8 text-[17px] md:flex"
+          aria-label="Main"
+        >
+          <a class="t text-plate-soft hover:text-plate-text" href="/services"
+            >Sessions</a
+          >
+          <a
+            class="t text-plate-text underline decoration-gold underline-offset-8"
+            href="/workshops"
+            aria-current="page"
+            >Workshops</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/courses"
+            >Courses</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/about"
+            >About</a
+          >
+        </nav>
+      </div>
+
+      <div class="pb-14 pt-10 lg:pb-16 lg:pt-16">
+        <p
+          class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
+        >
+          A one-day workshop
+        </p>
+        <h1
+          class="mt-4 max-w-[16ch] font-display text-[46px] font-normal leading-[1.02] text-plate-text sm:text-[60px] lg:text-[76px]"
+        >
+          Reading the Field
+        </h1>
+        <p
+          class="mt-6 max-w-[52ch] text-[21px] leading-relaxed text-plate-soft"
+        >
+          A day of learning to notice what you already notice. You stay clothed
+          and seated, and nobody touches you.
+        </p>
+
+        <!-- Date, place and price above everything, because they are what
+             decides whether the rest is worth reading. -->
+        <dl class="mt-10 flex flex-wrap gap-x-12 gap-y-6">
+          <div>
+            <dt
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+            >
+              When
+            </dt>
+            <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+              Sat 24 Oct &middot; 10:00&ndash;16:00
+            </dd>
+          </div>
+          <div>
+            <dt
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+            >
+              Where
+            </dt>
+            <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+              The Garden Room, Frome
+            </dd>
+          </div>
+          <div>
+            <dt
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+            >
+              Price
+            </dt>
+            <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+              &pound;95 a place
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- ══ HOW FULL IT IS ═══════════════════════════════════════════════
+           The count, plainly, as the line the photograph ends on. It used to
+           be drawn as ten marks; the operator asked for the count alone. -->
+      <div class="pb-12 lg:pb-16">
+        <p class="mt-4 fig font-mono text-[15px]">
+          <span class="text-gold">6 places left of 10</span>
+          <span class="text-plate-rule">
+            &middot; ten is what the room takes comfortably</span
+          >
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
+    <div class="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
+      <div class="pt-14 lg:pt-20">
+        <!-- ══ WHERE IT IS ════════════════════════════════════════════════
+             Before the long body, because somebody who cannot get to Frome on
+             a Saturday should find that out before they read a thousand words.
+             The step-free line, the toilet, the parking and the buses used to
+             be four bullets in the middle of the prose; they belong here, next
+             to the address, and they are not said twice. -->
+        <section aria-labelledby="where">
+          <h2
+            id="where"
+            class="font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+          >
+            Where it is
+          </h2>
+
+          <div class="mt-7 grid gap-8 sm:grid-cols-[260px_minmax(0,1fr)]">
+            <div>
+              <h3
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                The address
+              </h3>
+              <address
+                class="mt-4 not-italic text-[22px] leading-relaxed text-plate-text"
+              >
+                The Garden Room<br />
+                Fromefield<br />
+                Frome<br />
+                Somerset <span class="fig font-mono">BA11 2QN</span>
+              </address>
+              <a
+                class="t mt-4 inline-block text-[17px] text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+                href="https://www.google.com/maps/search/?api=1&amp;query=Fromefield%2C+Frome%2C+Somerset+BA11+2QN"
+              >
+                Open this in a map
+              </a>
+            </div>
+
+            <div>
+              <h3
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Getting there
+              </h3>
+              <ul
+                class="mt-4 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+              >
+                <li class="flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                  ></span>
+                  The room is on the ground floor, and it is step-free from the
+                  pavement to the chair you sit in.
+                </li>
+                <li class="flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                  ></span>
+                  There is an accessible toilet on the same floor.
+                </li>
+                <li class="flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                  ></span>
+                  There is parking on Fromefield, two minutes&rsquo; walk away.
+                </li>
+                <li class="flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                  ></span>
+                  It is eight minutes on foot from the market place, uphill on
+                  the way here.
+                </li>
+                <li class="flex gap-4">
+                  <span
+                    aria-hidden="true"
+                    class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                  ></span>
+                  The buses along Bath Road stop at the top of Fromefield.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ WHAT THE DAY IS ════════════════════════════════════════════ -->
+        <section class="mt-16" aria-labelledby="what">
+          <h2
+            id="what"
+            class="font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+          >
+            What the day is
+          </h2>
+          <div
+            class="mt-6 flex max-w-[62ch] flex-col gap-5 text-[19px] leading-relaxed text-plate-soft"
+          >
+            <p>
+              You arrive at ten. There is coffee, a circle of ten chairs, and
+              nine other people who also did not quite know what to expect. We
+              go round the circle once, first names only, and you can say as
+              little as you like.
+            </p>
+            <p>
+              The morning is spent on attention &mdash; how to tell the
+              difference between what you are sensing and what you are
+              supplying. You work on your own hands first, then with the person
+              next to you. Most people find they have been doing this for years
+              without a name for it.
+            </p>
+            <p>
+              After lunch you work in pairs, and you swap halfway. You stay
+              clothed, seated and at arm&rsquo;s length throughout. Nobody
+              touches you. You can stop at any point, and you do not have to say
+              why.
+            </p>
+            <p>
+              No belief is asked of you. People arrive sceptical and leave
+              sceptical, and that is a perfectly good way to spend a Saturday.
+            </p>
+          </div>
+        </section>
+
+        <!-- ══ THE SHAPE OF THE DAY ═══════════════════════════════════════
+             Times are content on this site, not chrome: set in the mono face
+             with tabular figures so the column of hours actually aligns, on
+             rules that run the full measure. -->
+        <section class="mt-14" aria-labelledby="shape">
+          <h2
+            id="shape"
+            class="font-display text-[30px] font-normal leading-tight text-plate-text"
+          >
+            The shape of the day
+          </h2>
+          <ul class="mt-6 border-t border-plate-rule/30">
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >10:00</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >Doors, coffee, and somewhere to put your coat.</span
+              >
+            </li>
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >10:30</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >The circle, and the morning&rsquo;s work on attention.</span
+              >
+            </li>
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >12:30</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >Lunch at the long table. An hour, and you can go outside.</span
+              >
+            </li>
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >13:30</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >Working in pairs, with a swap in the middle.</span
+              >
+            </li>
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >15:30</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >Back to the circle for whatever came up.</span
+              >
+            </li>
+            <li
+              class="flex flex-wrap gap-x-7 gap-y-1 border-b border-plate-rule/30 py-4"
+            >
+              <span
+                class="fig w-[74px] shrink-0 font-mono text-[18px] text-gold"
+                >16:00</span
+              >
+              <span
+                class="min-w-0 flex-1 text-[19px] leading-relaxed text-plate-soft"
+                >We finish. There is tea for anyone who wants to stay.</span
+              >
+            </li>
+          </ul>
+        </section>
+
+        <!-- ══ WHAT TO BRING ══════════════════════════════════════════════ -->
+        <section class="mt-14" aria-labelledby="bring">
+          <h2
+            id="bring"
+            class="font-display text-[30px] font-normal leading-tight text-plate-text"
+          >
+            What to bring
+          </h2>
+          <p
+            class="mt-5 max-w-[58ch] text-[19px] leading-relaxed text-plate-soft"
+          >
+            Almost nothing. There is nothing to buy on the day and nothing you
+            need to have read.
+          </p>
+          <ul
+            class="mt-6 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+          >
+            <li class="flex gap-4">
+              <span
+                aria-hidden="true"
+                class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+              ></span>
+              Lunch, coffee and tea are included. Tell me what you cannot eat
+              when you book.
+            </li>
+            <li class="flex gap-4">
+              <span
+                aria-hidden="true"
+                class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+              ></span>
+              Wear whatever you can sit comfortably in for six hours.
+            </li>
+            <li class="flex gap-4">
+              <span
+                aria-hidden="true"
+                class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+              ></span>
+              Bring a notebook if you are someone who writes things down. About
+              half the room usually is.
+            </li>
+            <li class="flex gap-4">
+              <span
+                aria-hidden="true"
+                class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+              ></span>
+              Bring a jumper. The room is warm at eleven and cooler by four.
+            </li>
+          </ul>
+        </section>
+
+        <!-- The document that arrives with the confirmation email, named here
+             so it is not a surprise in an inbox. -->
+        <section class="mt-14" aria-labelledby="before">
+          <h2
+            id="before"
+            class="font-display text-[30px] font-normal leading-tight text-plate-text"
+          >
+            Before you come
+          </h2>
+          <p
+            class="mt-5 max-w-[58ch] text-[19px] leading-relaxed text-plate-soft"
+          >
+            When you book, a short note comes with your confirmation &mdash; two
+            pages on what to expect, and one question to sit with beforehand.
+            You do not have to do anything with it, and nobody asks about it on
+            the day.
+          </p>
+        </section>
+
+        <!-- ══ THE ROOM, AND MARIANNE ═════════════════════════════════════
+             One film, given real size, then the stills. The order matters:
+             somebody deciding whether to spend a Saturday with a stranger wants
+             to see the room and hear the voice before they want a grid of
+             photographs. Nothing autoplays, and nothing loops. -->
+        <section class="mt-16" aria-labelledby="room">
+          <h2
+            id="room"
+            class="font-display text-[30px] font-normal leading-tight text-plate-text"
+          >
+            The room, and Marianne
+          </h2>
+          <p
+            class="mt-4 max-w-[56ch] text-[19px] leading-relaxed text-plate-soft"
+          >
+            Forty seconds on the room and what the day is like. Worth it if you
+            have never done anything like this before.
+          </p>
+
+          <figure class="mt-7">
+            <!-- ⚠⚠ PLACEHOLDER FOOTAGE — DO NOT LET THIS REACH A LIVE SITE ⚠⚠
+                 the-room-web.mp4 is a stand-in clip: a man talking to camera
+                 against a brick wall. It is NOT Marianne and it is NOT the
+                 garden room. The poster frame is a frame of that same clip, so
+                 it shows him too. It is wired up as a real player rather than
+                 drawn as one so the region is honest about its own size and
+                 controls — swap the source and the poster together when the
+                 film is shot, and rewrite the running time in the caption in
+                 the same edit.
+
+                 Two things the earlier version of this page stated and should
+                 not have: the clip is 0:42, not 2:04, and there is no VTT
+                 anywhere in this project, so there is no track element here and
+                 no line claiming subtitles exist. -->
+            <video
+              class="block w-full bg-surface"
+              width="1600"
+              height="900"
+              controls
+              preload="metadata"
+              playsinline
+              poster="../../../assets/videos/the-room-poster.jpg"
+            >
+              <source
+                src="../../../assets/videos/the-room-web.mp4"
+                type="video/mp4"
+              />
+              <p class="px-6 py-8 text-[19px] leading-relaxed text-plate-soft">
+                Your browser will not play this film here.
+                <a
+                  class="text-gold underline decoration-gold underline-offset-4"
+                  href="../../../assets/videos/the-room-web.mp4"
+                  >Download it instead</a
+                >
+                &mdash; MP4, 2.3 MB.
+              </p>
+            </video>
+            <figcaption class="mt-3 fig font-mono text-[15px] text-plate-rule">
+              0:42 &middot; no subtitles yet
+            </figcaption>
+          </figure>
+
+          <!-- The stills. Three are composed across the page and everybody sees
+               all three; the fourth is left visibly running off the right edge,
+               which is how the strip says there are more without an arrow, a
+               dot, or a word. Nothing is hidden and nothing waits for script. -->
+          <!-- No loading="lazy" on any of these on purpose: a lazy image below
+               the fold does not paint in a static full-page screenshot, and a
+               strip that reviews as an empty band is the same failure as one
+               gated behind a scroll-reveal. -->
+          <ul class="rail mt-9" id="stills">
+            <li id="photo-1">
+              <a class="shot" href="#photo-1">
+                <img
+                  src="../../../assets/images/web/work-wide-the-room.jpg"
+                  alt="Marianne standing at the treatment table, her hands held a little above a man resting under a blanket."
+                  width="1600"
+                  height="900"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+            <li id="photo-2">
+              <a class="shot" href="#photo-2">
+                <img
+                  src="../../../assets/images/web/chair-with-her-coat.jpg"
+                  alt="A wool coat over the back of a wooden chair, a canvas bag on the floor beside it."
+                  width="1600"
+                  height="1067"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+            <li id="photo-3">
+              <a class="shot" href="#photo-3">
+                <img
+                  src="../../../assets/images/web/window-last-light.jpg"
+                  alt="A lit lamp and a spider plant on the deep sill of the window, the last blue daylight outside."
+                  width="1600"
+                  height="1067"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+            <li id="photo-4">
+              <a class="shot" href="#photo-4">
+                <img
+                  src="../../../assets/images/web/work-close-hands.jpg"
+                  alt="Her hands held a hand&rsquo;s width above the blanket, their shadows falling on the cloth beneath."
+                  width="1600"
+                  height="1067"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+            <li id="photo-5">
+              <a class="shot" href="#photo-5">
+                <img
+                  src="../../../assets/images/web/work-down-the-body.jpg"
+                  alt="Seen over her shoulder, down the length of someone lying still on the table."
+                  width="1600"
+                  height="1067"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+            <li id="photo-6">
+              <a class="shot" href="#photo-6">
+                <img
+                  src="../../../assets/images/web/marianne-portrait-in-the-light.jpg"
+                  alt="Marianne, looking straight at the camera."
+                  width="1600"
+                  height="1067"
+                  class="aspect-[3/2] w-full object-cover"
+                />
+                <span class="vh">&mdash; open this photograph larger</span>
+              </a>
+            </li>
+          </ul>
+          <p
+            class="mt-4 max-w-[62ch] fig font-mono text-[15px] leading-relaxed text-plate-rule"
+          >
+            The Garden Room, Fromefield. Four of these are from one-to-one
+            sessions in the same room; the workshop photographs go up after the
+            October day.
+          </p>
+        </section>
+      </div>
+
+      <!-- ══ THE BOOKING PANEL ══════════════════════════════════════════════
+           The one blush pool on the page. It holds the single decision, and it
+           holds the cancellation terms with it — the moment somebody is
+           deciding to spend £95 is the moment they want to know what happens if
+           they cannot come. Putting that in a footer is how a practice ends up
+           arguing with people by email.
+
+           The ten marks from the masthead are repeated here at the size of the
+           control, in magenta rather than gold, because the ground changed and
+           in this system colour does a different job on each ground. -->
+      <aside id="book" class="lg:pt-20" aria-labelledby="book-h">
+        <div class="pool on-pool sticky top-8 px-7 py-8 sm:px-9">
+          <h2
+            id="book-h"
+            class="font-display text-[30px] font-normal leading-tight text-ink"
+          >
+            Take a place
+          </h2>
+
+          <div class="mt-5">
+            <p class="fig font-mono text-[16px] text-ink">
+              6 places left of 10
+            </p>
+          </div>
+
+          <div class="mt-7">
+            <label
+              for="qty"
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+            >
+              How many places
+            </label>
+            <div
+              class="mt-3 flex items-center border border-pool-rule"
+              role="group"
+              aria-label="Number of places"
+            >
+              <button type="button" class="step t" aria-label="One fewer place">
+                &minus;
+              </button>
+              <input
+                id="qty"
+                class="qty"
+                type="number"
+                inputmode="numeric"
+                value="2"
+                min="1"
+                max="6"
+                aria-describedby="qty-cap"
+              />
+              <button type="button" class="step t" aria-label="One more place">
+                +
+              </button>
+              <span class="ml-auto pr-5 fig font-mono text-[22px] text-ink"
+                >&pound;190</span
+              >
+            </div>
+            <p
+              id="qty-cap"
+              class="mt-3 text-[15px] leading-relaxed text-ink-soft"
+            >
+              Up to 6 places &mdash; that is all that is left.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            class="t mt-7 min-h-[56px] w-full bg-action px-6 text-[19px] font-semibold text-pool hover:bg-ink"
+          >
+            Book 2 places &middot; &pound;190
+          </button>
+
+          <p class="mt-4 text-[15px] leading-relaxed text-ink-soft">
+            You pay through Stripe. I never see your card details.
+          </p>
+
+          <hr class="my-7 border-0 border-t border-pool-rule/40" />
+
+          <h3
+            class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+          >
+            If you cannot come
+          </h3>
+          <p class="mt-3 text-[17px] leading-relaxed text-ink">
+            Cancel up to <strong class="font-semibold">14 days</strong> before
+            &mdash; by <span class="fig font-mono">Friday 10 October</span>
+            &mdash; and you are refunded in full. There is a link in your
+            confirmation email; you do not need to ask me.
+          </p>
+          <p class="mt-3 text-[17px] leading-relaxed text-ink-soft">
+            After that the place is held for you, and I cannot refund it.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="border-t border-plate-rule/30">
+    <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+      <p class="fig font-mono text-[15px] text-plate-rule">
+        The Field Work &middot; Frome, Somerset &middot; Complementary work. Not
+        a substitute for medical care.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ══ THE PHOTOGRAPHS, OPENED ═══════════════════════════════════════════
+       ONE dialog for all six pictures, opened with `showModal()`. It replaces
+       six `:target` overlays that each wrote a new hash: every Next and
+       Previous was a navigation, so the overlay was destroyed and rebuilt
+       between pictures, the page flashed through the scrim on each press, and
+       the back button walked out through every photograph looked at. The URL
+       is now never written and the picture swaps in place.
+
+       It carries no picture and no sentence of its own. The image file and the
+       caption are read off the rail photograph that was clicked, at the moment
+       it is clicked, so the caption IS that photograph's description and the
+       two can never drift apart.
+
+       With script off this element is `display: none` — a `<dialog>` with no
+       `open` attribute always is — and the rail's anchors do the work
+       instead: see `.rail > li:target` in the stylesheet. -->
+  <dialog class="lb" id="lightbox" aria-label="Photograph, larger">
+    <div class="lb-inner">
+      <div class="lb-bar">
+        <p class="lb-count" id="lb-count">1 of 6</p>
+        <button class="lb-ctl t" type="button" id="lb-close" autofocus>
+          <span class="lb-arrow" aria-hidden="true">&times;</span>
+          Close
+        </button>
+      </div>
+      <figure class="lb-fig">
+        <img id="lb-img" alt="" width="1600" height="1067" />
+        <figcaption class="lb-cap" id="lb-cap"></figcaption>
+      </figure>
+      <div class="lb-foot">
+        <button class="lb-ctl t" type="button" id="lb-prev">
+          <span class="lb-arrow" aria-hidden="true">&larr;</span> Previous
+        </button>
+        <button class="lb-ctl t" type="button" id="lb-next">
+          Next <span class="lb-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </div>
+    </div>
+    <!-- One status line, not two. It says where you are and what you are
+         looking at, in that order, each time the picture changes. -->
+    <p class="vh" id="lb-say" role="status"></p>
+  </dialog>
+
+  <script>
+    /* THE PHOTOGRAPH MODAL
+       ────────────────────────────────────────────────────────────────────
+       The whole of the page's script. It gates nothing: every photograph,
+       every word and the entire composition are in the delivered HTML and
+       render whole with this file removed. All it does is intercept a click
+       on a rail photograph and open the dialog instead of following the
+       anchor.
+
+       Behaviour, deliberately:
+         · the URL never changes — the click is prevented, nothing is pushed
+         · Next / Previous swap src, alt and caption IN PLACE; the dialog is
+           never closed and reopened, so there is no flash and no history
+         · Escape closes it — native to showModal(), not reimplemented here
+         · Left / Right arrows move through the set
+         · focus enters the dialog on open and returns to the photograph that
+           opened it on close
+         · the ends do not wrap: at the first and last picture the button that
+           would go past it is disabled, so it takes no click and no focus
+         · clicking the backdrop closes it
+
+       Everything is guarded. If any of it is missing or throws, the function
+       returns and the rail keeps the plain-anchor behaviour it has without
+       script. A builder porting this to React should keep the shape: one
+       dialog, one index, no routing. */
+    (function () {
+      "use strict";
+      try {
+        var dlg = document.getElementById("lightbox");
+        var rail = document.getElementById("stills");
+        if (!dlg || !rail || typeof dlg.showModal !== "function") return;
+
+        var shots = Array.prototype.slice.call(rail.querySelectorAll("a.shot"));
+        var img = document.getElementById("lb-img");
+        var cap = document.getElementById("lb-cap");
+        var count = document.getElementById("lb-count");
+        var say = document.getElementById("lb-say");
+        var prev = document.getElementById("lb-prev");
+        var next = document.getElementById("lb-next");
+        var closeBtn = document.getElementById("lb-close");
+        if (!shots.length || !img || !cap || !count || !say) return;
+        if (!prev || !next || !closeBtn) return;
+
+        var index = -1;
+        var opener = null;
+
+        /* Put picture i on the plate. The only place the dialog's contents are
+           ever written, so opening and stepping share one definition. */
+        function show(i) {
+          if (i < 0 || i >= shots.length) return false;
+          var source = shots[i].querySelector("img");
+          if (!source) return false;
+
+          var text = source.getAttribute("alt") || "";
+          img.setAttribute("src", source.getAttribute("src"));
+          img.setAttribute("width", source.getAttribute("width") || "1600");
+          img.setAttribute("height", source.getAttribute("height") || "1067");
+          cap.textContent = text;
+          count.textContent = i + 1 + " of " + shots.length;
+
+          /* The ends are ends. A disabled button is out of the tab order and
+             takes no pointer, and the stylesheet draws it spent. */
+          prev.disabled = i === 0;
+          next.disabled = i === shots.length - 1;
+
+          say.textContent = i + 1 + " of " + shots.length + ". " + text;
+          index = i;
+          return true;
+        }
+
+        function step(delta) {
+          var was = document.activeElement;
+          if (!show(index + delta)) return;
+          /* If the button just pressed has become an end, it has also lost
+             focus. Hand focus to the other one rather than dropping it on the
+             floor and stranding a keyboard user outside the controls. */
+          if (was && was.disabled) (was === prev ? next : prev).focus();
+        }
+
+        shots.forEach(function (link, i) {
+          link.addEventListener("click", function (event) {
+            /* Leave modified clicks alone — opening a photograph in a new tab
+               is a reasonable thing to want. */
+            if (
+              event.button !== 0 ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            )
+              return;
+            if (!show(i)) return;
+            event.preventDefault(); // the hash is never written
+            opener = link;
+            dlg.showModal();
+            document.documentElement.classList.add("lb-open");
+            closeBtn.focus();
+          });
+        });
+
+        prev.addEventListener("click", function () {
+          step(-1);
+        });
+        next.addEventListener("click", function () {
+          step(1);
+        });
+        closeBtn.addEventListener("click", function () {
+          dlg.close();
+        });
+
+        /* A click that lands on the dialog element itself is a click on the
+           backdrop: .lb-inner fills the plate edge to edge, so nothing else
+           can report the dialog as its target. */
+        dlg.addEventListener("click", function (event) {
+          if (event.target === dlg) dlg.close();
+        });
+
+        dlg.addEventListener("keydown", function (event) {
+          if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            step(-1);
+          } else if (event.key === "ArrowRight") {
+            event.preventDefault();
+            step(1);
+          }
+          /* Escape is left to the dialog. */
+        });
+
+        /* Fires for the close button, the backdrop and Escape alike. */
+        dlg.addEventListener("close", function () {
+          document.documentElement.classList.remove("lb-open");
+          if (opener) {
+            opener.focus();
+            opener = null;
+          }
+        });
+      } catch (error) {
+        /* The rail keeps its anchors and its no-script behaviour. */
+      }
+    })();
+  </script>
+</body>

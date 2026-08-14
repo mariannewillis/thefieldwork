@@ -65,12 +65,17 @@ export async function verifyPassword(
 
     const salt = Buffer.from(saltB64, "base64");
     const expected = Buffer.from(hashB64, "base64");
-    const actual = await scrypt(password.normalize("NFKC"), salt, expected.length, {
-      N: Number(n),
-      r: Number(r),
-      p: Number(p),
-      maxmem: 128 * Number(n) * Number(r) * 2,
-    });
+    const actual = await scrypt(
+      password.normalize("NFKC"),
+      salt,
+      expected.length,
+      {
+        N: Number(n),
+        r: Number(r),
+        p: Number(p),
+        maxmem: 128 * Number(n) * Number(r) * 2,
+      },
+    );
 
     // Length must match before timingSafeEqual, which throws on a mismatch —
     // and the comparison itself must be constant-time so that the time taken

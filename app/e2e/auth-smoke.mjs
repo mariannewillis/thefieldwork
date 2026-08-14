@@ -36,10 +36,16 @@ const USER = "marianne@thefieldwork.co.uk";
 const TEMP = "test1234";
 const STRONG = "clearing-lamp-quiet-hour";
 
-let pass = 0, fail = 0;
+let pass = 0,
+  fail = 0;
 const ok = (name, cond, detail = "") => {
-  if (cond) { pass++; console.log(`  PASS  ${name}`); }
-  else { fail++; console.log(`  FAIL  ${name}${detail ? ` — ${detail}` : ""}`); }
+  if (cond) {
+    pass++;
+    console.log(`  PASS  ${name}`);
+  } else {
+    fail++;
+    console.log(`  FAIL  ${name}${detail ? ` — ${detail}` : ""}`);
+  }
 };
 
 const b = await chromium.launch();
@@ -49,12 +55,18 @@ const path = (p) => new URL(p.url()).pathname;
 // 1 — the door is shut
 let p = await fresh();
 await p.goto(`${BASE}/admin`);
-ok("unauthenticated /admin redirects to sign-in", path(p) === "/admin/login", path(p));
+ok(
+  "unauthenticated /admin redirects to sign-in",
+  path(p) === "/admin/login",
+  path(p),
+);
 
 await p.goto(`${BASE}/admin/settings`);
 ok("deep admin link also redirects", path(p) === "/admin/login", path(p));
-ok("...and remembers where she was going",
-   new URL(p.url()).searchParams.get("next") === "/admin/settings");
+ok(
+  "...and remembers where she was going",
+  new URL(p.url()).searchParams.get("next") === "/admin/settings",
+);
 
 // 2 — wrong password is refused, and says nothing useful
 await p.goto(`${BASE}/admin/login`);
@@ -70,8 +82,11 @@ await p.fill('input[name="password"]', "wrongpassword");
 await p.click('button[type="submit"]');
 await p.waitForSelector('p[role="alert"]');
 const msg2 = (await p.locator('p[role="alert"]').innerText()).trim();
-ok("unknown username gives the SAME message (no user enumeration)",
-   msg1 === msg2, `"${msg1}" vs "${msg2}"`);
+ok(
+  "unknown username gives the SAME message (no user enumeration)",
+  msg1 === msg2,
+  `"${msg1}" vs "${msg2}"`,
+);
 
 // 3 — the temporary password gets you to the change screen and no further
 await p.goto(`${BASE}/admin/login`);
@@ -81,59 +96,90 @@ await p.click('button[type="submit"]');
 await p.waitForURL("**/admin/change-password");
 ok("temporary password forces a change", path(p) === "/admin/change-password");
 
-const oldCookie = (await p.context().cookies()).find(c => c.name === "tfw_session");
+const oldCookie = (await p.context().cookies()).find(
+  (c) => c.name === "tfw_session",
+);
 ok("session cookie is httpOnly", oldCookie?.httpOnly === true);
 ok("session cookie is sameSite Lax", oldCookie?.sameSite === "Lax");
 
 await p.goto(`${BASE}/admin/offerings`);
-ok("cannot skip the forced change by navigating", path(p) === "/admin/change-password", path(p));
+ok(
+  "cannot skip the forced change by navigating",
+  path(p) === "/admin/change-password",
+  path(p),
+);
 
 // 4 — the new password has to be worth something
 const tryChange = async (cur, next) => {
   await p.goto(`${BASE}/admin/change-password`);
   await p.waitForSelector('input[name="password"]');
   await p.evaluate(() =>
-    document.querySelector('input[name="password"]').removeAttribute("minlength"));
+    document
+      .querySelector('input[name="password"]')
+      .removeAttribute("minlength"),
+  );
   await p.fill('input[name="current"]', cur);
   await p.fill('input[name="password"]', next);
   await p.fill('input[name="confirm"]', next);
   await p.locator('button[type="submit"]').click();
   await p.waitForTimeout(900);
-  return p.locator('p[role="alert"]').count().then(n => n ? p.locator('p[role="alert"]').innerText() : null);
+  return p
+    .locator('p[role="alert"]')
+    .count()
+    .then((n) => (n ? p.locator('p[role="alert"]').innerText() : null));
 };
 // the form has minLength, so bypass it to prove the SERVER rejects it too
 await p.goto(`${BASE}/admin/change-password`);
 await p.waitForSelector('input[name="password"]');
-await p.evaluate(() => document.querySelector('input[name="password"]').removeAttribute("minlength"));
+await p.evaluate(() =>
+  document.querySelector('input[name="password"]').removeAttribute("minlength"),
+);
 await p.fill('input[name="current"]', TEMP);
 await p.fill('input[name="password"]', "short1");
 await p.fill('input[name="confirm"]', "short1");
 await p.locator('button[type="submit"]').click();
 await p.waitForTimeout(900);
-ok("server rejects a short password even with client validation stripped",
-   path(p) === "/admin/change-password" && await p.locator('p[role="alert"]').count() > 0);
+ok(
+  "server rejects a short password even with client validation stripped",
+  path(p) === "/admin/change-password" &&
+    (await p.locator('p[role="alert"]').count()) > 0,
+);
 
-ok("the temporary password cannot be kept as the new one",
-   (await tryChange(TEMP, TEMP))?.length > 0);
-ok("wrong current password is rejected",
-   (await tryChange("notthepassword", STRONG))?.length > 0);
+ok(
+  "the temporary password cannot be kept as the new one",
+  (await tryChange(TEMP, TEMP))?.length > 0,
+);
+ok(
+  "wrong current password is rejected",
+  (await tryChange("notthepassword", STRONG))?.length > 0,
+);
 
 // 5 — a real change works, and revokes what came before
 await tryChange(TEMP, STRONG);
-await p.waitForURL(url => new URL(url).pathname === "/admin", { timeout: 8000 }).catch(() => {});
+await p
+  .waitForURL((url) => new URL(url).pathname === "/admin", { timeout: 8000 })
+  .catch(() => {});
 ok("valid change lands in the portal", path(p) === "/admin", path(p));
-ok("portal renders the signed-in user",
-   (await p.locator("text=Signed in as").count()) > 0);
+ok(
+  "portal renders the signed-in user",
+  (await p.locator("text=Signed in as").count()) > 0,
+);
 
 const q = await b.newContext();
 await q.addCookies([oldCookie]);
 const qp = await q.newPage();
 await qp.goto(`${BASE}/admin`);
-ok("session issued BEFORE the change is revoked", path(qp) === "/admin/login", path(qp));
+ok(
+  "session issued BEFORE the change is revoked",
+  path(qp) === "/admin/login",
+  path(qp),
+);
 
 // 6 — forged tokens
 const t = await b.newContext();
-await t.addCookies([{ ...oldCookie, value: oldCookie.value.split(".")[0] + ".AAAAtampered" }]);
+await t.addCookies([
+  { ...oldCookie, value: oldCookie.value.split(".")[0] + ".AAAAtampered" },
+]);
 const tp = await t.newPage();
 await tp.goto(`${BASE}/admin`);
 ok("tampered signature is refused", path(tp) === "/admin/login", path(tp));
@@ -154,7 +200,10 @@ const signIn = async (pw) => {
   await p.waitForTimeout(1200);
   return path(p);
 };
-ok("the temporary password no longer works", (await signIn(TEMP)) === "/admin/login");
+ok(
+  "the temporary password no longer works",
+  (await signIn(TEMP)) === "/admin/login",
+);
 ok("the new password works", (await signIn(STRONG)) === "/admin");
 
 // 8 — open redirect
@@ -163,8 +212,11 @@ await p.fill('input[name="username"]', USER);
 await p.fill('input[name="password"]', STRONG);
 await p.click('button[type="submit"]');
 await p.waitForTimeout(1200);
-ok("cannot be redirected off-site after sign-in",
-   new URL(p.url()).host === new URL(BASE).host, p.url());
+ok(
+  "cannot be redirected off-site after sign-in",
+  new URL(p.url()).host === new URL(BASE).host,
+  p.url(),
+);
 
 // 9 — brute force
 const r = await fresh();
@@ -176,11 +228,18 @@ for (let i = 0; i < 9; i++) {
   await r.click('button[type="submit"]');
   await r.waitForSelector('p[role="alert"]');
   const m = await r.locator('p[role="alert"]').innerText();
-  if (/too many/i.test(m)) { locked = { attempt: i + 1, m: m.trim() }; break; }
+  if (/too many/i.test(m)) {
+    locked = { attempt: i + 1, m: m.trim() };
+    break;
+  }
 }
-ok("repeated guessing gets locked out", locked !== null,
-   locked ? "" : "9 wrong passwords accepted without a lockout");
-if (locked) console.log(`        locked after ${locked.attempt} attempts: "${locked.m}"`);
+ok(
+  "repeated guessing gets locked out",
+  locked !== null,
+  locked ? "" : "9 wrong passwords accepted without a lockout",
+);
+if (locked)
+  console.log(`        locked after ${locked.attempt} attempts: "${locked.m}"`);
 
 await b.close();
 console.log(`\n  ${pass} passed, ${fail} failed`);

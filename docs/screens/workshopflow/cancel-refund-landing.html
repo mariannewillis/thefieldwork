@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Cancel your place · The Field Work</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
+            },
+            fontFamily: {
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* ── The Lit Clearing · the page reached from an email ────────────────
+         Three states, all drawn, because this link gets clicked in a hurry and
+         often twice. The rule running through all of them: say what will
+         happen to the MONEY before asking anyone to confirm anything, and
+         never make someone guess which state they are in.
+
+         noindex, because this page is only ever reached from a signed link. */
+      html {
+        background-color: #160712;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .fig,
+      .font-mono {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+      /* The booking being acted on, restated identically in every state, so
+         nobody cancels the wrong day. */
+      .receipt {
+        border-left: 2px solid #8a7285;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+  </head>
+
+  <body
+    data-screen-id="cancel-refund-landing"
+    class="text-plate-text font-body"
+  >
+    <!-- an empty chair with a coat on it, where someone says they cannot come -->
+    <img
+      src="../../../assets/images/new/chair-with-her-coat.png"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
+
+    <main class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+      <a href="/" aria-label="The Field Work — home" class="inline-block">
+        <img
+          src="../../../assets/brand/logo-horizontal.svg"
+          alt="The Field Work"
+          width="440"
+          height="120"
+          class="h-[56px] w-auto"
+        />
+      </a>
+
+      <!-- ══ STATE 1 · WITHIN THE REFUND WINDOW ════════════════════════════
+           The money is stated in full before the button. "You will be refunded
+           £190" is the sentence someone needs; "cancel your booking" is not. -->
+      <section class="mt-14 max-w-[620px]" aria-labelledby="s1">
+        <p
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          State 1 · still refundable
+        </p>
+        <div class="pool on-pool mt-5 px-8 py-9 sm:px-10">
+          <h1
+            id="s1"
+            class="font-display text-[38px] font-normal leading-[1.05] text-ink"
+          >
+            Cancel your place
+          </h1>
+
+          <div class="receipt mt-7 pl-5">
+            <p class="font-display text-[26px] leading-tight text-ink">
+              Reading the Field
+            </p>
+            <p class="mt-2 fig font-mono text-[17px] text-ink-soft">
+              Sat 20 Sep · 10:00–16:30<br />
+              The Garden Room, Frome<br />
+              2 places · £190 paid on 14 Aug
+            </p>
+          </div>
+
+          <p class="mt-7 text-[19px] leading-relaxed text-ink">
+            You are 14 days clear of the workshop, so cancelling now returns
+            your money in full.
+          </p>
+          <p class="mt-4 text-[19px] leading-relaxed text-ink">
+            <strong class="font-semibold"
+              >£190 will go back to the card ending 4242.</strong
+            >
+            Stripe usually takes five to ten working days to show it.
+          </p>
+
+          <button
+            type="submit"
+            class="t mt-8 min-h-[56px] w-full bg-action px-6 text-[19px] font-semibold text-pool hover:bg-ink"
+          >
+            Cancel both places and refund £190
+          </button>
+
+          <p class="mt-5 text-[17px] leading-relaxed text-ink-soft">
+            Changed your mind about cancelling?
+            <a href="/workshops/reading-the-field" class="text-action underline"
+              >Keep your place</a
+            >.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ STATE 2 · PAST THE REFUND WINDOW ══════════════════════════════
+           The hard one. It must not pretend, must not hide the button, and
+           must not sound punitive. The place is still released — that is worth
+           something to Marianne and to whoever is on the waiting list. -->
+      <section class="mt-20 max-w-[620px]" aria-labelledby="s2">
+        <p
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          State 2 · past the refund date
+        </p>
+        <div class="pool on-pool mt-5 px-8 py-9 sm:px-10">
+          <h1
+            id="s2"
+            class="font-display text-[38px] font-normal leading-[1.05] text-ink"
+          >
+            Cancel your place
+          </h1>
+
+          <div class="receipt mt-7 pl-5">
+            <p class="font-display text-[26px] leading-tight text-ink">
+              Reading the Field
+            </p>
+            <p class="mt-2 fig font-mono text-[17px] text-ink-soft">
+              Sat 20 Sep · 10:00–16:30<br />
+              The Garden Room, Frome<br />
+              2 places · £190 paid on 14 Aug
+            </p>
+          </div>
+
+          <p
+            class="mt-7 border-l-2 border-pool-error bg-pool-error/10 px-4 py-4 text-[19px] leading-relaxed text-ink"
+          >
+            The refund date was <span class="fig font-mono">6 September</span>,
+            which has passed. Cancelling now will
+            <strong class="font-semibold">not return your £190</strong>.
+          </p>
+
+          <p class="mt-5 text-[19px] leading-relaxed text-ink">
+            You are welcome to cancel anyway — it frees the place for whoever is
+            waiting, and Marianne will know not to expect you.
+          </p>
+
+          <!-- Subordinate, not hidden. Removing it would leave someone with no
+               way to say "I can't come", which is worse than an unhappy click. -->
+          <button
+            type="submit"
+            class="t mt-8 min-h-[56px] w-full border border-ink bg-transparent px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
+          >
+            Cancel anyway, without a refund
+          </button>
+
+          <p class="mt-5 text-[17px] leading-relaxed text-ink-soft">
+            If something has happened and this feels wrong,
+            <a
+              href="mailto:hello@thefieldwork.co.uk"
+              class="text-action underline"
+              >write to Marianne</a
+            >
+            — she would rather hear from you than not.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ STATE 3 · ALREADY CANCELLED ═══════════════════════════════════
+           The state that gets forgotten. This link sits in an inbox and gets
+           clicked again days later, on a different device. It must read as
+           reassurance, not as an error. -->
+      <section class="mt-20 max-w-[620px]" aria-labelledby="s3">
+        <p
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          State 3 · already cancelled
+        </p>
+        <div class="pool on-pool mt-5 px-8 py-9 sm:px-10">
+          <h1
+            id="s3"
+            class="font-display text-[38px] font-normal leading-[1.05] text-ink"
+          >
+            This one is already cancelled
+          </h1>
+
+          <div class="receipt mt-7 pl-5">
+            <p class="font-display text-[26px] leading-tight text-ink">
+              Reading the Field
+            </p>
+            <p class="mt-2 fig font-mono text-[17px] text-ink-soft">
+              Sat 20 Sep · 10:00–16:30<br />
+              2 places · cancelled on 22 Aug
+            </p>
+          </div>
+
+          <p
+            class="mt-7 border-l-2 border-pool-success bg-pool-success/10 px-4 py-4 text-[19px] leading-relaxed text-ink"
+          >
+            <strong class="font-semibold">£190 was refunded on 22 Aug</strong>
+            to the card ending 4242. Nothing further is needed from you.
+          </p>
+
+          <p class="mt-5 text-[19px] leading-relaxed text-ink-soft">
+            If it still has not appeared on your statement, it is worth checking
+            with your bank first — after ten working days,
+            <a
+              href="mailto:hello@thefieldwork.co.uk"
+              class="text-action underline"
+              >tell us</a
+            >
+            and we will chase it.
+          </p>
+
+          <a
+            href="/workshops"
+            class="t mt-8 flex min-h-[56px] w-full items-center justify-center border border-ink px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
+          >
+            See the other workshops
+          </a>
+        </div>
+      </section>
+
+      <!-- ══ STATE 4 · DEAD LINK ═══════════════════════════════════════════
+           Same treatment as the password-reset dead link, and for the same
+           reason: one message whatever killed it, so a stolen or guessed link
+           reveals nothing about whether a booking exists. -->
+      <section class="mt-20 max-w-[620px]" aria-labelledby="s4">
+        <p
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          State 4 · the link no longer works
+        </p>
+        <div class="pool on-pool mt-5 px-8 py-9 sm:px-10">
+          <h1
+            id="s4"
+            class="font-display text-[38px] font-normal leading-[1.05] text-ink"
+          >
+            This link has expired
+          </h1>
+          <p class="mt-4 text-[19px] leading-relaxed text-ink-soft">
+            Cancellation links stop working once the workshop has been and gone.
+            If you need to sort something out,
+            <a
+              href="mailto:hello@thefieldwork.co.uk"
+              class="text-action underline"
+              >write to Marianne</a
+            >
+            with the date you booked and she will find it.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work · Frome, Somerset · Complementary work. Not a
+          substitute for medical care.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

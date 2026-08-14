@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Set your usual working hours, day by day",
         "Close a date or a stretch of dates entirely",
-        "Change how much notice you need before someone can book"
+        "Change how much notice you need before someone can book",
       ]}
     />
   );

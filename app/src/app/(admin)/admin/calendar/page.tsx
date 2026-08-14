@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Look ahead a month and see where the gaps are",
         "Open a day to see every session on it",
-        "Block out time you are not available"
+        "Block out time you are not available",
       ]}
     />
   );

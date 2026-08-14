@@ -154,6 +154,33 @@ button:focus-visible,
   height: 18px;
 }
 
+/* --- a modal ------------------------------------------------------------
+   A real <dialog>, so the focus goes into it, Escape closes it and the page
+   behind it cannot be tabbed to. The browser's own chrome is removed entirely:
+   this is the same hard-cut blush panel every other unit of work is, and a
+   rounded, shadowed box in the middle of it would be the one shape in the
+   system that came from somewhere else. */
+dialog.modal {
+  border: none;
+  padding: 0;
+  width: 100%;
+  max-width: min(560px, calc(100vw - 32px));
+  color: var(--color-ink);
+  /* Tailwind's preflight zeroes every element's margin, and a dialog centres
+     itself with `margin: auto`. Without this line the modal lands in the top
+     left corner of the screen, half off the panel it belongs to. */
+  margin: auto;
+  /* A long modal — the delete guard on a booking that owes money is the
+     longest — must scroll inside itself rather than push its own buttons off
+     the bottom of the screen. */
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+
+dialog.modal::backdrop {
+  background: rgb(10 3 9 / 0.66);
+}
+
 /* --- loading skeleton --------------------------------------------------
    Flat blocks at ground brightness. No shimmer — a shimmer is motion that
    says "something is happening" when nothing is. */
@@ -232,13 +259,12 @@ button:focus-visible,
   /* A vignette centred on the LAMP, not on the page. It keeps the light
      source bright and deepens the plum outward, so the panel's hard cut edge
      stays legible in the middle without flattening the photograph. */
-  background:
-    radial-gradient(
-      ellipse 90% 85% at 26% 52%,
-      rgb(22 7 18 / 0.12) 0%,
-      rgb(22 7 18 / 0.5) 55%,
-      rgb(22 7 18 / 0.8) 100%
-    );
+  background: radial-gradient(
+    ellipse 90% 85% at 26% 52%,
+    rgb(22 7 18 / 0.12) 0%,
+    rgb(22 7 18 / 0.5) 55%,
+    rgb(22 7 18 / 0.8) 100%
+  );
 }
 
 @media (max-width: 900px) {

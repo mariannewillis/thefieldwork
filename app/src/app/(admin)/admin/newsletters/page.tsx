@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Write a letter and save it as a draft for as long as you like",
         "Send yourself a test copy first",
-        "Look back at everything you have sent before"
+        "Look back at everything you have sent before",
       ]}
     />
   );

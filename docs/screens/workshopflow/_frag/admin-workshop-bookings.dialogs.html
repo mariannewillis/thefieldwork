@@ -1,0 +1,262 @@
+<!-- ============ CANCEL PROMPT — state A: the booking is still inside its
+         offering's refund period, so cancelling ASKS whether to send the money
+         back. Two buttons, both of which cancel; they differ only in what
+         happens to the money, and both say the amount. ============ -->
+<dialog
+  id="cancel-prompt"
+  data-pattern="clearing-plate"
+  data-variant="admin-panel"
+  data-kit-component="ConfirmDialog"
+  data-kit-variant="cancel-in-period"
+  class="bg-pool-surface text-pool-text max-w-[520px] w-full rounded-none shadow-none p-0"
+  aria-labelledby="cancel-prompt-title"
+>
+  <div class="px-8 py-7">
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Cancel &middot; inside the refund period
+    </p>
+    <h2
+      id="cancel-prompt-title"
+      class="font-display text-2xl text-pool-text mt-2"
+    >
+      Cancel Helen Prosser&rsquo;s two places &mdash; and send the &pound;190
+      back?
+    </h2>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      Reading the Field is on Sat 20 Sep and its refund period runs for fourteen
+      days, until 6 September. You are inside it, so the money can go back if
+      you want it to.
+    </p>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      Either way both places go back on sale straight away and she is told. If
+      you refund, Stripe usually takes five to ten working days to show the
+      &pound;190 on her statement.
+    </p>
+
+    <div class="mt-6 flex flex-col gap-4">
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        class="bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+      >
+        Cancel and refund &pound;190
+      </button>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="outline"
+          class="border border-pool-text bg-transparent px-8 py-4 text-sm font-medium text-pool-text hover:bg-pool-text hover:text-pool-surface"
+        >
+          Cancel and keep the &pound;190 for now
+        </button>
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="ghost"
+          class="py-3 text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+        >
+          Leave the booking as it is
+        </button>
+      </div>
+    </div>
+
+    <p class="mt-5 font-mono text-xs text-pool-text-secondary">
+      Keeping it does not close the door &mdash; the refund control stays
+      available on the row afterwards.
+    </p>
+  </div>
+</dialog>
+
+<!-- ============ CANCEL PROMPT — state B: past this offering's refund
+         period. No refund question is asked, because there is nothing to ask.
+         It must not pretend, must not hide the button, and must say what
+         cancelling does achieve, since it is not money. ============ -->
+<dialog
+  id="cancel-past-period"
+  data-pattern="clearing-plate"
+  data-variant="admin-panel"
+  data-kit-component="ConfirmDialog"
+  data-kit-variant="cancel-past-period"
+  class="bg-pool-surface text-pool-text max-w-[520px] w-full rounded-none shadow-none p-0"
+  aria-labelledby="cancel-past-period-title"
+>
+  <div class="px-8 py-7">
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Cancel &middot; past the refund period
+    </p>
+    <h2
+      id="cancel-past-period-title"
+      class="font-display text-2xl text-pool-text mt-2"
+    >
+      Cancel this session without returning the &pound;75?
+    </h2>
+    <p
+      class="mt-3 border-l-2 border-pool-danger px-4 py-3 text-sm text-pool-text"
+    >
+      A first session has a refund period of ten days. Marcus
+      Adeyemi-Hale&rsquo;s is on 13 August, so that period closed on 3 August.
+      Nothing goes back to his card.
+    </p>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      What cancelling does do: the hour goes back into your week and can be
+      booked by someone else. He is told what has happened, and told plainly
+      that no money is coming back.
+    </p>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      If you would rather give it back anyway, close this and use refund on the
+      row instead. That stays open to you whatever the period says.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="outline-danger"
+        class="border border-pool-text bg-transparent px-10 py-5 text-sm font-semibold text-pool-text hover:bg-pool-text hover:text-pool-surface"
+      >
+        Cancel the session and return nothing
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="ghost"
+        class="py-3 text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+      >
+        Leave the booking as it is
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ REFUND GUARD — refund used on its own, which is the
+         goodwill path. The amount, the card and the wait are all named before
+         the button, and the button repeats the amount. ============ -->
+<dialog
+  id="refund-guard"
+  data-pattern="clearing-plate"
+  data-variant="admin-panel"
+  data-kit-component="ConfirmDialog"
+  data-kit-variant="refund"
+  class="bg-pool-surface text-pool-text max-w-[480px] w-full rounded-none shadow-none p-0"
+  aria-labelledby="refund-guard-title"
+>
+  <div class="px-8 py-7">
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Refund on its own
+    </p>
+    <h2
+      id="refund-guard-title"
+      class="font-display text-2xl text-pool-text mt-2"
+    >
+      Put &pound;95 back on Iwan Beddoe&rsquo;s card?
+    </h2>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      His place on The Long Attention was cancelled on 2 August and the money
+      stayed with you. Sending it back now is your decision, not the refund
+      period&rsquo;s &mdash; that closed when the place was released.
+    </p>
+    <p class="mt-3 text-sm text-pool-text-secondary">
+      The place is already back on sale and Alan Prewett has taken it, so
+      nothing changes on the day. Stripe usually takes five to ten working days
+      to show the money on his statement. The booking stays in the records,
+      marked refunded.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        class="bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+      >
+        Refund &pound;95
+      </button>
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="ghost"
+        class="py-3 text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+      >
+        Leave it as it is
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ============ DELETE GUARD — only ever reachable on a booking that has
+         already been cancelled. The dangerous case is cancelled-but-not-
+         refunded: deleting there loses the record of money still owed to
+         somebody, so the modal names that first and puts refunding above the
+         destructive button. ============ -->
+<dialog
+  id="delete-guard"
+  data-pattern="clearing-plate"
+  data-variant="admin-panel"
+  data-kit-component="ConfirmDialog"
+  data-kit-variant="delete"
+  class="bg-pool-surface text-pool-text max-w-[540px] w-full rounded-none shadow-none p-0"
+  aria-labelledby="delete-guard-title"
+>
+  <div class="px-8 py-7">
+    <p class="font-mono text-xs uppercase tracking-wide text-pool-danger">
+      Delete &middot; a cancelled booking
+    </p>
+    <h2
+      id="delete-guard-title"
+      class="font-display text-2xl text-pool-text mt-2"
+    >
+      Are you sure you want to delete Iwan Beddoe&rsquo;s booking?
+    </h2>
+
+    <p
+      class="mt-3 border-l-2 border-pool-danger px-4 py-3 text-sm text-pool-text"
+    >
+      <span class="font-semibold"
+        >This one was cancelled but never refunded.</span
+      >
+      &pound;95 of his money is still with you. Delete the booking and the
+      record of where that &pound;95 came from goes with it &mdash; there will
+      be nothing left to refund from.
+    </p>
+
+    <p class="mt-4 text-sm text-pool-text-secondary">
+      What goes with it: his name and email, the payment reference Stripe gave
+      it, the date he booked and the date it was cancelled. The place itself was
+      released on 2 August and is not affected. This cannot be undone.
+    </p>
+
+    <div class="mt-6 flex flex-col gap-4">
+      <button
+        type="button"
+        data-kit-component="Button"
+        data-kit-variant="primary"
+        class="bg-accent-500 px-10 py-5 text-sm font-semibold text-pool-surface transition-colors duration-normal hover:bg-pool-text"
+      >
+        Refund the &pound;95 first
+      </button>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="danger"
+          class="border border-pool-danger bg-transparent px-8 py-4 text-sm font-medium text-pool-danger hover:bg-pool-danger hover:text-pool-surface"
+        >
+          Delete anyway and keep the &pound;95
+        </button>
+        <button
+          type="button"
+          data-kit-component="Button"
+          data-kit-variant="ghost"
+          class="py-3 text-sm font-medium text-pool-text-secondary underline decoration-1 underline-offset-4 hover:text-pool-text"
+        >
+          Keep the booking
+        </button>
+      </div>
+    </div>
+
+    <p class="mt-5 font-mono text-xs text-pool-text-secondary">
+      On a booking that was cancelled and refunded, this modal drops the money
+      warning and asks the plain question on its own.
+    </p>
+  </div>
+</dialog>

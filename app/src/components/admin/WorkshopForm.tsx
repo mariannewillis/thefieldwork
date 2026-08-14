@@ -1,0 +1,1352 @@
+"use client";
+
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from "react";
+import {
+  addPicture,
+  chooseAddress,
+  saveWorkshop,
+  suggestAddresses,
+  type AddressSuggestion,
+  type AddressSuggestions,
+  type WorkshopFormState,
+} from "@/app/(admin)/admin/offerings/actions";
+import { formatDayLong, refundDeadline, toDateInputValue } from "@/lib/format";
+import { MAX_IMAGES, MIN_TERM_LENGTH, slugify } from "@/lib/workshop-rules";
+import DeleteWorkshop from "./DeleteWorkshop";
+
+/**
+ * The form that writes a workshop.
+ *
+ * It follows the workshop's own PAGE, in the order people read it — the
+ * picture and the name, then the facts, then where it is, then the long body,
+ * then the pictures, then putting it up. That order is the design: the form is
+ * the page's own shape, so filling it in is imagining the page rather than
+ * mapping fields onto one.
+ *
+ * One sheet, not a stack of panels, and a line of help only where it changes
+ * what she types. A paragraph under every field triples the height of the form
+ * and buries the fields it was written to serve; where the form can SHOW the
+ * consequence instead — the refund deadline, the address the name makes — it
+ * shows it and says nothing.
+ */
+
+const FIELD =
+  "min-h-[48px] w-full border-b border-pool-rule bg-transparent py-2 text-[19px] text-ink focus:border-action focus:outline-none";
+const FIELD_BIG = `${FIELD} font-display text-[28px]`;
+const FIELD_FIG = `${FIELD} fig font-mono tabular-nums`;
+const LABEL =
+  "fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft";
+const HELP = "mt-2 max-w-[60ch] text-[15px] leading-relaxed text-ink-soft";
+const NEEDED =
+  "fig font-mono text-[13px] uppercase tracking-[0.14em] text-action";
+/* Ink, not gold and not magenta. Gold fails contrast inside a panel
+   (admin.css), and magenta is spoken for — it is what "Needed" and the save
+   button are saying. A heading that borrows the alarm colour makes six more
+   alarms. */
+const SECTION_EYEBROW =
+  "fig font-mono text-[15px] font-semibold uppercase tracking-[0.14em] text-ink";
+const SECTION_NOTE = "fig font-mono text-[15px] text-ink-soft";
+const QUIET_BUTTON =
+  "t min-h-[48px] border border-pool-rule px-6 text-[17px] font-medium text-ink hover:bg-ink hover:text-pool";
+
+/**
+ * A place she has used before, as the form needs it: the four fields it fills
+ * in, and the id that records which one filled them.
+ *
+ * Declared here rather than imported from `lib/venues` because that module is
+ * server-only and this file runs in the browser. The shapes match; the pages
+ * hand rows straight across.
+ */
+export type VenueChoice = {
+  id: number;
+  name: string;
+  addressLines: string;
+  postcode: string;
+  gettingThere: string;
+};
+
+export type WorkshopFormValues = {
+  id: number;
+  slug: string;
+  name: string;
+  summary: string;
+  body: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  venueName: string;
+  addressLines: string;
+  postcode: string;
+  gettingThere: string;
+  /** Which saved place filled the four above, if one did. */
+  venueId: number | null;
+  capacity: number;
+  priceGBP: number;
+  refundDays: number;
+  heroImage: string | null;
+  heroAlt: string | null;
+  /** The Vimeo or YouTube address. The still and the length come from there. */
+  filmUrl: string | null;
+  published: boolean;
+  updatedAt: Date;
+  images: { url: string; alt: string; position: number }[];
+};
+
+const INITIAL: WorkshopFormState = {
+  errors: {},
+  message: null,
+  values: {},
+  attempt: 0,
+};
+
+/**
+ * How long the address field waits after the last letter before it asks.
+ *
+ * See the effect that uses it: one request per pause in typing rather than one
+ * per keystroke, and every one of those is a round trip through our own server
+ * because the key never reaches the browser.
+ */
+const SUGGEST_AFTER_MS = 350;
+
+/** The address a picture's derivatives are served from (D-6). */
+function mediaSrc(basename: string): string {
+  return `/media/${basename}-1200.jpg`;
+}
+
+function FieldError({ error }: { error?: string }) {
+  if (!error) return null;
+  return (
+    <p role="alert" className="mt-2 max-w-[44ch] text-[15px] text-pool-error">
+      {error}
+    </p>
+  );
+}
+
+function Needed() {
+  return <span className={NEEDED}>Needed</span>;
+}
+
+/**
+ * One region of the page, on the one sheet.
+ *
+ * A hairline and a wide gap divide the regions instead of a panel each. Six
+ * hard-cut panels stacked read as six separate errands; the workshop is one.
+ */
+function Section({
+  id,
+  title,
+  note,
+  first,
+  children,
+}: {
+  id: string;
+  title: string;
+  note: string;
+  /** The first region opens the sheet, so it takes no rule above it. */
+  first?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className={first ? "" : "mt-11 border-t border-pool-rule/40 pt-9"}
+    >
+      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+        <h2 id={id} className={SECTION_EYEBROW}>
+          {title}
+        </h2>
+        <p className={SECTION_NOTE}>{note}</p>
+      </div>
+      <div className="mt-6">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * A picture — off her computer, or one already on the site.
+ *
+ * The file goes up the moment she chooses it, so the picture appears here
+ * before she writes the line saying what is in it, and a save that bounces
+ * cannot throw the upload away with it. What comes back is a BASENAME, and
+ * that is what the field posts: the path her file had on her own machine is
+ * never sent anywhere and never becomes part of an address.
+ *
+ * Two ways in and one value between them. Choosing a file sets the same field
+ * the list does, so uploading a picture selects it — there is no second step
+ * where she has to find what she just added.
+ */
+function PicturePicker({
+  name,
+  label,
+  library,
+  onAdded,
+  defaultValue,
+  children,
+}: {
+  name: string;
+  label: ReactNode;
+  /** Every picture on the site, growing as she adds to it. */
+  library: string[];
+  onAdded: (basename: string) => void;
+  defaultValue: string;
+  children?: ReactNode;
+}) {
+  const [chosen, setChosen] = useState(defaultValue);
+  const [adding, setAdding] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
+
+  async function take(input: HTMLInputElement) {
+    const file = input.files?.[0];
+    if (!file) return;
+    // Cleared straight away so choosing the same file twice — after a refusal
+    // she has since fixed — still counts as a change and fires this again.
+    input.value = "";
+
+    setAdding(true);
+    setRefused(null);
+    const body = new FormData();
+    body.set("file", file);
+    try {
+      const result = await addPicture(body);
+      if (!result.ok) {
+        setRefused(result.error);
+        return;
+      }
+      onAdded(result.basename);
+      setChosen(result.basename);
+    } catch {
+      setRefused(
+        "The picture did not get there. Check the connection and try again.",
+      );
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-start gap-6">
+      <div className="w-full max-w-[300px] shrink-0">
+        {chosen ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={mediaSrc(chosen)}
+            alt=""
+            className="h-[169px] w-full object-cover"
+          />
+        ) : (
+          <p className="flex h-[169px] w-full items-center justify-center border border-dashed border-pool-rule px-6 text-center text-[17px] text-ink-soft">
+            No picture yet
+          </p>
+        )}
+      </div>
+      <div className="min-w-[17rem] flex-1">
+        <p className={LABEL} id={`${name}-label`}>
+          {label}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+          {/* A label around a visually-hidden file input: the browser's own
+              control, which cannot be styled, wearing the same button as the
+              rest of the form. `sr-only` rather than `hidden`, because a
+              hidden input cannot be reached by keyboard — the ring below is
+              drawn from the input's focus so it still can. */}
+          <label
+            className={`${QUIET_BUTTON} inline-flex cursor-pointer items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action`}
+          >
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              disabled={adding}
+              onChange={(event) => take(event.currentTarget)}
+              className="sr-only"
+            />
+            {adding ? "Adding…" : "Choose a picture"}
+          </label>
+
+          <select
+            name={name}
+            aria-labelledby={`${name}-label`}
+            value={chosen}
+            onChange={(event) => setChosen(event.target.value)}
+            className={`${FIELD} w-auto min-w-[13rem] flex-1`}
+          >
+            <option value="">No picture</option>
+            {library.map((basename) => (
+              <option key={basename} value={basename}>
+                {basename.replace(/-/g, " ")}
+              </option>
+            ))}
+          </select>
+        </div>
+        {refused && (
+          <p
+            role="alert"
+            className="mt-2 max-w-[44ch] text-[15px] leading-relaxed text-pool-error"
+          >
+            {refused}
+          </p>
+        )}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export default function WorkshopForm({
+  workshop,
+  media,
+  venues,
+  canFindAddress,
+}: {
+  /** Absent when this is a workshop that does not exist yet. */
+  workshop?: WorkshopFormValues;
+  /** The pictures already on the site — see lib/media#listMediaBasenames. */
+  media: string[];
+  /** The places she has used before — see lib/venues#listVenues. */
+  venues: VenueChoice[];
+  /**
+   * Whether there is a key to look addresses up with — see
+   * lib/addresses#canFindAddresses. False leaves the four address fields
+   * exactly as they have always been: nothing offered, nothing to press,
+   * nothing broken — the name field is a name field and nothing more.
+   */
+  canFindAddress: boolean;
+}) {
+  const [state, formAction, pending] = useActionState(saveWorkshop, INITIAL);
+
+  /** What was typed if the last attempt bounced, otherwise what is stored. */
+  const kept = (name: string, stored: string) => state.values[name] ?? stored;
+
+  // The picture library, held here rather than in each picker, because a
+  // photograph she uploads against the masthead has to be offered to the rail
+  // below it as well — one library, one place it grows.
+  const [library, setLibrary] = useState(media);
+  const rememberPicture = (basename: string) =>
+    setLibrary((names) =>
+      names.includes(basename) ? names : [...names, basename].sort(),
+    );
+
+  const [name, setName] = useState(workshop?.name ?? "");
+  const [slug, setSlug] = useState(workshop?.slug ?? "");
+  // The address is offered until she overrules it. Once she has typed one,
+  // renaming the workshop must not silently move the page out from under a
+  // link somebody already has.
+  const [slugOwned, setSlugOwned] = useState(Boolean(workshop));
+  const [date, setDate] = useState(
+    workshop ? toDateInputValue(workshop.date) : "",
+  );
+  const [refundDays, setRefundDays] = useState(
+    String(workshop?.refundDays ?? 14),
+  );
+
+  // The four address fields are held here rather than left to the browser,
+  // because choosing a place has to visibly FILL them — not stand in for them.
+  // She can see what it put there and change any of it, which is the one-off
+  // case ("we are in the church hall for this one") working by default.
+  const [venueName, setVenueName] = useState(
+    kept("venueName", workshop?.venueName ?? ""),
+  );
+  const [addressLines, setAddressLines] = useState(
+    kept("addressLines", workshop?.addressLines ?? ""),
+  );
+  const [postcode, setPostcode] = useState(
+    kept("postcode", workshop?.postcode ?? ""),
+  );
+  const [gettingThere, setGettingThere] = useState(
+    kept("gettingThere", workshop?.gettingThere ?? ""),
+  );
+  // Which place filled them, kept only while its four fields are untouched:
+  // once she has edited one, the address on the page is no longer that place's
+  // and saying it came from there would be a small lie in the database.
+  const [venueId, setVenueId] = useState(
+    kept("venueId", workshop?.venueId ? String(workshop.venueId) : ""),
+  );
+
+  /**
+   * WHAT SHE HAS TYPED into the name field, which is not the same as what the
+   * field holds. Filling it from a saved place, or from an address she has
+   * just picked, must not send what was filled in straight back out as a fresh
+   * search — those set the field and leave this null, and the list stays shut.
+   */
+  const [typed, setTyped] = useState<string | null>(null);
+  // What the register offered and which term it was answering, so a list that
+  // arrives late cannot end up standing under something else.
+  const [offered, setOffered] = useState<{
+    term: string;
+    result: AddressSuggestions;
+  } | null>(null);
+  // Which row the arrows are on. -1 is none, which is where it starts: Enter
+  // on a term she has not moved off should do nothing rather than take a guess
+  // on her behalf.
+  const [active, setActive] = useState(-1);
+  // A pick in flight. It is the call that costs a look-up and fills four
+  // fields, so it is worth a word while it happens.
+  const [filling, setFilling] = useState(false);
+  const [pickFailed, setPickFailed] = useState(false);
+  const listId = useId();
+
+  const shutList = () => {
+    setOffered(null);
+    setActive(-1);
+  };
+
+  const fillFrom = (venue: VenueChoice) => {
+    setVenueName(venue.name);
+    setAddressLines(venue.addressLines);
+    setPostcode(venue.postcode);
+    setGettingThere(venue.gettingThere);
+    setVenueId(String(venue.id));
+    // An address filled in whole, from a place she has used before. There is
+    // nothing left to look up about it.
+    setTyped(null);
+    setPickFailed(false);
+    shutList();
+  };
+
+  /** Any hand edit to the four means this address is hers, not a place's. */
+  const ownAddress = () => setVenueId("");
+
+  const term = (typed ?? "").trim();
+  // Only ever the answer to what is in the field NOW. A list for three letters
+  // ago is worse than no list at all.
+  const answer = offered && offered.term === term ? offered.result : null;
+  // Bound out here rather than narrowed at the point of use, because the rows
+  // are drawn by a callback and a narrowing does not survive into one.
+  const suggestions =
+    answer?.status === "suggestions" ? answer.suggestions : [];
+  const listOpen = suggestions.length > 0;
+
+  /**
+   * One request per PAUSE in typing, not one per letter.
+   *
+   * 350ms is longer than the gap between letters of someone typing a name they
+   * already know, so a fluent burst spends one request at the end of it rather
+   * than eleven on the way — and each of those is a round trip through our own
+   * server before it is one to getAddress, because the key may never reach the
+   * browser. It is short enough that the list is there by the time she has
+   * stopped to look for it.
+   *
+   * Three letters before anything is asked at all (`MIN_TERM_LENGTH`): a
+   * two-letter term answers with whatever the country has most of.
+   *
+   * Suggesting is free at getAddress and only rate-limited. Resolving the one
+   * she picks is what costs a look-up, and that waits for the press.
+   */
+  useEffect(() => {
+    if (!canFindAddress || typed === null) return;
+    const asked = typed.trim();
+    if (asked.length < MIN_TERM_LENGTH) {
+      setOffered(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setOffered({ term: asked, result: await suggestAddresses(asked) });
+      } catch {
+        // The action itself did not come back — the connection, or a redeploy
+        // mid-request. Same thing to do about it as a service that is down.
+        setOffered({ term: asked, result: { status: "unavailable" } });
+      }
+    }, SUGGEST_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [typed, canFindAddress]);
+
+  /**
+   * One suggestion from the list, into the fields around it.
+   *
+   * THE SECOND CALL TO GETADDRESS HAPPENS HERE and nowhere else. A suggestion
+   * carries a line to read and an id and nothing else, so this is what turns
+   * the one she picked into an address — on the pick, never per suggestion
+   * shown, because this is the half that is billed.
+   *
+   * The NAME is only written when the register holds one: a house at 10 Watkin
+   * Terrace has no name, and putting "10" where The Garden Room goes would be
+   * worse than leaving what she typed there.
+   *
+   * Everything it fills stays visible and stays editable. "We are in the
+   * church hall for this one, second door" is a correction she has to be able
+   * to make on top of any of this.
+   */
+  const pick = async (suggestion: AddressSuggestion) => {
+    if (filling) return;
+    // Shut before the request rather than after. She has chosen; a list still
+    // standing over the fields it is about to fill reads as though the press
+    // missed.
+    setTyped(null);
+    shutList();
+    setPickFailed(false);
+    setFilling(true);
+    try {
+      const chosen = await chooseAddress(suggestion.id);
+      if (chosen.status !== "found") {
+        setPickFailed(true);
+        return;
+      }
+      if (chosen.address.name) setVenueName(chosen.address.name);
+      setAddressLines(chosen.address.addressLines);
+      if (chosen.address.postcode) setPostcode(chosen.address.postcode);
+      ownAddress();
+    } catch {
+      setPickFailed(true);
+    } finally {
+      setFilling(false);
+    }
+  };
+
+  /** The arrows, Enter and Escape, for a list that is standing open. */
+  const steerList = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (!listOpen) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActive((at) => (at + 1) % suggestions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActive((at) => (at <= 0 ? suggestions.length - 1 : at - 1));
+    } else if (event.key === "Enter") {
+      // Enter in a form submits it. With a list open it is a choice, and a
+      // save from here would post the address she has not picked yet.
+      event.preventDefault();
+      if (active >= 0) void pick(suggestions[active]);
+    } else if (event.key === "Escape") {
+      shutList();
+    }
+  };
+
+  /** The one line under the field, which is the whole of this control's chrome. */
+  const addressNote = filling
+    ? "Filling that in…"
+    : pickFailed || answer?.status === "unavailable"
+      ? "Could not look that up just now. Write the address below — it saves the same either way."
+      : answer?.status === "none"
+        ? "Nothing answers to that. Keep typing, or write the address below."
+        : "Type a name, a street or a postcode and the real addresses are offered to pick from.";
+
+  // Offered only when there is something new to keep. A place already on the
+  // list has nothing to be remembered about it.
+  const isNewPlace =
+    venueName.trim().length > 0 &&
+    !venues.some(
+      (venue) =>
+        venue.name.trim().toLowerCase() === venueName.trim().toLowerCase(),
+    );
+
+  const effectiveSlug = slugOwned ? slug : slugify(name);
+  const deadline =
+    date && /^\d+$/.test(refundDays)
+      ? refundDeadline(new Date(`${date}T00:00:00Z`), Number(refundDays))
+      : null;
+
+  // A row only ever exists because a picture exists. There is no "add an empty
+  // slot" any more: empty slots standing open ask a question whether or not she
+  // has an answer to it, and now that several photographs arrive from one
+  // press there is nothing left for an empty one to be for.
+  const [imageRows, setImageRows] = useState(() =>
+    (workshop?.images ?? []).map((image, index) => ({
+      key: index,
+      url: image.url,
+      alt: image.alt,
+    })),
+  );
+  // A row's number is one past the highest so far, so it never goes back down
+  // as rows are taken off: reusing a number would hand a fresh row whatever was
+  // typed into the removed one when a save bounces back and redraws the form.
+  // Worked out from the rows themselves rather than a counter, because a
+  // counter would make this updater impure — and React calls it twice.
+  const appendPicture = (url: string) =>
+    setImageRows((rows) => [
+      ...rows,
+      {
+        key: rows.reduce((next, row) => Math.max(next, row.key + 1), 0),
+        url,
+        alt: "",
+      },
+    ]);
+  const removeImageRow = (key: number) =>
+    setImageRows((rows) => rows.filter((row) => row.key !== key));
+  const atMaxImages = imageRows.length >= MAX_IMAGES;
+
+  // How far through a batch we are, while one is running. Null the rest of the
+  // time — there is no such thing here as a picture of what uploading looks
+  // like, only the count of an upload actually happening.
+  const [adding, setAdding] = useState<{ done: number; of: number } | null>(
+    null,
+  );
+  // The ones that did not make it, named. A batch of six with one bad file in
+  // it must land five and say which one it was — losing five good photographs
+  // because the sixth was a renamed text file is the failure this prevents.
+  const [refused, setRefused] = useState<{ name: string; why: string }[]>([]);
+  // What the ceiling turned away, if it turned anything away.
+  const [overflow, setOverflow] = useState<{ left: number; of: number } | null>(
+    null,
+  );
+
+  /**
+   * Several photographs, from one press.
+   *
+   * ONE AT A TIME, deliberately, not all at once. Each picture is decoded and
+   * re-encoded six ways by sharp, which is the slowest thing this app does —
+   * five in parallel is thirty encodes competing for the same cores, and on a
+   * slow machine that is how a request times out and takes the whole batch
+   * with it. In sequence, each is its own request that either lands or does
+   * not; "3 of 5" is then a true statement rather than an estimate; and the
+   * rows arrive in the order the files did, which is the order on the page.
+   */
+  async function takePictures(input: HTMLInputElement) {
+    const picked = [...(input.files ?? [])];
+    // Cleared straight away so choosing the same files again — after a refusal
+    // she has since fixed — still counts as a change and fires this again.
+    input.value = "";
+    if (picked.length === 0) return;
+
+    setRefused([]);
+    // The ceiling holds, but it takes what fits rather than refusing the lot.
+    // Turning away eight photographs because two of them were over the line
+    // would be the form correcting her instead of helping her.
+    const room = Math.max(MAX_IMAGES - imageRows.length, 0);
+    const taking = picked.slice(0, room);
+    setOverflow(
+      taking.length < picked.length
+        ? { left: picked.length - taking.length, of: picked.length }
+        : null,
+    );
+    if (taking.length === 0) return;
+
+    for (const [index, file] of taking.entries()) {
+      setAdding({ done: index, of: taking.length });
+      const body = new FormData();
+      body.set("file", file);
+      try {
+        const result = await addPicture(body);
+        if (result.ok) {
+          rememberPicture(result.basename);
+          appendPicture(result.basename);
+        } else {
+          setRefused((list) => [
+            ...list,
+            { name: file.name, why: result.error },
+          ]);
+        }
+      } catch {
+        setRefused((list) => [
+          ...list,
+          {
+            name: file.name,
+            why: "It did not get there. Check the connection and try this one again.",
+          },
+        ]);
+      }
+    }
+    setAdding(null);
+  }
+
+  return (
+    <>
+      {/* Remounted on every rejected attempt. React resets an uncontrolled
+          form once its action resolves, which would empty every field the
+          moment the server found a fault — the exact opposite of what the
+          screen promises ("Nothing has been lost"). Remounting redraws them
+          from what was typed. */}
+      <form key={state.attempt} action={formAction} className="pb-4">
+        {workshop && <input type="hidden" name="id" value={workshop.id} />}
+
+        {state.message && (
+          <p
+            role="alert"
+            className="pool on-pool mt-8 border-l-2 border-pool-error px-6 py-5 text-[17px] leading-relaxed text-pool-error"
+          >
+            {state.message}
+          </p>
+        )}
+
+        <div className="pool on-pool mt-6 px-6 py-8 sm:px-10 sm:py-10">
+          {/* ══ THE TOP OF THE PAGE ═══════════════════════════════════════ */}
+          <Section
+            first
+            id="masthead-h"
+            title="The top of the page"
+            note="The picture, then the name, then the sentence underneath"
+          >
+            <PicturePicker
+              name="heroImage"
+              label={
+                <>
+                  The picture behind the title <Needed />
+                </>
+              }
+              library={library}
+              onAdded={rememberPicture}
+              defaultValue={kept("heroImage", workshop?.heroImage ?? "")}
+            >
+              <p className={HELP}>
+                It sits dimmed behind the name, so it wants the mood of the day
+                rather than a detail.
+              </p>
+              <FieldError error={state.errors.heroImage} />
+            </PicturePicker>
+
+            <div className="mt-7">
+              <label className="block">
+                <span className={LABEL}>What is in that picture</span>
+                <input
+                  name="heroAlt"
+                  type="text"
+                  defaultValue={kept("heroAlt", workshop?.heroAlt ?? "")}
+                  className={FIELD}
+                />
+              </label>
+              <p className={HELP}>
+                Read out to anyone using a screen reader. No picture goes on the
+                site without one.
+              </p>
+              <FieldError error={state.errors.heroAlt} />
+            </div>
+
+            <div className="mt-7">
+              <label className="block">
+                <span className="flex flex-wrap items-baseline gap-x-3">
+                  <span className={LABEL}>Name</span>
+                  <Needed />
+                </span>
+                <input
+                  name="name"
+                  type="text"
+                  autoComplete="off"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className={FIELD_BIG}
+                />
+              </label>
+              <FieldError error={state.errors.name} />
+            </div>
+
+            <div className="mt-7">
+              <label className="block">
+                <span className="flex flex-wrap items-baseline gap-x-3">
+                  <span className={LABEL}>The sentence underneath</span>
+                  <Needed />
+                </span>
+                <textarea
+                  name="summary"
+                  rows={2}
+                  defaultValue={kept("summary", workshop?.summary ?? "")}
+                  className={`${FIELD} resize-none`}
+                />
+              </label>
+              <p className={HELP}>
+                Also the line on the workshops list, so it has to make sense on
+                its own.
+              </p>
+              <FieldError error={state.errors.summary} />
+            </div>
+          </Section>
+
+          {/* ══ THE FACTS ═════════════════════════════════════════════════ */}
+          <Section
+            id="facts-h"
+            title="The facts"
+            note="The four lines people look for first"
+          >
+            <label className="block">
+              <span className="flex flex-wrap items-baseline gap-x-3">
+                <span className={LABEL}>Date</span>
+                <Needed />
+              </span>
+              <input
+                name="date"
+                type="date"
+                value={date}
+                onChange={(event) => setDate(event.target.value)}
+                className={`${FIELD_FIG} text-[26px] sm:w-auto sm:min-w-[19rem]`}
+              />
+            </label>
+            <FieldError error={state.errors.date} />
+
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+              <div>
+                <label className="block">
+                  <span className="flex flex-wrap items-baseline gap-x-3">
+                    <span className={LABEL}>Starts</span>
+                    <Needed />
+                  </span>
+                  <input
+                    name="startTime"
+                    type="time"
+                    defaultValue={kept("startTime", workshop?.startTime ?? "")}
+                    className={`${FIELD_FIG} text-[21px]`}
+                  />
+                </label>
+                <FieldError error={state.errors.startTime} />
+              </div>
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Ends</span>
+                  <input
+                    name="endTime"
+                    type="time"
+                    defaultValue={kept("endTime", workshop?.endTime ?? "")}
+                    className={`${FIELD_FIG} text-[21px]`}
+                  />
+                </label>
+                <FieldError error={state.errors.endTime} />
+              </div>
+            </div>
+
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+              <div>
+                <label className="block">
+                  <span className="flex flex-wrap items-baseline gap-x-3">
+                    <span className={LABEL}>Price a place</span>
+                    <Needed />
+                  </span>
+                  <span className="flex items-baseline gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="fig font-mono text-[24px] text-ink-soft"
+                    >
+                      &pound;
+                    </span>
+                    <input
+                      name="price"
+                      type="text"
+                      inputMode="decimal"
+                      defaultValue={kept(
+                        "price",
+                        workshop ? String(workshop.priceGBP / 100) : "",
+                      )}
+                      className={`${FIELD_FIG} text-[32px]`}
+                    />
+                  </span>
+                </label>
+                <p className={HELP}>
+                  Per place. Someone booking two pays twice this.
+                </p>
+                <FieldError error={state.errors.price} />
+              </div>
+
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Places</span>
+                  <input
+                    name="capacity"
+                    type="number"
+                    min={1}
+                    defaultValue={kept(
+                      "capacity",
+                      String(workshop?.capacity ?? 10),
+                    )}
+                    className={`${FIELD_FIG} text-[32px]`}
+                  />
+                </label>
+                <p className={HELP}>
+                  How many the room takes, not how many are sold.
+                </p>
+                <FieldError error={state.errors.capacity} />
+              </div>
+            </div>
+
+            <div className="mt-7">
+              <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <label className={LABEL} htmlFor="refundDays">
+                  Refund up to
+                </label>
+                <input
+                  id="refundDays"
+                  name="refundDays"
+                  type="number"
+                  min={0}
+                  value={refundDays}
+                  onChange={(event) => setRefundDays(event.target.value)}
+                  className={`${FIELD_FIG} w-20 text-[21px]`}
+                />
+                <span className="text-[18px] text-ink-soft">
+                  days before the day
+                </span>
+              </p>
+              {/* The consequence of the two fields above, worked out as she
+                  types, because "14" and "the last day to cancel is the 6th"
+                  are different questions and she is answering the second. It
+                  is also the only explanation this field needs. */}
+              <p className="mt-3 font-display text-[24px] leading-tight text-ink">
+                {!date
+                  ? "Set the date and this will say the last day to cancel."
+                  : deadline
+                    ? `Which makes ${formatDayLong(deadline)} the last day to cancel.`
+                    : "Which means places on this day cannot be refunded, and the page says so."}
+              </p>
+              <FieldError error={state.errors.refundDays} />
+            </div>
+          </Section>
+
+          {/* ══ WHERE IT IS ═══════════════════════════════════════════════ */}
+          <Section
+            id="where-h"
+            title="Where it is"
+            note="The address on the page, and the things people write to ask about"
+          >
+            {/* Which place this came from. Posted with the address so the
+                record can say where it was copied from — and emptied by any
+                hand edit below, because then it was not copied from anywhere. */}
+            <input type="hidden" name="venueId" value={venueId} />
+
+            {venues.length > 0 && (
+              <div className="mb-7 flex flex-wrap items-center gap-x-4 gap-y-3">
+                <p className={LABEL}>Somewhere you have used</p>
+                {venues.map((venue) => (
+                  <button
+                    key={venue.id}
+                    type="button"
+                    onClick={() => fillFrom(venue)}
+                    className={QUIET_BUTTON}
+                  >
+                    {venue.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* The search is the FIELD, not a control beside it. A search box
+                  of its own would be two places to type a venue where the form
+                  has one, and the list has to be less chrome than the fields it
+                  front-ends. `relative` so the list hangs over what follows
+                  instead of shoving the rest of the address down the page as
+                  she types. */}
+              <div className="relative">
+                <label className="block">
+                  <span className={LABEL}>The name of the place</span>
+                  <input
+                    name="venueName"
+                    type="text"
+                    // Off, so the browser's own remembered values do not stand
+                    // in front of the register's.
+                    autoComplete="off"
+                    value={venueName}
+                    onChange={(event) => {
+                      setVenueName(event.target.value);
+                      // Typed, so it is a term as well as a value. Only where
+                      // there is a key: without one this field behaves exactly
+                      // as it always has.
+                      if (canFindAddress) setTyped(event.target.value);
+                      setActive(-1);
+                      setPickFailed(false);
+                      ownAddress();
+                    }}
+                    onKeyDown={steerList}
+                    // Tabbing away is leaving the list, not choosing from it.
+                    // A press on a row cannot be lost this way: the list holds
+                    // the focus on mousedown, below.
+                    onBlur={shutList}
+                    role={canFindAddress ? "combobox" : undefined}
+                    aria-expanded={canFindAddress ? listOpen : undefined}
+                    aria-controls={canFindAddress ? listId : undefined}
+                    aria-autocomplete={canFindAddress ? "list" : undefined}
+                    aria-activedescendant={
+                      active >= 0 ? `${listId}-${active}` : undefined
+                    }
+                    className={FIELD}
+                  />
+                </label>
+
+                {canFindAddress && (
+                  <>
+                    {listOpen && (
+                      <ul
+                        id={listId}
+                        role="listbox"
+                        aria-label="Addresses that match"
+                        // The press must not blur the field first: blurring
+                        // shuts the list, and a list that shuts on mousedown
+                        // is one whose rows can never be clicked.
+                        onMouseDown={(event) => event.preventDefault()}
+                        className="absolute inset-x-0 z-20 mt-1 max-h-[19rem] overflow-y-auto border border-pool-rule bg-pool"
+                      >
+                        {suggestions.map((suggestion, index) => (
+                          <li
+                            key={suggestion.id}
+                            id={`${listId}-${index}`}
+                            role="option"
+                            aria-selected={index === active}
+                            onMouseEnter={() => setActive(index)}
+                            onClick={() => void pick(suggestion)}
+                            className={`t cursor-pointer border-t border-pool-rule/40 px-4 py-2.5 text-[17px] leading-snug first:border-t-0 ${
+                              index === active ? "bg-ink text-pool" : "text-ink"
+                            }`}
+                          >
+                            {suggestion.label}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {/* One line, which is all the help this needs and all the
+                        chrome it gets. It says what to type, then what came
+                        back — never in the alarm colour, because none of its
+                        answers stops the workshop being saved. */}
+                    <p className={HELP} aria-live="polite">
+                      {addressNote}
+                    </p>
+                  </>
+                )}
+              </div>
+
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Postcode</span>
+                  <input
+                    name="postcode"
+                    type="text"
+                    autoCapitalize="characters"
+                    value={postcode}
+                    onChange={(event) => {
+                      setPostcode(event.target.value);
+                      ownAddress();
+                    }}
+                    className={FIELD_FIG}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-7">
+              <label className="block">
+                <span className={LABEL}>The address, a line at a time</span>
+                <textarea
+                  name="addressLines"
+                  rows={3}
+                  value={addressLines}
+                  onChange={(event) => {
+                    setAddressLines(event.target.value);
+                    ownAddress();
+                  }}
+                  className={`${FIELD} resize-none`}
+                />
+              </label>
+              <p className={HELP}>
+                The postcode above goes on its own line, so leave it out here.
+              </p>
+            </div>
+
+            <div className="mt-7">
+              <label className="block">
+                <span className={LABEL}>Getting there — one line each</span>
+                <textarea
+                  name="gettingThere"
+                  rows={5}
+                  value={gettingThere}
+                  onChange={(event) => {
+                    setGettingThere(event.target.value);
+                    ownAddress();
+                  }}
+                  className={`${FIELD} resize-none`}
+                />
+              </label>
+              <p className={HELP}>
+                Step-free or not, the toilet, the parking, the buses. Each line
+                becomes a bullet beside the address.
+              </p>
+            </div>
+
+            {/* Offered, not assumed. It appears only once she has named a place
+                that is not already on the list, and it is off until she says
+                so: a day in a church hall she will never use again should not
+                join the list she picks from for the next ten workshops. */}
+            {isNewPlace && (
+              <label className="mt-7 flex items-start gap-3 text-[18px] text-ink">
+                <input
+                  name="rememberVenue"
+                  type="checkbox"
+                  defaultChecked={state.values.rememberVenue === "on"}
+                  className="mt-1 h-5 w-5 shrink-0 accent-action"
+                />
+                <span>
+                  Keep {venueName.trim()} for next time
+                  <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
+                    It joins the places above, and fills all four of these in
+                    one press.
+                  </span>
+                </span>
+              </label>
+            )}
+          </Section>
+
+          {/* ══ WHAT THE DAY IS ═══════════════════════════════════════════ */}
+          <Section
+            id="body-h"
+            title="What the day is"
+            note="The long part — what happens, in the order it happens"
+          >
+            <label className="block">
+              <span className="flex flex-wrap items-baseline gap-x-3">
+                <span className={LABEL}>The workshop&rsquo;s own page</span>
+                <Needed />
+              </span>
+              <textarea
+                name="body"
+                rows={18}
+                defaultValue={kept("body", workshop?.body ?? "")}
+                className={`${FIELD} min-h-0 py-4 text-[18px] leading-relaxed`}
+              />
+            </label>
+            <FieldError error={state.errors.body} />
+            {/* Structure only. There is nothing here for type or colour because
+                those are already decided and stay the same across the site
+                (§12) — a toolbar that can set a colour is one that can break
+                the design. */}
+            <div className="mt-5 max-w-[62ch] text-[15px] leading-relaxed text-ink-soft">
+              <p>
+                A blank line starts a new paragraph, and three marks do the
+                rest:
+              </p>
+              <ul className="mt-3 flex flex-col gap-1">
+                <li>
+                  <code className="fig font-mono text-ink">## </code> at the
+                  start of a line makes it a section heading
+                </li>
+                <li>
+                  <code className="fig font-mono text-ink">### </code> makes it
+                  a smaller heading
+                </li>
+                <li>
+                  <code className="fig font-mono text-ink">- </code> makes the
+                  line a bullet
+                </li>
+              </ul>
+            </div>
+          </Section>
+
+          {/* ══ PICTURES AND FILM ═════════════════════════════════════════ */}
+          <Section
+            id="gallery-h"
+            title="Pictures and film"
+            note="One film, and the pictures under it"
+          >
+            {/* One field where there were three. The still it opens on and
+                how long it runs belong to the film, and Vimeo and YouTube
+                both already know them — so they are read from whichever one
+                holds it when this is saved, rather than typed here and left
+                to drift. */}
+            <label className="block">
+              <span className={LABEL}>The link to the film</span>
+              <input
+                name="filmUrl"
+                type="text"
+                inputMode="url"
+                placeholder="https://vimeo.com/76979871"
+                defaultValue={kept("filmUrl", workshop?.filmUrl ?? "")}
+                className={FIELD}
+              />
+            </label>
+            <p className={HELP}>
+              Optional. Put the film on Vimeo or YouTube and paste the link —
+              Vimeo for preference, because YouTube records who watched. Nothing
+              is loaded from either until somebody presses play.
+            </p>
+            <FieldError error={state.errors.filmUrl} />
+
+            <div className="mt-9 border-t border-pool-rule/25 pt-7">
+              <p className={LABEL}>Pictures</p>
+              <p className={HELP}>
+                The first three sit across the page and everybody sees them;
+                past that the strip scrolls, so the order matters. Each one
+                needs a line saying what is in it.
+              </p>
+              <FieldError error={state.errors.images} />
+
+              {imageRows.length > 0 && (
+                <ul className="mt-7 flex flex-col gap-7">
+                  {imageRows.map((row, index) => (
+                    <li
+                      key={row.key}
+                      className="border-t border-pool-rule/25 pt-7 first:border-t-0 first:pt-0"
+                    >
+                      <PicturePicker
+                        name={`image-url-${row.key}`}
+                        label={`Picture ${index + 1}`}
+                        library={library}
+                        onAdded={rememberPicture}
+                        defaultValue={kept(`image-url-${row.key}`, row.url)}
+                      >
+                        <label className="mt-4 block">
+                          <span className={LABEL}>What is in it</span>
+                          <input
+                            name={`image-alt-${row.key}`}
+                            type="text"
+                            defaultValue={kept(`image-alt-${row.key}`, row.alt)}
+                            className={FIELD}
+                          />
+                        </label>
+                        <FieldError
+                          error={state.errors[`image-alt-${row.key}`]}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImageRow(row.key)}
+                          className="t mt-4 min-h-[44px] text-[17px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
+                        >
+                          Take this one off
+                        </button>
+                      </PicturePicker>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+                {atMaxImages ? (
+                  <p className="text-[17px] text-ink-soft">
+                    Twelve is as many as a page carries well. Take one off to
+                    add another.
+                  </p>
+                ) : (
+                  /* One press, as many photographs as she likes. The same
+                     label-around-a-hidden-input as the masthead's, so the two
+                     read as one control used twice — the only difference is
+                     `multiple`, and that the count replaces the word while a
+                     batch is running. */
+                  <label
+                    className={`${QUIET_BUTTON} inline-flex cursor-pointer items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      multiple
+                      disabled={Boolean(adding)}
+                      onChange={(event) => takePictures(event.currentTarget)}
+                      className="sr-only"
+                    />
+                    {adding
+                      ? adding.of === 1
+                        ? "Adding…"
+                        : `Adding ${adding.done + 1} of ${adding.of}…`
+                      : imageRows.length
+                        ? "Add more pictures"
+                        : "Choose pictures"}
+                  </label>
+                )}
+                {/* The ceiling says nothing until it is nearly in the way. */}
+                {imageRows.length >= MAX_IMAGES - 3 && !atMaxImages && (
+                  <p className="fig font-mono text-[15px] text-ink-soft">
+                    {imageRows.length} of {MAX_IMAGES}
+                  </p>
+                )}
+              </div>
+
+              {/* Said plainly rather than silently done. She chose eight and
+                  got six; the form owes her the number and the reason. */}
+              {overflow && (
+                <p
+                  role="status"
+                  className="mt-4 max-w-[60ch] text-[17px] leading-relaxed text-ink"
+                >
+                  Twelve pictures is as many as a page carries well, so the last{" "}
+                  {overflow.left} of those {overflow.of} were left out.
+                </p>
+              )}
+
+              {refused.length > 0 && (
+                <ul
+                  role="alert"
+                  className="mt-4 flex max-w-[60ch] flex-col gap-2 text-[15px] leading-relaxed text-pool-error"
+                >
+                  {refused.map((one) => (
+                    <li key={one.name}>
+                      <span className="fig font-mono">{one.name}</span> &mdash;{" "}
+                      {one.why}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {imageRows.length > 1 && (
+                <p className={HELP}>
+                  Dragging to reorder is not built yet — several chosen at once
+                  arrive in the order your computer lists them, and the order
+                  here is the order on the page.
+                </p>
+              )}
+            </div>
+          </Section>
+
+          {/* ══ PUTTING IT UP ═════════════════════════════════════════════ */}
+          <Section
+            id="publish-h"
+            title="Putting it up"
+            note="One button and one check"
+          >
+            <div className="grid items-start gap-8 lg:grid-cols-2">
+              <div>
+                <p className={LABEL}>What this makes</p>
+                <p className="mt-3 fig font-mono text-[17px] text-ink">
+                  thefieldwork.co.uk/workshops/
+                  {effectiveSlug || (
+                    <>
+                      <span aria-hidden="true">&mdash;&mdash;</span>
+                      <span className="sr-only">address not set</span>
+                    </>
+                  )}
+                </p>
+                <label className="mt-4 block">
+                  <span className={LABEL}>Or write the address yourself</span>
+                  <input
+                    name="slug"
+                    type="text"
+                    value={effectiveSlug}
+                    onChange={(event) => {
+                      setSlugOwned(true);
+                      setSlug(slugify(event.target.value));
+                    }}
+                    className={FIELD_FIG}
+                  />
+                </label>
+                <p className={HELP}>
+                  Once people have this link it stays the same.
+                </p>
+                <FieldError error={state.errors.slug} />
+              </div>
+
+              <div>
+                <label className="flex items-start gap-3 text-[18px] text-ink">
+                  <input
+                    name="published"
+                    type="checkbox"
+                    defaultChecked={
+                      state.attempt > 0
+                        ? state.values.published === "on"
+                        : (workshop?.published ?? false)
+                    }
+                    className="mt-1 h-5 w-5 shrink-0 accent-action"
+                  />
+                  <span>
+                    Show this on the site
+                    <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
+                      It needs a picture behind the title and something written
+                      before it can go up.
+                    </span>
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="t mt-6 min-h-[56px] w-full bg-action px-8 text-[19px] font-semibold text-pool hover:bg-ink disabled:opacity-60"
+                >
+                  {pending ? "Saving…" : "Save this workshop"}
+                </button>
+              </div>
+            </div>
+          </Section>
+        </div>
+      </form>
+
+      {/* Its own form, and therefore outside the one above — a form nested in
+          a form is not valid HTML and the browser drops the inner one. */}
+      {workshop && <DeleteWorkshop id={workshop.id} name={workshop.name} />}
+    </>
+  );
+}

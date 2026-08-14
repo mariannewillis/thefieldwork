@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Reading the Field — a one-day workshop · The Field Work</title>
+    <meta
+      name="description"
+      content="One Saturday, ten places, a room with the curtains open. Reading the Field is a day of learning to notice what you already notice."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
+            },
+            fontFamily: {
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* ── The Lit Clearing, applied to a page that has to take money ────────
+         The rule the whole site runs on: colour is context-locked. Gold labels
+         the dark ground and never appears inside a blush panel; magenta works
+         inside a panel and never on the dark. Zero radius, zero shadow — the
+         only curve in the system is an avatar circle, and there isn't one here.
+
+         The commercial job of this page is one decision: how many places.
+         Everything is arranged so that decision is never more than a scroll
+         away, and so the facts it depends on — date, price, spaces left, what
+         happens if you can't come — are visible at the moment you make it. */
+      html {
+        background-color: #160712;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .fig,
+      .font-mono,
+      td,
+      th {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      [tabindex]:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible,
+      .on-pool input:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .skip {
+        position: absolute;
+        left: 20px;
+        top: -200px;
+        z-index: 60;
+      }
+      .skip:focus {
+        top: 20px;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+
+      /* The field photograph sits behind the masthead only — the page below is
+         plain, because a picture behind prose you are asking someone to read
+         before spending £95 is noise. */
+      .field {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 46%;
+        filter: brightness(0.5) saturate(1.04);
+        z-index: 0;
+        pointer-events: none;
+      }
+      .field-scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.35) 0%,
+          rgb(22 7 18 / 0.55) 55%,
+          rgb(22 7 18 / 0.95) 100%
+        );
+      }
+
+      /* The quantity stepper. Deliberately large — this is the one control on
+         the page, and it gets used on a phone. */
+      .step {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #8a7285;
+        background: transparent;
+        color: #1e0a1c;
+        font-size: 24px;
+        line-height: 1;
+      }
+      .step:hover:not(:disabled) {
+        background: #1e0a1c;
+        color: #fbf3f1;
+      }
+      .step:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      .qty {
+        width: 72px;
+        height: 52px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        color: #1e0a1c;
+        font-size: 26px;
+        font-family: "Azeret Mono", ui-monospace, monospace;
+      }
+      .qty::-webkit-outer-spin-button,
+      .qty::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      .qty {
+        -moz-appearance: textfield;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+        }
+      }
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+  </head>
+
+  <body
+    data-screen-id="workshop-detail-purchase"
+    class="text-plate-text font-body"
+  >
+    <!-- hands at the edge of the field, on the page that sells the day -->
+    <img
+      src="../../../assets/images/new/marianne-hands-at-the-edge.png"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
+
+    <a
+      href="#book"
+      class="skip bg-gold px-5 py-3 text-[17px] font-semibold text-ink"
+    >
+      Skip to booking
+    </a>
+
+    <!-- ══ MASTHEAD ══════════════════════════════════════════════════════ -->
+    <header class="relative overflow-hidden">
+      <img
+        src="../../../assets/images/new/window-last-light.png"
+        alt=""
+        aria-hidden="true"
+        class="field"
+      />
+      <div class="field-scrim" aria-hidden="true"></div>
+
+      <div class="relative z-10 mx-auto max-w-[1180px] px-6 lg:px-10">
+        <div class="flex items-center justify-between py-7">
+          <a href="/" aria-label="The Field Work — home">
+            <img
+              src="../../../assets/brand/logo-horizontal.svg"
+              alt="The Field Work"
+              width="440"
+              height="120"
+              class="h-[52px] w-auto"
+            />
+          </a>
+          <nav
+            class="hidden items-center gap-8 text-[17px] md:flex"
+            aria-label="Main"
+          >
+            <a class="t text-plate-soft hover:text-plate-text" href="/services"
+              >Sessions</a
+            >
+            <a
+              class="t text-plate-text underline decoration-gold underline-offset-8"
+              href="/workshops"
+              aria-current="page"
+              >Workshops</a
+            >
+            <a class="t text-plate-soft hover:text-plate-text" href="/courses"
+              >Courses</a
+            >
+            <a class="t text-plate-soft hover:text-plate-text" href="/about"
+              >About</a
+            >
+          </nav>
+        </div>
+
+        <!-- ══ THE FACTS, BEFORE THE PROSE ═══════════════════════════════
+             Date, place, price and spaces sit above everything, because they
+             are what decides whether the rest is worth reading. -->
+        <div class="pb-16 pt-10 lg:pb-24 lg:pt-16">
+          <p
+            class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
+          >
+            A one-day workshop
+          </p>
+          <h1
+            class="mt-4 max-w-[16ch] font-display text-[46px] font-normal leading-[1.02] text-plate-text sm:text-[60px] lg:text-[76px]"
+          >
+            Reading the Field
+          </h1>
+          <p
+            class="mt-6 max-w-[52ch] text-[21px] leading-relaxed text-plate-soft"
+          >
+            A day of learning to notice what you already notice. No belief is
+            asked of you, and nobody touches you.
+          </p>
+
+          <dl class="mt-10 flex flex-wrap gap-x-12 gap-y-6">
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                When
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                Sat 20 Sep · 10:00–16:30
+              </dd>
+            </div>
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Where
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                The Garden Room, Frome
+              </dd>
+            </div>
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Price
+              </dt>
+              <dd class="mt-2 fig font-mono text-[19px] text-plate-text">
+                £95 a place
+              </dd>
+            </div>
+            <div>
+              <dt
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule"
+              >
+                Places left
+              </dt>
+              <!-- Scarcity stated as a fact, not a countdown. Gold, because it
+                   is the one number on the dark ground that must be read. -->
+              <dd class="mt-2 fig font-mono text-[19px] text-gold">4 of 10</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
+      <div class="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
+        <!-- ══ WHAT THE DAY IS ═════════════════════════════════════════ -->
+        <div class="pt-14 lg:pt-20">
+          <section aria-labelledby="what">
+            <h2
+              id="what"
+              class="font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+            >
+              What the day is
+            </h2>
+            <div
+              class="mt-6 flex flex-col gap-5 text-[19px] leading-relaxed text-plate-soft"
+            >
+              <p>
+                You arrive at ten. There is coffee, and a circle of chairs, and
+                nine other people who also did not quite know what to expect.
+              </p>
+              <p>
+                The morning is spent on attention — how to tell the difference
+                between what you are sensing and what you are supplying. Most
+                people find they have been doing this for years without a name
+                for it.
+              </p>
+              <p>
+                After lunch you work in pairs. You stay clothed, seated, and at
+                arm's length throughout. Nothing is asked of your beliefs, and
+                you can stop at any point without explaining why.
+              </p>
+              <p>
+                We finish at half past four, and there is tea for anyone who
+                wants to stay and talk.
+              </p>
+            </div>
+          </section>
+
+          <section class="mt-14" aria-labelledby="practical">
+            <h2
+              id="practical"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              Practicalities
+            </h2>
+            <ul
+              class="mt-6 flex flex-col gap-4 text-[19px] leading-relaxed text-plate-soft"
+            >
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Lunch, coffee and tea are included. Tell us about anything you
+                cannot eat when you book.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                The Garden Room is on the ground floor with step-free access and
+                an accessible toilet.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                Wear whatever you can sit comfortably in for a day.
+              </li>
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="mt-[15px] h-px w-5 shrink-0 bg-gold"
+                ></span>
+                There is parking on Fromefield, two minutes' walk away.
+              </li>
+            </ul>
+          </section>
+
+          <!-- The document Marianne attaches to the confirmation email, named
+               here so it is not a surprise arriving in an inbox. -->
+          <section class="mt-14" aria-labelledby="before">
+            <h2
+              id="before"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              Before you come
+            </h2>
+            <p
+              class="mt-5 max-w-[58ch] text-[19px] leading-relaxed text-plate-soft"
+            >
+              When you book, a short note comes with your confirmation — two
+              pages on what to expect and one question to sit with beforehand.
+              You do not have to do anything with it.
+            </p>
+          </section>
+
+          <!-- ══ THE ROOM ═══════════════════════════════════════════════
+               One film, then stills. The order matters: someone deciding
+               whether to spend a Saturday with a stranger wants to see the
+               room and hear her voice more than they want a grid of photos.
+               So the film is given real size and the stills are secondary —
+               a gallery of equals would make neither count.
+
+               NOT autoplay. A video that starts talking on a page about
+               nervous-system work is the wrong first impression, and it is
+               the reason `poster` carries the whole weight until pressed. -->
+          <section class="mt-16" aria-labelledby="room">
+            <h2
+              id="room"
+              class="font-display text-[30px] font-normal leading-tight text-plate-text"
+            >
+              The room, and Marianne
+            </h2>
+            <p
+              class="mt-4 max-w-[56ch] text-[19px] leading-relaxed text-plate-soft"
+            >
+              Two minutes on what the day is actually like — worth watching if
+              you have never done anything like this before.
+            </p>
+
+            <figure class="mt-7">
+              <!-- PLACEHOLDER: no film has been shot yet. The poster is a real
+                   asset so the composition is honest at this size; swap in the
+                   source when there is one. -->
+              <div
+                class="relative aspect-video w-full overflow-hidden bg-surface"
+              >
+                <img
+                  src="../../../assets/images/new/marianne-room-aglow.png"
+                  alt="The Garden Room at dusk, lamps lit, chairs in a circle"
+                  class="absolute inset-0 h-full w-full object-cover"
+                  style="filter: brightness(0.72)"
+                />
+                <button
+                  type="button"
+                  class="t absolute inset-0 flex items-center justify-center"
+                  aria-label="Play the film — two minutes"
+                >
+                  <span
+                    class="flex h-[86px] w-[86px] items-center justify-center border border-gold bg-ground/70 text-gold"
+                  >
+                    <svg
+                      width="30"
+                      height="30"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
+              <figcaption
+                class="mt-3 fig font-mono text-[15px] text-plate-rule"
+              >
+                2:04 · captions available
+              </figcaption>
+            </figure>
+
+            <!-- The stills. Deliberately a strip, not a grid: three images
+                 that answer "what does it look like", then stop. -->
+            <ul class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <li>
+                <img
+                  src="../../../assets/images/new/aura-light-in-a-room.png"
+                  alt="Low winter light across the floor of the Garden Room"
+                  class="aspect-[4/5] w-full object-cover"
+                />
+              </li>
+              <li>
+                <img
+                  src="../../../assets/images/new/chair-with-her-coat.png"
+                  alt="A chair by the window with a coat over the back of it"
+                  class="aspect-[4/5] w-full object-cover"
+                />
+              </li>
+              <li class="col-span-2 sm:col-span-1">
+                <img
+                  src="../../../assets/images/new/work-wide-the-room.png"
+                  alt="The full circle of chairs, seen from the doorway"
+                  class="aspect-[4/5] w-full object-cover"
+                />
+              </li>
+            </ul>
+            <p class="mt-4 fig font-mono text-[15px] text-plate-rule">
+              The Garden Room, Fromefield
+            </p>
+          </section>
+        </div>
+
+        <!-- ══ THE BOOKING PANEL ═══════════════════════════════════════
+             The one blush pool on the page. It holds the single decision, and
+             it holds the cancellation terms with it — because the moment
+             someone is deciding to spend £95 is the moment they want to know
+             what happens if they cannot come. Burying that in a footer is how
+             a practice ends up arguing with people by email. -->
+        <aside id="book" class="lg:pt-20" aria-labelledby="book-h">
+          <div class="pool on-pool sticky top-8 px-7 py-8 sm:px-9">
+            <h2
+              id="book-h"
+              class="font-display text-[30px] font-normal leading-tight text-ink"
+            >
+              Take a place
+            </h2>
+
+            <p class="mt-3 fig font-mono text-[16px] text-pool-error">
+              4 places left of 10
+            </p>
+
+            <div class="mt-7">
+              <label
+                for="qty"
+                class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+              >
+                How many places
+              </label>
+              <div
+                class="mt-3 flex items-center border border-pool-rule"
+                role="group"
+                aria-label="Number of places"
+              >
+                <button
+                  type="button"
+                  class="step t"
+                  aria-label="One fewer place"
+                >
+                  −
+                </button>
+                <input
+                  id="qty"
+                  class="qty"
+                  type="number"
+                  inputmode="numeric"
+                  value="2"
+                  min="1"
+                  max="4"
+                  aria-describedby="qty-cap"
+                />
+                <button
+                  type="button"
+                  class="step t"
+                  aria-label="One more place"
+                >
+                  +
+                </button>
+                <span class="ml-auto pr-5 fig font-mono text-[22px] text-ink"
+                  >£190</span
+                >
+              </div>
+              <!-- The cap is stated, so hitting it is not a mystery. -->
+              <p
+                id="qty-cap"
+                class="mt-3 text-[15px] leading-relaxed text-ink-soft"
+              >
+                Up to 4 places — that is all that is left.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              class="t mt-7 min-h-[56px] w-full bg-action px-6 text-[19px] font-semibold text-pool hover:bg-ink"
+            >
+              Book 2 places · £190
+            </button>
+
+            <p class="mt-4 text-[15px] leading-relaxed text-ink-soft">
+              You will be taken to Stripe to pay. We never see your card
+              details.
+            </p>
+
+            <hr class="my-7 border-0 border-t border-pool-rule/40" />
+
+            <h3
+              class="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft"
+            >
+              If you cannot come
+            </h3>
+            <p class="mt-3 text-[17px] leading-relaxed text-ink">
+              Cancel up to <strong class="font-semibold">14 days</strong> before
+              — by <span class="fig font-mono">6 September</span> — and you are
+              refunded in full. There is a link in your confirmation email; you
+              do not need to ask anyone.
+            </p>
+            <p class="mt-3 text-[17px] leading-relaxed text-ink-soft">
+              After that the place is held for you, and we cannot refund it.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- ══ SOLD-OUT VARIANT ══════════════════════════════════════════
+           The same panel when places run out. Kept in the mockup because it is
+           the state that gets forgotten, and a workshop with ten places hits it
+           every time it succeeds. -->
+      <section
+        class="mt-24 border-t border-plate-rule/30 pt-14"
+        aria-labelledby="variant"
+      >
+        <p
+          id="variant"
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          The same panel, once it is full
+        </p>
+        <div class="mt-7 max-w-[400px]">
+          <div class="pool on-pool px-7 py-8 sm:px-9">
+            <h2
+              class="font-display text-[30px] font-normal leading-tight text-ink"
+            >
+              This one is full
+            </h2>
+            <p class="mt-3 fig font-mono text-[16px] text-ink-soft">
+              0 places left of 10
+            </p>
+            <p class="mt-5 text-[17px] leading-relaxed text-ink">
+              All ten places have gone. If someone cancels, the place goes to
+              the first person on the list.
+            </p>
+            <button
+              type="submit"
+              class="t mt-7 min-h-[56px] w-full border border-ink bg-transparent px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
+            >
+              Tell me if a place opens
+            </button>
+            <p class="mt-4 text-[15px] leading-relaxed text-ink-soft">
+              One email, only if a place actually opens. Nothing else.
+            </p>
+            <hr class="my-7 border-0 border-t border-pool-rule/40" />
+            <p class="text-[17px] leading-relaxed text-ink">
+              The next one is
+              <a
+                href="/workshops/grounding-for-beginners"
+                class="text-action underline"
+              >
+                Grounding for Beginners</a
+              >, on Saturday 11 October.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work · Frome, Somerset · Complementary work. Not a
+          substitute for medical care.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

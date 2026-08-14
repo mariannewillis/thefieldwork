@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Azeret_Mono, Cormorant_Garamond, Source_Sans_3 } from "next/font/google";
+import {
+  Azeret_Mono,
+  Cormorant_Garamond,
+  Source_Sans_3,
+} from "next/font/google";
 import "../(admin)/admin.css";
 
 /**
@@ -88,7 +92,11 @@ export default function AuthLayout({
           {/* The same mark the public homepage wears in its header, and the
               same file — so arriving at the private side still reads as her
               site rather than a generic admin login. */}
-          <a href="/" aria-label="The Field Work — home" className="mb-10 block">
+          <a
+            href="/"
+            aria-label="The Field Work — home"
+            className="mb-10 block"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-horizontal.svg"

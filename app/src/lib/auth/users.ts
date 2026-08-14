@@ -143,7 +143,9 @@ export async function ensureSeeded(): Promise<void> {
   }
 }
 
-export async function findByUsername(username: string): Promise<AdminUser | null> {
+export async function findByUsername(
+  username: string,
+): Promise<AdminUser | null> {
   await ensureSeeded();
   return prisma.adminUser.findFirst({
     where: { username: { equals: username.trim(), mode: "insensitive" } },
@@ -161,7 +163,10 @@ export async function findById(id: number): Promise<AdminUser | null> {
   return prisma.adminUser.findUnique({ where: { id } });
 }
 
-export async function setPassword(userId: number, newPassword: string): Promise<AdminUser> {
+export async function setPassword(
+  userId: number,
+  newPassword: string,
+): Promise<AdminUser> {
   return prisma.adminUser.update({
     where: { id: userId },
     data: {
@@ -173,7 +178,10 @@ export async function setPassword(userId: number, newPassword: string): Promise<
   });
 }
 
-export async function setEmail(userId: number, email: string): Promise<AdminUser> {
+export async function setEmail(
+  userId: number,
+  email: string,
+): Promise<AdminUser> {
   return prisma.adminUser.update({
     where: { id: userId },
     data: { email: email.trim() || null },

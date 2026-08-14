@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Workshops · The Field Work</title>
+    <meta
+      name="description"
+      content="Days in a room with the curtains open. Small groups, clothed and seated throughout, nothing asked of your beliefs."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
+            },
+            fontFamily: {
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* ── The Lit Clearing · the index ─────────────────────────────────────
+         A list page has one job: let someone find the day that is theirs and
+         see, without clicking, whether they can still have it. So the state
+         (places left / full / past) is carried on the row itself, not
+         discovered on the detail page after a click that raised hopes.
+
+         Colour stays context-locked: gold on the dark ground, magenta only
+         inside a blush pool. Zero radius, zero shadow. */
+      html {
+        background-color: #160712;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .fig,
+      .font-mono {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .skip {
+        position: absolute;
+        left: 20px;
+        top: -200px;
+        z-index: 60;
+      }
+      .skip:focus {
+        top: 20px;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+
+      /* A workshop row. The whole card is the target — on a phone, a small
+         "read more" link is a miss waiting to happen. */
+      .card {
+        border-top: 1px solid rgba(142, 106, 130, 0.3);
+      }
+      .card:last-child {
+        border-bottom: 1px solid rgba(142, 106, 130, 0.3);
+      }
+      .card:hover .card-title {
+        color: #e9c87e;
+      }
+      .card-title {
+        transition: color 140ms linear;
+      }
+      /* A past workshop is legible but plainly finished — held back rather
+         than hidden, because the archive is evidence the practice is real. */
+      .card--past {
+        opacity: 0.55;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+  </head>
+
+  <body data-screen-id="workshops-index" class="text-plate-text font-body">
+    <!-- the whole circle of chairs — the promise of the page -->
+    <img
+      src="../../../assets/images/new/work-wide-the-room.png"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
+
+    <a
+      href="#list"
+      class="skip bg-gold px-5 py-3 text-[17px] font-semibold text-ink"
+      >Skip to the workshops</a
+    >
+
+    <header class="mx-auto max-w-[1180px] px-6 lg:px-10">
+      <div class="flex items-center justify-between py-7">
+        <a href="/" aria-label="The Field Work — home">
+          <img
+            src="../../../assets/brand/logo-horizontal.svg"
+            alt="The Field Work"
+            width="440"
+            height="120"
+            class="h-[52px] w-auto"
+          />
+        </a>
+        <nav
+          class="hidden items-center gap-8 text-[17px] md:flex"
+          aria-label="Main"
+        >
+          <a class="t text-plate-soft hover:text-plate-text" href="/services"
+            >Sessions</a
+          >
+          <a
+            class="t text-plate-text underline decoration-gold underline-offset-8"
+            href="/workshops"
+            aria-current="page"
+            >Workshops</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/courses"
+            >Courses</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/about"
+            >About</a
+          >
+        </nav>
+      </div>
+
+      <div class="max-w-[54ch] pb-14 pt-8 lg:pb-20 lg:pt-14">
+        <p
+          class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
+        >
+          Workshops
+        </p>
+        <h1
+          class="mt-4 font-display text-[46px] font-normal leading-[1.03] text-plate-text sm:text-[60px]"
+        >
+          A day, with nine other people
+        </h1>
+        <p class="mt-6 text-[21px] leading-relaxed text-plate-soft">
+          Small groups, in a room with the curtains open. You stay clothed and
+          seated throughout, nobody touches you, and nothing is asked of your
+          beliefs.
+        </p>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
+      <!-- ══ COMING UP ═══════════════════════════════════════════════════ -->
+      <section id="list" aria-labelledby="coming">
+        <h2
+          id="coming"
+          class="fig font-mono text-[15px] uppercase tracking-[0.16em] text-plate-rule"
+        >
+          Coming up
+        </h2>
+
+        <div class="mt-8">
+          <!-- Places-left is on the ROW. Someone scanning for a date they can
+               make should never click into a full day to find that out. -->
+          <article class="card py-9">
+            <a
+              href="/workshops/reading-the-field"
+              class="group grid gap-6 md:grid-cols-[128px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] text-gold">
+                Sat 20 Sep<br /><span class="text-plate-rule">10:00–16:30</span>
+              </p>
+              <img
+                src="../../../assets/images/new/aura-seated-figure.png"
+                alt="A seated figure in low light, hands resting"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  Reading the Field
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  A day of learning to notice what you already notice. The
+                  morning on attention, the afternoon in pairs.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £95<br /><span class="text-[16px] text-gold"
+                  >4 places left</span
+                >
+              </p>
+            </a>
+          </article>
+
+          <article class="card py-9">
+            <a
+              href="/workshops/grounding-for-beginners"
+              class="group grid gap-6 md:grid-cols-[128px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] text-gold">
+                Sat 11 Oct<br /><span class="text-plate-rule">10:00–16:00</span>
+              </p>
+              <img
+                src="../../../assets/images/new/work-down-the-body.png"
+                alt="Hands moving slowly down the length of the body"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  Grounding for Beginners
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  For anyone who has never done this before and would rather not
+                  be the only one. Nothing assumed.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £85<br /><span class="text-[16px] text-gold"
+                  >9 places left</span
+                >
+              </p>
+            </a>
+          </article>
+
+          <!-- FULL. Still a link — the detail page offers the waiting list and
+               points at the next date, so a full day still converts. -->
+          <article class="card py-9">
+            <a
+              href="/workshops/the-long-attention"
+              class="group grid gap-6 md:grid-cols-[128px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] text-gold">
+                Sat 8 Nov<br /><span class="text-plate-rule">10:00–16:30</span>
+              </p>
+              <img
+                src="../../../assets/images/new/aura-hands-between.png"
+                alt="Two pairs of hands held a little apart"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  The Long Attention
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  A second day for people who have sat one before. Slower, and
+                  further in.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £95<br /><span class="text-[16px] text-plate-rule"
+                  >Full · join the list</span
+                >
+              </p>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══ EMPTY STATE ══════════════════════════════════════════════════
+           Drawn deliberately. A practitioner running three or four days a year
+           WILL have stretches with nothing scheduled, and a page that simply
+           ends is indistinguishable from one that is broken. -->
+      <section
+        class="mt-24 border-t border-plate-rule/30 pt-14"
+        aria-labelledby="variant"
+      >
+        <p
+          id="variant"
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          The same page with nothing booked in
+        </p>
+        <div class="pool on-pool mt-7 max-w-[620px] px-8 py-9">
+          <h2
+            class="font-display text-[32px] font-normal leading-tight text-ink"
+          >
+            Nothing in the diary just now
+          </h2>
+          <p class="mt-4 text-[19px] leading-relaxed text-ink">
+            The next dates usually go up a couple of months ahead. If you would
+            like to know when they do, leave your email and you will hear once.
+          </p>
+          <form class="mt-7 flex flex-col gap-4 sm:flex-row">
+            <label class="sr-only" for="notify">Email address</label>
+            <input
+              id="notify"
+              type="email"
+              placeholder="you@example.com"
+              class="min-h-[52px] flex-1 border-b border-pool-rule bg-transparent py-2 text-[19px] text-ink placeholder:text-ink-soft/60 focus:border-action focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="t min-h-[52px] bg-action px-7 text-[18px] font-semibold text-pool hover:bg-ink"
+            >
+              Tell me
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ══ PAST ═════════════════════════════════════════════════════════
+           Held back but present. Evidence the practice is real and running. -->
+      <section class="mt-24" aria-labelledby="past">
+        <h2
+          id="past"
+          class="fig font-mono text-[15px] uppercase tracking-[0.16em] text-plate-rule"
+        >
+          Already happened
+        </h2>
+        <div class="mt-8">
+          <article class="card card--past py-7">
+            <div
+              class="grid gap-4 md:grid-cols-[128px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] text-plate-rule">
+                Sat 14 Jun
+              </p>
+              <div>
+                <h3
+                  class="font-display text-[28px] font-normal leading-tight text-plate-text"
+                >
+                  Reading the Field
+                </h3>
+                <p class="mt-2 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome · 10 came
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[16px] text-plate-rule md:text-right"
+              >
+                Finished
+              </p>
+            </div>
+          </article>
+          <article class="card card--past py-7">
+            <div
+              class="grid gap-4 md:grid-cols-[128px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] text-plate-rule">
+                Sat 22 Mar
+              </p>
+              <div>
+                <h3
+                  class="font-display text-[28px] font-normal leading-tight text-plate-text"
+                >
+                  Grounding for Beginners
+                </h3>
+                <p class="mt-2 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome · 8 came
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[16px] text-plate-rule md:text-right"
+              >
+                Finished
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work · Frome, Somerset · Complementary work. Not a
+          substitute for medical care.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

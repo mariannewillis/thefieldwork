@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Read what someone sent with their booking",
         "Keep your own notes against a person's file",
-        "Delete a record entirely when someone asks you to"
+        "Delete a record entirely when someone asks you to",
       ]}
     />
   );

@@ -1,11 +1,13 @@
 // The Field Work — database schema.
 //
-// One model for now: the admin credential. It moves here from a JSON file
-// because a file does not survive a Replit redeploy, which silently restored
-// the temporary password every time the site was published.
+// The admin credential came here first, from a JSON file, because a file does
+// not survive a Replit redeploy and silently restored the temporary password
+// every time the site was published.
 //
-// Models for bookings, offerings, subscribers and page content land alongside
-// it as each section of the portal is built.
+// Workshops were the first offering to land, and bookings followed them.
+// Subscribers and page content are still to come. Money is counted in PENCE as
+// an Int everywhere it appears: 0.1 + 0.2 is not 0.3, and these figures are
+// what somebody gets charged and refunded.
 
 generator client {
   provider = "prisma-client-js"
@@ -60,4 +62,307 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+/// A workshop: one day, in one room, at one price, for a fixed number of
+/// people. The fields are the ones the public page actually renders, in the
+/// order it renders them — the page and the form that fills it in are the same
+/// shape on purpose (docs/screens/webapp/workshop-detail.html).
+model Workshop {
+  id Int @id @default(autoincrement())
+
+  /// The address the page lives at. Derived from the name when the workshop is
+  /// created and editable afterwards, but people put this link in emails to
+  /// each other, so changing it breaks something that already worked.
+  slug String @unique
+  name String
+
+  /// The sentence under the title. It is ALSO the only description the
+  /// workshops list shows, so it has to make sense with nothing around it.
+  summary String
+
+  /// The long body, as HTML. Only ever written by `src/lib/rich-text.ts` from
+  /// what Marianne types — headings, paragraphs and bullets, everything else
+  /// escaped. Storing HTML rather than her source keeps the page's render a
+  /// straight read with no parsing at request time.
+  bodyHtml String
+
+  /// The DAY, with no time attached — a date, not a timestamp. A workshop's
+  /// 20 September is 20 September wherever the server happens to be, and a
+  /// TIMESTAMP would let a timezone move it to the 19th.
+  date DateTime @db.Date
+
+  /// Wall-clock times as she writes them, "10:00" / "16:30". They are the
+  /// times in the room; attaching them to an instant would mean picking a
+  /// timezone, and the only correct answer would be the room's own.
+  startTime String
+  endTime   String
+
+  venueName String
+
+  /// The written address, one line per line, as it is set on the page. Kept as
+  /// prose rather than street/town/county columns because it is only ever
+  /// displayed whole — nothing sorts or searches on it.
+  addressLines String
+  postcode     String
+
+  /// The access notes — step-free, the toilet, the parking, the buses. One
+  /// bullet per line. These are what people write to ask about, so they sit
+  /// beside the address rather than inside the long body.
+  gettingThere String
+
+  /// Which saved place filled the four fields above, when one did.
+  ///
+  /// A note of where the address came from, not where it is read from. Nothing
+  /// renders through this relation, and it is cleared the moment any of the
+  /// four fields is edited by hand — because then the address on the page is
+  /// no longer that venue's.
+  venueId Int?
+  venue   Venue? @relation(fields: [venueId], references: [id], onDelete: SetNull)
+
+  /// How many the room takes. Since bookings landed this is ENFORCED rather
+  /// than displayed: places sold are counted off it when a Checkout Session is
+  /// opened and again when the payment is confirmed (D-16). Selling the
+  /// eleventh place of ten is taking money for a chair that does not exist.
+  capacity Int
+
+  /// PENCE. Never a float — 0.1 + 0.2 is not 0.3, and this figure is what
+  /// someone gets charged.
+  priceGBP Int
+
+  /// Days before the day that a place is still refundable in full. PER
+  /// WORKSHOP, not a site-wide rule: 14 is what her others use, and one day
+  /// may need different terms. 0 means it cannot be refunded at all, and the
+  /// page says so rather than printing a date.
+  refundDays Int @default(14)
+
+  /// The picture behind the title. Optional so a workshop can be written
+  /// before there is a photograph for it, but required to publish — a page
+  /// with no masthead is not the approved composition.
+  ///
+  /// Holds the media BASENAME, not a path: "marianne-room-aglow", from which
+  /// the page builds `/media/<basename>-{1200,2400}.{avif,webp,jpg}`. The
+  /// build-time image pipeline (D-6) emits six files per photograph and the
+  /// page picks between them, so a single path would throw five away. Same
+  /// shape `src/content/home.ts` already uses for the home page's plates.
+  heroImage String?
+
+  /// Required whenever heroImage is set. Enforced in the form, not by the
+  /// database, because the two columns have to be checked against each other.
+  heroAlt String?
+
+  /// The one film, as a LINK to Vimeo or YouTube — the address she pasted, in
+  /// its canonical form ("https://vimeo.com/76979871"). Nothing is uploaded
+  /// here and nothing is transcoded: her source file is 604 MB, and the
+  /// provider already does the encoding. The player's own address is derived
+  /// from this at render by `src/lib/film.ts`, so a change of embed shape
+  /// never needs a migration. Nullable because most workshops will not have
+  /// one, and a player with nothing behind it is worse than no player.
+  filmUrl String?
+  /// The still it opens on — a media BASENAME, like `heroImage`, not a path.
+  /// NOT HERS TO TYPE: it is fetched from the provider when the link is saved
+  /// and put through the same pipeline as everything else, so that opening a
+  /// workshop's page contacts Vimeo or YouTube for nothing at all until
+  /// somebody presses play. Null when the provider would not give one.
+  filmPoster String?
+  /// As written, "0:42" — read off the provider, not typed. Vimeo reports a
+  /// duration and YouTube does not, so this is null for a YouTube film and
+  /// the page simply says less.
+  filmDuration String?
+
+  /// Whether it is on the site. Unpublished is not a draft-shaped second copy:
+  /// there is one record, and this says whether the public can reach it.
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images   WorkshopImage[]
+  bookings Booking[]
+
+  /// Both lists that exist — the public index and the portal's — read in date
+  /// order, and both split on published.
+  @@index([published, date])
+}
+
+/// What happened to the money. Three states, and no fourth: a place is either
+/// held, or given up with the money returned, or given up without it.
+///
+/// `cancelledUnrefunded` covers TWO situations that look identical to the
+/// ledger and different to the person — cancelled after the refund date, where
+/// nothing is owed, and a refund we tried to make and could not. `CancelReason`
+/// below is what tells them apart, which is why both columns exist.
+enum BookingStatus {
+  paid
+  cancelledRefunded
+  cancelledUnrefunded
+}
+
+/// Why the place was given up.
+///
+/// `buyer` is somebody using the link in their own confirmation email.
+/// `soldOut` is the losing side of the race in D-16: two people paid for the
+/// last place, one of them has no place, and the money goes back.
+/// `marianne` is a cancellation made from the portal's bookings page — she is
+/// ill, the day is off, or she has taken somebody out of the room herself.
+///
+/// The three are kept apart because a row that only said "cancelled" could not
+/// answer the question she actually asks a month later: did they drop out, or
+/// did I? It also decides what the buyer's email says, since "the place is free
+/// for somebody else" is true when they cancelled and false when she did.
+enum CancelReason {
+  buyer
+  soldOut
+  marianne
+}
+
+/// A place somebody has paid for.
+///
+/// Written by ONE thing only — the Stripe webhook at
+/// `app/api/stripe/webhook`, on a signature-verified `checkout.session.completed`.
+/// Never by the browser coming back from Stripe: a success redirect can be
+/// forged, abandoned or lost, and a booking that exists because a URL was
+/// visited is a booking anybody can mint.
+model Booking {
+  id Int @id @default(autoincrement())
+
+  workshopId Int
+  /// Restrict, not cascade. Deleting a workshop that people have paid for
+  /// would delete the record of their money along with it; the portal refuses
+  /// the delete instead and says why.
+  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+
+  /// As Stripe collected them at the checkout. We never ask for either on our
+  /// own page — the whole promise of hosted checkout is that the card details,
+  /// and the form they are typed into, are Stripe's.
+  buyerName  String
+  buyerEmail String
+
+  places Int
+
+  /// PENCE, as Stripe reported the completed session — not as we recomputed
+  /// it. What they actually paid is what has to be refunded, and a price
+  /// Marianne edited while somebody was at the checkout would make our figure
+  /// and theirs differ. The two are compared on the way in and a difference is
+  /// logged loudly.
+  amountPence Int
+  /// Lowercase ISO, as Stripe writes it: "gbp".
+  currency    String
+
+  /// The checkout session, which is the natural key of a payment: unique, so
+  /// a redelivered webhook cannot make a second booking out of one payment.
+  stripeSessionId       String  @unique
+  /// What a refund is issued against. Nullable only because Stripe types it
+  /// that way; a completed card session always has one.
+  stripePaymentIntentId String?
+
+  status BookingStatus
+
+  /// The SHA-256 of the token in the cancellation link, never the token
+  /// itself — the same rule as PasswordResetToken above. The usable secret
+  /// exists only in the buyer's email, so a leaked dump of this table cannot
+  /// cancel anybody's place or move their money.
+  ///
+  /// Resending the link therefore ISSUES A NEW ONE rather than reprinting the
+  /// old, which also retires the link in the old email. `issueCancellationToken`
+  /// in src/lib/bookings.ts is the only thing that writes this.
+  cancellationTokenHash String @unique
+
+  cancelledAt     DateTime?
+  cancelledReason CancelReason?
+
+  /// What a refund needs to be traceable a year later, when somebody asks.
+  ///
+  /// INDEPENDENT OF `status`, on purpose. Usually a refund and a cancellation
+  /// happen together, but the portal lets Marianne send money back on a booking
+  /// she is NOT cancelling — somebody she has decided not to charge, who is
+  /// still coming. That row stays `paid`, so it keeps counting against the
+  /// room's capacity, and carries the refund as well. `refundId` being set is
+  /// therefore the only honest test of "has this money already gone back";
+  /// `status = cancelledRefunded` is a narrower question.
+  refundId      String?
+  refundedPence Int?
+  refundedAt    DateTime?
+
+  /// When Stripe says the payment completed, which is what the receipt line
+  /// on the confirmation page and in the email means by "paid on 14 Aug".
+  paidAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Places sold is `sum(places) where status = paid` for one workshop, and it
+  /// is read on every public workshop page.
+  @@index([workshopId, status])
+}
+
+/// A Stripe event we have already acted on.
+///
+/// Stripe retries a webhook until it gets a 2xx, and will happily deliver the
+/// same event twice for reasons of its own. The row is written inside the same
+/// transaction as the booking, so a redelivery collides on this primary key and
+/// the whole transaction rolls back — one event, one booking, one pair of
+/// emails.
+///
+/// Nothing prunes it yet. At a few hundred bookings a year that is a table of
+/// a few hundred rows.
+model StripeEvent {
+  /// Stripe's own id, `evt_…`.
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
+}
+
+/// A place she has run something in, kept so that the same address does not
+/// have to be typed again. Almost everything happens at The Garden Room.
+///
+/// It FILLS a workshop's own address columns and is never read instead of
+/// them. That is the whole reason the same four fields exist in both places: a
+/// workshop's address is what was true of the day it ran. Correcting the
+/// parking note here must not rewrite the page of a workshop that has already
+/// happened, and deleting a place must leave every workshop's address exactly
+/// where it is — which is why the relation above is nullable and set null on
+/// delete rather than cascading.
+model Venue {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  /// Same shape as `Workshop.addressLines` — prose, one line per line,
+  /// because the only thing either of them ever does is get displayed whole.
+  addressLines String
+  postcode     String
+
+  /// The access notes, one bullet per line, as on the workshop.
+  gettingThere String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workshops Workshop[]
+}
+
+/// One picture in a workshop's stills rail.
+///
+/// Capped at TWELVE in application logic rather than by a constraint: the
+/// limit is a judgement about how many a page carries before people stop
+/// scrolling, not an integrity rule, and the message when it is reached has to
+/// explain itself in her words.
+model WorkshopImage {
+  id         Int      @id @default(autoincrement())
+  workshopId Int
+  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+
+  /// The media basename, as on `Workshop.heroImage` — the page builds the
+  /// six derivative URLs from it.
+  url String
+
+  /// NOT nullable. No picture goes on the site without a line saying what is
+  /// in it — the form refuses, and the column refuses too.
+  alt String
+
+  /// The first three are what somebody sees before they scroll the rail, so
+  /// the order is content, not presentation.
+  position Int
+
+  @@index([workshopId, position])
 }

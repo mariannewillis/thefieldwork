@@ -9,7 +9,7 @@ export default function Page() {
       next={[
         "Upload a new photograph",
         "Give each one a description, so people using a screen reader know what it shows",
-        "Replace a picture everywhere it appears, in one move"
+        "Replace a picture everywhere it appears, in one move",
       ]}
     />
   );
