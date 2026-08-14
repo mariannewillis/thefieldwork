@@ -24,7 +24,8 @@ export const FIELD_BIG = `${FIELD} font-display text-[28px]`;
 export const FIELD_FIG = `${FIELD} fig font-mono tabular-nums`;
 export const LABEL =
   "fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft";
-export const HELP = "mt-2 max-w-[60ch] text-[15px] leading-relaxed text-ink-soft";
+export const HELP =
+  "mt-2 max-w-[60ch] text-[15px] leading-relaxed text-ink-soft";
 const NEEDED =
   "fig font-mono text-[13px] uppercase tracking-[0.14em] text-action";
 /* Ink, not gold and not magenta. Gold fails contrast inside a panel

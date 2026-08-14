@@ -14,8 +14,9 @@
    utility classes into hand CSS would be a redesign wearing a port's clothes.
 
    So this file is imported only by app/(site)/workshops/layout.tsx — and, since
-   the cancellation page is the same composition, by app/(site)/cancel/layout.tsx
-   re-exporting it. Next emits it as a route-scoped chunk either way. It never
+   the cancellation page and the courses pages are the same composition, by
+   app/(site)/cancel/layout.tsx and app/(site)/courses/layout.tsx re-exporting
+   it. Next emits it as a route-scoped chunk either way. It never
    loads beside home.css — which matters, because Tailwind's preflight resets
    margins home.css depends on and BOTH stylesheets define `.pool` for different
    jobs.
@@ -672,4 +673,104 @@ dialog.lb::backdrop {
   to {
     opacity: 1;
   }
+}
+
+/* ── A date on a course page ───────────────────────────────────────────────
+   The one region the workshop pages do not carry, from
+   docs/screens/courses flow/course-detail.html. It lives here rather than in a
+   courses stylesheet of its own because the courses pages ARE this composition
+   — they reach it through app/(site)/courses/layout.tsx, exactly as the
+   cancellation page does — and a second file importing Tailwind a second time
+   to add sixty lines is a chunk to keep in step for no gain.
+
+   A course is a run of dated things, and each one has a paragraph's worth of
+   description behind it. Six descriptions stacked open is a wall; six dates
+   with no description is a page nobody can decide from. So the dates stay out
+   and the descriptions fold away — native `<details>`/`<summary>`, no script,
+   no ARIA re-implementation. The element already is a button, already announces
+   expanded and collapsed, already opens on Enter and on Space, and already
+   prints open when the browser wants it to.
+
+   WHAT IS FOLDED AWAY IS ONLY THE PROSE. Every summary carries the whole set of
+   facts a person scanning needs — where the date falls in the run, its name,
+   the day, the hours, the room. Somebody who never opens one can still tell
+   whether they can make them all, which is the only question this page has to
+   answer. */
+.ev-sum {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 22px 0;
+  cursor: pointer;
+  /* Two declarations, or the browser's own disclosure triangle survives in one
+     engine and not the other. */
+  list-style: none;
+}
+
+.ev-sum::-webkit-details-marker {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .ev-sum {
+    gap: 28px;
+  }
+}
+
+.ev-sum:focus-visible {
+  outline: 2px solid #e9c87e;
+  outline-offset: 3px;
+}
+
+.ev-sum:hover .ev-title {
+  color: #e9c87e;
+}
+
+.ev-title {
+  transition: color 140ms linear;
+}
+
+/* THE MARK. The page already has a vocabulary for a small gold sign: the 20×1px
+   hairline that starts every line in "Getting there". The disclosure mark is
+   two of those crossed — a plus while the date is shut, and on opening the
+   upright turns a quarter circle onto the flat one and the mark becomes a
+   single rule. Both strokes are 1px, so at 90° the upright lands exactly on the
+   flat one and the end state is a hairline rather than a thicker hairline.
+
+   140ms, a colour-and-transform change on an already-visible element. Where
+   less motion has been asked for, the rule near the top of this file cuts the
+   duration to nothing and the mark simply is what it is in each state. */
+.ev-mark {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin-top: 11px;
+}
+
+.ev-mark::before,
+.ev-mark::after {
+  content: "";
+  position: absolute;
+  background-color: #e9c87e;
+}
+
+.ev-mark::before {
+  left: 0;
+  top: 10px;
+  width: 20px;
+  height: 1px;
+}
+
+.ev-mark::after {
+  left: 10px;
+  top: 0;
+  width: 1px;
+  height: 20px;
+  transform-origin: 50% 50%;
+  transition: transform 140ms linear;
+}
+
+details[open] > .ev-sum .ev-mark::after {
+  transform: rotate(90deg);
 }

@@ -1,0 +1,125 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import ServiceForm from "@/components/admin/ServiceForm";
+import { formatDuration, formatMoney } from "@/lib/format";
+import { mapSearchUrl } from "@/lib/maps";
+import { listMediaBasenames } from "@/lib/media";
+import { toSource } from "@/lib/rich-text";
+import { getServiceBySlug } from "@/lib/services";
+import { listVenues } from "@/lib/venues";
+
+/**
+ * One service, open for editing.
+ *
+ * Reachable whether or not it is on the site — one she has taken down is still
+ * hers to work on. The line at the top reads its state off the record rather
+ * than off the last thing that happened, so refreshing the page cannot make it
+ * say something that is no longer true (D-9).
+ */
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const [service, media, venues] = await Promise.all([
+    getServiceBySlug(slug),
+    listMediaBasenames(),
+    listVenues(),
+  ]);
+
+  if (!service) notFound();
+
+  const travels = service.location === "travels";
+
+  /**
+   * The address the map is asked about, which is whichever branch is in force.
+   *
+   * On the travelling branch it is the base she sets out from, with no name to
+   * search on — a postcode is still worth checking, because it is what every
+   * distance on the page is measured from and it is typed by hand.
+   */
+  const mapUrl = travels
+    ? mapSearchUrl({
+        venueName: "",
+        addressLines: service.baseAddressLines ?? "",
+        postcode: service.basePostcode ?? "",
+      })
+    : mapSearchUrl({
+        venueName: service.venueName ?? "",
+        addressLines: service.addressLines ?? "",
+        postcode: service.postcode ?? "",
+      });
+
+  const where = travels
+    ? `Travels ${service.travelRadiusMiles} ${service.travelRadiusMiles === 1 ? "mile" : "miles"}`
+    : service.venueName || "No place set yet";
+
+  return (
+    <>
+      <section className="pt-8 pb-1" aria-labelledby="form-h">
+        <Link
+          href="/admin/offerings?kind=services"
+          className="t fig font-mono text-[15px] uppercase tracking-[0.14em] text-plate-soft underline decoration-plate-rule underline-offset-4 hover:text-plate-text"
+        >
+          &larr; Offerings
+        </Link>
+
+        <p className="mt-5 fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold">
+          Service
+        </p>
+        <h1
+          id="form-h"
+          className="mt-3 font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[40px]"
+        >
+          {service.name}
+        </h1>
+        <p className="mt-3 fig font-mono text-[17px] tabular-nums text-plate-soft">
+          {formatDuration(service.durationMinutes)} &middot;{" "}
+          {formatMoney(service.priceGBP)} &middot; {where}
+        </p>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <p
+            className={`flex items-center gap-2.5 fig font-mono text-[15px] uppercase tracking-[0.14em] ${
+              service.published ? "text-plate-success" : "text-plate-soft"
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`h-1.5 w-1.5 ${service.published ? "bg-plate-success" : "bg-plate-soft"}`}
+            />
+            {service.published
+              ? `Meant for the site · thefieldwork.co.uk/services/${service.slug}`
+              : "Not on the site · only you can see this"}
+          </p>
+        </div>
+
+        {/* Said once, at the top, rather than beside every field it touches.
+            The record is real and complete; what is not built yet is the page
+            that reads it — and the portal does not imply otherwise (D-9). */}
+        {service.published && (
+          <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
+            The services pages on the site are not built yet, so nothing at that
+            address answers so far. Everything written here is saved and is what
+            those pages will show.
+          </p>
+        )}
+      </section>
+
+      <ServiceForm
+        media={media}
+        venues={venues}
+        // Built from the STORED address, not from what is in the fields, so
+        // the link goes where the site will send people. Null while the
+        // address is not set yet, and the form then shows nothing.
+        mapUrl={mapUrl}
+        service={{
+          ...service,
+          // The textarea shows her own marks, not the markup they became.
+          body: toSource(service.bodyHtml),
+        }}
+      />
+    </>
+  );
+}

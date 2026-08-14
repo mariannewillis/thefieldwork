@@ -344,6 +344,155 @@ model CourseImage {
   @@index([courseId, position])
 }
 
+/// Where a service happens. Two answers and no third.
+///
+/// `venue` — it happens somewhere of hers, at an address the page prints, the
+/// same four fields a workshop and a course carry.
+/// `travels` — she goes to the client, out to a distance she sets from a base
+/// address.
+///
+/// It is a column rather than something inferred from which fields are filled
+/// in, because "where is this?" has to have ONE answer on the public page and
+/// the answer is a decision she makes, not a guess the page assembles from
+/// what happens to be null. The branch not in force is emptied on every save
+/// and the database refuses anything else — see the CHECK constraint
+/// `Service_location_branch` in the add_services migration.
+enum ServiceLocation {
+  venue
+  travels
+}
+
+/// A service: one person, one session, for as long as it takes.
+///
+/// The third and last kind of offering. What it shares with a Workshop and a
+/// Course is spelled the same way and means the same thing — money is PENCE as
+/// an Int, the picture columns hold media basenames rather than paths, the
+/// film is a link with its still fetched once. The comments on Workshop above
+/// are the reasoning for all of it and are not repeated here.
+///
+/// TWO THINGS A WORKSHOP HAS THAT THIS DOES NOT, and the reasons are the shape
+/// of the thing rather than work left undone:
+///
+///  · NO DATE AND NO TIME. A visitor asks for a slot against her availability
+///    and she answers; she does not set one while writing the service. There
+///    is no column here for a day because there is no day.
+///  · NO CAPACITY. One-to-one means one.
+///
+/// It is not bookable yet — nothing here implies a checkout, a hold or an
+/// approval. That flow is a later pass and will bring its own tables.
+model Service {
+  id Int @id @default(autoincrement())
+
+  /// The address the page will live at, /services/<slug>.
+  slug String @unique
+  name String
+
+  /// The sentence under the title, and the only description the services list
+  /// shows.
+  summary String
+
+  /// The long body, as HTML, written by `src/lib/rich-text.ts` from what
+  /// Marianne types.
+  bodyHtml String
+
+  /// How long the session runs, in MINUTES. Minutes rather than a pair of
+  /// clock times, because a service has no start: it has a length, and the
+  /// start is whatever the visitor and she agree on. An hour and a quarter is
+  /// 75, and the page reads it back in words.
+  durationMinutes Int
+
+  /// Which of the two answers below is the live one. Exactly one branch is
+  /// filled in; the other is null, on every save and by constraint.
+  location ServiceLocation
+
+  /// ── at a venue ──────────────────────────────────────────────────────────
+  /// The same four fields as a workshop, and the same relation recording which
+  /// saved place filled them. All null when she travels.
+  venueName    String?
+  addressLines String?
+  postcode     String?
+  gettingThere String?
+
+  venueId Int?
+  venue   Venue? @relation(fields: [venueId], references: [id], onDelete: SetNull)
+
+  /// ── she travels ─────────────────────────────────────────────────────────
+  /// Where she sets out from, and how far she will go. All null when it
+  /// happens at a venue.
+  ///
+  /// The postcode is the one that matters — it is what a distance is measured
+  /// from — so the lines above it can be empty. This is usually her own base
+  /// rather than a room she teaches in, which is why it is not the venue
+  /// picker.
+  baseAddressLines  String?
+  basePostcode      String?
+  travelRadiusMiles Int?
+
+  /// What travelling costs, IN HER OWN WORDS.
+  ///
+  /// DELIBERATELY PROSE, and there is no rate, no threshold and no surcharge
+  /// column anywhere near it. She was asked whether travelling carries a
+  /// charge and did not say, so anything structured here would be a pricing
+  /// policy the portal invented on her behalf and then quietly enforced. A
+  /// line she writes covers whatever her policy actually is — including not
+  /// having one.
+  ///
+  /// If it turns out she wants mileage charged rather than described, that is
+  /// a column and a checkout change made THEN, on what she tells us. Do not
+  /// add a fee model to this on a guess.
+  travelNote String?
+
+  /// PENCE, for the session.
+  priceGBP Int
+
+  /// The picture behind the title, as a media basename, and the line saying
+  /// what is in it. Required together, and required to publish.
+  heroImage String?
+  heroAlt   String?
+
+  /// The one film, as a link to Vimeo or YouTube, with the still and the
+  /// length read off the provider when the link is saved. Same three columns
+  /// as Workshop, filled by the same code.
+  filmUrl      String?
+  filmPoster   String?
+  filmDuration String?
+
+  /// Whether it is on the site. Written and honoured here; the public services
+  /// pages are not built yet, so for the moment this decides what they will
+  /// show rather than what anybody can see.
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images ServiceImage[]
+
+  /// Both lists that will exist — the portal's and the public index — split on
+  /// published.
+  @@index([published])
+}
+
+/// One picture in a service's stills rail. WorkshopImage, for services — same
+/// twelve-picture ceiling in application logic, same reasons.
+model ServiceImage {
+  id        Int     @id @default(autoincrement())
+  serviceId Int
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  /// The media basename, as on `Service.heroImage`.
+  url String
+
+  /// NOT nullable. No picture goes on the site without a line saying what is
+  /// in it.
+  alt String
+
+  /// The first three are what somebody sees before they scroll the rail, so
+  /// the order is content, not presentation.
+  position Int
+
+  @@index([serviceId, position])
+}
+
 /// What happened to the money. Three states, and no fourth: a place is either
 /// held, or given up with the money returned, or given up without it.
 ///
@@ -529,6 +678,9 @@ model Venue {
 
   workshops Workshop[]
   courses   Course[]
+  /// Only the ones that happen AT a venue. A service she travels for records
+  /// no place, because it did not come from one.
+  services  Service[]
 }
 
 /// One picture in a workshop's stills rail.

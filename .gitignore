@@ -131,6 +131,10 @@ docs/screens/workshopflow/_frag/admin-workshops-list.html
 
 # Agent scratch at the app root (probe-tmp, check-tmp and friends).
 app/*-tmp.mjs
+app/_tmp-*
 
 # Splice scratch under the screens directories.
 docs/screens/**/_tmp-*
+
+# Agent test uploads — brown rectangles from a smoke run, not media.
+app/public/media/tmp-*

@@ -872,8 +872,8 @@ On 14 August a place was bought on the Replit dev preview. Stripe delivered
 `checkout.session.completed` to the PRODUCTION endpoint, which reads a different
 database and had never held that workshop. The webhook took the only path that
 fits a workshop it cannot find — `workshopGone` — refunded the payment in full
-and emailed the buyer to say *"Lorem Ipsum … is no longer running … £0.40 has
-been sent back"*. Twice: 14:19:27→29 and 14:22:12→14, the refund landing two to
+and emailed the buyer to say _"Lorem Ipsum … is no longer running … £0.40 has
+been sent back"_. Twice: 14:19:27→29 and 14:22:12→14, the refund landing two to
 three seconds after the completed session each time.
 
 The routing was never at fault, and the evidence says so: the refunds fired
@@ -905,11 +905,11 @@ concerned.
 
 ### Three answers, and they read differently in the log
 
-| The session says | What happens | The log line begins |
-| --- | --- | --- |
-| Another host | Nothing at all — 200, no booking, no refund, no email | `NOT THIS SITE'S EVENT` |
-| This host, workshop missing | Refunded and apologised for, exactly as before | `WORKSHOP WITHDRAWN` |
-| Nothing | Treated as this site's | `…carries no site stamp; it predates the guard` |
+| The session says            | What happens                                          | The log line begins                             |
+| --------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
+| Another host                | Nothing at all — 200, no booking, no refund, no email | `NOT THIS SITE'S EVENT`                         |
+| This host, workshop missing | Refunded and apologised for, exactly as before        | `WORKSHOP WITHDRAWN`                            |
+| Nothing                     | Treated as this site's                                | `…carries no site stamp; it predates the guard` |
 
 **200 on a foreign event, not an error.** Stripe delivered it correctly; it
 belongs to another deployment, which has had its own copy and dealt with it. A
@@ -1017,9 +1017,9 @@ nothing and a buyer being apologised to twice. The response carries
 Recorded first, then acted on. Every side effect — the refund, the confirmation,
 the apology — happens in the route, after the transaction has committed.
 
-| If the process dies | What is left |
-| --- | --- |
-| After recording, before refunding | An event recorded and not finished, a payment for a person to sort out, and a log line naming it |
+| If the process dies               | What is left                                                                                                                            |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| After recording, before refunding | An event recorded and not finished, a payment for a person to sort out, and a log line naming it                                        |
 | After refunding, before recording | Money returned and an apology sent with nothing written down — and Stripe redelivers for days, so the same buyer is apologised to again |
 
 The first is recoverable by somebody reading the log. The second is the thing
@@ -1180,6 +1180,130 @@ course and confirms its page is gone. It creates one course and removes it.
 The migration is additive: three new tables and one nullable foreign key from
 `Course` to `Venue`. Nothing existing is altered. Locally it is applied. On
 Replit:
+
+```
+npm run db:deploy
+```
+
+---
+
+## D-22 · A service has a length, not a date — and one answer about where (2026-08-14)
+
+**Operator decision, verbatim:** _"lets also create the admin new service page
+following the new workshop template - difference with service is marianne -
+sets a location or sets a distance from address (in case of travel) - she will
+also set how long the service will run for"_.
+
+### What was built, and what was deliberately not
+
+The MODEL and the CREATOR. `Service` and `ServiceImage`, the two pages at
+`/admin/offerings/services/new` and `/admin/offerings/services/[slug]`, one
+shared form, and the Services tab on Offerings — which now lists real services
+instead of saying "not built yet". All three kinds of offering are now real in
+the portal.
+
+Not built, and not stubbed either: the public service pages, and the whole
+request-and-approve flow. Services will be bookable with an approval step — a
+visitor asks for a slot, Marianne approves it, a payment link goes out, and an
+unpaid hold returns the slot by itself — and NOTHING in this pass implies any
+of it. There is no hold, no expiry, no status, no approval and no checkout, and
+the portal says as much in one line on the list rather than drawing controls
+with nothing behind them (D-9).
+
+### No date, no time, no capacity — and those are the model, not the backlog
+
+A workshop is a day. A course is a run of days. A service is neither: a visitor
+asks for a slot against her availability and she answers, so there is no day to
+set while she is writing it. `durationMinutes` is what she sets instead — the
+length, in minutes, because a service has no start of its own for two clock
+times to bracket. The form reads it back in words as she types ("Which the page
+reads as 1 hour 30 minutes"), the same way the workshop form reads back a
+refund deadline.
+
+Capacity is out for the plainer reason: one-to-one means one.
+
+`refundDays` is out too, and it is the one omission worth naming. Both the
+other kinds count a refund window back from a date, and a service has no date
+to count back from. It is also a term of a sale, and there is no sale here yet.
+When the approval flow lands, the cancellation terms belong with it.
+
+### Where it happens: an enum plus two nullable groups, and a CHECK constraint
+
+`ServiceLocation` is `venue | travels`, and `Service.location` says which.
+
+- `venue` — the same four fields a workshop and a course carry
+  (`venueName` / `addressLines` / `postcode` / `gettingThere`) plus the same
+  nullable `venueId` breadcrumb recording which saved place filled them.
+- `travels` — `basePostcode`, `travelRadiusMiles` and an optional
+  `baseAddressLines`, plus the note below.
+
+**Why an enum and not inference from which columns are null.** The alternative
+was to share one set of address columns and read "she travels" off
+`travelRadiusMiles` being set. It is fewer columns and it is worse: the branch
+would be a thing the reader deduces rather than a thing she decided, and
+`gettingThere` — step-free, the toilet, the parking — is a fact about a room of
+hers that is simply false about a client's kitchen. "Where is this?" has one
+answer on the page, so it has one column in the record.
+
+**Why a CHECK constraint.** The action empties the branch not in force on every
+save; `Service_location_branch` in the migration is what makes that true of
+rows the action did not write. Same reasoning as `Booking`'s `onDelete:
+Restrict` (D-16): a rule only the application keeps is a rule one careless
+write away from being kept by nobody. It is hand-written SQL appended to the
+generated migration, because Prisma cannot express it.
+
+Verified by the smoke test in both directions: a service set at the Garden Room
+and then switched to travelling comes back with all five venue columns null,
+and switched back again comes back with all four travelling columns null.
+
+### The travel note is prose, and no fee model was invented
+
+`Service.travelNote` is free text she writes herself. She was asked whether
+travelling carries a charge and did not say. Anything structured — a per-mile
+rate, a free-miles threshold, a surcharge column — would have been a pricing
+policy the portal invented on her behalf and then quietly enforced on her
+clients. A line she writes covers whatever her policy is, including not having
+one. The schema comment says so in as many words so that nobody adds a pricing
+engine on a guess; if she wants mileage charged rather than described, that is
+a column added THEN, on what she tells us.
+
+### What a service shares with the other two, it shares in code
+
+`lib/offering-form.ts` (pounds to pence, the rail, the saved venue, the film's
+still), `components/admin/OfferingFormParts.tsx` (the sheet's furniture) and
+`lib/offering-rules.ts` (`slugify`, the twelve-picture ceiling) are all reused
+verbatim — the extraction D-21 made for courses paid for itself here. Nothing
+was duplicated to build this. What is new is `formatDuration` in `lib/format.ts`
+and `lib/services.ts` for the read side.
+
+The three forms stay three files, for the reason D-21 gives.
+
+### `step` on a number input is a trap
+
+The duration field first shipped as `min={1} step={5}`, which makes 60 an
+invalid value to the browser: it refuses the whole form with a tooltip and no
+explanation. Caught by the drive, not by review. Any whole number is allowed
+here because any whole number is allowed by the check on the server, and the
+two must agree.
+
+### What it is verified by
+
+`e2e/services-smoke.mjs` — 57 assertions against a running app and a real
+database. It confirms the sheet has no date, no time, no capacity and no refund
+window on it; writes one at the Garden Room and reopens it with every field
+checked; writes one she travels for and confirms it is refused until it can say
+where from; switches the first one's branch both ways and confirms nothing of
+the abandoned answer survives; then deletes both and confirms their pages 404.
+The picture rail is deliberately not exercised — adding a picture means
+uploading one, and nothing in the portal can take a picture back out of the
+library, so a repeatable test of the rail would litter her media list on every
+run.
+
+### Applying it
+
+The migration is additive: two new tables, one new enum, one nullable foreign
+key from `Service` to `Venue`, and one CHECK constraint on the new table.
+Nothing existing is altered. Locally it is applied. On Replit:
 
 ```
 npm run db:deploy

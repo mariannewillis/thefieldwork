@@ -10,7 +10,17 @@ import { siteFooterLine, workshopsNav } from "@/content/workshops";
  * does not use these: it is a different composition, not a variant of this one.
  */
 
-export function SiteNav() {
+export function SiteNav({
+  /**
+   * Which entry this page IS, as its href. The seeded navigation carries a
+   * `current` flag of its own for the workshops pages it was written for; a
+   * page that is somewhere else says so here rather than the content module
+   * growing one list per section.
+   */
+  current,
+}: {
+  current?: string;
+} = {}) {
   return (
     <div className="flex items-center justify-between py-7">
       <a href="/" aria-label="The Field Work — home">
@@ -27,22 +37,25 @@ export function SiteNav() {
         className="hidden items-center gap-8 text-[17px] md:flex"
         aria-label="Main"
       >
-        {workshopsNav.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            aria-current={
-              "current" in item && item.current ? "page" : undefined
-            }
-            className={
-              "current" in item && item.current
-                ? "t text-plate-text underline decoration-gold underline-offset-8"
-                : "t text-plate-soft hover:text-plate-text"
-            }
-          >
-            {item.label}
-          </a>
-        ))}
+        {workshopsNav.map((item) => {
+          const here = current
+            ? item.href === current
+            : "current" in item && item.current;
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              aria-current={here ? "page" : undefined}
+              className={
+                here
+                  ? "t text-plate-text underline decoration-gold underline-offset-8"
+                  : "t text-plate-soft hover:text-plate-text"
+              }
+            >
+              {item.label}
+            </a>
+          );
+        })}
       </nav>
     </div>
   );

@@ -133,7 +133,9 @@ export default function CourseForm({
   // renaming the course must not silently move the page out from under a link
   // somebody already has.
   const [slugOwned, setSlugOwned] = useState(Boolean(course));
-  const [refundDays, setRefundDays] = useState(String(course?.refundDays ?? 14));
+  const [refundDays, setRefundDays] = useState(
+    String(course?.refundDays ?? 14),
+  );
 
   // The four address fields are held here rather than left to the browser,
   // because choosing a place has to visibly FILL them — not stand in for them.
@@ -484,7 +486,10 @@ export default function CourseForm({
                     name="capacity"
                     type="number"
                     min={1}
-                    defaultValue={kept("capacity", String(course?.capacity ?? 8))}
+                    defaultValue={kept(
+                      "capacity",
+                      String(course?.capacity ?? 8),
+                    )}
                     className={`${FIELD_FIG} text-[32px]`}
                   />
                 </label>

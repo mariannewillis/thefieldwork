@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/content/site";
+import { listPublishedCourses } from "@/lib/courses";
 import { listPublishedWorkshops } from "@/lib/workshops";
 
 /**
@@ -7,12 +8,15 @@ import { listPublishedWorkshops } from "@/lib/workshops";
  * sitemap is an invitation to index, which is the opposite of what /admin
  * wants.
  *
- * The workshops are read from the same query the workshops page itself uses,
- * so the sitemap cannot drift: a workshop she takes off the site leaves both
- * at once. An unpublished one never appears in either.
+ * The workshops and courses are read from the same queries their own pages
+ * use, so the sitemap cannot drift: one she takes off the site leaves both at
+ * once. An unpublished one never appears in either.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const workshops = await listPublishedWorkshops();
+  const [workshops, courses] = await Promise.all([
+    listPublishedWorkshops(),
+    listPublishedCourses(),
+  ]);
 
   return [
     {
@@ -31,6 +35,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/workshops/${workshop.slug}`,
       lastModified: workshop.updatedAt,
       // A workshop's page changes until the day, and then never again.
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
+    {
+      url: `${SITE_URL}/courses`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    ...courses.map((course) => ({
+      url: `${SITE_URL}/courses/${course.slug}`,
+      lastModified: course.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),

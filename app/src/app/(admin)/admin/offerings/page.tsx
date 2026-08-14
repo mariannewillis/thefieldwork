@@ -1,26 +1,27 @@
 import Link from "next/link";
 import { listAllCourses } from "@/lib/courses";
-import { formatDayShort, formatMoney, isPast } from "@/lib/format";
+import {
+  formatDayShort,
+  formatDuration,
+  formatMoney,
+  isPast,
+} from "@/lib/format";
+import { listAllServices } from "@/lib/services";
 import { listAllWorkshops } from "@/lib/workshops";
 
 /**
- * Offerings — the Workshops tab and the Courses tab.
+ * Offerings — three kinds, one list each.
  *
  * Ported from docs/screens/workshopflow/admin-offerings.html. What that screen
- * shows and this does not:
+ * shows and this does not: the money taken and the places gone. Both are
+ * countable for workshops now that bookings exist, but every figure about who
+ * has paid belongs on the portal's bookings page. Courses and services cannot
+ * be bought at all yet, so for them there is nothing to count.
  *
- *  · the money taken and the places gone. Both are countable for workshops now
- *    that bookings exist, but every figure about who has paid belongs on the
- *    portal's bookings page. Courses cannot be bought at all yet, so for them
- *    there is nothing to count.
- *  · the Services tab. It is shown, because the shape of the section is three
- *    kinds, but it is marked not-built rather than linked to a page that would
- *    404.
- *
- * The two lists are the same list twice, and deliberately: a course row and a
- * workshop row differ in one line — where a workshop prints its day, a course
- * prints the span of its run, read off its dates. Everything else about
- * reading the list is the same job.
+ * The three lists are the same list three times, and deliberately: the rows
+ * differ in one column each. Where a workshop prints its day, a course prints
+ * the span of its run and a service prints how long it takes. Everything else
+ * about reading the list is the same job.
  */
 
 const EYEBROW =
@@ -36,6 +37,7 @@ const TAB_OFF = `${TAB} t border-transparent text-plate-soft hover:text-plate-te
 
 type Workshop = Awaited<ReturnType<typeof listAllWorkshops>>[number];
 type Course = Awaited<ReturnType<typeof listAllCourses>>[number];
+type Service = Awaited<ReturnType<typeof listAllServices>>[number];
 
 /** The picture, or the space where one is not. Both lists want the same one. */
 function Thumbnail({ image, alt }: { image: string | null; alt: string }) {
@@ -193,6 +195,60 @@ function CourseRow({ course }: { course: Course }) {
   );
 }
 
+/**
+ * A service, in the same row as the other two.
+ *
+ * Where the workshop prints its one day and the course prints its run, this
+ * prints how long it takes — which is the only thing a service says about
+ * time. It is not in the diary until somebody asks for a slot, so there is no
+ * "already happened" list below: a service is a standing offer rather than a
+ * date, and it stops being one when she takes it off the site.
+ */
+function ServiceRow({ service }: { service: Service }) {
+  const travels = service.location === "travels";
+
+  return (
+    <article className={ROW}>
+      <Link
+        href={`/admin/offerings/services/${service.slug}`}
+        className="grid gap-6 md:grid-cols-[118px_140px_1fr_auto] md:items-start md:gap-8"
+      >
+        <p className="fig font-mono text-[18px] tabular-nums text-gold">
+          {formatDuration(service.durationMinutes)}
+          <br />
+          <span className="text-plate-soft">one to one</span>
+        </p>
+
+        <Thumbnail image={service.heroImage} alt={service.heroAlt ?? ""} />
+
+        <div>
+          <h3 className="font-display text-[28px] font-normal leading-tight text-plate-text">
+            {service.name}
+          </h3>
+          <p className="mt-3 max-w-[52ch] text-[18px] leading-relaxed text-plate-soft">
+            {service.summary}
+          </p>
+          <p className="mt-4 fig font-mono text-[15px] text-plate-soft">
+            {travels
+              ? `Travels ${service.travelRadiusMiles} ${service.travelRadiusMiles === 1 ? "mile" : "miles"} from ${service.basePostcode}`
+              : service.venueName || "No place set yet"}
+            {service._count.images > 0 &&
+              ` · ${service._count.images} picture${service._count.images === 1 ? "" : "s"}`}
+          </p>
+        </div>
+
+        <div className={FIGURES}>
+          <p className="text-[19px] text-plate-text">
+            {formatMoney(service.priceGBP)}
+          </p>
+          <p className="mt-1 text-[17px] text-plate-text">a session</p>
+          <LiveMark published={service.published} />
+        </div>
+      </Link>
+    </article>
+  );
+}
+
 /** The button that starts a new one, in the words of the tab it sits on. */
 function AddButton({ href, children }: { href: string; children: string }) {
   return (
@@ -222,11 +278,19 @@ export default async function Page({
   searchParams: Promise<{ kind?: string }>;
 }) {
   const { kind } = await searchParams;
-  const showingCourses = kind === "courses";
+  // Anything else — a hand-typed address, a stale bookmark — lands on
+  // workshops, which is the tab the page opens on.
+  const showing =
+    kind === "courses"
+      ? "courses"
+      : kind === "services"
+        ? "services"
+        : "workshops";
 
-  const [workshops, courses] = await Promise.all([
+  const [workshops, courses, services] = await Promise.all([
     listAllWorkshops(),
     listAllCourses(),
+    listAllServices(),
   ]);
 
   const comingWorkshops = workshops.filter(
@@ -268,35 +332,82 @@ export default async function Page({
         is live on the site is marked on its own line.
       </p>
 
-      {/* Two of the three kinds have something behind them. The third says so
-          rather than leading to a page that isn't there. */}
+      {/* All three kinds have something behind them now. */}
       <nav
         aria-label="Kinds of offering"
         className="mt-9 flex flex-wrap items-center gap-x-9 gap-y-1 border-b border-plate-rule/40"
       >
         <Link
           href="/admin/offerings"
-          aria-current={showingCourses ? undefined : "page"}
-          className={showingCourses ? TAB_OFF : TAB_ON}
+          aria-current={showing === "workshops" ? "page" : undefined}
+          className={showing === "workshops" ? TAB_ON : TAB_OFF}
         >
-          Workshops <span className="ml-2 tabular-nums">{workshops.length}</span>
+          Workshops{" "}
+          <span className="ml-2 tabular-nums">{workshops.length}</span>
         </Link>
-        <span className={`${TAB} border-transparent text-plate-soft`}>
-          Services{" "}
-          <span className="ml-2 text-[15px] normal-case tracking-normal">
-            not built yet
-          </span>
-        </span>
+        <Link
+          href="/admin/offerings?kind=services"
+          aria-current={showing === "services" ? "page" : undefined}
+          className={showing === "services" ? TAB_ON : TAB_OFF}
+        >
+          Services <span className="ml-2 tabular-nums">{services.length}</span>
+        </Link>
         <Link
           href="/admin/offerings?kind=courses"
-          aria-current={showingCourses ? "page" : undefined}
-          className={showingCourses ? TAB_ON : TAB_OFF}
+          aria-current={showing === "courses" ? "page" : undefined}
+          className={showing === "courses" ? TAB_ON : TAB_OFF}
         >
           Courses <span className="ml-2 tabular-nums">{courses.length}</span>
         </Link>
       </nav>
 
-      {showingCourses ? (
+      {showing === "services" ? (
+        <section className="mt-9" aria-labelledby="services-h">
+          <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
+            <div>
+              <h2 id="services-h" className={EYEBROW}>
+                What you offer one to one
+              </h2>
+              <p className="mt-2 fig font-mono text-[15px] tabular-nums text-plate-soft">
+                {services.length === 0
+                  ? "No services yet"
+                  : `${services.length} ${services.length === 1 ? "service" : "services"} · ${services.filter((service) => service.published).length} of them marked for the site`}
+              </p>
+            </div>
+            <AddButton href="/admin/offerings/services/new">
+              Write a new service
+            </AddButton>
+          </div>
+
+          {services.length === 0 ? (
+            <div className="pool on-pool mt-8 max-w-[62ch] px-7 py-7">
+              <p className="font-display text-[28px] leading-tight text-ink">
+                No services yet
+              </p>
+              <p className="mt-3 text-[18px] leading-relaxed text-ink">
+                A service is one person and one session — no date, because
+                somebody asks you for a slot rather than you setting one. Write
+                one and it sits here with its length beside it.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-8">
+              {services.map((service) => (
+                <ServiceRow key={service.id} service={service} />
+              ))}
+            </div>
+          )}
+
+          {/* The one thing this list cannot say, said once rather than as a
+              dash on every row. */}
+          <p className="mt-8 max-w-[62ch] fig font-mono text-[15px] leading-relaxed text-plate-soft">
+            Services cannot be asked for yet — the pages that would let somebody
+            request a slot are not built, and neither is the queue you would
+            answer them from. Each line shows how long a session runs and what
+            it costs.
+          </p>
+        </section>
+      ) : showing === "courses" ? (
         <>
           <section className="mt-9" aria-labelledby="coming-courses-h">
             <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-5">

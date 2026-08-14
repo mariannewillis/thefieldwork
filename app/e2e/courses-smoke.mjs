@@ -91,7 +91,10 @@ await page.goto(`${BASE}/admin/offerings?kind=courses`);
 ok("reachable", path() === "/admin/offerings?kind=courses", path());
 ok(
   "the tab is current",
-  (await page.getAttribute('a[href="/admin/offerings?kind=courses"]', "aria-current")) === "page",
+  (await page.getAttribute(
+    'a[href="/admin/offerings?kind=courses"]',
+    "aria-current",
+  )) === "page",
 );
 ok(
   "and it offers a new course",
@@ -132,7 +135,10 @@ const options = await page.$$eval('select[name="heroImage"] option', (list) =>
   list.map((o) => o.value).filter(Boolean),
 );
 await page.selectOption('select[name="heroImage"]', options[0]);
-await page.fill('[name="heroAlt"]', "The Garden Room at dusk, chairs in a circle");
+await page.fill(
+  '[name="heroAlt"]',
+  "The Garden Room at dusk, chairs in a circle",
+);
 
 // ── 3. three dates, entered out of order ──────────────────────────────────
 const dates = [
@@ -164,7 +170,9 @@ const dates = [
 
 for (const [index, one] of dates.entries()) {
   await page
-    .getByRole("button", { name: index === 0 ? "Add the first date" : "Add a date" })
+    .getByRole("button", {
+      name: index === 0 ? "Add the first date" : "Add a date",
+    })
     .click();
   await page.fill(`[name="run-${index}-title"]`, one.title);
   await page.fill(`[name="run-${index}-date"]`, one.date);
@@ -217,12 +225,17 @@ await page
       "  bounced:",
       JSON.stringify(
         await page.$$eval('[role="alert"]', (l) =>
-          l.map((e) => e.textContent?.replace(/\s+/g, " ").trim()).filter(Boolean),
+          l
+            .map((e) => e.textContent?.replace(/\s+/g, " ").trim())
+            .filter(Boolean),
         ),
       ),
     );
   });
-ok("it saves and opens", path() === "/admin/offerings/courses/attention-week-by-week");
+ok(
+  "it saves and opens",
+  path() === "/admin/offerings/courses/attention-week-by-week",
+);
 
 // ── 5. everything comes back ──────────────────────────────────────────────
 console.log("\nReopening it");
@@ -249,9 +262,24 @@ ok(
 );
 
 const inDateOrder = [
-  { date: "2026-10-21", title: "The first evening", venue: "The Garden Room", end: "21:00" },
-  { date: "2026-10-28", title: "The second evening", venue: "Rook Lane Chapel", end: "21:30" },
-  { date: "2026-11-04", title: "The third evening", venue: "The Garden Room", end: "21:00" },
+  {
+    date: "2026-10-21",
+    title: "The first evening",
+    venue: "The Garden Room",
+    end: "21:00",
+  },
+  {
+    date: "2026-10-28",
+    title: "The second evening",
+    venue: "Rook Lane Chapel",
+    end: "21:30",
+  },
+  {
+    date: "2026-11-04",
+    title: "The third evening",
+    venue: "The Garden Room",
+    end: "21:00",
+  },
 ];
 for (const [index, one] of inDateOrder.entries()) {
   ok(
@@ -279,9 +307,9 @@ ok(
 );
 ok(
   "the last day to cancel is counted from the first date",
-  (await page.locator("text=/last day to cancel/").first().textContent())?.includes(
-    "Wednesday 7 October",
-  ),
+  (
+    await page.locator("text=/last day to cancel/").first().textContent()
+  )?.includes("Wednesday 7 October"),
   await page.locator("text=/last day to cancel/").first().textContent(),
 );
 
@@ -341,7 +369,9 @@ ok(
 // ── 8. the list ───────────────────────────────────────────────────────────
 console.log("\nThe list");
 await page.goto(`${BASE}/admin/offerings?kind=courses`);
-const row = page.locator('a[href="/admin/offerings/courses/attention-week-by-week"]');
+const row = page.locator(
+  'a[href="/admin/offerings/courses/attention-week-by-week"]',
+);
 ok("the course is listed", await row.isVisible());
 const rowText = (await row.textContent())?.replace(/\s+/g, " ") ?? "";
 ok("with its run", /Wed 21 Oct.*to Wed 4 Nov/.test(rowText), rowText);
@@ -355,11 +385,15 @@ await page
   .getByRole("button", { name: "Yes, delete Attention, Week by Week" })
   .click();
 await page.waitForURL(/\/admin\/offerings\?kind=courses$/, { timeout: 15000 });
-ok("it goes", !(await page.locator('a[href*="attention-week-by-week"]').count()));
+ok(
+  "it goes",
+  !(await page.locator('a[href*="attention-week-by-week"]').count()),
+);
 await page.goto(`${BASE}/admin/offerings/courses/attention-week-by-week`);
 ok(
   "and its page is gone with it",
-  (await page.locator("text=/404|not be found|This page could not/i").count()) > 0,
+  (await page.locator("text=/404|not be found|This page could not/i").count()) >
+    0,
   await page.title(),
 );
 

@@ -171,7 +171,8 @@ export async function saveCourse(
   const published = values.published === "on";
 
   if (!name)
-    errors.name = "A course needs a name — it is the largest words on its page.";
+    errors.name =
+      "A course needs a name — it is the largest words on its page.";
 
   // The address is made from the name, and once people have that link it stays
   // the same. So it is offered rather than imposed, and she can overrule it.
@@ -299,7 +300,9 @@ export async function saveCourse(
 
   // Read once, used twice: the address the page used to live at, and what was
   // already known about the film. Both are needed before the write.
-  const previous = id ? await prisma.course.findUnique({ where: { id } }) : null;
+  const previous = id
+    ? await prisma.course.findUnique({ where: { id } })
+    : null;
   const { poster, duration } = await resolveFilm(film, previous);
 
   // The form's row numbers stop here. What the database keeps is six columns

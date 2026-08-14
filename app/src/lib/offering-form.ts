@@ -185,7 +185,10 @@ export async function resolveFilm(
   const details = await describeFilm(film);
   if (!details.posterUrl) return { poster: null, duration: details.duration };
 
-  const still = await ingestImageFromUrl(details.posterUrl, posterBasename(film));
+  const still = await ingestImageFromUrl(
+    details.posterUrl,
+    posterBasename(film),
+  );
   return {
     poster: still.ok ? still.basename : null,
     duration: details.duration,

@@ -22,6 +22,25 @@ export function formatMoney(pence: number): string {
   }).format(pounds);
 }
 
+/**
+ * "50 minutes", "1 hour", "1 hour 30 minutes" — how long a service runs.
+ *
+ * Spelled out rather than left as "75", because the number in the form is
+ * minutes and the sentence on the page is not: nobody books an appointment
+ * described as ninety minutes without doing the sum. Numerals, not words, so
+ * it sits in the same ledger column as the prices beside it.
+ */
+export function formatDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours} ${hours === 1 ? "hour" : "hours"}`);
+  if (rest > 0 || hours === 0) {
+    parts.push(`${rest} ${rest === 1 ? "minute" : "minutes"}`);
+  }
+  return parts.join(" ");
+}
+
 /** "Sat 20 Sep" — the ledger form, used wherever a date sits in a column. */
 export function formatDayShort(date: Date): string {
   return new Intl.DateTimeFormat("en-GB", {
