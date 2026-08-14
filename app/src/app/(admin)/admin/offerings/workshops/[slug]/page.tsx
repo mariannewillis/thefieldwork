@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import WorkshopForm from "@/components/admin/WorkshopForm";
-import { canFindAddresses } from "@/lib/addresses";
 import { formatDayShort, formatMoney } from "@/lib/format";
+import { mapSearchUrl } from "@/lib/maps";
 import { listMediaBasenames } from "@/lib/media";
 import { toSource } from "@/lib/rich-text";
 import { listVenues } from "@/lib/venues";
@@ -84,7 +84,10 @@ export default async function Page({
       <WorkshopForm
         media={media}
         venues={venues}
-        canFindAddress={canFindAddresses()}
+        // Built from the STORED address, not from what is in the fields, so
+        // the link goes where the site currently sends people. Null while the
+        // place is not set yet, and the form then shows nothing.
+        mapUrl={mapSearchUrl(workshop)}
         workshop={{
           ...workshop,
           // The textarea shows her own marks, not the markup they became.

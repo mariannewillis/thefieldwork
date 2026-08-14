@@ -104,7 +104,7 @@ artifacts/
 # once, which is why they are named here rather than remembered.
 app/_tmp-*/
 app/diag-tmp.mjs
-app/e2e/_*.mjs
+app/e2e/_*
 app/.smoke-*
 app/shot-*.png
 docs/screens/**/_verify*.mjs

@@ -14,6 +14,7 @@ import {
   isPast,
   refundDeadline,
 } from "@/lib/format";
+import { mapSearchUrl } from "@/lib/maps";
 import { paymentsConfigured } from "@/lib/stripe";
 import { getPublishedWorkshopBySlug } from "@/lib/workshops";
 
@@ -84,11 +85,7 @@ export default async function Page({
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
-  const mapQuery = encodeURIComponent(
-    [workshop.venueName, ...addressLines, workshop.postcode]
-      .filter(Boolean)
-      .join(", "),
-  );
+  const mapUrl = mapSearchUrl(workshop);
 
   return (
     <>
@@ -238,12 +235,14 @@ export default async function Page({
                       ))}
                       <span className="fig font-mono">{workshop.postcode}</span>
                     </address>
-                    <a
-                      className="t mt-4 inline-block text-[17px] text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
-                      href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
-                    >
-                      {workshopDetail.openInMap}
-                    </a>
+                    {mapUrl && (
+                      <a
+                        className="t mt-4 inline-block text-[17px] text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+                        href={mapUrl}
+                      >
+                        {workshopDetail.openInMap}
+                      </a>
+                    )}
                   </div>
 
                   {gettingThere.length > 0 && (

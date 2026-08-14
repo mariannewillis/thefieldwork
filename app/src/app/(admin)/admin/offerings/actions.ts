@@ -3,12 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import {
-  expandSuggestion,
-  suggestAddresses as askForSuggestions,
-  type AddressResolution,
-  type AddressSuggestions,
-} from "@/lib/addresses";
 import { getSession } from "@/lib/auth/server";
 import { describeFilm, parseFilm, posterBasename, type Film } from "@/lib/film";
 import { ingestImage, ingestImageFromUrl, MAX_UPLOAD_BYTES } from "@/lib/media";
@@ -37,51 +31,6 @@ async function requireSession() {
   // does not inherit the layout's check.
   if (!session) redirect("/admin/login");
   return session;
-}
-
-/**
- * What the address register holds, for the form to draw its list from.
- *
- * Re-exported rather than imported straight into the form, because the module
- * that does the work is server-only and the form runs in the browser. Types
- * are erased before either of them runs, so this crosses the line and the key
- * behind it does not.
- */
-export type {
-  AddressResolution,
-  AddressSuggestion,
-  AddressSuggestions,
-  ChosenAddress,
-} from "@/lib/addresses";
-
-/**
- * What the register offers for what she has typed so far.
- *
- * A POST endpoint of its own, like every server action — and one reached on a
- * timer while she types, so it is closed to anyone who is not signed in. Left
- * open it would be an address finder for the whole internet, rate-limited
- * against her plan.
- *
- * The lookup itself, the key, and the rule that decides whether this is
- * offered at all live in `lib/addresses`.
- */
-export async function suggestAddresses(
-  term: string,
-): Promise<AddressSuggestions> {
-  await requireSession();
-  return askForSuggestions(term);
-}
-
-/**
- * The one she picked, as fields to fill in.
- *
- * The BILLED half of the pair — getAddress charges a look-up for resolving a
- * suggestion and nothing for the suggesting — which is the other reason this
- * cannot be left open to anyone who finds the endpoint.
- */
-export async function chooseAddress(id: string): Promise<AddressResolution> {
-  await requireSession();
-  return expandSuggestion(id);
 }
 
 export type PictureAdded =
@@ -275,9 +224,9 @@ async function resolveVenue(
  * Asked once, when the link changes. Re-saving a workshop whose film is the
  * same does not go out to the internet again.
  *
- * Like the address lookup, it can never stop a save. A private film, a provider
- * having a bad morning, or no outbound network at all leaves both null, and
- * the page shows a plain plate to press instead of a photograph.
+ * It can never stop a save. A private film, a provider having a bad morning,
+ * or no outbound network at all leaves both null, and the page shows a plain
+ * plate to press instead of a photograph.
  */
 async function resolveFilm(
   film: Film | null,

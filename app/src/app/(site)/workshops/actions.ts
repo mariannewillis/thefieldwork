@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { SITE_URL } from "@/content/site";
 import { placesLeft, placesSold } from "@/lib/bookings";
 import { formatDayLong, isPast } from "@/lib/format";
-import { paymentsConfigured, stripe } from "@/lib/stripe";
+import {
+  paymentsConfigured,
+  SITE_METADATA_KEY,
+  stripe,
+  thisSite,
+} from "@/lib/stripe";
 import { getPublishedWorkshopBySlug } from "@/lib/workshops";
 
 /**
@@ -93,10 +98,17 @@ export async function startCheckout(
     // What the webhook needs to turn a payment into a place. The name is
     // carried too, so the rare payment for a workshop that has since been
     // taken down can still be written about in words.
+    //
+    // And which site opened it. The live endpoint is sent every completed
+    // session on the account, including the ones bought on a preview whose
+    // workshops the live database has never held; without this stamp it read
+    // those as a workshop withdrawn mid-checkout and refunded a stranger's
+    // payment (D-19).
     metadata: {
       workshopId: String(workshop.id),
       workshopName: workshop.name,
       places: String(asked),
+      [SITE_METADATA_KEY]: thisSite,
     },
   });
 

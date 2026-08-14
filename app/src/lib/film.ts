@@ -108,9 +108,9 @@ export type FilmDetails = {
  * oEmbed, which both of them publish and neither requires a key for. It is
  * asked once, when the link is saved, and never again on a page render.
  *
- * Like the address lookup, it is NEVER allowed to stop a save. A private film, a
- * provider having a bad morning, or no outbound network at all all produce
- * nulls: the film still saves, and the page shows a plain plate to press
+ * It is NEVER allowed to stop a save. A private film, a provider having a bad
+ * morning, or no outbound network at all all produce nulls: the film still
+ * saves, and the page shows a plain plate to press
  * instead of a still. The film is what she asked for; the still is a courtesy
  * on top of it.
  */

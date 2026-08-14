@@ -1,6 +1,5 @@
 import Link from "next/link";
 import WorkshopForm from "@/components/admin/WorkshopForm";
-import { canFindAddresses } from "@/lib/addresses";
 import { listMediaBasenames } from "@/lib/media";
 import { listVenues } from "@/lib/venues";
 
@@ -51,11 +50,9 @@ export default async function Page() {
         </p>
       </section>
 
-      <WorkshopForm
-        media={media}
-        venues={venues}
-        canFindAddress={canFindAddresses()}
-      />
+      {/* No map link here, and that is the difference the prop carries: there
+          is no saved address yet to go and look at. */}
+      <WorkshopForm media={media} venues={venues} />
     </>
   );
 }

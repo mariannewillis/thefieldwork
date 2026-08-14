@@ -1,24 +1,13 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useId,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type ReactNode,
-} from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import {
   addPicture,
-  chooseAddress,
   saveWorkshop,
-  suggestAddresses,
-  type AddressSuggestion,
-  type AddressSuggestions,
   type WorkshopFormState,
 } from "@/app/(admin)/admin/offerings/actions";
 import { formatDayLong, refundDeadline, toDateInputValue } from "@/lib/format";
-import { MAX_IMAGES, MIN_TERM_LENGTH, slugify } from "@/lib/workshop-rules";
+import { MAX_IMAGES, slugify } from "@/lib/workshop-rules";
 import DeleteWorkshop from "./DeleteWorkshop";
 
 /**
@@ -105,15 +94,6 @@ const INITIAL: WorkshopFormState = {
   values: {},
   attempt: 0,
 };
-
-/**
- * How long the address field waits after the last letter before it asks.
- *
- * See the effect that uses it: one request per pause in typing rather than one
- * per keystroke, and every one of those is a round trip through our own server
- * because the key never reaches the browser.
- */
-const SUGGEST_AFTER_MS = 350;
 
 /** The address a picture's derivatives are served from (D-6). */
 function mediaSrc(basename: string): string {
@@ -302,7 +282,7 @@ export default function WorkshopForm({
   workshop,
   media,
   venues,
-  canFindAddress,
+  mapUrl,
 }: {
   /** Absent when this is a workshop that does not exist yet. */
   workshop?: WorkshopFormValues;
@@ -311,12 +291,11 @@ export default function WorkshopForm({
   /** The places she has used before — see lib/venues#listVenues. */
   venues: VenueChoice[];
   /**
-   * Whether there is a key to look addresses up with — see
-   * lib/addresses#canFindAddresses. False leaves the four address fields
-   * exactly as they have always been: nothing offered, nothing to press,
-   * nothing broken — the name field is a name field and nothing more.
+   * The SAVED address, in a map — see lib/maps#mapSearchUrl. Absent on a
+   * workshop that does not exist yet, and on one whose place is not set:
+   * there is nothing to check until something has been written down.
    */
-  canFindAddress: boolean;
+  mapUrl?: string | null;
 }) {
   const [state, formAction, pending] = useActionState(saveWorkshop, INITIAL);
 
@@ -368,165 +347,16 @@ export default function WorkshopForm({
     kept("venueId", workshop?.venueId ? String(workshop.venueId) : ""),
   );
 
-  /**
-   * WHAT SHE HAS TYPED into the name field, which is not the same as what the
-   * field holds. Filling it from a saved place, or from an address she has
-   * just picked, must not send what was filled in straight back out as a fresh
-   * search — those set the field and leave this null, and the list stays shut.
-   */
-  const [typed, setTyped] = useState<string | null>(null);
-  // What the register offered and which term it was answering, so a list that
-  // arrives late cannot end up standing under something else.
-  const [offered, setOffered] = useState<{
-    term: string;
-    result: AddressSuggestions;
-  } | null>(null);
-  // Which row the arrows are on. -1 is none, which is where it starts: Enter
-  // on a term she has not moved off should do nothing rather than take a guess
-  // on her behalf.
-  const [active, setActive] = useState(-1);
-  // A pick in flight. It is the call that costs a look-up and fills four
-  // fields, so it is worth a word while it happens.
-  const [filling, setFilling] = useState(false);
-  const [pickFailed, setPickFailed] = useState(false);
-  const listId = useId();
-
-  const shutList = () => {
-    setOffered(null);
-    setActive(-1);
-  };
-
   const fillFrom = (venue: VenueChoice) => {
     setVenueName(venue.name);
     setAddressLines(venue.addressLines);
     setPostcode(venue.postcode);
     setGettingThere(venue.gettingThere);
     setVenueId(String(venue.id));
-    // An address filled in whole, from a place she has used before. There is
-    // nothing left to look up about it.
-    setTyped(null);
-    setPickFailed(false);
-    shutList();
   };
 
   /** Any hand edit to the four means this address is hers, not a place's. */
   const ownAddress = () => setVenueId("");
-
-  const term = (typed ?? "").trim();
-  // Only ever the answer to what is in the field NOW. A list for three letters
-  // ago is worse than no list at all.
-  const answer = offered && offered.term === term ? offered.result : null;
-  // Bound out here rather than narrowed at the point of use, because the rows
-  // are drawn by a callback and a narrowing does not survive into one.
-  const suggestions =
-    answer?.status === "suggestions" ? answer.suggestions : [];
-  const listOpen = suggestions.length > 0;
-
-  /**
-   * One request per PAUSE in typing, not one per letter.
-   *
-   * 350ms is longer than the gap between letters of someone typing a name they
-   * already know, so a fluent burst spends one request at the end of it rather
-   * than eleven on the way — and each of those is a round trip through our own
-   * server before it is one to getAddress, because the key may never reach the
-   * browser. It is short enough that the list is there by the time she has
-   * stopped to look for it.
-   *
-   * Three letters before anything is asked at all (`MIN_TERM_LENGTH`): a
-   * two-letter term answers with whatever the country has most of.
-   *
-   * Suggesting is free at getAddress and only rate-limited. Resolving the one
-   * she picks is what costs a look-up, and that waits for the press.
-   */
-  useEffect(() => {
-    if (!canFindAddress || typed === null) return;
-    const asked = typed.trim();
-    if (asked.length < MIN_TERM_LENGTH) {
-      setOffered(null);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        setOffered({ term: asked, result: await suggestAddresses(asked) });
-      } catch {
-        // The action itself did not come back — the connection, or a redeploy
-        // mid-request. Same thing to do about it as a service that is down.
-        setOffered({ term: asked, result: { status: "unavailable" } });
-      }
-    }, SUGGEST_AFTER_MS);
-    return () => clearTimeout(timer);
-  }, [typed, canFindAddress]);
-
-  /**
-   * One suggestion from the list, into the fields around it.
-   *
-   * THE SECOND CALL TO GETADDRESS HAPPENS HERE and nowhere else. A suggestion
-   * carries a line to read and an id and nothing else, so this is what turns
-   * the one she picked into an address — on the pick, never per suggestion
-   * shown, because this is the half that is billed.
-   *
-   * The NAME is only written when the register holds one: a house at 10 Watkin
-   * Terrace has no name, and putting "10" where The Garden Room goes would be
-   * worse than leaving what she typed there.
-   *
-   * Everything it fills stays visible and stays editable. "We are in the
-   * church hall for this one, second door" is a correction she has to be able
-   * to make on top of any of this.
-   */
-  const pick = async (suggestion: AddressSuggestion) => {
-    if (filling) return;
-    // Shut before the request rather than after. She has chosen; a list still
-    // standing over the fields it is about to fill reads as though the press
-    // missed.
-    setTyped(null);
-    shutList();
-    setPickFailed(false);
-    setFilling(true);
-    try {
-      const chosen = await chooseAddress(suggestion.id);
-      if (chosen.status !== "found") {
-        setPickFailed(true);
-        return;
-      }
-      if (chosen.address.name) setVenueName(chosen.address.name);
-      setAddressLines(chosen.address.addressLines);
-      if (chosen.address.postcode) setPostcode(chosen.address.postcode);
-      ownAddress();
-    } catch {
-      setPickFailed(true);
-    } finally {
-      setFilling(false);
-    }
-  };
-
-  /** The arrows, Enter and Escape, for a list that is standing open. */
-  const steerList = (event: ReactKeyboardEvent<HTMLInputElement>) => {
-    if (!listOpen) return;
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      setActive((at) => (at + 1) % suggestions.length);
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      setActive((at) => (at <= 0 ? suggestions.length - 1 : at - 1));
-    } else if (event.key === "Enter") {
-      // Enter in a form submits it. With a list open it is a choice, and a
-      // save from here would post the address she has not picked yet.
-      event.preventDefault();
-      if (active >= 0) void pick(suggestions[active]);
-    } else if (event.key === "Escape") {
-      shutList();
-    }
-  };
-
-  /** The one line under the field, which is the whole of this control's chrome. */
-  const addressNote = filling
-    ? "Filling that in…"
-    : pickFailed || answer?.status === "unavailable"
-      ? "Could not look that up just now. Write the address below — it saves the same either way."
-      : answer?.status === "none"
-        ? "Nothing answers to that. Keep typing, or write the address below."
-        : "Type a name, a street or a postcode and the real addresses are offered to pick from.";
 
   // Offered only when there is something new to keep. A place already on the
   // list has nothing to be remembered about it.
@@ -912,87 +742,20 @@ export default function WorkshopForm({
             )}
 
             <div className="grid gap-6 sm:grid-cols-2">
-              {/* The search is the FIELD, not a control beside it. A search box
-                  of its own would be two places to type a venue where the form
-                  has one, and the list has to be less chrome than the fields it
-                  front-ends. `relative` so the list hangs over what follows
-                  instead of shoving the rest of the address down the page as
-                  she types. */}
-              <div className="relative">
+              <div>
                 <label className="block">
                   <span className={LABEL}>The name of the place</span>
                   <input
                     name="venueName"
                     type="text"
-                    // Off, so the browser's own remembered values do not stand
-                    // in front of the register's.
-                    autoComplete="off"
                     value={venueName}
                     onChange={(event) => {
                       setVenueName(event.target.value);
-                      // Typed, so it is a term as well as a value. Only where
-                      // there is a key: without one this field behaves exactly
-                      // as it always has.
-                      if (canFindAddress) setTyped(event.target.value);
-                      setActive(-1);
-                      setPickFailed(false);
                       ownAddress();
                     }}
-                    onKeyDown={steerList}
-                    // Tabbing away is leaving the list, not choosing from it.
-                    // A press on a row cannot be lost this way: the list holds
-                    // the focus on mousedown, below.
-                    onBlur={shutList}
-                    role={canFindAddress ? "combobox" : undefined}
-                    aria-expanded={canFindAddress ? listOpen : undefined}
-                    aria-controls={canFindAddress ? listId : undefined}
-                    aria-autocomplete={canFindAddress ? "list" : undefined}
-                    aria-activedescendant={
-                      active >= 0 ? `${listId}-${active}` : undefined
-                    }
                     className={FIELD}
                   />
                 </label>
-
-                {canFindAddress && (
-                  <>
-                    {listOpen && (
-                      <ul
-                        id={listId}
-                        role="listbox"
-                        aria-label="Addresses that match"
-                        // The press must not blur the field first: blurring
-                        // shuts the list, and a list that shuts on mousedown
-                        // is one whose rows can never be clicked.
-                        onMouseDown={(event) => event.preventDefault()}
-                        className="absolute inset-x-0 z-20 mt-1 max-h-[19rem] overflow-y-auto border border-pool-rule bg-pool"
-                      >
-                        {suggestions.map((suggestion, index) => (
-                          <li
-                            key={suggestion.id}
-                            id={`${listId}-${index}`}
-                            role="option"
-                            aria-selected={index === active}
-                            onMouseEnter={() => setActive(index)}
-                            onClick={() => void pick(suggestion)}
-                            className={`t cursor-pointer border-t border-pool-rule/40 px-4 py-2.5 text-[17px] leading-snug first:border-t-0 ${
-                              index === active ? "bg-ink text-pool" : "text-ink"
-                            }`}
-                          >
-                            {suggestion.label}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {/* One line, which is all the help this needs and all the
-                        chrome it gets. It says what to type, then what came
-                        back — never in the alarm colour, because none of its
-                        answers stops the workshop being saved. */}
-                    <p className={HELP} aria-live="polite">
-                      {addressNote}
-                    </p>
-                  </>
-                )}
               </div>
 
               <div>
@@ -1031,6 +794,29 @@ export default function WorkshopForm({
                 The postcode above goes on its own line, so leave it out here.
               </p>
             </div>
+
+            {/* The one thing the form cannot tell her about an address is
+                whether it is the right one. This is the same link the workshop's
+                own page carries — one address, built one way (lib/maps) — so
+                what she checks here is what a visitor gets. A plain link out:
+                nothing is asked of Google until she presses it. */}
+            {mapUrl && (
+              <div className="mt-7">
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="t inline-flex min-h-[44px] items-center text-[17px] font-medium text-ink underline decoration-pool-rule underline-offset-4 hover:decoration-ink"
+                >
+                  Check this address on a map
+                </a>
+                <p className={HELP}>
+                  Opens what is saved, in a new tab. Worth pressing after any
+                  change of address: a postcode can be a real one and still be a
+                  mile from the door.
+                </p>
+              </div>
+            )}
 
             <div className="mt-7">
               <label className="block">

@@ -453,8 +453,9 @@ to guess.
 
 ## D-15 · An address is looked up from its postcode (2026-08-13)
 
-> **Superseded in part by D-16, the same day.** The endpoint this chose —
-> `GET /find/{postcode}` — no longer exists, and the reasoning below that
+> **Superseded in part by D-16, the same day — and then wholly by D-19.** The
+> lookup this describes no longer exists in any form; see D-19. The endpoint
+> this chose — `GET /find/{postcode}` — no longer exists, and the reasoning below that
 > rejects a typeahead on cost was wrong about how getAddress bills. Read D-16.
 > What survives: the choice of getAddress over postcodes.io, and every rule
 > about absent keys, saves, saved venues and editability.
@@ -499,6 +500,12 @@ visible and editable after any fill — "we are in the church hall for this one,
 second door" has to be possible on top of whatever the register said.
 
 ## D-16 · `/find` no longer exists, so the lookup is a typeahead (2026-08-13)
+
+> **Superseded by D-19 (2026-08-14): there is no address lookup any more.**
+> getAddress does not sell `/autocomplete` on the free tier and the open-data
+> alternative cannot find the venue, so the whole feature is withdrawn and the
+> address is four typed fields. Everything below is kept as the record of what
+> was tried. Read D-19 before proposing a typeahead again.
 
 **D-15 was built against an endpoint that has been withdrawn.** `GET
 /find/{postcode}?expand=true` — the one-request-per-postcode call the whole of
@@ -789,3 +796,163 @@ replaced at the module boundary (`src/lib/stripe.ts` overwritten inside a
 throwaway copy) so both the succeeding and the failing refund branch can be
 exercised without touching anybody's account, and email intercepted by the
 module's own log adapter so nothing is delivered.
+
+## D-19 · The address lookup is withdrawn; a saved address gets a map link (2026-08-14)
+
+> **Supersedes D-16 ("`/find` no longer exists, so the lookup is a typeahead")
+> and what was left of D-15.** Everything those two said about the four address
+> fields, the saved-venue picker and a lookup never blocking a save survives —
+> because there is no lookup left to block anything.
+
+**Operator decision:** _"okay no lookup just have address as input boxes but can
+we have view in maps once its saved?"_
+
+**Two ways were built and neither one works without paying.**
+
+- **getAddress.io refuses the free tier the typeahead needs.** The key is valid
+  — `/usage` answers 200 with it — and `/autocomplete` answers 401 with the same
+  key. The 401 handling D-16 added was written for a key that might be wrong;
+  the key is right, and autocomplete is simply not sold on the free plan. Every
+  branch of that module works and there is nothing behind it to work with.
+- **The free open-data alternative cannot find the venue.** Searching
+  OpenStreetMap for "The Garden Room Frome" returns Garden Rooms in Minnesota,
+  in London and in Rome, and not the one in Frome. This is the same wall D-15
+  hit with postcodes.io, arrived at from the other side: open data knows places
+  that somebody has mapped, and a hired room off Fromefield is not one of them.
+
+Building-level UK addresses are Royal Mail's Postcode Address File, and the PAF
+is sold. Both routes were tried; a third would be a third way of finding that
+out.
+
+**So it is gone rather than switched off.** `src/lib/addresses.ts`, the two
+server actions behind it, the typeahead in the workshop form,
+`GETADDRESS_API_KEY` and the four e2e scripts that exercised it are deleted.
+Nothing is left disabled, feature-flagged or commented "for when we have a
+plan": a key-shaped hole in `.env.example` is an invitation to spend a morning
+re-discovering the 401, and this entry is here so the next person to propose a
+typeahead reads what happened first.
+
+**The address is four fields, typed.** The name of the place, the postcode, the
+lines, and getting there — the same four, the same names, the same validation.
+The form is shorter than it was, which is the right direction for a sheet that
+was deliberately simplified.
+
+**The saved-venue picker stays, and stays first.** One press fills all four, and
+nearly every workshop is in The Garden Room. It was always the thing doing the
+work; it is now the only shortcut there is.
+
+**In its place: the address, in a map.** The workshop's own page has carried a
+Google Maps search link since it was built. The portal now carries the same one,
+on the edit page, under the address — and the URL is built in one place,
+`src/lib/maps.ts`, used by both, so what she checks is exactly what a visitor
+gets. It is a link and not an embed: nothing is asked of Google until she
+presses it, which is the rule the film player follows (D-14). It appears only on
+a workshop that exists and has an address, because a form with nothing saved in
+it has nothing to look up.
+
+**It is there because the seeded postcode may be wrong.** Two independent
+sources place **BA11 2QN** in Buckland Dinham rather than Fromefield, and both
+give Fromefield as BA11 2HE / 2AB / 1AZ. The client is being asked. The data is
+NOT being corrected here on the strength of a web search — but a postcode that
+is real, and a mile from the door, is exactly the mistake nothing in the form
+could catch and one press on this link now can. The line of help under it says
+so.
+
+**Not added to the Offerings list.** Each row there is one large link to the
+workshop's own page, and an anchor inside an anchor is not valid HTML — it would
+mean unpicking the row to put a second link in it. That is not free, and the map
+link is one press further on.
+
+---
+
+## D-19 · A webhook acts only on checkouts this deployment opened (2026-08-14)
+
+**Two real refunds, and an apology to somebody who had done nothing wrong.**
+On 14 August a place was bought on the Replit dev preview. Stripe delivered
+`checkout.session.completed` to the PRODUCTION endpoint, which reads a different
+database and had never held that workshop. The webhook took the only path that
+fits a workshop it cannot find — `workshopGone` — refunded the payment in full
+and emailed the buyer to say *"Lorem Ipsum … is no longer running … £0.40 has
+been sent back"*. Twice: 14:19:27→29 and 14:22:12→14, the refund landing two to
+three seconds after the completed session each time.
+
+The routing was never at fault, and the evidence says so: the refunds fired
+promptly, which means the endpoint was reachable and the handler ran to
+completion. The workshop simply was not at
+`https://thefieldwork.co.uk/admin/workshop-bookings`, because it never had been.
+
+**The code was right and the environments were wrong.** One Stripe account
+serves the live site and every preview of it, and Stripe sends every completed
+session to EVERY endpoint registered on the account. So "an event that is not
+mine" is an ordinary thing that arrives on an ordinary day — and the webhook had
+no way to see it, because a foreign session and a withdrawn workshop look
+identical from inside the handler: a `workshopId` the database cannot find.
+
+### The stamp is the site's own host, and it is not a new variable
+
+Every Checkout Session this app opens now carries `site` in its metadata — the
+host of `NEXT_PUBLIC_SITE_URL`. `thefieldwork.co.uk` live, the `.replit.dev`
+address on the preview, `localhost:3100` under the smoke test.
+
+Deliberately NOT a new `APP_ENV`-style variable. `NEXT_PUBLIC_SITE_URL` already
+differs between deployments and already has to be correct, because the
+cancellation links inside emails are built from it — a wrong value is noticed
+within one booking. A variable that mattered only to this guard could be wrong
+for months with nothing to notice, which is the same failure again wearing a
+different name. The consequence is that a preview must carry its OWN address:
+two deployments claiming one origin are one deployment as far as this is
+concerned.
+
+### Three answers, and they read differently in the log
+
+| The session says | What happens | The log line begins |
+| --- | --- | --- |
+| Another host | Nothing at all — 200, no booking, no refund, no email | `NOT THIS SITE'S EVENT` |
+| This host, workshop missing | Refunded and apologised for, exactly as before | `WORKSHOP WITHDRAWN` |
+| Nothing | Treated as this site's | `…carries no site stamp; it predates the guard` |
+
+**200 on a foreign event, not an error.** Stripe delivered it correctly; it
+belongs to another deployment, which has had its own copy and dealt with it. A
+4xx or 5xx would have Stripe retrying for days something we will never act on.
+
+**Nothing is written for a foreign event**, so its id never reaches
+`StripeEvent` and a redelivery arrives at the guard again rather than at the
+idempotency check. That is fine, and it is the reason the guard sits before
+everything else: doing nothing twice is doing nothing.
+
+**`workshopGone` is untouched.** It is a correct path and Marianne relies on it —
+a day taken off the site while somebody is at the checkout must be refunded and
+apologised for. What it lost is only the impostors.
+
+### An unstamped session is treated as ours, on purpose
+
+Sessions opened before this shipped are valid for hours afterwards, and a real
+buyer's payment is inside some of them. Calling those foreign would take the
+money, write no booking and send nothing — a silent swallow, which is a worse
+failure than the one being fixed: at least the refund gave the money back. The
+unstamped population only shrinks, because every session opened from now on
+carries the stamp, and the log says so each time one appears so it can be seen
+draining away.
+
+### The real fix is configuration, and the app can only notice
+
+`sk_test_` on the preview and `sk_live_` in production makes this structurally
+impossible — a test-mode event is only ever delivered to a test-mode endpoint,
+so the crossing cannot occur at all. Nothing in the app can arrange that, so at
+boot it says, once, when the keys and the site do not belong to each other: live
+keys off the live domain, or test keys on it.
+
+**A line in the log, never a refusal.** Refusing to start on a mismatch would
+take the site down over a guess about which host is production, and the guard
+above already makes the crossed case harmless.
+
+### What it is verified by
+
+`app/e2e/bookings-smoke.mjs` — now 72 assertions, of which 19 are this decision.
+The events are synthetic and signed with Stripe's own signing helper against a
+secret the script chose; no live Stripe call is made and no email is delivered.
+Four claims carry it: a session stamped with this host books normally; one
+stamped with another host is answered 200 and does NOTHING — no booking, no
+email, no refund attempted — and does nothing again when redelivered; one with
+no stamp books normally; and one stamped with this host for a workshop that is
+genuinely absent still refunds and still says the day is no longer running.

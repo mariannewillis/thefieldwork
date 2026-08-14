@@ -15,7 +15,14 @@ import {
   sendBookingMail,
 } from "@/lib/email/bookings";
 import { formatDayLong } from "@/lib/format";
-import { paymentsConfigured, stripe, webhookSecret } from "@/lib/stripe";
+import {
+  paymentsConfigured,
+  SITE_METADATA_KEY,
+  stripe,
+  thisSite,
+  webhookSecret,
+  whoseSession,
+} from "@/lib/stripe";
 
 /**
  * Stripe's word that a payment happened.
@@ -38,6 +45,10 @@ import { paymentsConfigured, stripe, webhookSecret } from "@/lib/stripe";
  *    booking or a second pair of emails (see confirmPaidBooking).
  *  - Capacity is counted again HERE, under a lock, not trusted from when the
  *    checkout was opened (D-16).
+ *  - A session opened by a DIFFERENT deployment is put down untouched. One
+ *    Stripe account serves the live site and every preview of it, and every
+ *    endpoint on the account is sent every completed session, so "this event is
+ *    not mine" is an ordinary thing that happens and not an error (D-19).
  *  - An unexpected failure is left to become a 500 on purpose, so Stripe
  *    retries it. Swallowing it into a 200 would lose the payment quietly.
  */
@@ -77,6 +88,36 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const session = event.data.object;
+
+  // WHOSE CHECKOUT WAS THIS. Asked before anything else about the session,
+  // because a payment made somewhere else is not ours to read, count, book or
+  // refund. The stamp is the opening site's own host, written at
+  // checkout.sessions.create.
+  //
+  // Nothing is written for a foreign event, so its id never reaches StripeEvent
+  // and a redelivery lands here again — which is fine: doing nothing twice is
+  // doing nothing.
+  const origin = whoseSession(session.metadata?.[SITE_METADATA_KEY]);
+
+  if (origin === "elsewhere") {
+    // 200, not an error. Stripe delivered it correctly; it simply belongs to
+    // another deployment, which will have had its own copy and dealt with it.
+    // A 4xx or 5xx here would have Stripe retrying an event we will never act
+    // on until it gives up days later.
+    console.warn(
+      `[stripe] NOT THIS SITE'S EVENT — session ${session.id} was opened by ${session.metadata?.[SITE_METADATA_KEY]}, and this is ${thisSite}. Ignored: no booking, no refund, no email. Its own site has it. If that address is a preview taking real payments, give the preview its own test-mode Stripe keys.`,
+    );
+    return Response.json({ received: true, acted: false, foreign: true });
+  }
+
+  if (origin === "unstamped") {
+    // Opened before the stamp existed, so there is no way to tell — and a
+    // real payment is likelier than a foreign one. Treated as ours, and said
+    // out loud, because these should stop appearing within a day of the deploy.
+    console.info(
+      `[stripe] session ${session.id} carries no ${SITE_METADATA_KEY} stamp; it predates the guard. Treating it as this site's (${thisSite}).`,
+    );
+  }
 
   // A session can complete before the money has actually arrived — bank
   // debits and other delayed methods. Only `paid` is a payment.
@@ -192,6 +233,12 @@ export async function POST(request: Request): Promise<Response> {
       // checkout. There is no Booking to write — the workshop it would point
       // at is gone — so the refund is issued straight against the payment and
       // the log plus these two emails are the whole record of it.
+      //
+      // THIS SITE'S OWN SESSION, on a workshop this site no longer has. The
+      // foreign-event case above looks identical from in here — a workshopId
+      // the database cannot find — and refunding one as if it were the other
+      // is exactly what went wrong (D-19). The stamp is what separates them,
+      // and the log lines below are written to be told apart at a glance.
       const amount = session.amount_total ?? 0;
       const buyer = session.customer_details?.email ?? session.customer_email;
       let refunded = false;
@@ -207,7 +254,7 @@ export async function POST(request: Request): Promise<Response> {
         error = e instanceof Error ? e.message : "unknown error";
       }
       console.error(
-        `[stripe] session ${session.id} paid for workshop ${workshopId}, which no longer exists. Refund ${refunded ? "issued" : `FAILED: ${error}`}.`,
+        `[stripe] WORKSHOP WITHDRAWN — session ${session.id} was opened by this site (${thisSite}) and paid for workshop ${workshopId}, which has since been taken off it. Refund ${refunded ? "issued" : `FAILED: ${error}`}, and the buyer has been written to.`,
       );
       if (buyer) {
         await sendBookingMail(

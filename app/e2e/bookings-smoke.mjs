@@ -61,6 +61,11 @@ loadEnv({ path: ".env.local" });
 
 const PORT = 3100;
 const BASE = `http://localhost:${PORT}`;
+// What this server will call itself, and what it therefore stamps onto the
+// checkouts it opens. The servers below are started with NEXT_PUBLIC_SITE_URL
+// set to BASE, so this is the host the webhook will recognise as its own.
+const HOST = `localhost:${PORT}`;
+const OTHER_HOST = "smoke-preview.example.invalid";
 const WHSEC = "whsec_smoke_test_only_not_a_real_secret";
 const FAKE_KEY = "sk_test_smoke_not_a_real_key_0000000000";
 const OWNER = "owner@example.invalid";
@@ -128,11 +133,13 @@ async function makeCopy() {
 }
 
 /**
- * Starts `next dev` in the copy with a chosen Stripe configuration, and
- * captures its output — which is where the emails land, because with no
- * RESEND_API_KEY the email module prints them instead of sending them.
+ * Starts `next dev` in the copy with a chosen configuration — the Stripe keys,
+ * and sometimes the site's own address, because which deployment a server
+ * believes it is decides which webhooks it will act on (D-19). Captures its
+ * output, which is where the emails land: with no RESEND_API_KEY the email
+ * module prints them instead of sending them.
  */
-async function startServer(stripeEnv, label) {
+async function startServer(env, label) {
   const log = [];
   const child = spawn(
     process.execPath,
@@ -154,7 +161,7 @@ async function startServer(stripeEnv, label) {
         AUTH_SECRET: process.env.AUTH_SECRET ?? "smoke-test-secret-not-real",
         NEXT_PUBLIC_SITE_URL: BASE,
         EMAIL_TO_OWNER: OWNER,
-        ...stripeEnv,
+        ...env,
       },
     },
   );
@@ -236,7 +243,21 @@ async function makeWorkshop({ slug, name, dayOffset, capacity, refundDays }) {
 
 // ── synthetic, signature-verified events ─────────────────────────────────────
 
-function checkoutEvent({ eventId, sessionId, workshopId, places, name }) {
+/**
+ * `site` is the deployment stamp the real checkout writes (D-19). It defaults
+ * to this server's own host, so every claim made before the guard existed goes
+ * on being made against a session the webhook owns. Pass another host for an
+ * event belonging to a different deployment, or `null` for a session opened
+ * before the stamp existed at all.
+ */
+function checkoutEvent({
+  eventId,
+  sessionId,
+  workshopId,
+  places,
+  name,
+  site = HOST,
+}) {
   return {
     id: eventId,
     object: "event",
@@ -256,6 +277,7 @@ function checkoutEvent({ eventId, sessionId, workshopId, places, name }) {
           workshopId: String(workshopId),
           places: String(places),
           workshopName: name,
+          ...(site === null ? {} : { site }),
         },
       },
     },
@@ -321,6 +343,18 @@ ids.race = await makeWorkshop({
   capacity: 1,
   refundDays: 14,
 });
+// For the deployment-stamp claims, kept apart from the workshops above so the
+// email counts asserted there cannot be disturbed by these.
+ids.stamped = await makeWorkshop({
+  slug: `smoke-booking-stamped-${stamp}`,
+  name: "Whose Event Is This",
+  dayOffset: 50,
+  capacity: 2,
+  refundDays: 14,
+});
+// A workshop id belonging to nothing, for the genuinely-withdrawn case. High
+// enough that the sequence will not reach it, low enough to be a Postgres int.
+const MISSING_WORKSHOP = 2_000_000_000;
 
 let server = await startServer(
   { STRIPE_SECRET_KEY: FAKE_KEY, STRIPE_WEBHOOK_SECRET: WHSEC },
@@ -681,6 +715,170 @@ try {
   );
 
   await browser.close();
+
+  // ── whose event is this (D-19) ─────────────────────────────────────────────
+  //
+  // The failure being guarded against: a place bought on the Replit preview,
+  // whose completed session Stripe delivers to the LIVE endpoint too. The live
+  // database has never held that workshop, so the webhook read it as a workshop
+  // withdrawn mid-checkout and did what that path is for — refunded the payment
+  // and emailed the buyer to say the day was no longer running. Twice, to a
+  // real buyer, on 2026-08-14.
+  //
+  // Last in the run on purpose: everything above counts emails, and these send
+  // some of their own.
+
+  const stamped = await postEvent(
+    checkoutEvent({
+      eventId: `evt_smoke_mine_${stamp}`,
+      sessionId: `cs_smoke_mine_${stamp}`,
+      workshopId: ids.stamped,
+      places: 1,
+      name: "Whose Event Is This",
+    }),
+  );
+  ok(
+    "a session stamped with this site's own host books as it always did",
+    stamped.status === 200 &&
+      (await bookings(ids.stamped)).filter((r) => r.status === "paid")
+        .length === 1,
+    String(stamped.status),
+  );
+
+  await sleep(750);
+  const beforeForeign = server.out();
+  const emailsBefore = countOf(beforeForeign, "EMAIL (not sent");
+
+  const foreign = await postEvent(
+    checkoutEvent({
+      eventId: `evt_smoke_foreign_${stamp}`,
+      sessionId: `cs_smoke_foreign_${stamp}`,
+      workshopId: ids.stamped,
+      places: 1,
+      name: "Whose Event Is This",
+      site: OTHER_HOST,
+    }),
+  );
+  ok(
+    "an event from another deployment is answered 200, not retried forever",
+    foreign.status === 200,
+    String(foreign.status),
+  );
+  ok(
+    "and Stripe is told plainly that nothing was done with it",
+    (await foreign.json()).acted === false,
+  );
+
+  // The same event again. Nothing was written for the first one, so its id
+  // never reached StripeEvent and this really is a second pass through the
+  // guard rather than the idempotency check answering.
+  const foreignAgain = await postEvent(
+    checkoutEvent({
+      eventId: `evt_smoke_foreign_${stamp}`,
+      sessionId: `cs_smoke_foreign_${stamp}`,
+      workshopId: ids.stamped,
+      places: 1,
+      name: "Whose Event Is This",
+      site: OTHER_HOST,
+    }),
+  );
+  ok("delivered twice, it is still accepted", foreignAgain.status === 200);
+
+  await sleep(750);
+  const afterForeign = server.out();
+  ok(
+    "no booking was written for either delivery",
+    (await bookings(ids.stamped)).length === 1,
+    String((await bookings(ids.stamped)).length),
+  );
+  ok(
+    "nobody was emailed — not the buyer, not Marianne",
+    countOf(afterForeign, "EMAIL (not sent") === emailsBefore,
+    `${countOf(afterForeign, "EMAIL (not sent")} vs ${emailsBefore}`,
+  );
+  ok(
+    "and no refund was attempted, because that path was never reached",
+    countOf(afterForeign, "[bookings] withdrawn-workshop refund") === 0,
+  );
+  ok(
+    "the log says whose event it was and that it was left alone",
+    afterForeign.includes("NOT THIS SITE'S EVENT") &&
+      afterForeign.includes(OTHER_HOST) &&
+      afterForeign.includes("no booking, no refund, no email"),
+  );
+
+  // ── a session from before the stamp existed ────────────────────────────────
+  //
+  // Treated as this site's. Calling it foreign would take a real buyer's money
+  // and write nothing at all, which is worse than the bug being fixed.
+  const unstamped = await postEvent(
+    checkoutEvent({
+      eventId: `evt_smoke_unstamped_${stamp}`,
+      sessionId: `cs_smoke_unstamped_${stamp}`,
+      workshopId: ids.stamped,
+      places: 1,
+      name: "Whose Event Is This",
+      site: null,
+    }),
+  );
+  ok("a session carrying no stamp is accepted", unstamped.status === 200);
+  ok(
+    "and books normally, rather than being swallowed",
+    (await bookings(ids.stamped)).filter((r) => r.status === "paid").length ===
+      2,
+  );
+  await sleep(750);
+  ok(
+    "the log notes that it predates the guard",
+    server.out().includes("predates the guard"),
+  );
+
+  // ── a workshop that has genuinely been withdrawn ───────────────────────────
+  //
+  // This site's own session, for a workshop this site no longer has. The path
+  // the outage abused is still exactly here, and still refunds and apologises.
+  const withdrawn = await postEvent(
+    checkoutEvent({
+      eventId: `evt_smoke_gonewk_${stamp}`,
+      sessionId: `cs_smoke_gonewk_${stamp}`,
+      workshopId: MISSING_WORKSHOP,
+      places: 1,
+      name: "The Day That Was Taken Down",
+    }),
+  );
+  ok(
+    "a payment for a withdrawn workshop is accepted",
+    withdrawn.status === 200,
+  );
+  await sleep(750);
+  const withdrawnLog = server.out();
+  ok(
+    "the refund is chased and the buyer is written to",
+    countOf(withdrawnLog, "[bookings] withdrawn-workshop refund") === 1 &&
+      withdrawnLog.includes(
+        `[bookings] withdrawn-workshop refund → ${BUYER}`,
+      ) &&
+      withdrawnLog.includes(`[bookings] withdrawn-workshop notice → ${OWNER}`),
+  );
+  ok(
+    "the email says the day is no longer running",
+    emailTo(withdrawnLog, BUYER, -1).includes("no longer running"),
+    emailTo(withdrawnLog, BUYER, -1).slice(0, 200),
+  );
+  ok(
+    "and the log reads as a withdrawal, not as somebody else's event",
+    withdrawnLog.includes("WORKSHOP WITHDRAWN") &&
+      withdrawnLog.includes(`opened by this site (${HOST})`),
+  );
+  ok(
+    "the boot log names the stamp this server writes onto its checkouts",
+    withdrawnLog.includes(`stamped site=${HOST}`),
+  );
+  ok(
+    "and says nothing about crossed keys, because test keys off the live domain are right",
+    !withdrawnLog.includes("LIVE KEYS ON") &&
+      !withdrawnLog.includes("TEST KEYS ON THE LIVE SITE"),
+  );
 } finally {
   await stopServer(server);
 }
@@ -743,6 +941,38 @@ try {
   ok(
     "and the log says so plainly rather than blaming the integration",
     server.out().includes("no keys set — buying is not offered"),
+  );
+} finally {
+  await stopServer(server);
+}
+
+// ── keys that do not belong to the site they are on ──────────────────────────
+//
+// The real fix for D-19 is configuration — test keys on every preview, live
+// keys only on the live domain — and nothing in the app can arrange that. So it
+// notices instead. Here that is a server calling itself the live site while
+// holding test keys, which is the harmless half of the pair; the dangerous half
+// is the same comparison with the other answer, and testing it would mean
+// writing an sk_live_ string into this file.
+server = await startServer(
+  {
+    STRIPE_SECRET_KEY: FAKE_KEY,
+    STRIPE_WEBHOOK_SECRET: WHSEC,
+    NEXT_PUBLIC_SITE_URL: "https://thefieldwork.co.uk",
+  },
+  "live-domain server with test keys",
+);
+try {
+  await fetch(`${BASE}/workshops/smoke-booking-main-${stamp}`);
+  await sleep(750);
+  ok(
+    "a server calling itself the live site with test keys says so, once",
+    countOf(server.out(), "TEST KEYS ON THE LIVE SITE") === 1,
+    String(countOf(server.out(), "TEST KEYS ON THE LIVE SITE")),
+  );
+  ok(
+    "and it is a warning, not a refusal — the page still serves",
+    (await fetch(`${BASE}/workshops`)).status === 200,
   );
 } finally {
   await stopServer(server);
