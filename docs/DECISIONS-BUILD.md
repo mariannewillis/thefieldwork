@@ -1060,3 +1060,127 @@ table of four rows. Locally it is applied. On Replit:
 ```
 npm run db:deploy
 ```
+
+---
+
+## D-21 · A course is a run of dates, and the order IS the date (2026-08-14)
+
+**Operator decision, verbatim:** _"lets generate the admin course creator page
+for real - use workshop/new as the guide with the addition of being able to add
+new course worshop title date/time location and description - these should be
+deletable but not re-ordereable"_.
+
+### What was built, and what was deliberately not
+
+The MODEL and the CREATOR. `Course`, `CourseSession` and `CourseImage`, the two
+pages at `/admin/offerings/courses/new` and `/admin/offerings/courses/[slug]`,
+one shared form, and the Courses tab on Offerings — which now lists real
+courses instead of saying "not built yet".
+
+Not built, and not stubbed either: the public course pages, any checkout for a
+course, the deposit-and-balance payment flow, reminders, and course bookings in
+the ledger. Where the approved mockup implies those, the screen leaves them out
+rather than drawing a control with nothing behind it (D-9). Two consequences
+are said in as many words in the portal: the deposit field is "written down
+rather than charged", and a published course is "a decision the site will
+honour rather than one anybody can see" until the pages exist.
+
+Also left out of the mockup: the weekly-run generator ("write four dated
+evenings"), the drag-to-reorder handle, the calendar blocking, and the
+"put it up and start another" button. The first three are the reordering
+machinery this entry exists to avoid; the last is a second save path that
+nothing else in the portal has.
+
+### `CourseSession` carries a title and a paragraph
+
+The public course page gives every date a name and something somebody can open,
+so the record holds both. They are ordinary columns, filled in on the same row
+as the date and the times.
+
+### There is no sequence column, and nothing reorders
+
+The order is the date — in the portal, on the page, and in the numbering the
+page prints. It sorts by date on the way in and on the way out, and there is
+nothing else it could sort by.
+
+That removes a class of bug rather than solving it. A sequence integer beside a
+date creates a state where the two disagree: a run whose numbers say one thing
+and whose calendar says another, a screen that has to explain it, and a repair
+to design. The approved mockup drew that screen — "Won't go up · Evening 3
+falls before evening 2" with a "Put them in date order" button. None of it can
+happen here, so none of it is built. Dates are added and taken off, and a week
+she forgot goes on the end and lands in the right place.
+
+The form makes the rule visible rather than writing it down: each row is headed
+with where that date falls in the run — "1 of 3 · Wed 21 Oct" — worked out from
+the dates as she types them. Rows stay where she put them while she is writing,
+so nothing jumps under her hand; the run reads back in date order above, and
+comes back in date order when she reopens it.
+
+### What things are called
+
+The model is `CourseSession` in code. Nothing Marianne or a visitor reads ever
+says "session": this site already sells one-to-one **sessions** as a Service,
+and two meanings of one word is a trap.
+
+The approved public page says "evenings" and the admin mockup says "the dates".
+The portal uses **the dates** throughout, because a course that meets on a
+Saturday morning has no evenings in it and the neutral word is true of every
+run. The form posts its rows as `run-<n>-*`, so the word does not appear in the
+markup either.
+
+### The deposit is stored and not charged
+
+`Course.depositGBP`, in pence, nullable — null means the whole price is taken
+at once, the way a workshop is (D-7). Zero is written as null, because "no
+deposit" and "a deposit of £0" are the same arrangement and two spellings of
+one fact eventually get read as two facts.
+
+Nothing acts on it. It is a column now because the figure is hers to decide
+while she is writing the course, not months later when the checkout lands.
+
+### What a course shares with a workshop, it shares in code
+
+A workshop and a course ask the same questions about money, clock times,
+places, pictures and film. Three moves keep one answer to each:
+
+- `src/lib/offering-form.ts` — the checks and conversions both actions make
+  (pounds to pence, the time format, the rail, the saved venue, the film's
+  still). They were private to the workshop's actions file and could not stay
+  there: a `"use server"` module may export nothing but async functions.
+- `src/components/admin/OfferingFormParts.tsx` — the sheet's furniture: the
+  field classes, the hairline regions, the word Needed, the picture picker.
+- `src/lib/workshop-rules.ts` → `src/lib/offering-rules.ts`, since `slugify`
+  and the twelve-picture ceiling were never about workshops.
+
+The two forms and the two actions stay separate files. What differs between
+them is which fields exist and what the words beside them say, and one
+component parameterised into covering both would be harder to read than either.
+
+### The Offerings tabs are now links
+
+Workshops and Courses are two lists on one page, chosen with `?kind=courses`;
+Services still says "not built yet" because it is. The rows are the same row
+twice — where a workshop prints its day, a course prints its run, read off its
+dates.
+
+### What it is verified by
+
+`e2e/courses-smoke.mjs` — 46 assertions against a running app and a real
+database. It writes a course with three dates entered deliberately out of
+order, saves it, reopens it and checks every field and every date came back;
+checks the run reads back in date order while she is still typing; clears one
+date's name, ticks publish and confirms the save is refused with the fault
+drawn beside that date and nothing else lost; takes one date off and confirms
+only that one went and the rest are still in date order; then deletes the
+course and confirms its page is gone. It creates one course and removes it.
+
+### Applying it
+
+The migration is additive: three new tables and one nullable foreign key from
+`Course` to `Venue`. Nothing existing is altered. Locally it is applied. On
+Replit:
+
+```
+npm run db:deploy
+```

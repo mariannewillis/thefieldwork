@@ -1,6 +1,6 @@
 import "server-only";
 import { POSTER_PREFIX } from "@/lib/film";
-import { slugify } from "@/lib/workshop-rules";
+import { slugify } from "@/lib/offering-rules";
 import {
   ACCEPTED_TYPES,
   encodeDerivatives,

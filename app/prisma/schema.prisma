@@ -5,7 +5,10 @@
 // every time the site was published.
 //
 // Workshops were the first offering to land, and bookings followed them.
-// Subscribers and page content are still to come. Money is counted in PENCE as
+// Courses came next — the same offering spread over a run of dates, written in
+// the portal but not yet on sale. Services came third, and are the last of the
+// three kinds. Subscribers and page content are still to
+// come. Money is counted in PENCE as
 // an Int everywhere it appears: 0.1 + 0.2 is not 0.3, and these figures are
 // what somebody gets charged and refunded.
 
@@ -183,6 +186,162 @@ model Workshop {
   /// Both lists that exist — the public index and the portal's — read in date
   /// order, and both split on published.
   @@index([published, date])
+}
+
+/// A course: one purchase covering a run of dates, at one price, for a fixed
+/// number of people. Everything it shares with a Workshop is spelled the same
+/// way and means the same thing — the address is copied out of a Venue and
+/// then owned by the course, money is PENCE as an Int, and the picture columns
+/// hold media basenames rather than paths. The comments on Workshop above are
+/// the reasoning for all of it and are not repeated here.
+///
+/// What makes it not a workshop is that it has no day of its own. The run is
+/// CourseSession below, and the span the page prints — "Four Wednesdays ·
+/// 7–28 Oct" — is read off those rows rather than stored here. Storing it
+/// would be a second copy of something the dates already say, and the two
+/// would disagree the first time one of them moved.
+model Course {
+  id Int @id @default(autoincrement())
+
+  /// The address the page will live at, /courses/<slug>.
+  slug String @unique
+  name String
+
+  /// The sentence under the title, and the only description the courses list
+  /// shows.
+  summary String
+
+  /// The long body, as HTML, written by `src/lib/rich-text.ts` from what
+  /// Marianne types.
+  bodyHtml String
+
+  /// Where the run happens, as it reads on the page. A single date can be
+  /// somewhere else — see `CourseSession.venue` — and these four are what the
+  /// course itself says.
+  venueName    String
+  addressLines String
+  postcode     String
+  gettingThere String
+
+  /// Which saved place filled the four fields above, when one did. A note of
+  /// where the address came from, not where it is read from; cleared the
+  /// moment any of the four is edited by hand.
+  venueId Int?
+  venue   Venue? @relation(fields: [venueId], references: [id], onDelete: SetNull)
+
+  /// How many the room takes. Not enforced against anything yet: courses are
+  /// not on sale, so there is nothing to count off it.
+  capacity Int
+
+  /// PENCE. The whole run, every date included — there is no way to buy one
+  /// date of a course.
+  priceGBP Int
+
+  /// PENCE, and null when the whole price is taken at once the way a
+  /// workshop's is. STORED ONLY. Nothing charges it and nothing chases the
+  /// balance: a deposit is a two-payment arrangement that belongs with a
+  /// checkout, and courses have no checkout yet. It is a column now because
+  /// the figure is Marianne's to decide and she decides it while she is
+  /// writing the course, not months later.
+  depositGBP Int?
+
+  /// Days before the FIRST date that the run is still refundable in full. A
+  /// course is bought once, so it is cancelled once.
+  refundDays Int @default(14)
+
+  /// The picture behind the title, as a media basename, and the line saying
+  /// what is in it. Required together, and required to publish.
+  heroImage String?
+  heroAlt   String?
+
+  /// The one film, as a link to Vimeo or YouTube, with the still and the
+  /// length read off the provider when the link is saved. Same three columns
+  /// as Workshop, filled by the same code.
+  filmUrl      String?
+  filmPoster   String?
+  filmDuration String?
+
+  /// Whether it is on the site. Written and honoured here; the public courses
+  /// pages are not built yet, so for the moment this decides what they will
+  /// show rather than what anybody can see.
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images   CourseImage[]
+  sessions CourseSession[]
+
+  /// Both lists that will exist — the portal's and the public index — split on
+  /// published.
+  @@index([published])
+}
+
+/// One date in a course's run.
+///
+/// `title` and `description` are here because the course's page gives every
+/// date a name and a paragraph somebody can open. A row holding only a date
+/// and two clock times would give the page nothing to expand into.
+///
+/// THERE IS NO SEQUENCE COLUMN, and dates are added and deleted but never
+/// reordered. The order IS the date — in the portal, on the page, and in the
+/// numbering the page prints. That removes a class of bug rather than solving
+/// it: with a sequence integer beside a date there is a state where the two
+/// disagree, a screen that has to say so, and a repair to design. Dates cannot
+/// be out of order, so none of that exists.
+model CourseSession {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  /// What this one is called — "Attention, and what it is not". Empty until
+  /// she writes it; required before the course can go on the site.
+  title String
+
+  /// The DAY, with no time attached, for the reason Workshop.date gives.
+  date DateTime @db.Date
+
+  /// Wall-clock times as she writes them, "19:00" / "21:00".
+  startTime String
+  endTime   String
+
+  /// The room, as written. The form offers the course's own place and she can
+  /// overrule it for one date — a run that moves for a week is real, and it is
+  /// the whole reason this is a column of its own rather than read off the
+  /// course.
+  venue String
+
+  /// What happens on this one. Prose, as typed — not the ##/### markup the
+  /// long body takes, because it is two or three sentences behind a line
+  /// somebody opened, not a page.
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Every read is in date order, which is the only order there is.
+  @@index([courseId, date])
+}
+
+/// One picture in a course's stills rail. WorkshopImage, for courses — same
+/// twelve-picture ceiling in application logic, same reasons.
+model CourseImage {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  /// The media basename, as on `Course.heroImage`.
+  url String
+
+  /// NOT nullable. No picture goes on the site without a line saying what is
+  /// in it.
+  alt String
+
+  /// The first three are what somebody sees before they scroll the rail, so
+  /// the order is content, not presentation.
+  position Int
+
+  @@index([courseId, position])
 }
 
 /// What happened to the money. Three states, and no fourth: a place is either
@@ -369,6 +528,7 @@ model Venue {
   updatedAt DateTime @updatedAt
 
   workshops Workshop[]
+  courses   Course[]
 }
 
 /// One picture in a workshop's stills rail.

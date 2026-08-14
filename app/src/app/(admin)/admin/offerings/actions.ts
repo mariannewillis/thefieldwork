@@ -4,10 +4,19 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/server";
-import { describeFilm, parseFilm, posterBasename, type Film } from "@/lib/film";
-import { ingestImage, ingestImageFromUrl, MAX_UPLOAD_BYTES } from "@/lib/media";
+import { parseFilm, type Film } from "@/lib/film";
+import { ingestImage, MAX_UPLOAD_BYTES } from "@/lib/media";
+import {
+  collectImages,
+  collectValues,
+  isTime,
+  parsePence,
+  parseWholeNumber,
+  resolveFilm,
+  resolveVenue,
+} from "@/lib/offering-form";
 import { toHtml } from "@/lib/rich-text";
-import { MAX_IMAGES, slugify } from "@/lib/workshop-rules";
+import { slugify, type OfferingFormState } from "@/lib/offering-rules";
 
 /**
  * Writing a workshop.
@@ -75,187 +84,8 @@ export async function addPicture(formData: FormData): Promise<PictureAdded> {
   });
 }
 
-export type WorkshopFormState = {
-  /** Keyed by the field's `name`, drawn under that field. */
-  errors: Record<string, string>;
-  /** The line at the top: how many things need another look. */
-  message: string | null;
-  /** What was typed, echoed back so a rejected form loses nothing. */
-  values: Record<string, string>;
-  /** Bumped on every failed attempt; the form remounts on it (see the form). */
-  attempt: number;
-};
-
-/** Every string the form posts, kept so a rejected submission can be redrawn. */
-function collectValues(formData: FormData): Record<string, string> {
-  const values: Record<string, string> = {};
-  for (const [key, value] of formData.entries()) {
-    if (typeof value === "string") values[key] = value;
-  }
-  return values;
-}
-
-/**
- * Pounds as she types them → pence as we store them.
- *
- * Accepts "95", "£95", "95.50" and "1,250". Returns null for anything else,
- * including the empty string — the caller decides whether that is an error,
- * because a missing price and a price of "ninety-five" want different words.
- */
-function parsePence(input: string): number | null {
-  const cleaned = input.replace(/[£,\s]/g, "");
-  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
-  return Math.round(Number(cleaned) * 100);
-}
-
-function parseWholeNumber(input: string, min: number): number | null {
-  if (!/^\d+$/.test(input.trim())) return null;
-  const value = Number(input);
-  return value < min ? null : value;
-}
-
-/** "10:00" — the only shape an `<input type="time">` posts. */
-function isTime(input: string): boolean {
-  return /^([01]\d|2[0-3]):[0-5]\d$/.test(input);
-}
-
-/**
- * The pictures on the rail, read out of the form.
- *
- * Rows are posted as `image-url-<n>` / `image-alt-<n>`, where <n> identifies
- * the row in the rendered list rather than a database id, and the numbers are
- * not necessarily contiguous — the form drops a row she takes off rather than
- * marking it. Position is the order the rows arrive in, which is DOM order, so
- * a gap in the numbering never becomes a gap on the page.
- */
-function collectImages(formData: FormData): {
-  images: { url: string; alt: string; position: number }[];
-  errors: Record<string, string>;
-} {
-  const images: { url: string; alt: string; position: number }[] = [];
-  const errors: Record<string, string> = {};
-
-  for (const [key, value] of formData.entries()) {
-    if (!key.startsWith("image-url-") || typeof value !== "string") continue;
-    const row = key.slice("image-url-".length);
-    const url = value.trim();
-    if (!url) continue;
-
-    const alt = String(formData.get(`image-alt-${row}`) ?? "").trim();
-    if (!alt) {
-      errors[`image-alt-${row}`] =
-        "Say what is in this one, the way you would describe it to someone on the phone. No picture goes on the site without a line saying what is in it.";
-      continue;
-    }
-    images.push({ url, alt, position: images.length });
-  }
-
-  if (images.length > MAX_IMAGES) {
-    errors["images"] =
-      `Twelve pictures is as many as a page carries well — past that people stop scrolling and the last ones are never seen. This one has ${images.length}.`;
-  }
-
-  return { images, errors };
-}
-
-/**
- * Which saved place this workshop's address came from, if any.
- *
- * Two ways it gets one: she picked a place and left the four fields as it
- * filled them, so the form posts its id — or she typed somewhere new and left
- * "Remember this place" ticked, so it is saved here. Either way the four
- * fields are what the page renders and this only records where they came from.
- *
- * A place already saved is never rewritten from here. If the name matches one
- * that exists, that one is used as it stands: "remember this place" is not
- * "and change the one I remembered before", and the address of somewhere she
- * has used ten times should not move because of one workshop's typing.
- */
-async function resolveVenue(
-  chosen: string | undefined,
-  remember: boolean,
-  place: {
-    venueName: string;
-    addressLines: string;
-    postcode: string;
-    gettingThere: string;
-  },
-): Promise<number | null> {
-  const chosenId = Number(chosen);
-  if (Number.isInteger(chosenId) && chosenId > 0) {
-    // It could have been deleted since the form was drawn. A stale id is not
-    // worth failing a save over — the address itself is posted with it.
-    const exists = await prisma.venue.findUnique({ where: { id: chosenId } });
-    if (exists) return exists.id;
-  }
-
-  if (!remember || !place.venueName) return null;
-
-  const already = await prisma.venue.findFirst({
-    where: { name: { equals: place.venueName, mode: "insensitive" } },
-  });
-  if (already) return already.id;
-
-  const saved = await prisma.venue.create({
-    data: {
-      name: place.venueName,
-      addressLines: place.addressLines,
-      postcode: place.postcode,
-      gettingThere: place.gettingThere,
-    },
-  });
-  return saved.id;
-}
-
-/**
- * The still a film opens on, and how long it runs.
- *
- * NEITHER IS HERS TO TYPE. They belong to the film, the provider already
- * knows both, and a duration she typed by hand is a figure with no source
- * behind it — which is the same rule D-9 applies to everything else in the
- * portal. So the form asks for the link and this fetches the rest.
- *
- * The still is FETCHED AND RE-ENCODED rather than linked to. A page carrying
- * an `<img>` pointed at Vimeo's servers would tell Vimeo who is reading it
- * before anybody pressed play, which is precisely what the click-to-load
- * player on the public page exists to prevent — the still is the click
- * target, so a hotlinked one would defeat it on the way in.
- *
- * Asked once, when the link changes. Re-saving a workshop whose film is the
- * same does not go out to the internet again.
- *
- * It can never stop a save. A private film, a provider having a bad morning,
- * or no outbound network at all leaves both null, and the page shows a plain
- * plate to press instead of a photograph.
- */
-async function resolveFilm(
-  film: Film | null,
-  previous: {
-    filmUrl: string | null;
-    filmPoster: string | null;
-    filmDuration: string | null;
-  } | null,
-): Promise<{ poster: string | null; duration: string | null }> {
-  if (!film) return { poster: null, duration: null };
-
-  const unchanged =
-    previous?.filmUrl === film.watchUrl && previous.filmPoster !== null;
-  if (unchanged) {
-    return { poster: previous.filmPoster, duration: previous.filmDuration };
-  }
-
-  const details = await describeFilm(film);
-  if (!details.posterUrl) return { poster: null, duration: details.duration };
-
-  const still = await ingestImageFromUrl(
-    details.posterUrl,
-    posterBasename(film),
-  );
-  return {
-    poster: still.ok ? still.basename : null,
-    duration: details.duration,
-  };
-}
+/** The name this form knows it by. The shape is every offering form's. */
+export type WorkshopFormState = OfferingFormState;
 
 export async function saveWorkshop(
   prev: WorkshopFormState,

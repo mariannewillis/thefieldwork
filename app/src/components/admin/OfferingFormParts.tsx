@@ -1,0 +1,237 @@
+"use client";
+
+import { useState, type ReactNode } from "react";
+import { addPicture } from "@/app/(admin)/admin/offerings/actions";
+
+/**
+ * The pieces both offering forms are built from.
+ *
+ * A workshop and a course are written on the same sheet: hairline-separated
+ * regions in the order the page reads, a line of help only where it changes
+ * what she types, and one word — Needed — for the fields that stop it going
+ * live. Those are decisions about the portal, not about workshops, so they are
+ * made once here.
+ *
+ * The two forms themselves stay separate files. What differs between them is
+ * which fields exist and what the words beside them say, and a single
+ * component parameterised into covering both would be harder to read than
+ * either.
+ */
+
+export const FIELD =
+  "min-h-[48px] w-full border-b border-pool-rule bg-transparent py-2 text-[19px] text-ink focus:border-action focus:outline-none";
+export const FIELD_BIG = `${FIELD} font-display text-[28px]`;
+export const FIELD_FIG = `${FIELD} fig font-mono tabular-nums`;
+export const LABEL =
+  "fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft";
+export const HELP = "mt-2 max-w-[60ch] text-[15px] leading-relaxed text-ink-soft";
+const NEEDED =
+  "fig font-mono text-[13px] uppercase tracking-[0.14em] text-action";
+/* Ink, not gold and not magenta. Gold fails contrast inside a panel
+   (admin.css), and magenta is spoken for — it is what "Needed" and the save
+   button are saying. A heading that borrows the alarm colour makes six more
+   alarms. */
+const SECTION_EYEBROW =
+  "fig font-mono text-[15px] font-semibold uppercase tracking-[0.14em] text-ink";
+const SECTION_NOTE = "fig font-mono text-[15px] text-ink-soft";
+export const QUIET_BUTTON =
+  "t min-h-[48px] border border-pool-rule px-6 text-[17px] font-medium text-ink hover:bg-ink hover:text-pool";
+
+/**
+ * A place she has used before, as the forms need it: the four fields it fills
+ * in, and the id that records which one filled them.
+ *
+ * Declared here rather than imported from `lib/venues` because that module is
+ * server-only and this file runs in the browser. The shapes match; the pages
+ * hand rows straight across.
+ */
+export type VenueChoice = {
+  id: number;
+  name: string;
+  addressLines: string;
+  postcode: string;
+  gettingThere: string;
+};
+
+/** The address a picture's derivatives are served from (D-6). */
+export function mediaSrc(basename: string): string {
+  return `/media/${basename}-1200.jpg`;
+}
+
+export function FieldError({ error }: { error?: string }) {
+  if (!error) return null;
+  return (
+    <p role="alert" className="mt-2 max-w-[44ch] text-[15px] text-pool-error">
+      {error}
+    </p>
+  );
+}
+
+export function Needed() {
+  return <span className={NEEDED}>Needed</span>;
+}
+
+/**
+ * One region of the page, on the one sheet.
+ *
+ * A hairline and a wide gap divide the regions instead of a panel each. Six
+ * hard-cut panels stacked read as six separate errands; the offering is one.
+ */
+export function Section({
+  id,
+  title,
+  note,
+  first,
+  children,
+}: {
+  id: string;
+  title: string;
+  note: string;
+  /** The first region opens the sheet, so it takes no rule above it. */
+  first?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className={first ? "" : "mt-11 border-t border-pool-rule/40 pt-9"}
+    >
+      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+        <h2 id={id} className={SECTION_EYEBROW}>
+          {title}
+        </h2>
+        <p className={SECTION_NOTE}>{note}</p>
+      </div>
+      <div className="mt-6">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * A picture — off her computer, or one already on the site.
+ *
+ * The file goes up the moment she chooses it, so the picture appears here
+ * before she writes the line saying what is in it, and a save that bounces
+ * cannot throw the upload away with it. What comes back is a BASENAME, and
+ * that is what the field posts: the path her file had on her own machine is
+ * never sent anywhere and never becomes part of an address.
+ *
+ * Two ways in and one value between them. Choosing a file sets the same field
+ * the list does, so uploading a picture selects it — there is no second step
+ * where she has to find what she just added.
+ */
+export function PicturePicker({
+  name,
+  label,
+  library,
+  onAdded,
+  defaultValue,
+  children,
+}: {
+  name: string;
+  label: ReactNode;
+  /** Every picture on the site, growing as she adds to it. */
+  library: string[];
+  onAdded: (basename: string) => void;
+  defaultValue: string;
+  children?: ReactNode;
+}) {
+  const [chosen, setChosen] = useState(defaultValue);
+  const [adding, setAdding] = useState(false);
+  const [refused, setRefused] = useState<string | null>(null);
+
+  async function take(input: HTMLInputElement) {
+    const file = input.files?.[0];
+    if (!file) return;
+    // Cleared straight away so choosing the same file twice — after a refusal
+    // she has since fixed — still counts as a change and fires this again.
+    input.value = "";
+
+    setAdding(true);
+    setRefused(null);
+    const body = new FormData();
+    body.set("file", file);
+    try {
+      const result = await addPicture(body);
+      if (!result.ok) {
+        setRefused(result.error);
+        return;
+      }
+      onAdded(result.basename);
+      setChosen(result.basename);
+    } catch {
+      setRefused(
+        "The picture did not get there. Check the connection and try again.",
+      );
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-start gap-6">
+      <div className="w-full max-w-[300px] shrink-0">
+        {chosen ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={mediaSrc(chosen)}
+            alt=""
+            className="h-[169px] w-full object-cover"
+          />
+        ) : (
+          <p className="flex h-[169px] w-full items-center justify-center border border-dashed border-pool-rule px-6 text-center text-[17px] text-ink-soft">
+            No picture yet
+          </p>
+        )}
+      </div>
+      <div className="min-w-[17rem] flex-1">
+        <p className={LABEL} id={`${name}-label`}>
+          {label}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3">
+          {/* A label around a visually-hidden file input: the browser's own
+              control, which cannot be styled, wearing the same button as the
+              rest of the form. `sr-only` rather than `hidden`, because a
+              hidden input cannot be reached by keyboard — the ring below is
+              drawn from the input's focus so it still can. */}
+          <label
+            className={`${QUIET_BUTTON} inline-flex cursor-pointer items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action`}
+          >
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              disabled={adding}
+              onChange={(event) => take(event.currentTarget)}
+              className="sr-only"
+            />
+            {adding ? "Adding…" : "Choose a picture"}
+          </label>
+
+          <select
+            name={name}
+            aria-labelledby={`${name}-label`}
+            value={chosen}
+            onChange={(event) => setChosen(event.target.value)}
+            className={`${FIELD} w-auto min-w-[13rem] flex-1`}
+          >
+            <option value="">No picture</option>
+            {library.map((basename) => (
+              <option key={basename} value={basename}>
+                {basename.replace(/-/g, " ")}
+              </option>
+            ))}
+          </select>
+        </div>
+        {refused && (
+          <p
+            role="alert"
+            className="mt-2 max-w-[44ch] text-[15px] leading-relaxed text-pool-error"
+          >
+            {refused}
+          </p>
+        )}
+        {children}
+      </div>
+    </div>
+  );
+}

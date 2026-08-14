@@ -131,3 +131,6 @@ docs/screens/workshopflow/_frag/admin-workshops-list.html
 
 # Agent scratch at the app root (probe-tmp, check-tmp and friends).
 app/*-tmp.mjs
+
+# Splice scratch under the screens directories.
+docs/screens/**/_tmp-*

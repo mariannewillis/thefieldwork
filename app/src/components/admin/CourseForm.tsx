@@ -1,13 +1,16 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { addPicture } from "@/app/(admin)/admin/offerings/actions";
+import { saveCourse } from "@/app/(admin)/admin/offerings/courses/actions";
 import {
-  addPicture,
-  saveWorkshop,
-} from "@/app/(admin)/admin/offerings/actions";
-import { formatDayLong, refundDeadline, toDateInputValue } from "@/lib/format";
+  formatDayLong,
+  formatDayShort,
+  refundDeadline,
+  toDateInputValue,
+} from "@/lib/format";
 import { MAX_IMAGES, NO_ATTEMPT_YET, slugify } from "@/lib/offering-rules";
-import DeleteWorkshop from "./DeleteWorkshop";
+import DeleteCourse from "./DeleteCourse";
 import {
   FieldError,
   FIELD,
@@ -23,34 +26,31 @@ import {
 } from "./OfferingFormParts";
 
 /**
- * The form that writes a workshop.
+ * The form that writes a course.
  *
- * It follows the workshop's own PAGE, in the order people read it — the
- * picture and the name, then the facts, then where it is, then the long body,
- * then the pictures, then putting it up. That order is the design: the form is
- * the page's own shape, so filling it in is imagining the page rather than
- * mapping fields onto one.
+ * The workshop form's sibling, and deliberately the same sheet: the picture
+ * and the name, then the facts, then where it is, then the long body, then the
+ * dates, then the pictures, then putting it up. Anyone who has filled in one
+ * of these has filled in the other.
  *
- * One sheet, not a stack of panels, and a line of help only where it changes
- * what she types. A paragraph under every field triples the height of the form
- * and buries the fields it was written to serve; where the form can SHOW the
- * consequence instead — the refund deadline, the address the name makes — it
- * shows it and says nothing.
+ * What a workshop does not have is the run. A course has no day of its own —
+ * it has dates, and everything the top of its page says about when it happens
+ * is read back from them rather than typed twice.
  *
- * The furniture — the field classes, the regions, the picture picker, the word
- * Needed — is in `OfferingFormParts`, shared with the course form so the two
- * sheets stay one sheet.
+ * THE DATES ARE ADDED AND TAKEN OFF, NEVER REORDERED. The order is the date,
+ * so there is no drag handle, no numbering to keep in step, and no state where
+ * the run is "out of order" for the form to explain. What the row headings
+ * show is the place each date will take in the run, worked out from the dates
+ * themselves as she types them — which is the rule made visible rather than
+ * written down.
  */
 
-export type WorkshopFormValues = {
+export type CourseFormValues = {
   id: number;
   slug: string;
   name: string;
   summary: string;
   body: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
   venueName: string;
   addressLines: string;
   postcode: string;
@@ -59,6 +59,8 @@ export type WorkshopFormValues = {
   venueId: number | null;
   capacity: number;
   priceGBP: number;
+  /** Pence, or null when the whole price is taken at once. */
+  depositGBP: number | null;
   refundDays: number;
   heroImage: string | null;
   heroAlt: string | null;
@@ -67,29 +69,49 @@ export type WorkshopFormValues = {
   published: boolean;
   updatedAt: Date;
   images: { url: string; alt: string; position: number }[];
+  dates: {
+    title: string;
+    date: Date;
+    startTime: string;
+    endTime: string;
+    venue: string;
+    description: string;
+  }[];
 };
 
-export default function WorkshopForm({
-  workshop,
+/** One row of the run, as the form holds it while she is writing. */
+type DateRow = {
+  key: number;
+  title: string;
+  /** "2026-10-07", as an `<input type="date">` wants it. */
+  date: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  description: string;
+};
+
+export default function CourseForm({
+  course,
   media,
   venues,
   mapUrl,
 }: {
-  /** Absent when this is a workshop that does not exist yet. */
-  workshop?: WorkshopFormValues;
+  /** Absent when this is a course that does not exist yet. */
+  course?: CourseFormValues;
   /** The pictures already on the site — see lib/media#listMediaBasenames. */
   media: string[];
   /** The places she has used before — see lib/venues#listVenues. */
   venues: VenueChoice[];
   /**
    * The SAVED address, in a map — see lib/maps#mapSearchUrl. Absent on a
-   * workshop that does not exist yet, and on one whose place is not set:
-   * there is nothing to check until something has been written down.
+   * course that does not exist yet, and on one whose place is not set: there
+   * is nothing to check until something has been written down.
    */
   mapUrl?: string | null;
 }) {
   const [state, formAction, pending] = useActionState(
-    saveWorkshop,
+    saveCourse,
     NO_ATTEMPT_YET,
   );
 
@@ -105,40 +127,33 @@ export default function WorkshopForm({
       names.includes(basename) ? names : [...names, basename].sort(),
     );
 
-  const [name, setName] = useState(workshop?.name ?? "");
-  const [slug, setSlug] = useState(workshop?.slug ?? "");
+  const [name, setName] = useState(course?.name ?? "");
+  const [slug, setSlug] = useState(course?.slug ?? "");
   // The address is offered until she overrules it. Once she has typed one,
-  // renaming the workshop must not silently move the page out from under a
-  // link somebody already has.
-  const [slugOwned, setSlugOwned] = useState(Boolean(workshop));
-  const [date, setDate] = useState(
-    workshop ? toDateInputValue(workshop.date) : "",
-  );
-  const [refundDays, setRefundDays] = useState(
-    String(workshop?.refundDays ?? 14),
-  );
+  // renaming the course must not silently move the page out from under a link
+  // somebody already has.
+  const [slugOwned, setSlugOwned] = useState(Boolean(course));
+  const [refundDays, setRefundDays] = useState(String(course?.refundDays ?? 14));
 
   // The four address fields are held here rather than left to the browser,
   // because choosing a place has to visibly FILL them — not stand in for them.
-  // She can see what it put there and change any of it, which is the one-off
-  // case ("we are in the church hall for this one") working by default.
   const [venueName, setVenueName] = useState(
-    kept("venueName", workshop?.venueName ?? ""),
+    kept("venueName", course?.venueName ?? ""),
   );
   const [addressLines, setAddressLines] = useState(
-    kept("addressLines", workshop?.addressLines ?? ""),
+    kept("addressLines", course?.addressLines ?? ""),
   );
   const [postcode, setPostcode] = useState(
-    kept("postcode", workshop?.postcode ?? ""),
+    kept("postcode", course?.postcode ?? ""),
   );
   const [gettingThere, setGettingThere] = useState(
-    kept("gettingThere", workshop?.gettingThere ?? ""),
+    kept("gettingThere", course?.gettingThere ?? ""),
   );
   // Which place filled them, kept only while its four fields are untouched:
   // once she has edited one, the address on the page is no longer that place's
   // and saying it came from there would be a small lie in the database.
   const [venueId, setVenueId] = useState(
-    kept("venueId", workshop?.venueId ? String(workshop.venueId) : ""),
+    kept("venueId", course?.venueId ? String(course.venueId) : ""),
   );
 
   const fillFrom = (venue: VenueChoice) => {
@@ -162,27 +177,86 @@ export default function WorkshopForm({
     );
 
   const effectiveSlug = slugOwned ? slug : slugify(name);
-  const deadline =
-    date && /^\d+$/.test(refundDays)
-      ? refundDeadline(new Date(`${date}T00:00:00Z`), Number(refundDays))
-      : null;
 
-  // A row only ever exists because a picture exists. There is no "add an empty
-  // slot" any more: empty slots standing open ask a question whether or not she
-  // has an answer to it, and now that several photographs arrive from one
-  // press there is nothing left for an empty one to be for.
-  const [imageRows, setImageRows] = useState(() =>
-    (workshop?.images ?? []).map((image, index) => ({
+  // ── the run ────────────────────────────────────────────────────────────
+  // Rows keep their own dates in state because three things read them as she
+  // types: the span at the top of the facts, the last day to cancel, and the
+  // place each date takes in the run. Everything else in a row is left to the
+  // browser and read back off the form when it is posted.
+  const [dateRows, setDateRows] = useState<DateRow[]>(() =>
+    (course?.dates ?? []).map((one, index) => ({
       key: index,
-      url: image.url,
-      alt: image.alt,
+      title: one.title,
+      date: toDateInputValue(one.date),
+      startTime: one.startTime,
+      endTime: one.endTime,
+      venue: one.venue,
+      description: one.description,
     })),
   );
+
   // A row's number is one past the highest so far, so it never goes back down
   // as rows are taken off: reusing a number would hand a fresh row whatever was
   // typed into the removed one when a save bounces back and redraws the form.
   // Worked out from the rows themselves rather than a counter, because a
   // counter would make this updater impure — and React calls it twice.
+  const addDate = () =>
+    setDateRows((rows) => [
+      ...rows,
+      {
+        key: rows.reduce((next, row) => Math.max(next, row.key + 1), 0),
+        title: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        // The course's own place, offered. A run that moves for one week is
+        // real, so it is a field rather than an assumption.
+        venue: venueName,
+        description: "",
+      },
+    ]);
+  const removeDate = (key: number) =>
+    setDateRows((rows) => rows.filter((row) => row.key !== key));
+  const setDate = (key: number, date: string) =>
+    setDateRows((rows) =>
+      rows.map((row) => (row.key === key ? { ...row, date } : row)),
+    );
+
+  // The run as it will actually be: the dated rows, in date order. This is the
+  // only ordering there is — she can add a forgotten week at the bottom and it
+  // takes its place here without anything being renumbered.
+  const dated = dateRows
+    .filter((row) => row.date)
+    .sort((one, other) => one.date.localeCompare(other.date));
+  const placeInRun = (key: number) =>
+    dated.findIndex((row) => row.key === key) + 1;
+
+  const asDate = (value: string) => new Date(`${value}T00:00:00Z`);
+  const span =
+    dated.length === 0
+      ? null
+      : dated.length === 1
+        ? `One date · ${formatDayShort(asDate(dated[0].date))}`
+        : `${dated.length} dates · ${formatDayShort(asDate(dated[0].date))} – ${formatDayShort(asDate(dated[dated.length - 1].date))}`;
+
+  // Counted back from the FIRST date, because a course is bought once and so
+  // is cancelled once.
+  const deadline =
+    dated.length > 0 && /^\d+$/.test(refundDays)
+      ? refundDeadline(asDate(dated[0].date), Number(refundDays))
+      : null;
+
+  // ── the rail ───────────────────────────────────────────────────────────
+  // A row only ever exists because a picture exists. There is no "add an empty
+  // slot": empty slots standing open ask a question whether or not she has an
+  // answer to it.
+  const [imageRows, setImageRows] = useState(() =>
+    (course?.images ?? []).map((image, index) => ({
+      key: index,
+      url: image.url,
+      alt: image.alt,
+    })),
+  );
   const appendPicture = (url: string) =>
     setImageRows((rows) => [
       ...rows,
@@ -203,8 +277,7 @@ export default function WorkshopForm({
     null,
   );
   // The ones that did not make it, named. A batch of six with one bad file in
-  // it must land five and say which one it was — losing five good photographs
-  // because the sixth was a renamed text file is the failure this prevents.
+  // it must land five and say which one it was.
   const [refused, setRefused] = useState<{ name: string; why: string }[]>([]);
   // What the ceiling turned away, if it turned anything away.
   const [overflow, setOverflow] = useState<{ left: number; of: number } | null>(
@@ -214,13 +287,9 @@ export default function WorkshopForm({
   /**
    * Several photographs, from one press.
    *
-   * ONE AT A TIME, deliberately, not all at once. Each picture is decoded and
-   * re-encoded six ways by sharp, which is the slowest thing this app does —
-   * five in parallel is thirty encodes competing for the same cores, and on a
-   * slow machine that is how a request times out and takes the whole batch
-   * with it. In sequence, each is its own request that either lands or does
-   * not; "3 of 5" is then a true statement rather than an estimate; and the
-   * rows arrive in the order the files did, which is the order on the page.
+   * ONE AT A TIME, deliberately, not all at once — see the same function in
+   * WorkshopForm for why. In sequence, "3 of 5" is a true statement rather
+   * than an estimate, and the rows arrive in the order the files did.
    */
   async function takePictures(input: HTMLInputElement) {
     const picked = [...(input.files ?? [])];
@@ -231,8 +300,6 @@ export default function WorkshopForm({
 
     setRefused([]);
     // The ceiling holds, but it takes what fits rather than refusing the lot.
-    // Turning away eight photographs because two of them were over the line
-    // would be the form correcting her instead of helping her.
     const room = Math.max(MAX_IMAGES - imageRows.length, 0);
     const taking = picked.slice(0, room);
     setOverflow(
@@ -278,7 +345,7 @@ export default function WorkshopForm({
           screen promises ("Nothing has been lost"). Remounting redraws them
           from what was typed. */}
       <form key={state.attempt} action={formAction} className="pb-4">
-        {workshop && <input type="hidden" name="id" value={workshop.id} />}
+        {course && <input type="hidden" name="id" value={course.id} />}
 
         {state.message && (
           <p
@@ -306,10 +373,10 @@ export default function WorkshopForm({
               }
               library={library}
               onAdded={rememberPicture}
-              defaultValue={kept("heroImage", workshop?.heroImage ?? "")}
+              defaultValue={kept("heroImage", course?.heroImage ?? "")}
             >
               <p className={HELP}>
-                It sits dimmed behind the name, so it wants the mood of the day
+                It sits dimmed behind the name, so it wants the mood of the room
                 rather than a detail.
               </p>
               <FieldError error={state.errors.heroImage} />
@@ -321,7 +388,7 @@ export default function WorkshopForm({
                 <input
                   name="heroAlt"
                   type="text"
-                  defaultValue={kept("heroAlt", workshop?.heroAlt ?? "")}
+                  defaultValue={kept("heroAlt", course?.heroAlt ?? "")}
                   className={FIELD}
                 />
               </label>
@@ -359,12 +426,12 @@ export default function WorkshopForm({
                 <textarea
                   name="summary"
                   rows={2}
-                  defaultValue={kept("summary", workshop?.summary ?? "")}
+                  defaultValue={kept("summary", course?.summary ?? "")}
                   className={`${FIELD} resize-none`}
                 />
               </label>
               <p className={HELP}>
-                Also the line on the workshops list, so it has to make sense on
+                Also the line on the courses list, so it has to make sense on
                 its own.
               </p>
               <FieldError error={state.errors.summary} />
@@ -375,58 +442,13 @@ export default function WorkshopForm({
           <Section
             id="facts-h"
             title="The facts"
-            note="The four lines people look for first"
+            note="True of the whole run, not of one date"
           >
-            <label className="block">
-              <span className="flex flex-wrap items-baseline gap-x-3">
-                <span className={LABEL}>Date</span>
-                <Needed />
-              </span>
-              <input
-                name="date"
-                type="date"
-                value={date}
-                onChange={(event) => setDate(event.target.value)}
-                className={`${FIELD_FIG} text-[26px] sm:w-auto sm:min-w-[19rem]`}
-              />
-            </label>
-            <FieldError error={state.errors.date} />
-
-            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <label className="block">
                   <span className="flex flex-wrap items-baseline gap-x-3">
-                    <span className={LABEL}>Starts</span>
-                    <Needed />
-                  </span>
-                  <input
-                    name="startTime"
-                    type="time"
-                    defaultValue={kept("startTime", workshop?.startTime ?? "")}
-                    className={`${FIELD_FIG} text-[21px]`}
-                  />
-                </label>
-                <FieldError error={state.errors.startTime} />
-              </div>
-              <div>
-                <label className="block">
-                  <span className={LABEL}>Ends</span>
-                  <input
-                    name="endTime"
-                    type="time"
-                    defaultValue={kept("endTime", workshop?.endTime ?? "")}
-                    className={`${FIELD_FIG} text-[21px]`}
-                  />
-                </label>
-                <FieldError error={state.errors.endTime} />
-              </div>
-            </div>
-
-            <div className="mt-7 grid gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block">
-                  <span className="flex flex-wrap items-baseline gap-x-3">
-                    <span className={LABEL}>Price a place</span>
+                    <span className={LABEL}>Price for the whole run</span>
                     <Needed />
                   </span>
                   <span className="flex items-baseline gap-2">
@@ -442,14 +464,15 @@ export default function WorkshopForm({
                       inputMode="decimal"
                       defaultValue={kept(
                         "price",
-                        workshop ? String(workshop.priceGBP / 100) : "",
+                        course ? String(course.priceGBP / 100) : "",
                       )}
                       className={`${FIELD_FIG} text-[32px]`}
                     />
                   </span>
                 </label>
                 <p className={HELP}>
-                  Per place. Someone booking two pays twice this.
+                  One price, every date included. There is no way to buy a
+                  single evening of a course.
                 </p>
                 <FieldError error={state.errors.price} />
               </div>
@@ -461,18 +484,50 @@ export default function WorkshopForm({
                     name="capacity"
                     type="number"
                     min={1}
-                    defaultValue={kept(
-                      "capacity",
-                      String(workshop?.capacity ?? 10),
-                    )}
+                    defaultValue={kept("capacity", String(course?.capacity ?? 8))}
                     className={`${FIELD_FIG} text-[32px]`}
                   />
                 </label>
                 <p className={HELP}>
-                  How many the room takes, not how many are sold.
+                  How many the room takes for the whole run, not how many are
+                  sold.
                 </p>
                 <FieldError error={state.errors.capacity} />
               </div>
+            </div>
+
+            <div className="mt-7 max-w-[34rem]">
+              <label className="block">
+                <span className={LABEL}>Deposit</span>
+                <span className="flex items-baseline gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="fig font-mono text-[24px] text-ink-soft"
+                  >
+                    &pound;
+                  </span>
+                  <input
+                    name="deposit"
+                    type="text"
+                    inputMode="decimal"
+                    defaultValue={kept(
+                      "deposit",
+                      course?.depositGBP ? String(course.depositGBP / 100) : "",
+                    )}
+                    className={`${FIELD_FIG} text-[26px]`}
+                  />
+                </span>
+              </label>
+              {/* Said plainly, because a figure in a form that nothing acts on
+                  is exactly the kind of state D-9 forbids the portal to imply.
+                  It is written down now because it is hers to decide while she
+                  is writing the course. */}
+              <p className={HELP}>
+                What would be taken at booking. Leave it empty to take the whole
+                price at once, the way a workshop does. Nothing sells a course
+                yet, so this is written down rather than charged.
+              </p>
+              <FieldError error={state.errors.deposit} />
             </div>
 
             <div className="mt-7">
@@ -490,21 +545,35 @@ export default function WorkshopForm({
                   className={`${FIELD_FIG} w-20 text-[21px]`}
                 />
                 <span className="text-[18px] text-ink-soft">
-                  days before the day
+                  days before the first date
                 </span>
               </p>
-              {/* The consequence of the two fields above, worked out as she
-                  types, because "14" and "the last day to cancel is the 6th"
-                  are different questions and she is answering the second. It
-                  is also the only explanation this field needs. */}
+              {/* The consequence of the field above and the dates below,
+                  worked out as she types. "14" and "the last day to cancel is
+                  the 23rd" are different questions, and she is answering the
+                  second. */}
               <p className="mt-3 font-display text-[24px] leading-tight text-ink">
-                {!date
-                  ? "Set the date and this will say the last day to cancel."
+                {dated.length === 0
+                  ? "Put the dates in below and this will say the last day to cancel."
                   : deadline
                     ? `Which makes ${formatDayLong(deadline)} the last day to cancel.`
-                    : "Which means places on this day cannot be refunded, and the page says so."}
+                    : "Which means places on this course cannot be refunded, and the page says so."}
               </p>
               <FieldError error={state.errors.refundDays} />
+            </div>
+
+            {/* Read back, never typed. The span at the top of a course's page
+                is the run's own first and last date; a second copy of it here
+                would be a figure that could disagree with the diary. */}
+            <div className="mt-9 border-t border-pool-rule/25 pt-7">
+              <p className={LABEL}>When it runs</p>
+              <p className="mt-3 font-display text-[26px] leading-tight text-ink">
+                {span ?? "No dates yet."}
+              </p>
+              <p className={HELP}>
+                Written from the dates below rather than typed here, and it is
+                what the top of the course&rsquo;s page says.
+              </p>
             </div>
           </Section>
 
@@ -590,10 +659,10 @@ export default function WorkshopForm({
             </div>
 
             {/* The one thing the form cannot tell her about an address is
-                whether it is the right one. This is the same link the workshop's
-                own page carries — one address, built one way (lib/maps) — so
-                what she checks here is what a visitor gets. A plain link out:
-                nothing is asked of Google until she presses it. */}
+                whether it is the right one. Same link the public page carries,
+                built in one place (lib/maps), so what she checks is what a
+                visitor gets. A plain link out: nothing is asked of Google until
+                she presses it. */}
             {mapUrl && (
               <div className="mt-7">
                 <a
@@ -634,8 +703,7 @@ export default function WorkshopForm({
 
             {/* Offered, not assumed. It appears only once she has named a place
                 that is not already on the list, and it is off until she says
-                so: a day in a church hall she will never use again should not
-                join the list she picks from for the next ten workshops. */}
+                so. */}
             {isNewPlace && (
               <label className="mt-7 flex items-start gap-3 text-[18px] text-ink">
                 <input
@@ -655,21 +723,21 @@ export default function WorkshopForm({
             )}
           </Section>
 
-          {/* ══ WHAT THE DAY IS ═══════════════════════════════════════════ */}
+          {/* ══ WHAT THE COURSE IS ════════════════════════════════════════ */}
           <Section
             id="body-h"
-            title="What the day is"
-            note="The long part — what happens, in the order it happens"
+            title="What the course is"
+            note="The long part — what the run is for, and who it is for"
           >
             <label className="block">
               <span className="flex flex-wrap items-baseline gap-x-3">
-                <span className={LABEL}>The workshop&rsquo;s own page</span>
+                <span className={LABEL}>The course&rsquo;s own page</span>
                 <Needed />
               </span>
               <textarea
                 name="body"
                 rows={18}
-                defaultValue={kept("body", workshop?.body ?? "")}
+                defaultValue={kept("body", course?.body ?? "")}
                 className={`${FIELD} min-h-0 py-4 text-[18px] leading-relaxed`}
               />
             </label>
@@ -697,6 +765,201 @@ export default function WorkshopForm({
                   line a bullet
                 </li>
               </ul>
+              <p className="mt-3">
+                What happens on each date goes with that date, below, not here.
+              </p>
+            </div>
+          </Section>
+
+          {/* ══ THE DATES ═════════════════════════════════════════════════ */}
+          <Section
+            id="dates-h"
+            title="The dates"
+            note="The run, one date at a time"
+          >
+            <p className="max-w-[62ch] text-[17px] leading-relaxed text-ink-soft">
+              They go on the page in date order, whatever order you put them in
+              here — so a week you forgot can go on the end and still land in
+              the right place. There is no limit on how many, and each one can
+              be somewhere else if it has to be.
+            </p>
+            <FieldError error={state.errors.run} />
+
+            {dateRows.length > 0 && (
+              <ul className="mt-8 flex flex-col gap-8">
+                {dateRows.map((row) => {
+                  const place = placeInRun(row.key);
+                  return (
+                    <li
+                      key={row.key}
+                      className="border-t border-pool-rule/25 pt-8 first:border-t-0 first:pt-0"
+                    >
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+                        {/* Where this one lands in the run, worked out from the
+                            dates as she types them. It is the whole rule —
+                            order is the date — said by the form rather than in
+                            a line of help. */}
+                        <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink">
+                          {place > 0 ? (
+                            <>
+                              {place} of {dated.length}
+                              <span className="ml-3 normal-case tracking-normal text-ink-soft">
+                                {formatDayShort(asDate(row.date))}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-ink-soft">
+                              Not dated yet
+                              <span className="ml-3 normal-case tracking-normal">
+                                it takes its place as soon as it has a day
+                              </span>
+                            </span>
+                          )}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => removeDate(row.key)}
+                          className="t min-h-[44px] text-[17px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
+                        >
+                          Take this date off
+                        </button>
+                      </div>
+
+                      <div className="mt-5">
+                        <label className="block">
+                          <span className="flex flex-wrap items-baseline gap-x-3">
+                            <span className={LABEL}>
+                              What this one is called
+                            </span>
+                            <Needed />
+                          </span>
+                          <input
+                            name={`run-${row.key}-title`}
+                            type="text"
+                            defaultValue={kept(
+                              `run-${row.key}-title`,
+                              row.title,
+                            )}
+                            className={`${FIELD} font-display text-[24px]`}
+                          />
+                        </label>
+                        <FieldError
+                          error={state.errors[`run-${row.key}-title`]}
+                        />
+                      </div>
+
+                      <div className="mt-6 grid gap-6 sm:grid-cols-[1.4fr_1fr_1fr]">
+                        <div>
+                          <label className="block">
+                            <span className="flex flex-wrap items-baseline gap-x-3">
+                              <span className={LABEL}>Date</span>
+                              <Needed />
+                            </span>
+                            <input
+                              name={`run-${row.key}-date`}
+                              type="date"
+                              value={row.date}
+                              onChange={(event) =>
+                                setDate(row.key, event.target.value)
+                              }
+                              className={`${FIELD_FIG} text-[21px]`}
+                            />
+                          </label>
+                          <FieldError
+                            error={state.errors[`run-${row.key}-date`]}
+                          />
+                        </div>
+                        <div>
+                          <label className="block">
+                            <span className={LABEL}>Starts</span>
+                            <input
+                              name={`run-${row.key}-start`}
+                              type="time"
+                              defaultValue={kept(
+                                `run-${row.key}-start`,
+                                row.startTime,
+                              )}
+                              className={`${FIELD_FIG} text-[21px]`}
+                            />
+                          </label>
+                          <FieldError
+                            error={state.errors[`run-${row.key}-start`]}
+                          />
+                        </div>
+                        <div>
+                          <label className="block">
+                            <span className={LABEL}>Ends</span>
+                            <input
+                              name={`run-${row.key}-end`}
+                              type="time"
+                              defaultValue={kept(
+                                `run-${row.key}-end`,
+                                row.endTime,
+                              )}
+                              className={`${FIELD_FIG} text-[21px]`}
+                            />
+                          </label>
+                          <FieldError
+                            error={state.errors[`run-${row.key}-end`]}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <label className="block">
+                          <span className={LABEL}>Where this one is</span>
+                          <input
+                            name={`run-${row.key}-venue`}
+                            type="text"
+                            defaultValue={kept(
+                              `run-${row.key}-venue`,
+                              row.venue,
+                            )}
+                            className={FIELD}
+                          />
+                        </label>
+                        <p className={HELP}>
+                          Filled in with the course&rsquo;s own place. Change it
+                          for a week that moves.
+                        </p>
+                      </div>
+
+                      <div className="mt-6">
+                        <label className="block">
+                          <span className={LABEL}>What happens this time</span>
+                          <textarea
+                            name={`run-${row.key}-description`}
+                            rows={4}
+                            defaultValue={kept(
+                              `run-${row.key}-description`,
+                              row.description,
+                            )}
+                            className={`${FIELD} min-h-0 py-3 text-[18px] leading-relaxed`}
+                          />
+                        </label>
+                        <p className={HELP}>
+                          Two or three sentences, shown when somebody opens this
+                          one on the page. The date and the time are on the line
+                          either way.
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            <div className="mt-8">
+              <button type="button" onClick={addDate} className={QUIET_BUTTON}>
+                {dateRows.length === 0 ? "Add the first date" : "Add a date"}
+              </button>
+              {dateRows.length === 0 && (
+                <p className={HELP}>
+                  A course with no dates stays a draft and never reaches the
+                  site — a run of dates is the whole difference between this and
+                  a workshop.
+                </p>
+              )}
             </div>
           </Section>
 
@@ -706,11 +969,9 @@ export default function WorkshopForm({
             title="Pictures and film"
             note="One film, and the pictures under it"
           >
-            {/* One field where there were three. The still it opens on and
-                how long it runs belong to the film, and Vimeo and YouTube
-                both already know them — so they are read from whichever one
-                holds it when this is saved, rather than typed here and left
-                to drift. */}
+            {/* One field where there were three. The still it opens on and how
+                long it runs belong to the film, and Vimeo and YouTube both
+                already know them. */}
             <label className="block">
               <span className={LABEL}>The link to the film</span>
               <input
@@ -718,7 +979,7 @@ export default function WorkshopForm({
                 type="text"
                 inputMode="url"
                 placeholder="https://vimeo.com/76979871"
-                defaultValue={kept("filmUrl", workshop?.filmUrl ?? "")}
+                defaultValue={kept("filmUrl", course?.filmUrl ?? "")}
                 className={FIELD}
               />
             </label>
@@ -784,11 +1045,6 @@ export default function WorkshopForm({
                     add another.
                   </p>
                 ) : (
-                  /* One press, as many photographs as she likes. The same
-                     label-around-a-hidden-input as the masthead's, so the two
-                     read as one control used twice — the only difference is
-                     `multiple`, and that the count replaces the word while a
-                     batch is running. */
                   <label
                     className={`${QUIET_BUTTON} inline-flex cursor-pointer items-center has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action`}
                   >
@@ -863,7 +1119,7 @@ export default function WorkshopForm({
               <div>
                 <p className={LABEL}>What this makes</p>
                 <p className="mt-3 fig font-mono text-[17px] text-ink">
-                  thefieldwork.co.uk/workshops/
+                  thefieldwork.co.uk/courses/
                   {effectiveSlug || (
                     <>
                       <span aria-hidden="true">&mdash;&mdash;</span>
@@ -898,15 +1154,18 @@ export default function WorkshopForm({
                     defaultChecked={
                       state.attempt > 0
                         ? state.values.published === "on"
-                        : (workshop?.published ?? false)
+                        : (course?.published ?? false)
                     }
                     className="mt-1 h-5 w-5 shrink-0 accent-action"
                   />
                   <span>
                     Show this on the site
                     <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
-                      It needs a picture behind the title and something written
-                      before it can go up.
+                      It needs a picture behind the title, something written,
+                      and at least one date with a name on it. The courses pages
+                      on the site are not built yet, so for now this is a
+                      decision the site will honour rather than one anybody can
+                      see.
                     </span>
                   </span>
                 </label>
@@ -916,7 +1175,7 @@ export default function WorkshopForm({
                   disabled={pending}
                   className="t mt-6 min-h-[56px] w-full bg-action px-8 text-[19px] font-semibold text-pool hover:bg-ink disabled:opacity-60"
                 >
-                  {pending ? "Saving…" : "Save this workshop"}
+                  {pending ? "Saving…" : "Save this course"}
                 </button>
               </div>
             </div>
@@ -926,7 +1185,7 @@ export default function WorkshopForm({
 
       {/* Its own form, and therefore outside the one above — a form nested in
           a form is not valid HTML and the browser drops the inner one. */}
-      {workshop && <DeleteWorkshop id={workshop.id} name={workshop.name} />}
+      {course && <DeleteCourse id={course.id} name={course.name} />}
     </>
   );
 }

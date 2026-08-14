@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Courses · The Field Work</title>
+    <meta
+      name="description"
+      content="Evenings in a run, booked once for the whole series. Small groups, clothed and seated throughout, nothing asked of your beliefs."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ground: "#160712",
+              surface: "#260F20",
+              pool: "#FBF3F1",
+              ink: "#1E0A1C",
+              "ink-soft": "#5A4356",
+              action: "#C2187A",
+              "plate-text": "#FBF3F1",
+              "plate-soft": "#D8BFC9",
+              "plate-rule": "#8E6A82",
+              "pool-rule": "#8A7285",
+              "pool-error": "#A3221A",
+              "pool-success": "#0F6B3D",
+              gold: "#E9C87E",
+              coral: "#F5876F",
+            },
+            fontFamily: {
+              display: ["Cormorant Garamond", "Georgia", "serif"],
+              body: ["Source Sans 3", "system-ui", "sans-serif"],
+              mono: ["Azeret Mono", "ui-monospace", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* ── The Lit Clearing · the index ─────────────────────────────────────
+         A list page has one job: let someone find the day that is theirs and
+         see, without clicking, whether they can still have it. So the state
+         (places left / full / past) is carried on the row itself, not
+         discovered on the detail page after a click that raised hopes.
+
+         Colour stays context-locked: gold on the dark ground, magenta only
+         inside a blush pool. Zero radius, zero shadow. */
+      html {
+        background-color: #160712;
+      }
+      body {
+        font-family: "Source Sans 3", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .pool {
+        background-color: #fbf3f1;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .fig,
+      .font-mono {
+        font-variant-numeric: tabular-nums lining-nums;
+      }
+      a {
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid #e9c87e;
+        outline-offset: 3px;
+      }
+      .on-pool a:focus-visible,
+      .on-pool button:focus-visible {
+        outline: 2px solid #c2187a;
+      }
+      .skip {
+        position: absolute;
+        left: 20px;
+        top: -200px;
+        z-index: 60;
+      }
+      .skip:focus {
+        top: 20px;
+      }
+      .t {
+        transition:
+          background-color 140ms linear,
+          color 140ms linear,
+          border-color 140ms linear;
+      }
+
+      /* A workshop row. The whole card is the target — on a phone, a small
+         "read more" link is a miss waiting to happen. */
+      .card {
+        border-top: 1px solid rgba(142, 106, 130, 0.3);
+      }
+      .card:last-child {
+        border-bottom: 1px solid rgba(142, 106, 130, 0.3);
+      }
+      .card:hover .card-title {
+        color: #e9c87e;
+      }
+      .card-title {
+        transition: color 140ms linear;
+      }
+      /* A past workshop is legible but plainly finished — held back rather
+         than hidden, because the archive is evidence the practice is real. */
+      .card--past {
+        opacity: 0.55;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ── The page ground ──────────────────────────────────────────────────
+         A photograph behind the whole page, held a long way back. It is
+         atmosphere, not content: the scrim takes it to near-black so type
+         never has to compete, and it is fixed so scrolling reveals the page
+         rather than dragging a picture along with it.
+
+         `z-index:-2` keeps it behind everything without wrapping the layout,
+         which is why `bg-ground` comes OFF the body — an opaque body would
+         paint straight over it. html keeps the ground colour, so a failed
+         image load still lands on plum rather than white. */
+      .page-field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 45%;
+        filter: brightness(0.55) saturate(1.02);
+        z-index: -2;
+        pointer-events: none;
+      }
+      .page-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          rgb(22 7 18 / 0.7) 0%,
+          rgb(22 7 18 / 0.88) 55%,
+          rgb(22 7 18 / 0.97) 100%
+        );
+      }
+    </style>
+  </head>
+
+  <body data-screen-id="courses-index" class="text-plate-text font-body">
+    <!-- the whole circle of chairs — the promise of the page -->
+    <img
+      src="../../../assets/images/web/work-wide-the-room.jpg"
+      alt=""
+      aria-hidden="true"
+      class="page-field"
+    />
+    <div class="page-scrim" aria-hidden="true"></div>
+
+    <a
+      href="#list"
+      class="skip bg-gold px-5 py-3 text-[17px] font-semibold text-ink"
+      >Skip to the courses</a
+    >
+
+    <header class="mx-auto max-w-[1180px] px-6 lg:px-10">
+      <div class="flex items-center justify-between py-7">
+        <a href="/" aria-label="The Field Work — home">
+          <img
+            src="../../../assets/brand/logo-horizontal.svg"
+            alt="The Field Work"
+            width="440"
+            height="120"
+            class="h-[52px] w-auto"
+          />
+        </a>
+        <nav
+          class="hidden items-center gap-8 text-[17px] md:flex"
+          aria-label="Main"
+        >
+          <a class="t text-plate-soft hover:text-plate-text" href="/services"
+            >Sessions</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/workshops"
+            >Workshops</a
+          >
+          <a
+            class="t text-plate-text underline decoration-gold underline-offset-8"
+            href="/courses"
+            aria-current="page"
+            >Courses</a
+          >
+          <a class="t text-plate-soft hover:text-plate-text" href="/about"
+            >About</a
+          >
+        </nav>
+      </div>
+
+      <div class="max-w-[54ch] pb-14 pt-8 lg:pb-20 lg:pt-14">
+        <p
+          class="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold"
+        >
+          Courses
+        </p>
+        <h1
+          class="mt-4 font-display text-[46px] font-normal leading-[1.03] text-plate-text sm:text-[60px]"
+        >
+          One place, every evening in the run
+        </h1>
+        <p class="mt-6 text-[21px] leading-relaxed text-plate-soft">
+          A course is booked once, for the whole series — the same chair, the
+          same hour, on every date in it. Small groups, clothed and seated
+          throughout, and nothing asked of your beliefs.
+        </p>
+      </div>
+    </header>
+
+    <main id="main" class="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
+      <!-- ══ COMING UP ═══════════════════════════════════════════════════
+           The row carries the SPAN, the price and the places left, because
+           those are the three things that decide it. A course is a run of
+           evenings, so the first column says how many and from when rather
+           than naming one date — somebody scanning for something they can
+           commit to is looking for the shape of the commitment first. -->
+      <section id="list" aria-labelledby="coming">
+        <h2
+          id="coming"
+          class="fig font-mono text-[15px] uppercase tracking-[0.16em] text-plate-rule"
+        >
+          Coming up
+        </h2>
+        <p
+          class="mt-3 max-w-[52ch] text-[17px] leading-relaxed text-plate-soft"
+        >
+          One price covers the whole run. There is no single-evening ticket, and
+          the group that starts together finishes together.
+        </p>
+
+        <div class="mt-8">
+          <article class="card py-9">
+            <a
+              href="course-detail.html"
+              class="group grid gap-6 md:grid-cols-[168px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] leading-[1.5] text-gold">
+                Four Wednesday<br />evenings<br /><span class="text-plate-rule"
+                  >from 7 October</span
+                >
+              </p>
+              <img
+                src="../../../assets/images/web/aura-seated-figure.jpg"
+                alt="A seated figure in low light, hands resting"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  Working with the Field
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  Four evenings with the same seven other people. Attention,
+                  then hands, then whatever the room is carrying by the end of
+                  October.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  19:00–21:00 · The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £320<br /><span class="text-[15px] text-plate-rule"
+                  >for all four</span
+                ><br /><span class="text-[16px] text-gold">5 places left</span>
+              </p>
+            </a>
+          </article>
+
+          <article class="card py-9">
+            <a
+              href="/courses/aura-healing-foundations"
+              class="group grid gap-6 md:grid-cols-[168px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] leading-[1.5] text-gold">
+                Six Tuesday<br />evenings<br /><span class="text-plate-rule"
+                  >from 15 September</span
+                >
+              </p>
+              <img
+                src="../../../assets/images/web/work-down-the-body.jpg"
+                alt="Seen over her shoulder, down the length of someone lying still on the table"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  Aura Healing: Foundations
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  Six weeks for people who want longer than an hour with the
+                  practice. The same six people, both sides of the chair.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  19:00–21:00 · The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £480<br /><span class="text-[15px] text-plate-rule"
+                  >for all six</span
+                ><br /><span class="text-[16px] text-gold">2 places left</span>
+              </p>
+            </a>
+          </article>
+
+          <!-- FULL. Still a link — the detail page offers the waiting list and
+               points at the next run, so a full course still converts. -->
+          <article class="card py-9">
+            <a
+              href="/courses/aura-healing-practitioner-pathway"
+              class="group grid gap-6 md:grid-cols-[168px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p class="fig font-mono text-[17px] leading-[1.5] text-gold">
+                Six Saturdays<br /><span class="text-plate-rule"
+                  >from 7 November</span
+                >
+              </p>
+              <img
+                src="../../../assets/images/web/window-last-light.jpg"
+                alt="A lit lamp and a spider plant on the deep sill of the window, the last blue daylight outside"
+                class="aspect-[4/5] w-full max-w-[150px] object-cover"
+              />
+              <div>
+                <h3
+                  class="card-title font-display text-[34px] font-normal leading-tight text-plate-text sm:text-[38px]"
+                >
+                  Aura Healing: Practitioner Pathway
+                </h3>
+                <p
+                  class="mt-3 max-w-[52ch] text-[19px] leading-relaxed text-plate-soft"
+                >
+                  The training course, and the longest thing on this site. Six
+                  full Saturdays, with a piece of writing between each one.
+                </p>
+                <p class="mt-4 fig font-mono text-[16px] text-plate-rule">
+                  10:00–16:00 · The Garden Room, Frome
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[19px] text-plate-text md:text-right"
+              >
+                £650<br /><span class="text-[15px] text-plate-rule"
+                  >for all six</span
+                ><br /><span class="text-[16px] text-plate-rule"
+                  >Full · join the list</span
+                >
+              </p>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══ EMPTY STATE ══════════════════════════════════════════════════
+           Drawn deliberately, and it matters more here than on the workshops
+           page: a course runs two or three times a year, so the months with
+           nothing scheduled are the normal state, not the exception. A page
+           that simply ends is indistinguishable from one that is broken. -->
+      <section
+        class="mt-24 border-t border-plate-rule/30 pt-14"
+        aria-labelledby="variant"
+      >
+        <p
+          id="variant"
+          class="fig font-mono text-[14px] uppercase tracking-[0.16em] text-gold"
+        >
+          The same page between runs
+        </p>
+        <div class="pool on-pool mt-7 max-w-[620px] px-8 py-9">
+          <h2
+            class="font-display text-[32px] font-normal leading-tight text-ink"
+          >
+            No course running just now
+          </h2>
+          <p class="mt-4 text-[19px] leading-relaxed text-ink">
+            A course runs two or three times a year, and the dates usually go up
+            two months ahead. If you would like to know when the next set does,
+            leave your email and you will hear once.
+          </p>
+          <form class="mt-7 flex flex-col gap-4 sm:flex-row">
+            <label class="sr-only" for="notify">Email address</label>
+            <input
+              id="notify"
+              type="email"
+              placeholder="you@example.com"
+              class="min-h-[52px] flex-1 border-b border-pool-rule bg-transparent py-2 text-[19px] text-ink placeholder:text-ink-soft/60 focus:border-action focus:outline-none"
+            />
+            <button
+              type="submit"
+              class="t min-h-[52px] bg-action px-7 text-[18px] font-semibold text-pool hover:bg-ink"
+            >
+              Tell me
+            </button>
+          </form>
+          <p class="mt-5 text-[17px] leading-relaxed text-ink-soft">
+            In the meantime there are
+            <a
+              class="text-action underline decoration-action underline-offset-4"
+              href="/workshops"
+              >one-day workshops</a
+            >, which ask for a Saturday rather than a month of Wednesdays.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══ PAST ═════════════════════════════════════════════════════════
+           Held back but present. Evidence the practice is real and running,
+           and on a course page it is also the answer to "does this actually
+           run, or is it always coming soon". -->
+      <section class="mt-24" aria-labelledby="past">
+        <h2
+          id="past"
+          class="fig font-mono text-[15px] uppercase tracking-[0.16em] text-plate-rule"
+        >
+          Already run
+        </h2>
+        <div class="mt-8">
+          <article class="card card--past py-7">
+            <div
+              class="grid gap-4 md:grid-cols-[168px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p
+                class="fig font-mono text-[17px] leading-[1.5] text-plate-rule"
+              >
+                Six Tuesday<br />evenings<br />3 Feb – 10 Mar
+              </p>
+              <div>
+                <h3
+                  class="font-display text-[28px] font-normal leading-tight text-plate-text"
+                >
+                  Aura Healing: Foundations
+                </h3>
+                <p class="mt-2 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome · 6 came, 6 finished
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[16px] text-plate-rule md:text-right"
+              >
+                Finished
+              </p>
+            </div>
+          </article>
+          <article class="card card--past py-7">
+            <div
+              class="grid gap-4 md:grid-cols-[168px_150px_1fr_auto] md:items-start md:gap-8"
+            >
+              <p
+                class="fig font-mono text-[17px] leading-[1.5] text-plate-rule"
+              >
+                Four Wednesday<br />evenings<br />22 Apr – 13 May
+              </p>
+              <div>
+                <h3
+                  class="font-display text-[28px] font-normal leading-tight text-plate-text"
+                >
+                  Working with the Field
+                </h3>
+                <p class="mt-2 fig font-mono text-[16px] text-plate-rule">
+                  The Garden Room, Frome · 8 came, 7 finished
+                </p>
+              </div>
+              <p
+                class="fig font-mono text-[16px] text-plate-rule md:text-right"
+              >
+                Finished
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-plate-rule/30">
+      <div class="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
+        <p class="fig font-mono text-[15px] text-plate-rule">
+          The Field Work · Frome, Somerset · Complementary work. Not a
+          substitute for medical care.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
