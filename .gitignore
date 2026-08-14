@@ -138,3 +138,4 @@ docs/screens/**/_tmp-*
 
 # Agent test uploads — brown rectangles from a smoke run, not media.
 app/public/media/tmp-*
+docs/_d23-tmp.md

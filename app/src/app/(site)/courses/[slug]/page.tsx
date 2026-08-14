@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import CoursePanel from "@/components/site/CoursePanel";
 import FilmEmbed from "@/components/site/FilmEmbed";
 import PhotoRail from "@/components/site/PhotoRail";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { courseDetail } from "@/content/courses";
+import {
+  coursePlacesSold,
+  depositStillOffered,
+  placesLeft,
+} from "@/lib/bookings";
 import { capitalise, runShape, spellCount } from "@/lib/course-run";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { parseFilm } from "@/lib/film";
@@ -11,9 +17,11 @@ import {
   formatDayLong,
   formatDayShort,
   formatMoney,
+  isPast,
   refundDeadline,
 } from "@/lib/format";
 import { mapSearchUrl } from "@/lib/maps";
+import { paymentsConfigured } from "@/lib/stripe";
 
 /**
  * One course's own page.
@@ -131,6 +139,12 @@ export default async function Page({
     session.description.trim(),
   );
 
+  // Counted from paid bookings, less any whose balance went unpaid — the same
+  // figure the checkout will count again under a lock. A place released by a
+  // lapsed balance appears back here with nothing having had to run (D-23).
+  const left = placesLeft(course.capacity, await coursePlacesSold(course.id));
+  const finished = run ? isPast(run.last) : false;
+
   return (
     <>
       {/* The page ground: an abstract, fixed and scrimmed. Decorative, so it
@@ -233,15 +247,16 @@ export default async function Page({
             </dl>
           </div>
 
-          {/* WHAT THE ROOM HOLDS, as the line the photograph ends on. The
-              approved screen says "5 places left of 8"; nothing books a course,
-              so there are no bookings to count off the capacity and a figure
-              here would be invented. Where the other number will come from is
-              said once, in the panel, beside the same figure. */}
+          {/* WHAT IS LEFT, as the line the photograph ends on — the approved
+              screen's "5 places left of 8", now that there are bookings to
+              count off the capacity. Before the first one it says what the room
+              holds, because "8 places left of 8" is a warning about nothing. */}
           <div className="pb-12 lg:pb-16">
             <p className="mt-4 fig font-mono text-[15px]">
               <span className="text-gold">
-                {course.capacity} {course.capacity === 1 ? "place" : "places"}
+                {left === course.capacity
+                  ? `${course.capacity} ${course.capacity === 1 ? "place" : "places"}`
+                  : `${left} ${left === 1 ? "place" : "places"} left of ${course.capacity}`}
               </span>
               <span className="text-plate-rule">
                 {" "}
@@ -430,92 +445,35 @@ export default async function Page({
           </div>
 
           {/* ══ WHAT IT COSTS ═════════════════════════════════════════════
-              The one blush pool on the page. The approved screen puts a "Pay
-              the deposit · £80" button here, and there is nothing behind it:
-              no checkout for a run of dates, no deposit charged, no course
-              bookings anywhere in the system. So the button is not drawn, and
-              what stands in its place says so — the same move the workshop
-              panel made before Stripe landed, and the one the portal's own
-              stubs make (D-9).
+              The one blush pool on the page, and the approved screen's "Pay
+              the deposit · £80" button now has the thing behind it that it
+              always described (D-23). The panel is a client component for the
+              same reason the workshop's is: it holds one decision — how many
+              places — and prices it as she moves the stepper.
 
-              Everything else in the panel is real and is what somebody
-              deciding needs: the price for the whole run, what the room holds,
-              the deposit she has set, and the date a place could be cancelled
-              by, counted back from the first date. */}
-          <aside id="book" className="lg:pt-20" aria-labelledby="book-h">
-            <div className="pool on-pool sticky top-8 px-7 py-8 sm:px-9">
-              <h2
-                id="book-h"
-                className="font-display text-[30px] font-normal leading-tight text-ink"
-              >
-                {courseDetail.panel.title}
-              </h2>
-
-              <p className="mt-5 fig font-mono text-[22px] text-ink">
-                {formatMoney(course.priceGBP)}{" "}
-                <span className="text-[16px] text-ink-soft">
-                  {courseDetail.panel.forTheRun}
-                </span>
-              </p>
-
-              {course.depositGBP !== null && (
-                <p className="mt-3 fig font-mono text-[16px] text-ink-soft">
-                  {courseDetail.panel.depositLabel}{" "}
-                  {formatMoney(course.depositGBP)} &middot;{" "}
-                  {courseDetail.panel.depositNote}
-                </p>
-              )}
-
-              <p className="mt-5 fig font-mono text-[16px] text-ink">
-                {course.capacity} {course.capacity === 1 ? "place" : "places"}
-              </p>
-              <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
-                {courseDetail.panel.placesNote}
-              </p>
-
-              <div className="mt-7 border border-pool-rule px-5 py-5">
-                <p className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft">
-                  {courseDetail.panel.notLiveEyebrow}
-                </p>
-                <p className="mt-2 text-[19px] font-semibold leading-snug text-ink">
-                  {courseDetail.panel.notLiveTitle}
-                </p>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
-                  {courseDetail.panel.notLiveBody}
-                </p>
-              </div>
-
-              <hr className="my-7 border-0 border-t border-pool-rule/40" />
-
-              <h3 className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft">
-                {courseDetail.panel.ifYouCannotCome}
-              </h3>
-              {/* Written as the terms a place WOULD be taken on, because none
-                  has been. A page that says "you are refunded in full" about a
-                  payment it cannot take is describing something that has never
-                  happened to anybody. */}
-              {deadline ? (
-                <p className="mt-3 text-[17px] leading-relaxed text-ink">
-                  When a place can be taken, it will be cancellable up to{" "}
-                  <strong className="font-semibold">
-                    {course.refundDays}{" "}
-                    {course.refundDays === 1 ? "day" : "days"}
-                  </strong>{" "}
-                  before the first date &mdash; by{" "}
-                  <span className="fig font-mono">
-                    {formatDayLong(deadline)}
-                  </span>{" "}
-                  &mdash; for a full refund. After that the place is held for
-                  you across every date in the run.
-                </p>
-              ) : (
-                <p className="mt-3 text-[17px] leading-relaxed text-ink">
-                  A place on this run will not be refundable once it is taken.
-                  That is said here rather than found out later.
-                </p>
-              )}
-            </div>
-          </aside>
+              The deposit is only offered as one when the course carries BOTH a
+              deposit and a date for the rest. A deposit with no date to settle
+              by is an arrangement with no second half, and the form refuses to
+              publish one — this is the same rule, drawn. */}
+          <CoursePanel
+            slug={course.slug}
+            capacity={course.capacity}
+            placesLeft={left}
+            pricePence={course.priceGBP}
+            depositPence={course.depositGBP}
+            refundDays={course.refundDays}
+            refundDeadline={deadline ? formatDayLong(deadline) : null}
+            balanceDueOn={
+              // Null once the balance day has been: the deposit arrangement
+              // ends on its own date and the whole price is taken from then on,
+              // which is what the checkout will do (see depositStillOffered).
+              depositStillOffered(course)
+                ? formatDayLong(course.balanceDueAt as Date)
+                : null
+            }
+            canBuy={paymentsConfigured()}
+            isFinished={finished}
+          />
         </div>
       </main>
 

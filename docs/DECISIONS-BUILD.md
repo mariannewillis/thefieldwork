@@ -1308,3 +1308,200 @@ Nothing existing is altered. Locally it is applied. On Replit:
 ```
 npm run db:deploy
 ```
+
+## D-23 · A course is bought on a deposit; the balance is a link, and an unpaid one releases the place by arithmetic (2026-08-14)
+
+Courses go on sale. The operator's four decisions, in his words: **deposit
+first, payment plans later** — two payments, not n; **the balance due date is
+Marianne's, per course**, set in the course creator the same way `refundDays`
+is; **a paid deposit holds the place**; and **if the balance is not paid, the
+place is released and she is told**. Everything below follows from those and
+from the rules that already govern workshops — the webhook confirms and the
+browser never does (D-17), the event id is recorded before anything acts on it
+(D-20), capacity is checked under a row lock (D-16).
+
+### Payments became rows, and outstanding is a subtraction
+
+The question this answers is _"how does Marianne know whether something has been
+paid in full?"_, and the answer had to be arithmetic she can see rather than a
+boolean somebody keeps correct.
+
+`Booking` now records **what is owed** — `totalPence`, and `balanceDueAt` when
+there is a balance. `Payment` records **what came in** — one row per completed
+Checkout Session, with its kind (`deposit` | `balance` | `full`), its amount, its
+session and payment-intent ids, and its own refund fields. Paid is the sum of
+those rows; outstanding is the difference; "the money has gone back" is whether
+anything is left. None of the three is a column, so none of them can drift.
+
+Six columns LEFT `Booking` to get there: `stripeSessionId`,
+`stripePaymentIntentId`, `currency` and the three refund fields. They were facts
+about money arriving, and a booking can now have two of those. One column could
+only ever have held one — a settled course refunded is two refunds against two
+payment intents.
+
+**Refund idempotency moved with them**: the key is now `refund-payment-<id>`
+rather than `refund-booking-<id>`, and a refund walks every unrefunded payment,
+recording each as Stripe confirms it. A deposit that went back and a balance
+that would not therefore leaves the truth on the two rows.
+
+### One Booking, two nullable keys, and a CHECK
+
+`Booking.workshopId` became nullable and `courseId` joined it, with
+`Booking_one_offering` refusing any row that names both or neither. The
+alternative — a `kind` enum beside a bare integer — costs the foreign keys: no
+`onDelete: Restrict` on either side, and nothing to stop a booking pointing at a
+workshop id that is really a course id. This way both relations are real, both
+refuse the deletion of something people have paid for, and the database can say
+what the application means. Services arrive later as a third nullable key and one
+more term in the same sum.
+
+Reading is normalised ONCE, in `offeringOf()`, into an `Offering` — name, slug,
+capacity, refundDays, first date, last date, the dates themselves, the address.
+Every page, email and rule downstream works on that, so a rule about a refund
+date cannot quietly apply to one kind and not the other.
+
+**Existing bookings were migrated, not special-cased.** The migration writes one
+`Payment` of kind `full` for every booking that existed, copying its session,
+intent, currency, amount, refund and `paidAt` across. After it there is no such
+thing as a booking from before payments were rows, so nothing downstream carries
+a branch for one and nothing can forget to. Booking 25 — a real place, really
+paid for — came out of it as one booking and one payment, which the smoke test
+checks before it does anything else.
+
+### The balance link is OURS, and it goes out immediately
+
+The link to pay the rest is `/pay/<token>` on this site, and it is sent **in the
+deposit confirmation email**, not on the due date.
+
+**Why not on the due date**: nothing in this app runs on a schedule, and a link
+the buyer already holds needs no scheduler to be correct. It sits in the inbox
+from the day they book, it names the amount and the date, and pressing it on the
+morning it is due works exactly as pressing it that afternoon does.
+
+**Why not a Stripe URL**: a Checkout Session's URL expires within a day and
+becomes a dead end in an inbox somebody kept for six weeks. Our page creates a
+fresh session when the button is pressed — so the amount is worked out then,
+from the booking and its payments, rather than fixed weeks earlier — and it can
+say three things a spent Stripe link cannot: this was already paid, this place
+has been released, and here is what is still owed and when. It is also
+re-sendable, because it is a link of ours to reissue.
+
+The token is stored as a SHA-256 hash on `Booking.balanceTokenHash`, exactly as
+the cancellation token is. Issuing is rotation; the usable secret exists only in
+the email.
+
+### Release is LAZY, and that is the design rather than a shortcut
+
+A place whose balance is overdue stops counting toward capacity wherever
+capacity is computed — one `NOT (...)` clause in the one query behind every
+count of places sold. Nothing runs, nothing sweeps, no column is set.
+
+That is not a saving; it is the only version that cannot be wrong. A place
+released by a job that has to fire is a place that stays held when the job does
+not. This is true the moment the due day is over, in the same instant on the
+public page, in the checkout, and under the lock in the webhook.
+
+**The booking is not cancelled by it.** She may still want the money, the buyer
+may still pay, and a row rewritten by the passing of time would be a state change
+nobody made. It simply stops counting — and paying the balance makes it count
+again by itself, because `hasLapsed` is derived from `outstanding`. That reclaim
+is only honest while nobody else has taken the chair, which is checked on the
+page and again under the lock; the losing case is the D-16 race in a different
+coat and gets the same answer, refunding the balance and telling both people.
+The deposit is left alone: what happens to it is Marianne's decision, not a rule
+the portal invented on her behalf.
+
+**A deposit arrangement ends on its own date.** A course whose balance day has
+passed still carries a deposit figure — she set it in June and the run is in
+October — and taking that deposit now would write a booking that is overdue the
+instant it exists: lapsed before the confirmation lands. So from that day the
+whole price is taken at once. `depositStillOffered()` is that test, and the
+panel, the checkout and the webhook all call it, because three copies of it is
+how a page offers £80 and a card gets charged £240.
+
+### Telling her needs something to fire, and nothing does
+
+This is the honest gap. A place is released by a date passing, so there is no
+moment at which anything could send a message, and no cron was invented to
+manufacture one.
+
+It surfaces where she will see it: the bookings ledger says it at the top —
+"2 places have been released because the balance was not paid" — and each row
+says it again in red, with the date it lapsed and the deposit money still with
+her. Nothing is cancelled and nothing is refunded; both are hers to decide.
+
+**What a scheduled job would add**, so the operator can decide about Replit
+scheduling separately: (1) a reminder to the buyer a few days before the balance
+is due, which is the thing most likely to stop a place lapsing at all; (2) an
+email to Marianne on the morning a place lapses, rather than her finding out when
+she next opens the ledger; (3) a weekly digest of what is outstanding. None of
+them changes what is TRUE — the arithmetic is already correct without them — so
+all three are notification rather than mechanism, and can be added later without
+touching any of the above.
+
+### The balance date is hers, in one place only
+
+`Course.balanceDueAt`, set in the course creator beside the deposit it belongs
+to. It is validated against the run's first date — the rest has to be paid by
+the time the run starts, because money owed by somebody already attending is a
+debt rather than a deposit — and a deposit with no date cannot go on the site at
+all, because that is an arrangement with no second half.
+
+It is **copied onto the Booking** as the place is taken. Moving the course's date
+afterwards must not move the date somebody already bought on, which is the same
+reasoning that copies a venue's address onto the workshop rather than reading
+through the relation.
+
+There is deliberately no second concept of "when payment is due" anywhere else.
+
+**One consequence for the operator's own data**: `ifr-course` carries a deposit
+and no balance date, because the column did not exist when it was written. It
+stays published and sells at the WHOLE price until she opens it and sets one —
+the panel says "the whole price is taken when you book", which is exactly what
+the checkout will do. The form asks for a date the next time she saves it
+published.
+
+### What it is verified by
+
+`e2e/course-bookings-smoke.mjs` — 69 assertions against a running app and a real
+database, on the same harness as `bookings-smoke.mjs` and with the same three
+guarantees: no real money (a made-up `sk_test_` key belonging to no account), no
+real email (`RESEND_API_KEY=""`, so the log adapter runs — asserted, not
+assumed), and every address ending `.invalid`. The Stripe events are synthetic
+and signed with a secret the script chose, using Stripe's own signing helper.
+
+It covers, in order: the operator's Booking 25 surviving the migration as one
+booking and one `full` payment; the database refusing a booking for neither
+offering; a deposit creating one booking and one payment with £160 outstanding
+and the date copied across; the same event twice making one of everything; the
+confirmation naming the run, every date, what was paid, what is owed, by when,
+and carrying both links; capacity counted off the deposit; the balance page
+stating the amount; the balance settling it as a second payment; the receipt and
+the notice; a redelivered balance writing nothing; the link then reading "already
+paid in full"; the cancellation link working on a course and offering back
+everything actually paid; a course with no deposit settled in one payment with no
+balance link in its email; a lapsed place freeing the room with nothing having
+run; that place being resold at the whole price; the lapsed link then reading
+"this place has been released"; a balance arriving for it refunded with both
+people told; the two-people-one-place race; and a course withdrawn mid-checkout
+recorded as `courseGone` rather than as a workshop.
+
+`bookings-smoke.mjs` (86), `admin-bookings-smoke.mjs` (56) and `courses-smoke.mjs`
+(50) all still pass — the last with new coverage of the balance-date field and
+its two refusals.
+
+### Applying it
+
+The migration adds one enum, one table, three enum values and four columns;
+renames `Booking.amountPence` to `totalPence`; moves six columns' worth of data
+onto the new table; and drops them. It is written by hand because the middle of
+it is a data migration and the end of it is a CHECK constraint Prisma cannot
+express. Locally it is applied. On Replit:
+
+```
+npm run db:deploy
+```
+
+**Restart the app after deploying.** A running server holds a Prisma client
+generated against the old schema and will refuse every course save with an
+unrelated-looking error until it is restarted. That is how this was found here.

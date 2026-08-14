@@ -80,14 +80,17 @@ export default async function Page({
           </p>
         </div>
 
-        {/* Said once, at the top, rather than beside every field it touches.
-            The record is real and complete; what is not built yet is the page
-            that reads it — and the portal does not imply otherwise (D-9). */}
+        {/* Said once, at the top, rather than beside every field it touches:
+            a published course is now genuinely for sale, and the money side of
+            that is the one thing worth restating before she edits anything. */}
         {course.published && (
           <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
-            The courses pages on the site are not built yet, so nothing at that
-            address answers so far. Everything written here is saved and is what
-            those pages will show.
+            This one is live and places can be bought.{" "}
+            {course.depositGBP && course.balanceDueAt
+              ? `A deposit of ${formatMoney(course.depositGBP)} is taken at booking and the rest is due by ${formatDayShort(course.balanceDueAt)}.`
+              : "The whole price is taken when somebody books."}{" "}
+            Changing the price or the deposit changes what the NEXT person pays
+            — anyone who has already booked keeps the terms they bought on.
           </p>
         )}
       </section>

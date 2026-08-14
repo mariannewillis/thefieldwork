@@ -5,10 +5,10 @@
 // every time the site was published.
 //
 // Workshops were the first offering to land, and bookings followed them.
-// Courses came next — the same offering spread over a run of dates, written in
-// the portal but not yet on sale. Services came third, and are the last of the
-// three kinds. Subscribers and page content are still to
-// come. Money is counted in PENCE as
+// Courses came next — the same offering spread over a run of dates — and are
+// now on sale too, on a deposit and a balance. Services came third, and are the
+// last of the three kinds; they are still not bookable. Subscribers and page
+// content are still to come. Money is counted in PENCE as
 // an Int everywhere it appears: 0.1 + 0.2 is not 0.3, and these figures are
 // what somebody gets charged and refunded.
 
@@ -229,8 +229,10 @@ model Course {
   venueId Int?
   venue   Venue? @relation(fields: [venueId], references: [id], onDelete: SetNull)
 
-  /// How many the room takes. Not enforced against anything yet: courses are
-  /// not on sale, so there is nothing to count off it.
+  /// How many the room takes. ENFORCED, as a workshop's is: counted off when a
+  /// Checkout Session is opened and again under a row lock when the payment is
+  /// confirmed (D-16). A place is committed by the DEPOSIT — the balance
+  /// arriving later changes nothing about the room.
   capacity Int
 
   /// PENCE. The whole run, every date included — there is no way to buy one
@@ -238,12 +240,24 @@ model Course {
   priceGBP Int
 
   /// PENCE, and null when the whole price is taken at once the way a
-  /// workshop's is. STORED ONLY. Nothing charges it and nothing chases the
-  /// balance: a deposit is a two-payment arrangement that belongs with a
-  /// checkout, and courses have no checkout yet. It is a column now because
-  /// the figure is Marianne's to decide and she decides it while she is
-  /// writing the course, not months later.
+  /// workshop's is. What the checkout charges: with a deposit set, buying a
+  /// place takes this and the rest is owed by `balanceDueAt` below.
   depositGBP Int?
+
+  /// When the rest of the price is due. HERS TO SET, per course, the same way
+  /// `refundDays` is — this is not a site-wide "28 days before" rule the
+  /// portal decided on her behalf.
+  ///
+  /// A DAY, with no time attached, for the reason `Workshop.date` gives. Null
+  /// when there is no deposit and nothing is ever outstanding; required before
+  /// a course with a deposit can go on the site, because a deposit with no
+  /// date to settle by is an arrangement with no second half.
+  ///
+  /// It is COPIED onto each Booking as it is made. Moving it afterwards must
+  /// not move the date somebody already bought on, which is the same reasoning
+  /// that copies a venue's address onto the workshop rather than reading
+  /// through the relation.
+  balanceDueAt DateTime? @db.Date
 
   /// Days before the FIRST date that the run is still refundable in full. A
   /// course is bought once, so it is cancelled once.
@@ -271,6 +285,7 @@ model Course {
 
   images   CourseImage[]
   sessions CourseSession[]
+  bookings Booking[]
 
   /// Both lists that will exist — the portal's and the public index — split on
   /// published.
@@ -524,21 +539,39 @@ enum CancelReason {
   marianne
 }
 
-/// A place somebody has paid for.
+/// A place somebody has paid for, on a workshop or on a course.
 ///
 /// Written by ONE thing only — the Stripe webhook at
 /// `app/api/stripe/webhook`, on a signature-verified `checkout.session.completed`.
 /// Never by the browser coming back from Stripe: a success redirect can be
 /// forged, abandoned or lost, and a booking that exists because a URL was
 /// visited is a booking anybody can mint.
+///
+/// WHAT IS OWED IS HERE; WHAT CAME IN IS IN `Payment` BELOW. A workshop is one
+/// payment and a course on a deposit is two, so the amount actually received is
+/// the sum of its Payment rows and what is still outstanding is the difference.
+/// Neither is a column, because a column would be a figure somebody has to keep
+/// correct and arithmetic is not (D-23).
+///
+/// ONE OFFERING, AND EXACTLY ONE. Two nullable foreign keys with a CHECK
+/// constraint rather than a `kind` column and a bare integer: this way both
+/// relations are real, both are `Restrict`, and the database can refuse a
+/// booking that points at a workshop AND a course — or at neither. Services are
+/// not bookable and have no column here; when they are, they arrive as a third
+/// nullable key and one more branch in the same constraint.
 model Booking {
-  id Int @id @default(autoincrement())
-
-  workshopId Int
+  /// Null when this is a course booking.
+  workshopId Int?
   /// Restrict, not cascade. Deleting a workshop that people have paid for
   /// would delete the record of their money along with it; the portal refuses
   /// the delete instead and says why.
-  workshop   Workshop @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+  workshop   Workshop? @relation(fields: [workshopId], references: [id], onDelete: Restrict)
+
+  /// Null when this is a workshop booking. Restrict for the same reason.
+  courseId Int?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  id Int @id @default(autoincrement())
 
   /// As Stripe collected them at the checkout. We never ask for either on our
   /// own page — the whole promise of hosted checkout is that the card details,
@@ -548,21 +581,25 @@ model Booking {
 
   places Int
 
-  /// PENCE, as Stripe reported the completed session — not as we recomputed
-  /// it. What they actually paid is what has to be refunded, and a price
-  /// Marianne edited while somebody was at the checkout would make our figure
-  /// and theirs differ. The two are compared on the way in and a difference is
-  /// logged loudly.
-  amountPence Int
-  /// Lowercase ISO, as Stripe writes it: "gbp".
-  currency    String
+  /// PENCE — WHAT THE WHOLE THING COSTS, every place included. Not what has
+  /// been paid: a course bought on a deposit owes the rest of this until the
+  /// balance lands. On a workshop it is both, because a workshop is paid at
+  /// once.
+  ///
+  /// Worked out from the offering's own row at the moment the booking is made,
+  /// and never afterwards — a price Marianne edits next month must not change
+  /// what somebody already owes. The first payment's amount is compared
+  /// against it on the way in and a difference is logged loudly.
+  totalPence Int
 
-  /// The checkout session, which is the natural key of a payment: unique, so
-  /// a redelivered webhook cannot make a second booking out of one payment.
-  stripeSessionId       String  @unique
-  /// What a refund is issued against. Nullable only because Stripe types it
-  /// that way; a completed card session always has one.
-  stripePaymentIntentId String?
+  /// When the rest is due, COPIED from the course as it stood when the place
+  /// was taken. Null when nothing was ever outstanding — every workshop
+  /// booking, and a course with no deposit.
+  ///
+  /// This is what "overdue" is measured against, so it belongs to the booking
+  /// rather than being read through the course: moving the course's own date
+  /// afterwards must not move the date somebody already bought on.
+  balanceDueAt DateTime? @db.Date
 
   status BookingStatus
 
@@ -572,36 +609,108 @@ model Booking {
   /// cancel anybody's place or move their money.
   ///
   /// Resending the link therefore ISSUES A NEW ONE rather than reprinting the
-  /// old, which also retires the link in the old email. `issueCancellationToken`
+  /// old, which also retires the link in the old email. `issueLinkToken`
   /// in src/lib/bookings.ts is the only thing that writes this.
   cancellationTokenHash String @unique
+
+  /// The SHA-256 of the token in the /pay/<token> link, on the same terms.
+  /// Null when nothing was ever owed, because then there is no such link.
+  ///
+  /// A LINK OF OURS AND NEVER A STRIPE URL. A Checkout URL expires and becomes
+  /// a dead end in somebody's inbox; this address does not, because the page
+  /// behind it opens a fresh session on the click, and can also say "this was
+  /// already paid" or "this place has been released" (D-23).
+  balanceTokenHash String? @unique
 
   cancelledAt     DateTime?
   cancelledReason CancelReason?
 
-  /// What a refund needs to be traceable a year later, when somebody asks.
-  ///
-  /// INDEPENDENT OF `status`, on purpose. Usually a refund and a cancellation
-  /// happen together, but the portal lets Marianne send money back on a booking
-  /// she is NOT cancelling — somebody she has decided not to charge, who is
-  /// still coming. That row stays `paid`, so it keeps counting against the
-  /// room's capacity, and carries the refund as well. `refundId` being set is
-  /// therefore the only honest test of "has this money already gone back";
-  /// `status = cancelledRefunded` is a narrower question.
-  refundId      String?
-  refundedPence Int?
-  refundedAt    DateTime?
-
-  /// When Stripe says the payment completed, which is what the receipt line
-  /// on the confirmation page and in the email means by "paid on 14 Aug".
+  /// When the FIRST payment completed — the moment the place became theirs.
+  /// What the receipt line on the confirmation page and in the email mean by
+  /// "paid on 14 Aug". A second payment does not move it; it writes its own
+  /// row below.
   paidAt DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  /// Places sold is `sum(places) where status = paid` for one workshop, and it
-  /// is read on every public workshop page.
+  payments Payment[]
+
+  /// Places sold is `sum(places) where status = paid` for one offering, less
+  /// anything lapsed, and it is read on every public workshop and course page.
   @@index([workshopId, status])
+  @@index([courseId, status])
+}
+
+/// What a payment was for. Three kinds and no fourth, because the operator's
+/// decision is a deposit and a balance rather than instalments: `full` is the
+/// whole price at once, which is every workshop and a course with no deposit.
+/// Payment plans of n instalments are NOT this — they would need an ordering
+/// and a schedule, and neither exists here.
+enum PaymentKind {
+  deposit
+  balance
+  full
+}
+
+/// Money that actually arrived.
+///
+/// One row per completed Checkout Session, written inside the same transaction
+/// that records the Stripe event, so a redelivered webhook cannot make a second
+/// row out of one payment — and neither can two different events, because
+/// `stripeSessionId` is unique here exactly as it was on Booking before.
+///
+/// THE ARITHMETIC LIVES ON THESE ROWS. What has been paid is the sum of their
+/// amounts; what is outstanding is the booking's total less that sum; whether
+/// the money has gone back is whether every one of them carries a refund. None
+/// of it is a boolean anybody has to remember to update.
+model Payment {
+  id        Int     @id @default(autoincrement())
+  bookingId Int
+  /// Cascade, unlike the offerings above. Deleting a booking is only ever
+  /// reachable once it has been cancelled (D-18), and at that point the
+  /// payments are the record OF that booking rather than a record of their own
+  /// — the modal says in as many words that the payment reference goes with it.
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  kind PaymentKind
+
+  /// PENCE, as Stripe reported the completed session — not as we recomputed
+  /// it. What they were actually charged is what has to be refunded.
+  amountPence Int
+  /// Lowercase ISO, as Stripe writes it: "gbp".
+  currency    String
+
+  /// The checkout session this payment came from. Unique, so one session can
+  /// only ever become one payment however many times Stripe delivers it.
+  stripeSessionId       String  @unique
+  /// What a refund is issued against. Nullable only because Stripe types it
+  /// that way; a completed card session always has one.
+  stripePaymentIntentId String?
+
+  /// When Stripe says this one completed.
+  paidAt DateTime
+
+  /// What a refund needs to be traceable a year later, when somebody asks.
+  ///
+  /// PER PAYMENT, because a course refunded after both halves have landed is
+  /// two refunds against two payment intents, and one column on the booking
+  /// could hold only one of them. A refund is issued under the idempotency key
+  /// `refund-payment-<id>`, so repeating the call returns the refund that
+  /// already exists rather than moving money twice.
+  refundId      String?
+  refundedPence Int?
+  refundedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// A booking has at most one deposit, one balance and one full payment.
+  /// The kinds are the arrangement, so two of a kind is not a thing that can
+  /// be true — and this is what stops a second balance being taken if two
+  /// checkouts were somehow opened from one link.
+  @@unique([bookingId, kind])
+  @@index([bookingId])
 }
 
 /// What the webhook DID with an event, decided under the workshop's lock.
@@ -627,6 +736,18 @@ enum StripeEventOutcome {
   /// The workshop was gone by the time the payment was confirmed. No Booking
   /// to write; the payment is refunded and apologised for.
   workshopGone
+  /// The course was gone by the time the payment was confirmed. The same path
+  /// as `workshopGone` and a separate value because the two are different
+  /// events a year later, and one name for both would answer neither.
+  courseGone
+  /// A balance landed on a course booking and settled it. Its own value rather
+  /// than a second `booked`, because nothing was booked — a place that was
+  /// already held stopped being owed for.
+  settled
+  /// A balance arrived for a booking there was nothing left to settle: it had
+  /// been cancelled, or it had lapsed and the place had gone to somebody else.
+  /// The payment is refunded and both people are told.
+  balanceUnwanted
 }
 
 /// A Stripe event we have already acted on.

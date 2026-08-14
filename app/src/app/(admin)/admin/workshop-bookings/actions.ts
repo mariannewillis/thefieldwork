@@ -6,8 +6,9 @@ import {
   cancelBookingFromPortal,
   deleteBookingFromPortal,
   findBookingById,
+  offeringOf,
   refundBookingFromPortal,
-  type BookingWithWorkshop,
+  type BookingWithOffering,
 } from "@/lib/bookings";
 import {
   cancellationEmail,
@@ -60,7 +61,7 @@ async function requireSession() {
 }
 
 /** The booking as it is NOW, not as the page drew it. */
-async function reread(formData: FormData): Promise<BookingWithWorkshop | null> {
+async function reread(formData: FormData): Promise<BookingWithOffering | null> {
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return null;
   return findBookingById(id);
@@ -75,10 +76,11 @@ const GONE = "That booking is no longer here.";
  * without this she cancels somebody and the workshop page keeps showing the
  * room as full.
  */
-function revalidateEverywhere(booking: BookingWithWorkshop) {
+function revalidateEverywhere(booking: BookingWithOffering) {
+  const offering = offeringOf(booking);
   revalidatePath("/");
-  revalidatePath("/workshops");
-  revalidatePath(`/workshops/${booking.workshop.slug}`);
+  revalidatePath(offering.kind === "workshop" ? "/workshops" : "/courses");
+  revalidatePath(offering.href);
   revalidatePath("/admin/workshop-bookings");
   revalidatePath("/admin/offerings");
 }

@@ -106,7 +106,7 @@ export async function startCheckout(
     // payment (D-19).
     metadata: {
       workshopId: String(workshop.id),
-      workshopName: workshop.name,
+      offeringName: workshop.name,
       places: String(asked),
       [SITE_METADATA_KEY]: thisSite,
     },

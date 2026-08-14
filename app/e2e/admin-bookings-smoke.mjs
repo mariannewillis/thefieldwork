@@ -284,31 +284,44 @@ async function makeWorkshop({ slug, name, dayOffset, refundDays }) {
   return rows[0].id;
 }
 
-/** A booking put straight into the database, with the token we keep. */
+/**
+ * A booking put straight into the database, with the token we keep — and its
+ * money, on the Payment row where money now lives (D-23).
+ */
 async function seedBooking(workshopId, tag, extra = {}) {
   const token = randomBytes(32).toString("base64url");
   const hash = createHash("sha256").update(token).digest("hex");
+  const places = extra.places ?? 1;
   const { rows } = await db.query(
     `INSERT INTO "Booking"
-       ("workshopId","buyerName","buyerEmail",places,"amountPence",currency,
-        "stripeSessionId","stripePaymentIntentId",status,"cancellationTokenHash",
-        "paidAt","cancelledAt","cancelledReason","refundId","refundedPence",
-        "refundedAt","updatedAt")
-     VALUES ($1,$2,$3,$4,9500,'gbp',$5,$6,$7,$8,now(),$9,$10,$11,$12,$13,now())
+       ("workshopId","buyerName","buyerEmail",places,"totalPence",status,
+        "cancellationTokenHash","paidAt","cancelledAt","cancelledReason","updatedAt")
+     VALUES ($1,$2,$3,$4,$5,$6,$7,now(),$8,$9,now())
      RETURNING id`,
     [
       workshopId,
       extra.name ?? `Smoke ${tag}`,
       BUYER,
-      extra.places ?? 1,
-      `cs_smoke_ledger_${tag}_${Date.now()}`,
-      `pi_smoke_ledger_${tag}`,
+      places,
+      9500 * places,
       extra.status ?? "paid",
       hash,
       extra.status && extra.status !== "paid" ? new Date() : null,
       extra.status && extra.status !== "paid"
         ? (extra.reason ?? "buyer")
         : null,
+    ],
+  );
+  await db.query(
+    `INSERT INTO "Payment"
+       ("bookingId",kind,"amountPence",currency,"stripeSessionId",
+        "stripePaymentIntentId","paidAt","refundId","refundedPence","refundedAt","updatedAt")
+     VALUES ($1,'full',$2,'gbp',$3,$4,now(),$5,$6,$7,now())`,
+    [
+      rows[0].id,
+      9500 * places,
+      `cs_smoke_ledger_${tag}_${Date.now()}`,
+      `pi_smoke_ledger_${tag}`,
       extra.refundId ?? null,
       extra.refundedPence ?? null,
       extra.refundId ? new Date() : null,
@@ -317,10 +330,30 @@ async function seedBooking(workshopId, tag, extra = {}) {
   return rows[0].id;
 }
 
-const bookingRow = (id) =>
-  db
-    .query(`SELECT * FROM "Booking" WHERE id = $1`, [id])
-    .then((r) => r.rows[0]);
+/**
+ * A booking as the database has it, with its payments folded back in so the
+ * assertions below can go on asking about `refundId` and `refundedPence` in one
+ * place. A workshop booking has exactly one payment, so the fold is a read.
+ */
+const bookingRow = async (id) => {
+  const { rows } = await db.query(`SELECT * FROM "Booking" WHERE id = $1`, [
+    id,
+  ]);
+  if (!rows[0]) return undefined;
+  const { rows: paid } = await db.query(
+    `SELECT * FROM "Payment" WHERE "bookingId" = $1 ORDER BY id`,
+    [id],
+  );
+  return {
+    ...rows[0],
+    payments: paid,
+    amountPence: paid.reduce((sum, one) => sum + one.amountPence, 0),
+    refundId: paid.find((one) => one.refundId)?.refundId ?? null,
+    refundedPence:
+      paid.reduce((sum, one) => sum + (one.refundedPence ?? 0), 0) || null,
+    refundedAt: paid.find((one) => one.refundedAt)?.refundedAt ?? null,
+  };
+};
 
 /** The most recent email the log shows going to one address, in full. */
 function emailTo(log, address) {
@@ -483,7 +516,7 @@ try {
   const body = await page.locator("main").innerText();
   ok(
     "the headline answers the one question with real figures",
-    /live bookings are for days that haven/.test(body) &&
+    /live bookings are for things that haven/.test(body) &&
       body.includes("you are holding"),
     body.split("\n").slice(0, 6).join(" | "),
   );
@@ -512,17 +545,20 @@ try {
     (await page.locator("#upcoming-table thead").innerText())
       .replace(/\s+/g, " ")
       .toLowerCase()
-      .startsWith("name email type offering deposit courses only paid"),
+      .startsWith("name email type offering deposit courses only held"),
     (await page.locator("#upcoming-table thead").innerText()).replace(
       /\s+/g,
       " ",
     ),
   );
+  // The Type cell is set in uppercase by the stylesheet, so innerText gives it
+  // back as WORKSHOP — the assertion has to ask for what is drawn.
   ok(
-    "Type says Workshop on every row and the page says why once",
-    body.includes(
-      "Type reads Workshop on every row because a workshop is the only thing",
-    ) && body.includes("Deposit is empty"),
+    "Type says Workshop on every row, and the page says once why Deposit is empty",
+    body.includes("WORKSHOP") &&
+      !body.includes("SERVICE") &&
+      body.includes("Deposit is empty on a workshop") &&
+      body.includes("Type never reads Service"),
   );
   ok(
     "each row states its own workshop's refund period",
@@ -592,9 +628,13 @@ try {
       call.params.payment_intent === "pi_smoke_ledger_refundit",
     JSON.stringify(call?.params),
   );
+  // The key is the PAYMENT now, not the booking (D-23): a settled course is two
+  // payments against two intents, and one key for the pair could only ever
+  // guard one of them.
+  const annaPayment = (await bookingRow(id.refundIt)).payments[0];
   ok(
-    "under the booking's own idempotency key, so a repeat moves nothing twice",
-    call.options.idempotencyKey === `refund-booking-${id.refundIt}`,
+    "under that payment's own idempotency key, so a repeat moves nothing twice",
+    call.options.idempotencyKey === `refund-payment-${annaPayment.id}`,
     call?.options?.idempotencyKey,
   );
   const annaMail = emailTo(server.out(), BUYER);
@@ -730,7 +770,7 @@ try {
   // The refund is backdated an hour so this is the real shape of that case
   // rather than two things happening in the same second.
   await db.query(
-    `UPDATE "Booking" SET "refundedAt" = now() - interval '1 hour' WHERE id = $1`,
+    `UPDATE "Payment" SET "refundedAt" = now() - interval '1 hour' WHERE "bookingId" = $1`,
     [id.comp],
   );
   await page.reload();
@@ -884,8 +924,13 @@ try {
   // booking has gone back to being live since it was drawn. The server reads
   // the booking again and refuses — a disabled button is a courtesy, not a rule.
   await db.query(
-    `UPDATE "Booking" SET status='paid', "cancelledAt"=null, "cancelledReason"=null,
-       "refundId"=null, "refundedPence"=null, "refundedAt"=null WHERE id=$1`,
+    `UPDATE "Booking" SET status='paid', "cancelledAt"=null, "cancelledReason"=null
+       WHERE id=$1`,
+    [id.done],
+  );
+  await db.query(
+    `UPDATE "Payment" SET "refundId"=null, "refundedPence"=null, "refundedAt"=null
+       WHERE "bookingId"=$1`,
     [id.done],
   );
   await (

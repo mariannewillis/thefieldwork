@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import { cancelPage, siteFooterLine } from "@/content/workshops";
 import {
   findBookingByToken,
+  heldPence,
   isRefundable,
+  offeringOf,
+  outstandingPence,
+  paidPence,
   refundOwed,
-  type BookingWithWorkshop,
+  type BookingWithOffering,
 } from "@/lib/bookings";
+import { runShape } from "@/lib/course-run";
 import {
   formatDayLong,
   formatDayShort,
@@ -53,24 +58,33 @@ function Receipt({
   booking,
   showPaid,
 }: {
-  booking: BookingWithWorkshop;
+  booking: BookingWithOffering;
   showPaid: boolean;
 }) {
-  const { workshop } = booking;
+  const offering = offeringOf(booking);
+  // A workshop reads as one dated line; a course reads as the shape of its run,
+  // because "Wed 7 Oct · 19:00" is the first of four and saying only that
+  // would name the wrong commitment.
+  const run = offering.kind === "course" ? runShape(offering.dates) : null;
+  const one = offering.dates[0];
+
   return (
     <div className="receipt mt-7 pl-5">
       <p className="font-display text-[26px] leading-tight text-ink">
-        {workshop.name}
+        {offering.name}
       </p>
       <p className="mt-2 fig font-mono text-[17px] text-ink-soft">
-        {formatDayShort(workshop.date)} &middot; {workshop.startTime}
-        {workshop.endTime ? `–${workshop.endTime}` : ""}
+        {run
+          ? `${run.words} · ${run.span}`
+          : one
+            ? `${formatDayShort(one.date)} · ${one.startTime}${one.endTime ? `–${one.endTime}` : ""}`
+            : formatDayShort(offering.firstDate)}
         <br />
-        {workshop.venueName}
+        {offering.venueName}
         <br />
         {booking.places} {booking.places === 1 ? "place" : "places"} &middot;{" "}
         {showPaid
-          ? `${formatMoney(booking.amountPence)} paid on ${formatInstant(booking.paidAt)}`
+          ? `${formatMoney(paidPence(booking))} paid on ${formatInstant(booking.paidAt)}`
           : `cancelled on ${formatInstant(booking.cancelledAt ?? booking.updatedAt)}`}
       </p>
     </div>
@@ -149,7 +163,17 @@ export default async function Page({
     );
   }
 
-  const { workshop } = booking;
+  const offering = offeringOf(booking);
+  const paid = paidPence(booking);
+  const held = heldPence(booking);
+
+  // The most recent refund on any of this booking's payments — a course
+  // settled and then cancelled has two, and the later of them is the one the
+  // sentence below means by "was refunded on".
+  const refundedOn = booking.payments
+    .map((one) => one.refundedAt)
+    .filter((at): at is Date => at !== null)
+    .sort((one, other) => other.getTime() - one.getTime())[0];
 
   // ── STATE 3 · already cancelled ───────────────────────────────────────────
   if (booking.status !== "paid") {
@@ -167,9 +191,8 @@ export default async function Page({
           <>
             <p className="mt-7 border-l-2 border-pool-success bg-pool-success/10 px-4 py-4 text-[19px] leading-relaxed text-ink">
               <strong className="font-semibold">
-                {formatMoney(booking.refundedPence ?? booking.amountPence)} was
-                refunded on{" "}
-                {formatInstant(booking.refundedAt ?? booking.cancelledAt!)}
+                {formatMoney(paid)} was refunded on{" "}
+                {formatInstant(refundedOn ?? booking.cancelledAt!)}
               </strong>{" "}
               to the card you paid with. Nothing further is needed from you.
             </p>
@@ -190,8 +213,8 @@ export default async function Page({
              somebody money. */
           <p className="mt-7 border-l-2 border-pool-error bg-pool-error/10 px-4 py-4 text-[19px] leading-relaxed text-ink">
             <strong className="font-semibold">
-              {formatMoney(booking.amountPence)} is owed back to you and the
-              refund did not go through.
+              {formatMoney(held)} is owed back to you and the refund did not go
+              through.
             </strong>{" "}
             Marianne has been told and will return it by hand. Nothing is needed
             from you.
@@ -203,21 +226,31 @@ export default async function Page({
           </p>
         )}
 
+        {/* Back to the list this one came from. Sending somebody who has just
+            given up a course to the workshops page would be answering a
+            question they did not ask. */}
         <a
-          href="/workshops"
+          href={offering.kind === "workshop" ? "/workshops" : "/courses"}
           className="t mt-8 flex min-h-[56px] w-full items-center justify-center border border-ink px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
         >
-          {cancelPage.doneOther}
+          {offering.kind === "workshop"
+            ? cancelPage.doneOther
+            : "See the other courses"}
         </a>
       </Shell>
     );
   }
 
-  // The same date the workshop page and the confirmation email print, worked
-  // out from this workshop's OWN refundDays. Null means it was never
-  // refundable, which is a real answer and not a missing one.
-  const deadline = refundDeadline(workshop.date, workshop.refundDays);
-  const refundable = isRefundable(workshop);
+  // The same date the offering's own page and the confirmation email print,
+  // worked out from its OWN refundDays and counted back from the first date.
+  // Null means it was never refundable, which is a real answer and not a
+  // missing one.
+  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+  const refundable = isRefundable(offering);
+  // What a course still owes stops being owed the moment the place goes back.
+  // Said out loud, because somebody who has paid a deposit and is cancelling
+  // wants to know they are not about to be chased for the rest.
+  const owedNoMore = outstandingPence(booking);
 
   return (
     <Shell>
@@ -227,6 +260,21 @@ export default async function Page({
 
       <Receipt booking={booking} showPaid={true} />
 
+      {/* Said before either branch, because it is true in both and it is the
+          first thing somebody halfway through a course's payments will want to
+          know: giving the place up ends the arrangement, and nobody will ask
+          for the rest afterwards. */}
+      {owedNoMore > 0 && (
+        <p className="mt-7 text-[19px] leading-relaxed text-ink">
+          {formatMoney(owedNoMore)} of this is still to pay
+          {booking.balanceDueAt
+            ? `, by ${formatDayLong(booking.balanceDueAt)}`
+            : ""}
+          . Cancelling ends that &mdash; the balance stops being due and you
+          will not be asked for it.
+        </p>
+      )}
+
       {refundable ? (
         /* ── STATE 1 · within the refund window ───────────────────────────
            The money is stated in full before the button. "You will be
@@ -234,13 +282,14 @@ export default async function Page({
            booking" is not. */
         <>
           <p className="mt-7 text-[19px] leading-relaxed text-ink">
-            You are {workshop.refundDays} days clear of the workshop, so
-            cancelling now returns your money in full.
+            You are {offering.refundDays}{" "}
+            {offering.refundDays === 1 ? "day" : "days"} clear of{" "}
+            {offering.kind === "workshop" ? "the workshop" : "the first date"},
+            so cancelling now returns your money in full.
           </p>
           <p className="mt-4 text-[19px] leading-relaxed text-ink">
             <strong className="font-semibold">
-              {formatMoney(booking.amountPence)} will go back to the card you
-              paid with.
+              {formatMoney(paid)} will go back to the card you paid with.
             </strong>{" "}
             Stripe usually takes five to ten working days to show it.
           </p>
@@ -255,16 +304,13 @@ export default async function Page({
               {booking.places === 1
                 ? "this place"
                 : `all ${booking.places} places`}{" "}
-              and refund {formatMoney(booking.amountPence)}
+              and refund {formatMoney(paid)}
             </button>
           </form>
 
           <p className="mt-5 text-[17px] leading-relaxed text-ink-soft">
             {cancelPage.keepInstead}{" "}
-            <a
-              href={`/workshops/${workshop.slug}`}
-              className="text-action underline"
-            >
+            <a href={offering.href} className="text-action underline">
               {cancelPage.keepLink}
             </a>
             .
@@ -289,7 +335,7 @@ export default async function Page({
               </>
             )}{" "}
             <strong className="font-semibold">
-              not return your {formatMoney(booking.amountPence)}
+              not return your {formatMoney(paid)}
             </strong>
             .
           </p>

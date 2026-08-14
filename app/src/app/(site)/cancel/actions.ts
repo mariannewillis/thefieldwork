@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import {
   cancelBooking,
+  coursePlacesSold,
   findBookingByToken,
+  offeringOf,
   placesLeft,
   placesSold,
 } from "@/lib/bookings";
@@ -39,6 +41,7 @@ export async function cancelPlace(formData: FormData): Promise<void> {
   const booking = await findBookingByToken(token);
   if (!booking) return;
 
+  const offering = offeringOf(booking);
   const result = await cancelBooking(booking);
 
   // Both endings are told about: the ordinary one, and the one where the place
@@ -46,10 +49,11 @@ export async function cancelPlace(formData: FormData): Promise<void> {
   // booking, so neither can claim a refund that failed. Only "alreadyCancelled"
   // stays silent — somebody has already had both of these.
   if (result.outcome === "cancelled" || result.outcome === "refundFailed") {
-    const left = placesLeft(
-      booking.workshop.capacity,
-      await placesSold(booking.workshopId),
-    );
+    const sold =
+      offering.kind === "workshop"
+        ? await placesSold(offering.id)
+        : await coursePlacesSold(offering.id);
+    const left = placesLeft(offering.capacity, sold);
     await sendBookingMail(cancellationEmail(result.booking), "cancellation");
     await sendBookingMail(
       cancellationNoticeEmail(result.booking, left),
@@ -58,7 +62,7 @@ export async function cancelPlace(formData: FormData): Promise<void> {
   }
 
   // The place is back, so every page that counts places is now wrong.
-  revalidatePath("/workshops");
-  revalidatePath(`/workshops/${booking.workshop.slug}`);
+  revalidatePath(offering.kind === "workshop" ? "/workshops" : "/courses");
+  revalidatePath(offering.href);
   revalidatePath("/");
 }

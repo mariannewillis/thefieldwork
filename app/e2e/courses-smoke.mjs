@@ -123,8 +123,19 @@ await page.fill(
 );
 await page.fill('[name="price"]', "240");
 await page.fill('[name="deposit"]', "60");
+// The day the rest is due — hers, per course, beside the deposit it belongs
+// to. The dates below start on 7 October, so this sits a fortnight ahead of
+// them; the save refuses anything later than the first date.
+await page.fill('[name="balanceDueAt"]', "2026-09-23");
 await page.fill('[name="capacity"]', "8");
 await page.fill('[name="refundDays"]', "14");
+ok(
+  "the deposit and its date say what they add up to, as she types",
+  (await page.locator("text=/Which takes/").first().textContent())?.includes(
+    "£60 at booking, and £180 by Wednesday 23 September",
+  ),
+  await page.locator("text=/Which takes/").first().textContent(),
+);
 
 // The saved place fills the four address fields in one press.
 await page.getByRole("button", { name: "The Garden Room" }).click();
@@ -246,6 +257,7 @@ ok(
 );
 ok("the price", (await val("price")) === "240");
 ok("the deposit", (await val("deposit")) === "60");
+ok("the day the rest is due", (await val("balanceDueAt")) === "2026-09-23");
 ok("the places", (await val("capacity")) === "8");
 ok("the refund window", (await val("refundDays")) === "14");
 ok("the place", (await val("venueName")) === "The Garden Room");
@@ -313,12 +325,60 @@ ok(
   await page.locator("text=/last day to cancel/").first().textContent(),
 );
 
+// ── 6a. a deposit needs a day the rest is due by ───────────────────────
+//
+// The two halves of one arrangement. A deposit with no date would take part of
+// the price and nothing would ever ask for the rest, so it cannot go on the
+// site — and a date after the run has started is money owed by somebody who is
+// already attending, which is not what "the rest is due by" means.
+console.log("\nThe deposit and its date");
+const balanceError = () =>
+  page
+    .locator('[name="balanceDueAt"]')
+    .locator("xpath=ancestor::div[1]")
+    .locator('[role="alert"]')
+    .first()
+    .textContent();
+
+/**
+ * Save, and wait until the rejected form has finished redrawing itself.
+ *
+ * A bounced save REMOUNTS the whole form (see the `key={state.attempt}` note in
+ * CourseForm) so that nothing typed is lost. The "needs another look" line
+ * appears before that remount has settled, so anything typed between the two
+ * is wiped a moment later — which is a race in the test, not in the form. The
+ * short settle is for the remount and nothing else.
+ */
+async function saveAndBounce() {
+  await page.getByRole("button", { name: "Save this course" }).click();
+  await page.waitForSelector("text=/needs another look/", { timeout: 15000 });
+  await page.waitForTimeout(900);
+}
+
+await page.fill('[name="balanceDueAt"]', "2026-10-28");
+await saveAndBounce();
+ok(
+  "a balance date after the run starts is refused, and names the day it starts",
+  (await balanceError())?.includes("21 October"),
+  await balanceError(),
+);
+
+await page.fill('[name="balanceDueAt"]', "");
+await page.check('[name="published"]');
+await saveAndBounce();
+ok(
+  "and a deposit with no date at all cannot go on the site",
+  (await balanceError())?.includes("A deposit needs a day the rest is due by"),
+  await balanceError(),
+);
+await page.uncheck('[name="published"]');
+await page.fill('[name="balanceDueAt"]', "2026-09-23");
+
 // ── 6. publishing needs a name on every date ──────────────────────────────
 console.log("\nThe publish gate");
 await page.fill('[name="run-1-title"]', "");
 await page.check('[name="published"]');
-await page.getByRole("button", { name: "Save this course" }).click();
-await page.waitForSelector("text=/needs another look/", { timeout: 15000 });
+await saveAndBounce();
 ok(
   "a date with no name stops it going live",
   path() === "/admin/offerings/courses/attention-week-by-week",

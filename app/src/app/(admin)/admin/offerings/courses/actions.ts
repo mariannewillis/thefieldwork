@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/server";
 import { parseFilm, type Film } from "@/lib/film";
+import { formatDayLong } from "@/lib/format";
 import {
   collectImages,
   collectValues,
@@ -208,6 +209,21 @@ export async function saveCourse(
       "A deposit is part of the price, so it cannot be more than the price.";
   }
 
+  // When the rest is due. HERS, per course, beside the deposit it belongs to —
+  // and deliberately not a site-wide "28 days before" rule the portal decided
+  // on her behalf. Read here and checked against the run below, once the dates
+  // have been collected.
+  const balanceSource = (values.balanceDueAt ?? "").trim();
+  let balanceDueAt: Date | null = null;
+  if (balanceSource) {
+    if (Number.isNaN(Date.parse(`${balanceSource}T00:00:00Z`))) {
+      errors.balanceDueAt =
+        "That is not a date this understands. Use the date picker.";
+    } else {
+      balanceDueAt = new Date(`${balanceSource}T00:00:00Z`);
+    }
+  }
+
   const capacity = parseWholeNumber(values.capacity ?? "", 1);
   if (capacity === null) {
     errors.capacity =
@@ -238,6 +254,23 @@ export async function saveCourse(
   const { run, errors: runErrors } = collectRun(formData);
   Object.assign(errors, runErrors);
 
+  // ── the deposit and its date are one arrangement ──────────────────────────
+  //
+  // Checked here rather than only on publish where BOTH halves are present but
+  // disagree, because that is a mistake she can see and fix now. The half that
+  // is simply not filled in yet is a draft, and drafts are allowed until she
+  // tries to put one on the site.
+  if (balanceDueAt && !depositPence) {
+    errors.balanceDueAt =
+      "There is no deposit on this course, so there is nothing left to be due later. Either put a deposit in above, or clear this date and the whole price is taken at once.";
+  }
+  if (balanceDueAt && run.length > 0 && balanceDueAt > run[0].date) {
+    // The run's first date is the ceiling, not the last: money owed for a
+    // course somebody has already started attending is a debt, not a deposit,
+    // and it is not what she means by "the rest is due by".
+    errors.balanceDueAt = `The run starts on ${formatDayLong(run[0].date)}, so the rest has to be paid by then at the latest. Put a date on or before it.`;
+  }
+
   const { images, errors: imageErrors } = collectImages(formData);
   Object.assign(errors, imageErrors);
 
@@ -256,6 +289,13 @@ export async function saveCourse(
     if (run.length === 0) {
       errors.run =
         "A course is a run of dates, and this one has none. Put the dates in below — a course with nothing in the diary is a draft, not a page.";
+    }
+    // A deposit with no date to settle by is an arrangement with no second
+    // half: the checkout would take part of the price and nothing would ever
+    // ask for the rest. So it is not a thing that can go on sale.
+    if (depositPence && !balanceDueAt && !errors.balanceDueAt) {
+      errors.balanceDueAt =
+        "A deposit needs a day the rest is due by, or nothing ever asks for it. Put a date in — on or before the first date of the run.";
     }
     for (const one of run) {
       if (one.title) continue;
@@ -325,6 +365,10 @@ export async function saveCourse(
     // £0" are the same arrangement, and one of the two spellings would
     // eventually be read as the other.
     depositGBP: depositPence || null,
+    // And the date goes with it. Taking the deposit off clears the date rather
+    // than leaving it behind, because a day the rest is due on a course that
+    // takes the whole price at once is a fact about nothing.
+    balanceDueAt: depositPence ? balanceDueAt : null,
     refundDays: refundDays as number,
     heroImage: heroImage || null,
     heroAlt: heroImage ? heroAlt : null,
@@ -367,11 +411,11 @@ export type DeleteState = { error: string | null };
 /**
  * Deleting a course.
  *
- * Its dates and its pictures go with it, by the cascade on both relations.
- * Nothing refuses this the way `deleteWorkshop` refuses a workshop somebody
- * has paid for: courses are not on sale, so there is no money on this side to
- * take a record of down with it. When they are, this needs the same guard, for
- * the same reason.
+ * Its dates and its pictures go with it, by the cascade on both relations. What
+ * does NOT go with it is a booking: a course can be bought now (D-23), so this
+ * refuses exactly as `deleteWorkshop` does, and the database refuses too
+ * (`onDelete: Restrict`). Deleting a course somebody has paid a deposit on
+ * would take the record of their money down with it.
  */
 export async function deleteCourse(
   _prev: DeleteState,
@@ -385,6 +429,18 @@ export async function deleteCourse(
   const course = await prisma.course.findUnique({ where: { id } });
   if (!course) return { error: "That course no longer exists." };
 
+  // Every booking counts here, cancelled ones included: a cancelled booking is
+  // the record of a refund, and that has to survive the run it was for.
+  const held = await prisma.booking.count({ where: { courseId: id } });
+  if (held > 0) {
+    return {
+      error:
+        held === 1
+          ? "Somebody has booked a place on this one, so it cannot be deleted — the record of what they paid would go with it. Cancel and refund them in Bookings first, or take this off the site instead."
+          : `${held} people have booked places on this one, so it cannot be deleted — the record of what they paid would go with it. Cancel and refund them in Bookings first, or take this off the site instead.`,
+    };
+  }
+
   await prisma.course.delete({ where: { id } });
 
   revalidateCourse(course.slug);
@@ -394,12 +450,19 @@ export async function deleteCourse(
 /**
  * Everything that changes when a course does.
  *
- * Only the portal's own list, for now. The public courses pages are not built
- * yet, so there is nothing prerendered under /courses to go stale — when there
- * is, this is where "/", "/courses" and "/courses/<slug>" go, exactly as
- * `revalidateWorkshop` lists them for workshops.
+ * The public pages are prerendered and would otherwise keep serving what they
+ * were built with — which is the whole failure this closes: she saves, looks at
+ * the site, and sees yesterday. The old address is passed when the slug has
+ * moved, so the page that no longer exists stops being served from the cache as
+ * though it did.
  */
 function revalidateCourse(slug: string, previousSlug?: string) {
+  revalidatePath("/");
+  revalidatePath("/courses");
+  revalidatePath(`/courses/${slug}`);
+  if (previousSlug && previousSlug !== slug) {
+    revalidatePath(`/courses/${previousSlug}`);
+  }
   revalidatePath("/admin/offerings");
   revalidatePath(`/admin/offerings/courses/${slug}`);
   if (previousSlug && previousSlug !== slug) {

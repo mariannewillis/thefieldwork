@@ -89,31 +89,82 @@ export const courseDetail = {
     forTheRun: "for the whole run",
     ifYouCannotCome: "If you cannot come",
 
+    /** The approved screen's own words, now that there is something behind them. */
+    quantityLabel: "How many places",
+    fewer: "One fewer place",
+    more: "One more place",
+    onTheWay: "Taking you to pay…",
+    cardDetails:
+      "Payment is taken by Stripe. Your card details are typed on their page and never reach this site.",
+
     /**
-     * Where the button is on the approved screen, which draws "Pay the deposit
-     * · £80". There is no checkout for a run of dates — no payment, no deposit
-     * charged, no course bookings anywhere — so the button is not drawn and
-     * this stands in its place. The panel stays, because the price, the deposit
-     * she has set, what the room holds and the date a place could be cancelled
-     * by are all real and are what somebody deciding needs to see (D-9, and the
-     * same shape the workshop panel used before Stripe landed).
+     * Where the button is when this server cannot take money at all — no Stripe
+     * keys, or only half of them (see src/lib/stripe.ts). It says what it is
+     * instead of pretending, which is the same move the workshop panel makes.
      */
     notLiveEyebrow: "Not open yet",
     notLiveTitle: "You cannot book a course online yet.",
     notLiveBody:
-      "Booking a run of dates is not built. Everything else on this page is real — the dates, the room, the price, the deposit and the date you could cancel by. Write to Marianne if you would like a place held.",
+      "This site cannot take a payment at the moment. Everything else on this page is real — the dates, the room, the price, the deposit and the date you could cancel by. Write to Marianne if you would like a place held.",
 
-    /**
-     * Said ONCE on the page, beside the figure it qualifies. A workshop counts
-     * places left from paid bookings; a course has no bookings to count, so the
-     * page prints what the room holds and says where the other figure will come
-     * from rather than inventing a number of places sold.
-     */
-    placesNote:
-      "That is what the room holds. How many are left will be counted from bookings, as it is on a workshop, once a course can be booked.",
+    fullTitle: "This run is full.",
+    fullBody:
+      "Every place has gone. A course runs two or three times a year, and the next dates go up about two months ahead.",
+    fullLink: "See the other courses",
+
+    pastTitle: "This run has finished.",
+    pastBody:
+      "The last of these dates has been. The next run goes up about two months before it starts.",
 
     depositLabel: "Deposit",
-    /** Stored by the form, charged by nothing. Saying so is the whole point. */
-    depositNote: "Nothing charges it yet.",
+    /** What the deposit arrangement actually is, said where it is decided. */
+    depositNote: "the rest by",
+    balanceNote:
+      "The link to pay the rest is in your confirmation email, and it works from the day you book. If the balance is not paid by that date the place is released.",
+    /** A course with no deposit. One payment, and it says so. */
+    paidInFullNote: "The whole price is taken when you book.",
   },
+} as const;
+
+/**
+ * The page a balance link opens — /pay/<token>.
+ *
+ * The sibling of `cancelPage` in `src/content/workshops.ts`, and shaped the
+ * same way, because it is the same kind of page: something reached only from a
+ * link in an email, that has to be right in four or five different states and
+ * say the same sentence for every way a link can be dead.
+ */
+export const payPage = {
+  /** The ground photograph. The same settled plate the confirmation uses. */
+  plate: {
+    src: "work-wide-the-room",
+    alt: "",
+  },
+
+  title: "The rest of your place",
+  overdueTitle: "This was due — and the place is still here",
+  doneTitle: "This one is already paid in full",
+  releasedTitle: "This place has been released",
+  cancelledTitle: "This place was cancelled",
+
+  deadTitle: "This link has expired",
+  deadBody:
+    "It may have been replaced by a newer one, or the run it belonged to may have finished. If you think that is wrong,",
+  deadBodyLink: "write to Marianne",
+  deadBodyAfter: "and she will sort it out.",
+
+  contact: "marianne@thefieldwork.co.uk",
+
+  doneBody:
+    "There is nothing left to pay. The link to cancel is in your first email, and its terms have not changed.",
+  releasedBody:
+    "The balance was not paid by the date it was due, so the place went back into the room and somebody else has taken it. Nothing further has been charged.",
+  cancelledBody:
+    "This place was given up, so there is nothing left to pay. Anything that was owed back to you is dealt with separately.",
+
+  writeToHer: "If you would still like a place,",
+  writeToHerLink: "write to Marianne",
+  writeToHerAfter: "and she will tell you what there is.",
+
+  seeCourses: "See the courses",
 } as const;

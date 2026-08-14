@@ -47,22 +47,28 @@ export type LedgerRow = {
   reference: string;
   buyerName: string;
   places: number;
-  amountPence: number;
+  /** PENCE she is holding — what a refund would actually send back. */
+  heldPence: number;
+  /** PENCE that ever arrived, refunds included. */
+  paidPence: number;
   status: "paid" | "cancelledRefunded" | "cancelledUnrefunded";
   cancelledAt: Date | null;
-  refundedPence: number | null;
+  /** The most recent refund on any of this booking's payments. */
   refundedAt: Date | null;
-  /** Money has gone back, whatever the status says. */
+  /** Nothing left to send back, whatever the status says. */
   refunded: boolean;
   /** Cancelled, and the money is still with her. */
   owed: boolean;
-  workshopName: string;
-  workshopDate: Date;
+  /** Which of the two this is. It changes two sentences and no rules. */
+  kind: "workshop" | "course";
+  offeringName: string;
+  /** The day, or the first day of a run. */
+  offeringDate: Date;
   refundDays: number;
   refundDeadline: Date | null;
-  /** The day has been and gone. */
+  /** The day — or the last date of the run — has been and gone. */
   dayHasBeen: boolean;
-  /** Still inside this workshop's own refund period, as of now. */
+  /** Still inside this offering's own refund period, as of now. */
   insidePeriod: boolean;
 };
 
@@ -234,9 +240,15 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
     if (deleteState.done) setOpen(null);
   }, [deleteState.done]);
 
-  const money = formatMoney(booking.amountPence);
+  // What a refund would send back — never the price. On a course cancelled
+  // between the deposit and the balance those are different figures, and
+  // promising the price is promising money that never arrived.
+  const money = formatMoney(booking.heldPence);
   const who = booking.buyerName;
-  const day = formatDayShort(booking.workshopDate);
+  const day = formatDayShort(booking.offeringDate);
+  // A workshop IS on a day; a course STARTS on one. One word, and getting it
+  // wrong makes the modal read as though the run were a single evening.
+  const isOn = booking.kind === "workshop" ? "is on" : "starts on";
   const thePlaces =
     booking.places === 1 ? "place" : `all ${booking.places} places`;
   const live = booking.status === "paid";
@@ -249,14 +261,14 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
   const canCancel = live && !booking.dayHasBeen;
   const cancelWhyNot = !live
     ? `Cancel is spent — this booking was already cancelled${booking.cancelledAt ? ` on ${formatInstant(booking.cancelledAt)}` : ""}.`
-    : "Cancel is spent — that day has already been, so there is no place left to release. You can still send the money back.";
+    : `Cancel is spent — that ${booking.kind === "workshop" ? "day" : "run"} has already been, so there is no place left to release. You can still send the money back.`;
 
   const canRefund = !booking.refunded;
   const refundWhyNot = `Refund is spent — the money already went back${booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}. There is nothing left to send.`;
 
   const canDelete = !live;
   const deleteWhyNot = booking.dayHasBeen
-    ? "Delete stays out of reach — it is available once a booking is cancelled, and a day that has been cannot be cancelled, so this record stays."
+    ? `Delete stays out of reach — it is available once a booking is cancelled, and a ${booking.kind === "workshop" ? "day" : "run"} that has been cannot be cancelled, so this record stays.`
     : "Delete stays out of reach until this booking has been cancelled. It never acts on a place somebody is still holding.";
 
   /** A control that cannot be used says so out loud, in the row. */
@@ -284,7 +296,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
                   ? "Cancel — still inside this offering's refund period, so you will be asked whether to send the money back"
                   : "Cancel — past this offering's refund period, so the place is released and no money goes back"
             }
-            aria-label={`Cancel ${who}'s ${thePlaces} on ${booking.workshopName}, ${day}`}
+            aria-label={`Cancel ${who}'s ${thePlaces} on ${booking.offeringName}, ${day}`}
           >
             <CancelIcon />
           </button>
@@ -307,7 +319,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
             onClick={() => ask("refund")}
             className={LIVE_REFUND}
             title="Refund — send the money back on its own"
-            aria-label={`Refund ${money} to ${who} for ${booking.workshopName}, ${day}`}
+            aria-label={`Refund ${money} to ${who} for ${booking.offeringName}, ${day}`}
           >
             <RefundIcon />
           </button>
@@ -330,7 +342,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
             onClick={() => ask("delete")}
             className={LIVE_DELETE}
             title="Delete — remove this record for good"
-            aria-label={`Delete ${who}'s booking on ${booking.workshopName}, ${day}, from the records`}
+            aria-label={`Delete ${who}'s booking on ${booking.offeringName}, ${day}, from the records`}
           >
             <DeleteIcon />
           </button>
@@ -380,8 +392,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               Release {who}&rsquo;s {thePlaces}?
             </h2>
             <p className={BODY}>
-              You sent{" "}
-              {formatMoney(booking.refundedPence ?? booking.amountPence)} back
+              You sent {formatMoney(booking.paidPence)} back
               {booking.refundedAt
                 ? ` on ${formatInstant(booking.refundedAt)}`
                 : ""}{" "}
@@ -404,8 +415,9 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               back?
             </h2>
             <p className={BODY}>
-              {booking.workshopName} is on {formatDayLong(booking.workshopDate)}{" "}
-              and its refund period runs for {booking.refundDays} days, until{" "}
+              {booking.offeringName} {isOn}{" "}
+              {formatDayLong(booking.offeringDate)} and its refund period runs
+              for {booking.refundDays} days, until{" "}
               {booking.refundDeadline
                 ? formatDayLong(booking.refundDeadline)
                 : "the day itself"}
@@ -429,14 +441,14 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
             <p className={WARNING}>
               {booking.refundDays === 0 ? (
                 <>
-                  A place on {booking.workshopName} cannot be refunded once it
+                  A place on {booking.offeringName} cannot be refunded once it
                   is taken. Nothing goes back to their card.
                 </>
               ) : (
                 <>
-                  {booking.workshopName} has a refund period of{" "}
-                  {booking.refundDays} days. It is on{" "}
-                  {formatDayLong(booking.workshopDate)}, so that period closed
+                  {booking.offeringName} has a refund period of{" "}
+                  {booking.refundDays} days. It {isOn}{" "}
+                  {formatDayLong(booking.offeringDate)}, so that period closed
                   on{" "}
                   {booking.refundDeadline
                     ? formatDayLong(booking.refundDeadline)
@@ -554,8 +566,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               {booking.places === 1
                 ? "Their place stays"
                 : `All ${booking.places} of their places stay`}{" "}
-              held, and they are still expected on{" "}
-              {formatDayLong(booking.workshopDate)}. That is exactly what their
+              held, and they are still expected. That is exactly what their
               email says.
             </p>
             <p className={BODY}>
@@ -568,7 +579,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
           <>
             <p className={BODY}>
               {booking.places === 1 ? "Their place" : "Their places"} on{" "}
-              {booking.workshopName} {booking.places === 1 ? "was" : "were"}{" "}
+              {booking.offeringName} {booking.places === 1 ? "was" : "were"}{" "}
               cancelled
               {booking.cancelledAt
                 ? ` on ${formatInstant(booking.cancelledAt)}`

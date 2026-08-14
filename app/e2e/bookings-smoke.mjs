@@ -296,7 +296,7 @@ function checkoutEvent({
         metadata: {
           workshopId: String(workshopId),
           places: String(places),
-          workshopName: name,
+          offeringName: name,
           ...(site === null ? {} : { site }),
         },
       },
@@ -320,12 +320,31 @@ async function postEvent(event, { secret = WHSEC, signed = true } = {}) {
   });
 }
 
-const bookings = (workshopId) =>
-  db
-    .query(`SELECT * FROM "Booking" WHERE "workshopId" = $1 ORDER BY id`, [
-      workshopId,
-    ])
-    .then((r) => r.rows);
+/**
+ * Bookings for one workshop, each with its Payment rows attached.
+ *
+ * Payments became rows of their own (D-23), so the money a booking carries is
+ * no longer on the booking: the session id, the payment intent, the amount and
+ * the refund all live on `Payment` and are read back through it here.
+ */
+const bookings = async (workshopId) => {
+  const { rows } = await db.query(
+    `SELECT * FROM "Booking" WHERE "workshopId" = $1 ORDER BY id`,
+    [workshopId],
+  );
+  const { rows: paid } = await db.query(
+    `SELECT * FROM "Payment" WHERE "bookingId" = ANY($1::int[]) ORDER BY id`,
+    [rows.map((row) => row.id)],
+  );
+  return rows.map((row) => ({
+    ...row,
+    payments: paid.filter((one) => one.bookingId === row.id),
+    // What has actually arrived, which on a workshop is the whole price.
+    paid: paid
+      .filter((one) => one.bookingId === row.id)
+      .reduce((sum, one) => sum + one.amountPence, 0),
+  }));
+};
 
 /** What the app recorded about one event, or null if it recorded nothing. */
 const eventRow = (id) =>
@@ -437,14 +456,22 @@ try {
   ok("one paid booking exists", rows.length === 1 && rows[0].status === "paid");
   ok(
     "for the places and the amount Stripe reported",
-    rows[0].places === 2 && rows[0].amountPence === 19000,
-    `${rows[0]?.places} places, ${rows[0]?.amountPence}p`,
+    rows[0].places === 2 &&
+      rows[0].totalPence === 19000 &&
+      rows[0].paid === 19000,
+    `${rows[0]?.places} places, owes ${rows[0]?.totalPence}p, paid ${rows[0]?.paid}p`,
+  );
+  ok(
+    "and it is ONE payment, of kind full — a workshop is paid at once",
+    rows[0].payments.length === 1 && rows[0].payments[0].kind === "full",
+    rows[0].payments.map((one) => one.kind).join(", "),
   );
   ok(
     "with the buyer Stripe collected, and a payment intent to refund against",
     rows[0].buyerEmail === BUYER &&
       rows[0].buyerName === "Sarah Hall" &&
-      rows[0].stripePaymentIntentId === `pi_${first.data.object.id}`,
+      rows[0].payments[0].stripePaymentIntentId ===
+        `pi_${first.data.object.id}`,
   );
   ok(
     "and only the HASH of the cancellation token",
@@ -544,7 +571,9 @@ try {
     overshoot.status === 200,
   );
   rows = await bookings(ids.main);
-  const oversold = rows.find((r) => r.stripeSessionId.includes("over"));
+  const oversold = rows.find((r) =>
+    r.payments.some((one) => one.stripeSessionId.includes("over")),
+  );
   ok(
     "but the booking is written cancelled, not paid",
     oversold?.status === "cancelledUnrefunded" &&
@@ -668,8 +697,8 @@ try {
     "cancelling past the date releases the place and refunds nothing",
     lateRow.status === "cancelledUnrefunded" &&
       lateRow.cancelledReason === "buyer" &&
-      lateRow.refundId === null,
-    `${lateRow?.status} / ${lateRow?.refundId}`,
+      lateRow.payments.every((one) => one.refundId === null),
+    `${lateRow?.status} / ${lateRow?.payments.map((one) => one.refundId).join(",")}`,
   );
   const lateLog = server.out();
   ok(
@@ -1140,23 +1169,34 @@ async function seedBooking(workshopId, tag, extra = {}) {
   const { randomBytes, createHash } = await import("node:crypto");
   const token = randomBytes(32).toString("base64url");
   const hash = createHash("sha256").update(token).digest("hex");
+  const session = `cs_smoke_seed_${tag}_${Date.now()}`;
   const { rows } = await db.query(
     `INSERT INTO "Booking"
-       ("workshopId","buyerName","buyerEmail",places,"amountPence",currency,
-        "stripeSessionId","stripePaymentIntentId",status,"cancellationTokenHash",
-        "paidAt","cancelledAt","cancelledReason","refundId","refundedPence",
-        "refundedAt","updatedAt")
-     VALUES ($1,'Sarah Hall',$2,1,9500,'gbp',$3,$4,$5,$6,now(),$7,$8,$9,$10,$11,now())
+       ("workshopId","buyerName","buyerEmail",places,"totalPence",status,
+        "cancellationTokenHash","paidAt","cancelledAt","cancelledReason","updatedAt")
+     VALUES ($1,'Sarah Hall',$2,1,9500,$3,$4,now(),$5,$6,now())
      RETURNING id`,
     [
       workshopId,
       BUYER,
-      `cs_smoke_seed_${tag}_${Date.now()}`,
-      `pi_smoke_seed_${tag}`,
       extra.status ?? "paid",
       hash,
       extra.status && extra.status !== "paid" ? new Date() : null,
       extra.status && extra.status !== "paid" ? "buyer" : null,
+    ],
+  );
+  // The money, on its own row (D-23). A workshop is one payment of kind
+  // `full`, which is exactly what the migration made of every booking that
+  // existed before payments were rows.
+  await db.query(
+    `INSERT INTO "Payment"
+       ("bookingId",kind,"amountPence",currency,"stripeSessionId",
+        "stripePaymentIntentId","paidAt","refundId","refundedPence","refundedAt","updatedAt")
+     VALUES ($1,'full',9500,'gbp',$2,$3,now(),$4,$5,$6,now())`,
+    [
+      rows[0].id,
+      session,
+      `pi_smoke_seed_${tag}`,
       extra.refundId ?? null,
       extra.refundedPence ?? null,
       extra.refundId ? new Date() : null,
@@ -1167,6 +1207,7 @@ async function seedBooking(workshopId, tag, extra = {}) {
 
 /** Only ever what this script made. The operator's own data is not touched. */
 async function cleanUp() {
+  // Payments cascade with their booking, so there is nothing to delete first.
   await db.query(
     `DELETE FROM "Booking" WHERE "workshopId" IN
        (SELECT id FROM "Workshop" WHERE slug LIKE 'smoke-booking-%')`,

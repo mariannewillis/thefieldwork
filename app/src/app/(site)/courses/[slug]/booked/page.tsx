@@ -4,9 +4,12 @@ import { bookingConfirmation } from "@/content/workshops";
 import {
   bookingReference,
   findBookingBySession,
+  offeringOf,
+  outstandingPence,
   paidPence,
   type BookingWithOffering,
 } from "@/lib/bookings";
+import { capitalise, runShape } from "@/lib/course-run";
 import {
   formatDayLong,
   formatDayShort,
@@ -16,31 +19,28 @@ import {
 } from "@/lib/format";
 
 /**
- * Where paying for a place lands.
+ * Where paying for a course place lands — BOTH payments.
  *
- * Ported from docs/screens/workshopflow/booking-confirmation.html, the approved
- * composition, the way the other pages were ported.
+ * The workshop confirmation's sibling, and one page rather than two because a
+ * deposit and a balance land in the same place and want the same three
+ * questions answered: what did I buy, what have I paid, and what is left. The
+ * page reads the answer off the booking, so it says "£80 paid, £160 by 3
+ * October" the first time and "paid in full" the second without being told
+ * which of the two brought somebody here.
  *
  * THIS PAGE CONFIRMS NOTHING. It is the browser coming back from Stripe, and a
  * browser cannot be evidence of a payment — the URL can be typed, kept from a
  * previous purchase, or reached by somebody who abandoned the checkout. So it
  * does not write anything and does not believe anything: it looks up the
- * booking the WEBHOOK wrote, by session id, and shows what it finds. If the
+ * payment the WEBHOOK wrote, by session id, and shows what it finds. If the
  * webhook has not arrived yet — usually a second, occasionally a minute — it
  * says so plainly and reloads itself rather than inventing a receipt.
  *
- * TWO DEPARTURES from the approved screen, both because the thing behind them
- * does not exist:
- *
- *  1. THE CANCEL BUTTON. The screen puts one here. The cancellation token is
- *     stored only as a hash (see Booking.cancellationTokenHash), so this page
- *     genuinely cannot rebuild the link — and issuing a fresh one here would
- *     kill the link already sitting in the buyer's inbox. What stands in its
- *     place is the screen's own next sentence, which was always true: the link
- *     is in the email.
- *  2. "Put it in my calendar" and the three "What happens now" bullets.
- *     Nothing generates an .ics file, and two of the bullets describe a
- *     preparatory note and a dietary record that do not exist (D-9).
+ * THE LINKS ARE NOT ON IT, and that is the same decision the workshop page
+ * made for the same reason: both tokens are stored only as hashes, so this page
+ * genuinely cannot rebuild either — and issuing fresh ones here would retire
+ * the links already sitting in the buyer's inbox. What stands in their place is
+ * the sentence that was always true: they are in the email.
  */
 
 export const metadata: Metadata = {
@@ -61,13 +61,10 @@ export default async function Page({
   const { session } = await searchParams;
 
   // The session id AND the address have to agree. A session belonging to
-  // another workshop would otherwise render somebody else's receipt under this
+  // another course would otherwise render somebody else's receipt under this
   // one's URL.
-  //
-  // Looked up through the PAYMENT, because the session is a fact about money
-  // arriving rather than about the booking (D-23).
   const found = session ? await findBookingBySession(session) : null;
-  const booking = found?.workshop?.slug === slug ? found : null;
+  const booking = found?.course?.slug === slug ? found : null;
 
   const c = bookingConfirmation;
 
@@ -102,7 +99,7 @@ export default async function Page({
           <>
             {/* No script, no polling loop: the page simply asks the browser to
                 come back in four seconds. React 19 hoists this into the head.
-                It is removed the moment the booking is found, so it never
+                It is removed the moment the payment is found, so it never
                 reloads a finished page. */}
             <meta httpEquiv="refresh" content="4" />
             <Plain title={c.settlingTitle} body={c.settlingBody} />
@@ -125,43 +122,42 @@ function Plain({ title, body }: { title: string; body: string }) {
       </h1>
       <p className="mt-6 text-[21px] leading-relaxed text-plate-soft">{body}</p>
       <a
-        href="/workshops"
+        href="/courses"
         className="t mt-8 inline-flex min-h-[56px] items-center justify-center border border-plate-rule px-6 text-[18px] font-medium text-plate-text hover:border-gold hover:text-gold"
       >
-        See the workshops
+        See the courses
       </a>
     </section>
   );
 }
 
 function Booked({ booking }: { booking: BookingWithOffering }) {
-  // Only ever reached with a workshop booking — the caller has already checked
-  // that this session's booking belongs to the workshop in the address.
-  const workshop = booking.workshop as NonNullable<
-    BookingWithOffering["workshop"]
-  >;
-  const paid = paidPence(booking);
+  const offering = offeringOf(booking);
+  const run = runShape(offering.dates);
   const c = bookingConfirmation;
-  const deadline = refundDeadline(workshop.date, workshop.refundDays);
-  const address = workshop.addressLines
+  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+  const paid = paidPence(booking);
+  const owed = outstandingPence(booking);
+  const deposit = booking.payments.find((one) => one.kind === "deposit");
+  const address = offering.addressLines
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
 
   return (
     <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_400px] lg:gap-14">
-      {/* ══ THE DAY THEY BOUGHT ═══════════════════════════════════════════ */}
+      {/* ══ THE RUN THEY BOUGHT ═══════════════════════════════════════════ */}
       <div>
         <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold">
           {c.eyebrow}
         </p>
         <h1 className="mt-4 max-w-[16ch] font-display text-[46px] font-normal leading-[1.02] text-plate-text sm:text-[58px]">
-          {workshop.name}
+          {offering.name}
         </h1>
         <p className="mt-6 max-w-[52ch] text-[21px] leading-relaxed text-plate-soft">
-          {booking.places === 1 ? "One place" : `${booking.places} places`} on{" "}
-          {formatDayLong(workshop.date)}. There is nothing else you need to do —
-          a confirmation is on its way to{" "}
+          {booking.places === 1 ? "One place" : `${booking.places} places`} on
+          every date in the run. There is nothing else you need to do today — a
+          confirmation is on its way to{" "}
           <span className="fig font-mono text-plate-text">
             {booking.buyerEmail}
           </span>
@@ -169,21 +165,22 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
         </p>
 
         <dl className="rule mt-10 flex flex-wrap gap-x-12 gap-y-6 pt-8">
-          <div>
-            <dt className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule">
-              {c.when}
-            </dt>
-            <dd className="mt-2 fig font-mono text-[19px] text-plate-text">
-              {formatDayShort(workshop.date)} &middot; {workshop.startTime}
-              {workshop.endTime ? `–${workshop.endTime}` : ""}
-            </dd>
-          </div>
+          {run && (
+            <div>
+              <dt className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule">
+                {c.when}
+              </dt>
+              <dd className="mt-2 fig font-mono text-[19px] text-plate-text">
+                {capitalise(run.words)} &middot; {run.span}
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-plate-rule">
               {c.place}
             </dt>
             <dd className="mt-2 fig font-mono text-[19px] text-plate-text">
-              {workshop.venueName}
+              {offering.venueName}
               {address.map((line) => (
                 <span key={line}>
                   <br />
@@ -191,7 +188,7 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
                 </span>
               ))}
               <br />
-              {workshop.postcode}
+              {offering.postcode}
             </dd>
           </div>
           <div>
@@ -203,12 +200,30 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
             </dd>
           </div>
         </dl>
+
+        {/* Every date, in order. Somebody who has just committed a month of
+            Wednesdays wants to write all of them down before they close the
+            tab. */}
+        <ul className="mt-10 flex flex-col gap-3">
+          {offering.dates.map((date) => (
+            <li
+              key={date.date.toISOString()}
+              className="fig font-mono text-[17px] text-plate-soft"
+            >
+              <span className="text-plate-text">
+                {formatDayShort(date.date)}
+              </span>{" "}
+              &middot; {date.startTime}&ndash;{date.endTime}
+              {date.title ? ` · ${date.title}` : ""}
+            </li>
+          ))}
+        </ul>
       </div>
 
-      {/* ══ THE RECEIPT, AND THE WAY OUT ══════════════════════════════════
-          The cancellation terms sit ON this page, not only in the email.
-          Somebody who books on a phone in a hurry will close the tab and go
-          looking for "how do I cancel" long before they open the email. */}
+      {/* ══ THE RECEIPT, AND WHAT IS LEFT ═════════════════════════════════
+          The outstanding balance sits ON this page, not only in the email.
+          Somebody who books on a phone in a hurry will close the tab, and the
+          one thing they must not lose is that this is not the whole price. */}
       <aside>
         <div className="pool on-pool px-7 py-8 sm:px-9">
           <h2 className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft">
@@ -217,19 +232,42 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
           <dl className="mt-5 flex flex-col gap-3 text-[18px] text-ink">
             <div className="flex justify-between gap-4">
               <dt>
-                {booking.places} {booking.places === 1 ? "place" : "places"} at{" "}
-                {formatMoney(workshop.priceGBP)}
+                {booking.places} {booking.places === 1 ? "place" : "places"} for
+                the whole run
               </dt>
-              <dd className="fig font-mono">{formatMoney(paid)}</dd>
+              <dd className="fig font-mono">
+                {formatMoney(booking.totalPence)}
+              </dd>
             </div>
+            {deposit && (
+              <div className="flex justify-between gap-4">
+                <dt>Deposit paid {formatInstant(deposit.paidAt)}</dt>
+                <dd className="fig font-mono">
+                  {formatMoney(deposit.amountPence)}
+                </dd>
+              </div>
+            )}
             <div className="flex justify-between gap-4 border-t border-pool-rule/40 pt-3 font-semibold">
-              <dt>Paid {formatInstant(booking.paidAt)}</dt>
-              <dd className="fig font-mono">{formatMoney(paid)}</dd>
+              <dt>{owed > 0 ? "Still to pay" : "Paid in full"}</dt>
+              <dd className="fig font-mono">
+                {formatMoney(owed > 0 ? owed : paid)}
+              </dd>
             </div>
           </dl>
           <p className="mt-4 fig font-mono text-[15px] text-ink-soft">
             Receipt from Stripe
           </p>
+
+          {owed > 0 && booking.balanceDueAt && (
+            <p className="mt-5 border-l-2 border-gold px-4 py-3 text-[17px] leading-relaxed text-ink">
+              <strong className="font-semibold">
+                {formatMoney(owed)} is due by{" "}
+                {formatDayLong(booking.balanceDueAt)}
+              </strong>
+              . The link to pay it is in your confirmation email and works from
+              today. If it is not paid by that date the place is released.
+            </p>
+          )}
 
           <hr className="my-7 border-0 border-t border-pool-rule/40" />
 
@@ -242,19 +280,20 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
               <strong className="fig font-semibold">
                 {formatDayLong(deadline)}
               </strong>{" "}
-              and you get the full {formatMoney(paid)} back. After that the
-              place is held for you and cannot be refunded.
+              and you get back everything you have paid. After that the place is
+              held for you across every date and cannot be refunded.
             </p>
           ) : (
             <p className="mt-3 text-[17px] leading-relaxed text-ink">
-              A place on this day cannot be refunded. You can still tell us you
+              A place on this run cannot be refunded. You can still tell us you
               are not coming, and the place goes to somebody else.
             </p>
           )}
           <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">
-            The link to cancel is in your email. It is the only one — this page
-            cannot show it, which is on purpose: it is the key to your booking
-            and it lives in your inbox, not in a web address anyone could keep.
+            The links to pay and to cancel are in your email. They are the only
+            ones — this page cannot show them, which is on purpose: they are the
+            keys to your booking and they live in your inbox, not in a web
+            address anyone could keep.
           </p>
         </div>
       </aside>

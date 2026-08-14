@@ -2,12 +2,19 @@ import { revalidatePath } from "next/cache";
 import type Stripe from "stripe";
 import {
   bookingReference,
+  confirmBalancePayment,
   confirmPaidBooking,
+  coursePlacesSold,
+  findBookingBySession,
+  offeringOf,
   placesLeft,
   placesSold,
+  refundOnePayment,
   refundSoldOut,
 } from "@/lib/bookings";
 import {
+  balanceNoticeEmail,
+  balancePaidEmail,
   bookingNoticeEmail,
   cannotHonourEmail,
   cannotHonourNoticeEmail,
@@ -42,10 +49,10 @@ import {
  *  - Delivery happens more than once. Stripe retries until it gets a 2xx,
  *    sends duplicates of its own accord, and the dashboard can replay one by
  *    hand. The event id is written FIRST inside the transaction that confirms
- *    the payment, before the workshop is looked for — so it is recorded on
+ *    the payment, before the offering is looked for — so it is recorded on
  *    every path that goes on to act, not only the one that writes a Booking.
  *    A second delivery collides on it and this handler does nothing: no
- *    booking, no refund, no email (D-20, and see confirmPaidBooking).
+ *    booking, no payment, no refund, no email (D-20).
  *  - Capacity is counted again HERE, under a lock, not trusted from when the
  *    checkout was opened (D-16).
  *  - A session opened by a DIFFERENT deployment is put down untouched. One
@@ -54,6 +61,12 @@ import {
  *    not mine" is an ordinary thing that happens and not an error (D-19).
  *  - An unexpected failure is left to become a 500 on purpose, so Stripe
  *    retries it. Swallowing it into a 200 would lose the payment quietly.
+ *
+ * THREE THINGS CAN BE BEING PAID FOR (D-23), and the session's own metadata
+ * says which: a place on a workshop, a place on a course, or the balance on a
+ * course place already held. Which one it is decides everything below, so it is
+ * read once, at the top, from a field this app wrote when it opened the
+ * session — never inferred from which other fields happen to be present.
  */
 export async function POST(request: Request): Promise<Response> {
   if (!paymentsConfigured() || !webhookSecret) {
@@ -131,15 +144,47 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ received: true, acted: false });
   }
 
-  const workshopId = Number(session.metadata?.workshopId);
-  const places = Number(session.metadata?.places);
-  const workshopName = session.metadata?.workshopName ?? "a workshop";
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
 
-  if (
-    !Number.isInteger(workshopId) ||
-    !Number.isInteger(places) ||
-    places < 1
-  ) {
+  // What they were CHARGED, from Stripe. Never a figure the browser sent.
+  const amountPence = session.amount_total ?? 0;
+  const currency = session.currency ?? "gbp";
+
+  if (session.metadata?.balanceFor) {
+    return settleBalance({
+      event,
+      session,
+      bookingId: Number(session.metadata.balanceFor),
+      amountPence,
+      currency,
+      paymentIntentId,
+    });
+  }
+
+  const workshopId = Number(session.metadata?.workshopId);
+  const courseId = Number(session.metadata?.courseId);
+  // `workshopName` is what this key was called before courses could be bought.
+  // A Checkout Session lives for about a day, so for one day after the deploy
+  // that carries this change there are real sessions in flight still carrying
+  // the old spelling — and the one message that reads it is the apology for a
+  // withdrawn offering, which is the worst place to print "an offering".
+  const offeringName =
+    session.metadata?.offeringName ??
+    session.metadata?.workshopName ??
+    "an offering";
+  const places = Number(session.metadata?.places);
+
+  const offering =
+    Number.isInteger(workshopId) && workshopId > 0
+      ? ({ kind: "workshop", id: workshopId } as const)
+      : Number.isInteger(courseId) && courseId > 0
+        ? ({ kind: "course", id: courseId } as const)
+        : null;
+
+  if (!offering || !Number.isInteger(places) || places < 1) {
     // A completed session on this account that this app did not open — a
     // payment link, or an invoice she made in the dashboard. Deliberately NOT
     // refunded: automatically returning money we cannot account for is worse
@@ -150,24 +195,18 @@ export async function POST(request: Request): Promise<Response> {
     // twice, and a redelivery landing here again is a second helping of
     // nothing. The same is true of the unpaid branch before it.
     console.error(
-      `[stripe] session ${session.id} completed with no usable metadata (workshopId=${session.metadata?.workshopId}, places=${session.metadata?.places}). No booking written. If this was a workshop payment it needs sorting out by hand.`,
+      `[stripe] session ${session.id} completed with no usable metadata (workshopId=${session.metadata?.workshopId}, courseId=${session.metadata?.courseId}, places=${session.metadata?.places}). No booking written. If this was a real payment it needs sorting out by hand.`,
     );
     return Response.json({ received: true, acted: false });
   }
 
-  const paymentIntentId =
-    typeof session.payment_intent === "string"
-      ? session.payment_intent
-      : (session.payment_intent?.id ?? null);
-
   const result = await confirmPaidBooking({
     eventId: event.id,
     eventType: event.type,
-    workshopId,
+    offering,
     places,
-    // What they were CHARGED, from Stripe. Never a figure the browser sent.
-    amountPence: session.amount_total ?? 0,
-    currency: session.currency ?? "gbp",
+    amountPence,
+    currency,
     buyerName: session.customer_details?.name?.trim() || "Someone",
     buyerEmail:
       session.customer_details?.email?.trim() || session.customer_email || "",
@@ -189,21 +228,20 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ received: true, acted: false, replay: true });
 
     case "confirmed": {
-      const { booking, token } = result;
-      const left = placesLeft(
-        booking.workshop.capacity,
-        await placesSold(booking.workshopId),
-      );
+      const { booking, cancelToken, balanceToken } = result;
+      const own = offeringOf(booking);
+      const left = placesLeft(own.capacity, await soldNow(offering));
       console.info(
-        `[stripe] ${bookingReference(booking.id)} — ${booking.places} place(s) on ${booking.workshop.slug}, ${left} left.`,
+        `[stripe] ${bookingReference(booking.id)} — ${booking.places} place(s) on ${own.slug}, ${left} left.`,
       );
-      // A place has gone, so every page that prints how many are left is now
-      // out of date. The public pages are cached and would otherwise keep
-      // serving the old count until something else happened to change them.
-      revalidatePath("/workshops");
-      revalidatePath(`/workshops/${booking.workshop.slug}`);
-      revalidatePath("/");
-      await sendBookingMail(confirmationEmail(booking, token), "confirmation");
+      revalidateFor(own.kind, own.slug);
+      await sendBookingMail(
+        confirmationEmail(booking, {
+          cancel: cancelToken,
+          balance: balanceToken,
+        }),
+        "confirmation",
+      );
       await sendBookingMail(
         bookingNoticeEmail(booking, left),
         "booking notice",
@@ -213,13 +251,14 @@ export async function POST(request: Request): Promise<Response> {
 
     case "noPlace": {
       const { booking } = result;
+      const own = offeringOf(booking);
       const { refunded, error } = await refundSoldOut(booking);
       await sendBookingMail(
         cannotHonourEmail({
           to: booking.buyerEmail,
-          workshopName: booking.workshop.name,
-          workshopDay: formatDayLong(booking.workshop.date),
-          amountPence: booking.amountPence,
+          offeringName: own.name,
+          offeringDay: formatDayLong(own.firstDate),
+          amountPence,
           why: "soldOut",
           refunded,
         }),
@@ -227,10 +266,10 @@ export async function POST(request: Request): Promise<Response> {
       );
       await sendBookingMail(
         cannotHonourNoticeEmail({
-          workshopName: booking.workshop.name,
-          workshopDay: formatDayLong(booking.workshop.date),
+          offeringName: own.name,
+          offeringDay: formatDayLong(own.firstDate),
           buyerEmail: booking.buyerEmail,
-          amountPence: booking.amountPence,
+          amountPence,
           why: "soldOut",
           refunded,
           reference: bookingReference(booking.id),
@@ -241,25 +280,25 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ received: true, acted: true });
     }
 
-    case "workshopGone": {
-      // Rare: the day was taken off the site while somebody was at the
-      // checkout. There is no Booking to write — the workshop it would point
-      // at is gone — so the refund is issued straight against the payment and
-      // the log, these two emails and the StripeEvent row are the record.
+    case "offeringGone": {
+      // Rare: the day, or the run, was taken off the site while somebody was
+      // at the checkout. There is no Booking to write — the thing it would
+      // point at is gone — so the refund is issued straight against the
+      // payment and the log, these two emails and the StripeEvent row are the
+      // record.
       //
-      // REACHED ONCE PER EVENT. The transaction that found the workshop
-      // missing recorded the event id and stamped it `workshopGone` before
-      // returning, so everything below runs on the first delivery and on no
-      // other. The refund would survive a repeat by itself — its idempotency
-      // key is the session — but the emails would not, and an apology
-      // arriving twice is the thing a buyer actually notices (D-20).
+      // REACHED ONCE PER EVENT. The transaction that found it missing recorded
+      // the event id and stamped the outcome before returning, so everything
+      // below runs on the first delivery and on no other. The refund would
+      // survive a repeat by itself — its idempotency key is the session — but
+      // the emails would not, and an apology arriving twice is the thing a
+      // buyer actually notices (D-20).
       //
-      // THIS SITE'S OWN SESSION, on a workshop this site no longer has. The
-      // foreign-event case above looks identical from in here — a workshopId
-      // the database cannot find — and refunding one as if it were the other
-      // is exactly what went wrong (D-19). The stamp is what separates them,
-      // and the log lines below are written to be told apart at a glance.
-      const amount = session.amount_total ?? 0;
+      // THIS SITE'S OWN SESSION, on something this site no longer has. The
+      // foreign-event case above looks identical from in here — an id the
+      // database cannot find — and refunding one as if it were the other is
+      // exactly what went wrong (D-19). The stamp is what separates them, and
+      // the log lines below are written to be told apart at a glance.
       const buyer = session.customer_details?.email ?? session.customer_email;
       let refunded = false;
       let error: string | undefined;
@@ -274,16 +313,16 @@ export async function POST(request: Request): Promise<Response> {
         error = e instanceof Error ? e.message : "unknown error";
       }
       console.error(
-        `[stripe] WORKSHOP WITHDRAWN — session ${session.id} was opened by this site (${thisSite}) and paid for workshop ${workshopId}, which has since been taken off it. Refund ${refunded ? "issued" : `FAILED: ${error}`}, and the buyer has been written to.`,
+        `[stripe] ${result.kind === "workshop" ? "WORKSHOP" : "COURSE"} WITHDRAWN — session ${session.id} was opened by this site (${thisSite}) and paid for ${result.kind} ${offering.id}, which has since been taken off it. Refund ${refunded ? "issued" : `FAILED: ${error}`}, and the buyer has been written to.`,
       );
       if (buyer) {
         await sendBookingMail(
           cannotHonourEmail({
             to: buyer,
-            workshopName,
-            workshopDay: "the day you booked",
-            amountPence: amount,
-            why: "workshopGone",
+            offeringName,
+            offeringDay: "the day you booked",
+            amountPence,
+            why: "offeringGone",
             refunded,
           }),
           "withdrawn-workshop refund",
@@ -291,11 +330,11 @@ export async function POST(request: Request): Promise<Response> {
       }
       await sendBookingMail(
         cannotHonourNoticeEmail({
-          workshopName,
-          workshopDay: "the day it was taken down",
+          offeringName,
+          offeringDay: "the day it was taken down",
           buyerEmail: buyer ?? "an address Stripe did not give us",
-          amountPence: amount,
-          why: "workshopGone",
+          amountPence,
+          why: "offeringGone",
           refunded,
           reference: null,
           error,
@@ -305,4 +344,172 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ received: true, acted: true });
     }
   }
+}
+
+/**
+ * The second half of a course place.
+ *
+ * The place was committed by the deposit and nothing about the room changes
+ * here — what changes is that the booking stops being outstanding. So there is
+ * no capacity check on the ordinary path, and one only where the booking had
+ * already lapsed: see `confirmBalancePayment`.
+ */
+async function settleBalance(args: {
+  event: Stripe.Event;
+  session: Stripe.Checkout.Session;
+  bookingId: number;
+  amountPence: number;
+  currency: string;
+  paymentIntentId: string | null;
+}): Promise<Response> {
+  const { event, session, bookingId, amountPence, currency } = args;
+
+  if (!Number.isInteger(bookingId) || bookingId < 1) {
+    console.error(
+      `[stripe] session ${session.id} is stamped as a balance for "${session.metadata?.balanceFor}", which is not a booking. Nothing written; it needs sorting out by hand.`,
+    );
+    return Response.json({ received: true, acted: false });
+  }
+
+  const result = await confirmBalancePayment({
+    eventId: event.id,
+    eventType: event.type,
+    bookingId,
+    amountPence,
+    currency,
+    stripeSessionId: session.id,
+    stripePaymentIntentId: args.paymentIntentId,
+    paidAt: new Date(event.created * 1000),
+  });
+
+  switch (result.outcome) {
+    case "alreadyHandled":
+      console.info(
+        `[stripe] ALREADY SEEN — event ${event.id} (session ${session.id}) was acted on when it first arrived, so nothing has been done again: no payment, no refund, no email.`,
+      );
+      return Response.json({ received: true, acted: false, replay: true });
+
+    case "settled": {
+      const { booking } = result;
+      const own = offeringOf(booking);
+      console.info(
+        `[stripe] ${bookingReference(booking.id)} — balance paid on ${own.slug}. Nothing outstanding.`,
+      );
+      // The place was never released, so nothing about the count changes —
+      // except on a booking that had lapsed, where paying takes the place back
+      // and every page that counts places is now wrong. Revalidating either
+      // way costs one render and is right in both.
+      revalidateFor(own.kind, own.slug);
+      await sendBookingMail(balancePaidEmail(booking), "balance receipt");
+      await sendBookingMail(balanceNoticeEmail(booking), "balance notice");
+      return Response.json({ received: true, acted: true });
+    }
+
+    case "bookingGone": {
+      const buyer = session.customer_details?.email ?? session.customer_email;
+      let refunded = false;
+      let error: string | undefined;
+      try {
+        if (!args.paymentIntentId)
+          throw new Error("the session has no payment");
+        await stripe().refunds.create(
+          { payment_intent: args.paymentIntentId },
+          { idempotencyKey: `refund-session-${session.id}` },
+        );
+        refunded = true;
+      } catch (e) {
+        error = e instanceof Error ? e.message : "unknown error";
+      }
+      console.error(
+        `[stripe] BALANCE FOR A BOOKING THAT IS GONE — session ${session.id} paid a balance on booking ${bookingId}, which no longer exists. Refund ${refunded ? "issued" : `FAILED: ${error}`}.`,
+      );
+      if (buyer) {
+        await sendBookingMail(
+          cannotHonourEmail({
+            to: buyer,
+            offeringName: "your course place",
+            offeringDay: "the dates you booked",
+            amountPence,
+            why: "placeReleased",
+            refunded,
+          }),
+          "unwanted-balance refund",
+        );
+      }
+      await sendBookingMail(
+        cannotHonourNoticeEmail({
+          offeringName: "a course place that has been deleted",
+          offeringDay: "—",
+          buyerEmail: buyer ?? "an address Stripe did not give us",
+          amountPence,
+          why: "placeReleased",
+          refunded,
+          reference: null,
+          error,
+        }),
+        "unwanted-balance notice",
+      );
+      return Response.json({ received: true, acted: true });
+    }
+
+    case "unwanted": {
+      // The place had been cancelled, or it had lapsed and the chair had gone
+      // to somebody else while they were paying. ONLY THIS PAYMENT goes back —
+      // the deposit is a separate question and it is Marianne's, which is what
+      // her notice says.
+      const { booking, why } = result;
+      const own = offeringOf(booking);
+      const { refunded, error } = await refundOnePayment(booking, session.id);
+      console.error(
+        `[stripe] BALANCE NOT WANTED — session ${session.id} paid the balance on ${bookingReference(booking.id)} but ${why}. Refund ${refunded ? "issued" : `FAILED: ${error}`}.`,
+      );
+      await sendBookingMail(
+        cannotHonourEmail({
+          to: booking.buyerEmail,
+          offeringName: own.name,
+          offeringDay: formatDayLong(own.firstDate),
+          amountPence,
+          why: "placeReleased",
+          refunded,
+        }),
+        "unwanted-balance refund",
+      );
+      await sendBookingMail(
+        cannotHonourNoticeEmail({
+          offeringName: own.name,
+          offeringDay: formatDayLong(own.firstDate),
+          buyerEmail: booking.buyerEmail,
+          amountPence,
+          why: "placeReleased",
+          refunded,
+          reference: bookingReference(booking.id),
+          error,
+        }),
+        "unwanted-balance notice",
+      );
+      return Response.json({ received: true, acted: true });
+    }
+  }
+}
+
+function soldNow(offering: {
+  kind: "workshop" | "course";
+  id: number;
+}): Promise<number> {
+  return offering.kind === "workshop"
+    ? placesSold(offering.id)
+    : coursePlacesSold(offering.id);
+}
+
+/**
+ * A place has gone, so every page that prints how many are left is now out of
+ * date. The public pages are cached and would otherwise keep serving the old
+ * count until something else happened to change them.
+ */
+function revalidateFor(kind: "workshop" | "course", slug: string) {
+  revalidatePath(kind === "workshop" ? "/workshops" : "/courses");
+  revalidatePath(
+    kind === "workshop" ? `/workshops/${slug}` : `/courses/${slug}`,
+  );
+  revalidatePath("/");
 }

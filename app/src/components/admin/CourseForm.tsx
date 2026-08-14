@@ -61,6 +61,8 @@ export type CourseFormValues = {
   priceGBP: number;
   /** Pence, or null when the whole price is taken at once. */
   depositGBP: number | null;
+  /** The day the rest is due. Null when there is no deposit. */
+  balanceDueAt: Date | null;
   refundDays: number;
   heroImage: string | null;
   heroAlt: string | null;
@@ -135,6 +137,22 @@ export default function CourseForm({
   const [slugOwned, setSlugOwned] = useState(Boolean(course));
   const [refundDays, setRefundDays] = useState(
     String(course?.refundDays ?? 14),
+  );
+  // The deposit and the day the rest is due are one arrangement, so the form
+  // holds both: the second field only means anything while the first has a
+  // figure in it, and the sentence under them is written from the two together
+  // with the run below. A deposit with no date is what the save refuses.
+  const [price, setPrice] = useState(
+    kept("price", course ? String(course.priceGBP / 100) : ""),
+  );
+  const [deposit, setDeposit] = useState(
+    kept("deposit", course?.depositGBP ? String(course.depositGBP / 100) : ""),
+  );
+  const [balanceDueAt, setBalanceDueAt] = useState(
+    kept(
+      "balanceDueAt",
+      course?.balanceDueAt ? toDateInputValue(course.balanceDueAt) : "",
+    ),
   );
 
   // The four address fields are held here rather than left to the browser,
@@ -240,6 +258,25 @@ export default function CourseForm({
       : dated.length === 1
         ? `One date · ${formatDayShort(asDate(dated[0].date))}`
         : `${dated.length} dates · ${formatDayShort(asDate(dated[0].date))} – ${formatDayShort(asDate(dated[dated.length - 1].date))}`;
+
+  // What the two money fields add up to, said in the sentence somebody
+  // deciding actually reads. Written from what is typed rather than from what
+  // is saved, so it is true before the save as well as after it.
+  const pounds = (value: string) => {
+    const figure = Number(value.replace(/[£,\s]/g, ""));
+    return Number.isFinite(figure) && figure > 0 ? figure : null;
+  };
+  const priceNow = pounds(price);
+  const depositNow = pounds(deposit);
+  const depositWords = !depositNow
+    ? "No deposit — the whole price is taken when somebody books, the way a workshop is."
+    : priceNow && depositNow > priceNow
+      ? "That deposit is more than the price. A deposit is part of the price, not on top of it."
+      : !balanceDueAt
+        ? "A deposit needs a day the rest is due by, or nothing ever asks for it. This one cannot go on the site until it has one."
+        : priceNow
+          ? `Which takes £${depositNow} at booking, and £${(priceNow - depositNow).toFixed(2).replace(/\.00$/, "")} by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`
+          : `Which takes £${depositNow} at booking, and the rest by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`;
 
   // Counted back from the FIRST date, because a course is bought once and so
   // is cancelled once.
@@ -464,10 +501,8 @@ export default function CourseForm({
                       name="price"
                       type="text"
                       inputMode="decimal"
-                      defaultValue={kept(
-                        "price",
-                        course ? String(course.priceGBP / 100) : "",
-                      )}
+                      value={price}
+                      onChange={(event) => setPrice(event.target.value)}
                       className={`${FIELD_FIG} text-[32px]`}
                     />
                   </span>
@@ -501,39 +536,65 @@ export default function CourseForm({
               </div>
             </div>
 
-            <div className="mt-7 max-w-[34rem]">
-              <label className="block">
-                <span className={LABEL}>Deposit</span>
-                <span className="flex items-baseline gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="fig font-mono text-[24px] text-ink-soft"
-                  >
-                    &pound;
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Deposit</span>
+                  <span className="flex items-baseline gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="fig font-mono text-[24px] text-ink-soft"
+                    >
+                      &pound;
+                    </span>
+                    <input
+                      name="deposit"
+                      type="text"
+                      inputMode="decimal"
+                      value={deposit}
+                      onChange={(event) => setDeposit(event.target.value)}
+                      className={`${FIELD_FIG} text-[26px]`}
+                    />
                   </span>
+                </label>
+                <p className={HELP}>
+                  What is taken when somebody books. Leave it empty to take the
+                  whole price at once, the way a workshop does.
+                </p>
+                <FieldError error={state.errors.deposit} />
+              </div>
+
+              <div>
+                <label className="block">
+                  <span className={LABEL}>The rest is due by</span>
                   <input
-                    name="deposit"
-                    type="text"
-                    inputMode="decimal"
-                    defaultValue={kept(
-                      "deposit",
-                      course?.depositGBP ? String(course.depositGBP / 100) : "",
-                    )}
-                    className={`${FIELD_FIG} text-[26px]`}
+                    name="balanceDueAt"
+                    type="date"
+                    value={balanceDueAt}
+                    onChange={(event) => setBalanceDueAt(event.target.value)}
+                    className={`${FIELD_FIG} text-[21px]`}
                   />
-                </span>
-              </label>
-              {/* Said plainly, because a figure in a form that nothing acts on
-                  is exactly the kind of state D-9 forbids the portal to imply.
-                  It is written down now because it is hers to decide while she
-                  is writing the course. */}
-              <p className={HELP}>
-                What would be taken at booking. Leave it empty to take the whole
-                price at once, the way a workshop does. Nothing sells a course
-                yet, so this is written down rather than charged.
-              </p>
-              <FieldError error={state.errors.deposit} />
+                </label>
+                {/* YOUR DATE, not a rule this decided for you. It is beside the
+                    deposit because the two are one arrangement, and there is
+                    deliberately no second place in the portal where a payment
+                    date can be set. */}
+                <p className={HELP}>
+                  Your date, per course &mdash; on or before the first date of
+                  the run. A link to pay the rest goes out with the confirmation
+                  and works from the day they book.
+                </p>
+                <FieldError error={state.errors.balanceDueAt} />
+              </div>
             </div>
+
+            {/* The consequence of the two fields above and the dates below,
+                worked out as she types — the same move the refund line makes.
+                "£80" and "then £160 by 3 October" are different questions, and
+                she is answering the second. */}
+            <p className="mt-4 max-w-[62rem] font-display text-[24px] leading-tight text-ink">
+              {depositWords}
+            </p>
 
             <div className="mt-7">
               <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -1167,10 +1228,9 @@ export default function CourseForm({
                     Show this on the site
                     <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
                       It needs a picture behind the title, something written,
-                      and at least one date with a name on it. The courses pages
-                      on the site are not built yet, so for now this is a
-                      decision the site will honour rather than one anybody can
-                      see.
+                      and at least one date with a name on it — and, if there is
+                      a deposit, a day the rest is due by. Once it is up, places
+                      can be bought.
                     </span>
                   </span>
                 </label>

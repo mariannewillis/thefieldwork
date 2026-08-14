@@ -5,11 +5,18 @@ import BookingActions, {
 import {
   alreadyRefunded,
   bookingReference,
+  hasLapsed,
+  heldPence,
   isRefundable,
   listAllBookings,
+  offeringOf,
+  outstandingPence,
+  paidPence,
   refundOwed,
-  type BookingWithWorkshop,
+  type BookingWithOffering,
+  type Offering,
 } from "@/lib/bookings";
+import { runShape } from "@/lib/course-run";
 import {
   formatDayShort,
   formatInstant,
@@ -19,7 +26,7 @@ import {
 } from "@/lib/format";
 
 /**
- * The ledger — every place anyone has paid for.
+ * The ledger — every place anyone has paid for, on a workshop or on a course.
  *
  * Ported from docs/screens/workshopflow/admin-workshop-bookings.html. It lives
  * at /admin/workshop-bookings and NOT at /admin/bookings, which is the requests
@@ -28,17 +35,23 @@ import {
  * reason.
  *
  * TWO TABLES AND NOTHING TO FILE. A booking sits in "still to come" until its
- * day has been, and the morning after it is in the archive. That is a
- * consequence of the date and not a state anybody sets, so there is no column
- * to keep in step and nothing that can get stuck in the wrong one.
+ * day has been — or, on a course, until the last date of the run has — and the
+ * morning after it is in the archive. That is a consequence of the date and not
+ * a state anybody sets, so there is no column to keep in step and nothing that
+ * can get stuck in the wrong one.
  *
- * WHAT THE APPROVED SCREEN SHOWS THAT THIS CANNOT, and says so once rather than
- * faking variety: Type reads "Workshop" on every row because a workshop is the
- * only thing that can be bought — there is no Service or Course model yet — and
- * Deposit is empty on every row because only a course takes one. Both columns
- * stay, because they are the shape of the table those things will arrive into,
- * and inventing a Service row to make the column look busy would be a lie the
- * size of a whole product.
+ * THE TWO COLUMNS THE APPROVED SCREEN DREW EMPTY ARE FULL NOW (D-23). Type says
+ * Workshop or Course, because both can be bought; Deposit says what was taken at
+ * booking and what is still owed, because a course can be sold on one. Services
+ * are still not bookable, so no row has ever said Service, and none pretends to.
+ *
+ * AND THIS IS WHERE A LAPSED PLACE SURFACES. A course place whose balance was
+ * never paid stops counting toward the room the morning after it was due — no
+ * job runs, nothing sweeps, the arithmetic simply stops including it. Nothing
+ * can therefore TELL her it happened, so the row says so, plainly, in the table
+ * she already opens: the state line names the date it lapsed and the headline
+ * counts them. If a message on the day is wanted as well, that needs something
+ * scheduled, and that is a decision about hosting rather than about this screen.
  *
  * The mockup's "the other states" gallery is a review device and does not ship
  * (D-1). The states themselves do: the empty tables are below, the archive's
@@ -64,28 +77,32 @@ const NOTE = "mt-1 block fig font-mono text-[15px] tabular-nums text-ink-soft";
 // ── the row ──────────────────────────────────────────────────────────────────
 
 /** Everything the controls need, in a shape that crosses to the browser. */
-function toLedgerRow(booking: BookingWithWorkshop): LedgerRow {
+function toLedgerRow(booking: BookingWithOffering): LedgerRow {
+  const offering = offeringOf(booking);
+  const lastRefundedAt = booking.payments
+    .map((one) => one.refundedAt)
+    .filter((at): at is Date => at !== null)
+    .sort((one, other) => other.getTime() - one.getTime())[0];
+
   return {
     id: booking.id,
     reference: bookingReference(booking.id),
     buyerName: booking.buyerName,
     places: booking.places,
-    amountPence: booking.amountPence,
+    heldPence: heldPence(booking),
+    paidPence: paidPence(booking),
     status: booking.status,
     cancelledAt: booking.cancelledAt,
-    refundedPence: booking.refundedPence,
-    refundedAt: booking.refundedAt,
+    refundedAt: lastRefundedAt ?? null,
     refunded: alreadyRefunded(booking),
     owed: refundOwed(booking),
-    workshopName: booking.workshop.name,
-    workshopDate: booking.workshop.date,
-    refundDays: booking.workshop.refundDays,
-    refundDeadline: refundDeadline(
-      booking.workshop.date,
-      booking.workshop.refundDays,
-    ),
-    dayHasBeen: isPast(booking.workshop.date),
-    insidePeriod: isRefundable(booking.workshop),
+    kind: offering.kind,
+    offeringName: offering.name,
+    offeringDate: offering.firstDate,
+    refundDays: offering.refundDays,
+    refundDeadline: refundDeadline(offering.firstDate, offering.refundDays),
+    dayHasBeen: isPast(offering.lastDate),
+    insidePeriod: isRefundable(offering),
   };
 }
 
@@ -94,39 +111,73 @@ function places(n: number): string {
   return `${n} ${n === 1 ? "place" : "places"}`;
 }
 
+/** "Sat 20 Sep" for a workshop · "Four Wednesdays · 7–28 Oct" for a course. */
+function whenWords(offering: Offering): string {
+  if (offering.kind === "workshop") return formatDayShort(offering.firstDate);
+  const run = runShape(offering.dates);
+  return run
+    ? `${run.words} · ${run.span}`
+    : formatDayShort(offering.firstDate);
+}
+
 /**
  * The line under the offering — the one thing about this booking she has to
  * know before she touches anything.
  *
  * On a live booking that is its own refund period, measured against ITS OWN
- * workshop and never a site-wide rule. On a cancelled one it is what happened
- * to the money, and who did it.
+ * offering and never a site-wide rule. On a cancelled one it is what happened
+ * to the money, and who did it. And on a course place whose balance never
+ * arrived it is that, before anything else: a released place is the state that
+ * changes what the room holds, so it is the state that gets said first.
  */
-function StateLine({ booking }: { booking: BookingWithWorkshop }) {
-  const { workshop } = booking;
-  const deadline = refundDeadline(workshop.date, workshop.refundDays);
+function StateLine({ booking }: { booking: BookingWithOffering }) {
+  const offering = offeringOf(booking);
+  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
   const owed = refundOwed(booking);
 
   if (booking.status === "paid") {
+    // ── the released place ──────────────────────────────────────────────────
+    // Said first and said in red, because it is the only state on this screen
+    // that changed something — the room — without anybody doing anything.
+    if (hasLapsed(booking)) {
+      return (
+        <span className={`${NOTE} text-pool-error`}>
+          Balance not paid by {formatDayShort(booking.balanceDueAt as Date)} —
+          this place is released and back on sale.{" "}
+          {formatMoney(heldPence(booking))} of theirs is still with you.
+        </span>
+      );
+    }
+    if (outstandingPence(booking) > 0 && booking.balanceDueAt) {
+      return (
+        <span className={NOTE}>
+          {formatMoney(outstandingPence(booking))} due{" "}
+          {formatDayShort(booking.balanceDueAt)} — the place is released if it
+          is not paid
+        </span>
+      );
+    }
     if (alreadyRefunded(booking)) {
       return (
         <span className={`${NOTE} text-pool-success`}>
           Refunded{" "}
-          {booking.refundedAt ? `on ${formatInstant(booking.refundedAt)}` : ""}{" "}
+          {booking.payments.find((one) => one.refundedAt)?.refundedAt
+            ? `on ${formatInstant(booking.payments.find((one) => one.refundedAt)!.refundedAt as Date)}`
+            : ""}{" "}
           — the place is still held
         </span>
       );
     }
-    if (workshop.refundDays === 0) {
+    if (offering.refundDays === 0) {
       return <span className={NOTE}>This one cannot be refunded</span>;
     }
-    if (isPast(workshop.date)) {
+    if (isPast(offering.lastDate)) {
       return (
-        <span className={NOTE}>Refund period {workshop.refundDays} days</span>
+        <span className={NOTE}>Refund period {offering.refundDays} days</span>
       );
     }
     if (!deadline) return null;
-    if (isRefundable(workshop)) {
+    if (isRefundable(offering)) {
       // The deadline day itself still counts, so the day it falls on is worth
       // saying out loud rather than printing today's date back at her.
       const now = new Date();
@@ -136,7 +187,7 @@ function StateLine({ booking }: { booking: BookingWithWorkshop }) {
         deadline.getUTCDate() === now.getUTCDate();
       return (
         <span className={NOTE}>
-          Refund period {workshop.refundDays} days —{" "}
+          Refund period {offering.refundDays} days —{" "}
           {lastDay
             ? "today is the last day"
             : `closes ${formatDayShort(deadline)}`}
@@ -145,7 +196,7 @@ function StateLine({ booking }: { booking: BookingWithWorkshop }) {
     }
     return (
       <span className={`${NOTE} text-pool-error`}>
-        Refund period {workshop.refundDays} days — closed{" "}
+        Refund period {offering.refundDays} days — closed{" "}
         {formatDayShort(deadline)}
       </span>
     );
@@ -162,10 +213,13 @@ function StateLine({ booking }: { booking: BookingWithWorkshop }) {
     : "";
 
   if (booking.status === "cancelledRefunded") {
+    const refundedAt = booking.payments.find(
+      (one) => one.refundedAt,
+    )?.refundedAt;
     return (
       <span className={NOTE}>
         Cancelled{when} {by} — refunded
-        {booking.refundedAt ? ` ${formatInstant(booking.refundedAt)}` : ""}
+        {refundedAt ? ` ${formatInstant(refundedAt)}` : ""}
       </span>
     );
   }
@@ -177,20 +231,65 @@ function StateLine({ booking }: { booking: BookingWithWorkshop }) {
   );
 }
 
+/**
+ * The deposit column, which the approved screen drew and nothing could fill.
+ *
+ * Empty on a workshop, and it says why once in the note under the headline
+ * rather than on every row. On a course it is the two figures that make the
+ * arrangement: what was taken at booking, and what is still to come.
+ */
+function Deposit({ booking }: { booking: BookingWithOffering }) {
+  const deposit = booking.payments.find((one) => one.kind === "deposit");
+  const owed = outstandingPence(booking);
+
+  if (!deposit) {
+    return (
+      <>
+        <span
+          className="block fig font-mono text-[17px] text-ink-soft"
+          aria-hidden="true"
+        >
+          &ndash;
+        </span>
+        <span className="sr-only">
+          No deposit. This one was paid in full when it was booked.
+        </span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span className="block whitespace-nowrap fig font-mono text-[17px] tabular-nums text-ink">
+        {formatMoney(deposit.amountPence)}
+      </span>
+      <span className={NOTE}>
+        {owed === 0
+          ? "settled in full"
+          : `${formatMoney(owed)} still owed${booking.balanceDueAt ? ` · ${formatDayShort(booking.balanceDueAt)}` : ""}`}
+      </span>
+    </>
+  );
+}
+
 /** The money column: what is with her, and what has left. */
-function Money({ booking }: { booking: BookingWithWorkshop }) {
-  const back = booking.refundedPence ?? booking.amountPence;
+function Money({ booking }: { booking: BookingWithOffering }) {
+  const held = heldPence(booking);
+  const paid = paidPence(booking);
   const owed = refundOwed(booking);
 
   if (alreadyRefunded(booking)) {
+    const refundedAt = booking.payments.find(
+      (one) => one.refundedAt,
+    )?.refundedAt;
     return (
       <>
         <span className="block whitespace-nowrap fig font-mono text-[19px] font-semibold tabular-nums text-pool-success">
           {formatMoney(0)}
         </span>
         <span className={NOTE}>
-          {formatMoney(back)} went back
-          {booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}
+          {formatMoney(paid)} went back
+          {refundedAt ? ` on ${formatInstant(refundedAt)}` : ""}
         </span>
       </>
     );
@@ -201,7 +300,7 @@ function Money({ booking }: { booking: BookingWithWorkshop }) {
       <span
         className={`block whitespace-nowrap fig font-mono text-[19px] font-semibold tabular-nums ${owed ? "text-pool-error" : "text-ink"}`}
       >
-        {formatMoney(booking.amountPence)}
+        {formatMoney(held)}
       </span>
       <span className={NOTE}>
         {owed ? "still with you" : `paid ${formatInstant(booking.paidAt)}`}
@@ -210,7 +309,8 @@ function Money({ booking }: { booking: BookingWithWorkshop }) {
   );
 }
 
-function Row({ booking }: { booking: BookingWithWorkshop }) {
+function Row({ booking }: { booking: BookingWithOffering }) {
+  const offering = offeringOf(booking);
   return (
     <tr className="border-t border-pool-rule align-top">
       <th
@@ -230,29 +330,20 @@ function Row({ booking }: { booking: BookingWithWorkshop }) {
       <td
         className={`${CELL} whitespace-nowrap fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft`}
       >
-        Workshop
+        {offering.kind === "workshop" ? "Workshop" : "Course"}
       </td>
       <td className={CELL}>
         <span className="block font-display text-[21px] leading-tight text-ink">
-          {booking.workshop.name}
+          {offering.name}
         </span>
         <span className={NOTE}>
-          {formatDayShort(booking.workshop.date)} &middot;{" "}
-          {places(booking.places)}
+          {whenWords(offering)} &middot; {places(booking.places)}
           {booking.status === "paid" ? "" : ", released"}
         </span>
         <StateLine booking={booking} />
       </td>
       <td className={CELL}>
-        <span
-          className="block fig font-mono text-[17px] text-ink-soft"
-          aria-hidden="true"
-        >
-          &ndash;
-        </span>
-        <span className="sr-only">
-          No deposit. A workshop is paid in full when it is booked.
-        </span>
+        <Deposit booking={booking} />
       </td>
       <td className={CELL}>
         <Money booking={booking} />
@@ -286,7 +377,7 @@ function Headers() {
           Deposit<span className={CAPTION}>courses only</span>
         </th>
         <th scope="col" className={HEAD}>
-          Paid<span className={CAPTION}>in full, when it was booked</span>
+          Held<span className={CAPTION}>what is with you now</span>
         </th>
         <th scope="col" className={`${HEAD} pr-0`}>
           Actions
@@ -307,7 +398,7 @@ function Table({
 }: {
   id: string;
   caption: string;
-  bookings: BookingWithWorkshop[];
+  bookings: BookingWithOffering[];
   children?: React.ReactNode;
 }) {
   return (
@@ -373,32 +464,42 @@ export default async function Page({
 
   // Soonest first while it is still to come; most recent first once it has
   // been. Both orders are "the thing you are most likely to be looking for at
-  // the top", which is a different sort on either side of today.
-  const upcoming = all.filter((b) => !isPast(b.workshop.date));
+  // the top", which is a different sort on either side of today. The date is
+  // read off the offering rather than the row, because a course has none of its
+  // own — its run does (D-21).
+  const dateOf = (booking: BookingWithOffering) =>
+    offeringOf(booking).firstDate.getTime();
+  const stillToCome = (booking: BookingWithOffering) =>
+    !isPast(offeringOf(booking).lastDate);
+
+  const upcoming = all
+    .filter(stillToCome)
+    .sort((a, b) => dateOf(a) - dateOf(b) || a.id - b.id);
   const archived = all
-    .filter((b) => isPast(b.workshop.date))
-    .sort(
-      (a, b) =>
-        b.workshop.date.getTime() - a.workshop.date.getTime() || b.id - a.id,
-    );
+    .filter((booking) => !stillToCome(booking))
+    .sort((a, b) => dateOf(b) - dateOf(a) || b.id - a.id);
 
   // Every total on this screen is NET: what she is actually holding, with
   // anything already sent back taken off. A gross figure would count a refunded
   // booking's money twice — once here and once on somebody's statement.
-  const held = (b: BookingWithWorkshop) =>
-    b.amountPence - (b.refundedPence ?? 0);
-
   const live = upcoming.filter((b) => b.status === "paid");
-  const takenAhead = live.reduce((sum, b) => sum + held(b), 0);
+  const takenAhead = live.reduce((sum, b) => sum + heldPence(b), 0);
   const refundableAhead = live
-    .filter((b) => isRefundable(b.workshop) && !alreadyRefunded(b))
-    .reduce((sum, b) => sum + b.amountPence, 0);
+    .filter((b) => isRefundable(offeringOf(b)) && !alreadyRefunded(b))
+    .reduce((sum, b) => sum + heldPence(b), 0);
   const owedAhead = upcoming
     .filter((b) => refundOwed(b))
-    .reduce((sum, b) => sum + b.amountPence, 0);
+    .reduce((sum, b) => sum + heldPence(b), 0);
   const cancelledAhead = upcoming.length - live.length;
 
-  const takenBefore = archived.reduce((sum, b) => sum + held(b), 0);
+  // The two figures that only a course can produce: what is still to come in,
+  // and what has quietly gone back on sale because it never did.
+  const outstandingAhead = live
+    .filter((b) => !hasLapsed(b))
+    .reduce((sum, b) => sum + outstandingPence(b), 0);
+  const lapsed = live.filter((b) => hasLapsed(b));
+
+  const takenBefore = archived.reduce((sum, b) => sum + heldPence(b), 0);
   const archiveShown = showWholeArchive
     ? archived
     : archived.slice(0, ARCHIVE_SHOWN);
@@ -417,12 +518,12 @@ export default async function Page({
           <>
             {live.length === 1 ? (
               <>
-                One live booking is for a day that hasn&rsquo;t happened yet,
-                and you are holding {formatMoney(takenAhead)} against it.
+                One live booking is for something that hasn&rsquo;t happened
+                yet, and you are holding {formatMoney(takenAhead)} against it.
               </>
             ) : (
               <>
-                {live.length} live bookings are for days that haven&rsquo;t
+                {live.length} live bookings are for things that haven&rsquo;t
                 happened yet, and you are holding {formatMoney(takenAhead)}{" "}
                 against them.
               </>
@@ -447,31 +548,54 @@ export default async function Page({
         )}
       </h1>
 
+      {/* THE ONE THING NOTHING CAN TELL HER. A place released by an unpaid
+          balance happens by the passing of a date, so there is no moment at
+          which anything could send a message — and nothing here runs on a
+          schedule. It is said at the top of the screen she opens instead, above
+          the tables, in the figures rather than as a warning. */}
+      {lapsed.length > 0 && (
+        <p className="mt-6 max-w-[72ch] border-l-2 border-pool-error bg-pool-error/10 px-5 py-4 text-[19px] leading-relaxed text-plate-text">
+          <strong className="font-semibold">
+            {lapsed.length === 1
+              ? "One place has been released"
+              : `${lapsed.length} places have been released`}{" "}
+            because the balance was not paid.
+          </strong>{" "}
+          {lapsed.length === 1 ? "It is" : "They are"} back on sale, and{" "}
+          {formatMoney(lapsed.reduce((sum, b) => sum + heldPence(b), 0))} of
+          deposit money is still with you. Each one says so on its own row
+          below. Nothing has been cancelled and nothing has been refunded —
+          those are yours to decide.
+        </p>
+      )}
+
       <p className="mt-5 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
-        A booking sits in the first table until its day has been. The morning
-        after, it moves itself down to the archive. There is nothing to file.
+        A booking sits in the first table until its day has been — or, on a
+        course, until the last date of the run has. The morning after, it moves
+        itself down to the archive. There is nothing to file.
       </p>
       <p className="mt-3 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
-        Every workshop carries its own refund period, set when you make it. Each
-        row is measured against its own, and says which.
+        Every workshop and every course carries its own refund period, set when
+        you make it. Each row is measured against its own, and says which. A
+        course&rsquo;s is counted back from its first date.
       </p>
       <p className="mt-3 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
         Cancel is the everyday one. It releases the place, and while the booking
         is still inside its refund period it asks whether to send the money back
         as well. Past that period it cancels without a refund and says so
         plainly. Refund can also be used on its own, later, if you change your
-        mind. Delete stays out of reach until a booking has been cancelled — it
-        takes the record away altogether, and it cannot be undone.
+        mind — and it sends back everything that has actually arrived, which on
+        a course part-paid is the deposit and nothing else. Delete stays out of
+        reach until a booking has been cancelled — it takes the record away
+        altogether, and it cannot be undone.
       </p>
 
-      {/* Said once, quietly, because two of the seven columns are empty for
-          every row and will be until there is something else to sell. */}
+      {/* Said once, quietly, because Deposit is empty on every workshop row
+          and Service has never appeared at all. */}
       <p className="mt-6 max-w-[72ch] fig font-mono text-[15px] leading-relaxed text-plate-soft">
-        Type reads Workshop on every row because a workshop is the only thing
-        that can be bought yet — sessions and courses are not built. Deposit is
-        empty for the same reason: only a course takes one, and a workshop is
-        paid in full when it is booked. Both columns stay, so that nothing has
-        to move when they fill.
+        Deposit is empty on a workshop, which is paid in full when it is booked.
+        Type never reads Service, because a session cannot be bought online yet
+        — the column stays, so that nothing has to move when it can.
       </p>
 
       {/* ── still to come ──────────────────────────────────────────────── */}
@@ -487,14 +611,16 @@ export default async function Page({
             <p className="mt-1 max-w-[62ch] fig font-mono text-[17px] tabular-nums text-plate-soft">
               {upcoming.length === 0
                 ? "Nothing in the diary has been booked"
-                : `${upcoming.length} ${upcoming.length === 1 ? "row" : "rows"} — ${live.length} live${cancelledAhead > 0 ? `, ${cancelledAhead} cancelled` : ""} · soonest first`}
+                : `${upcoming.length} ${upcoming.length === 1 ? "row" : "rows"} — ${live.length} live${cancelledAhead > 0 ? `, ${cancelledAhead} cancelled` : ""}${lapsed.length > 0 ? `, ${lapsed.length} released` : ""} · soonest first`}
+              {outstandingAhead > 0 &&
+                ` · ${formatMoney(outstandingAhead)} of balances still to come in`}
               {owedAhead > 0 &&
                 ` · ${formatMoney(owedAhead)} of the cancelled money has not gone back yet`}
             </p>
           </div>
           {takenAhead > 0 && (
             <p className="fig font-mono text-[24px] tabular-nums text-gold">
-              {formatMoney(takenAhead)} paid
+              {formatMoney(takenAhead)} held
             </p>
           )}
         </div>
@@ -505,14 +631,15 @@ export default async function Page({
             eyebrowClass="text-action"
             title="Nothing is booked yet."
           >
-            Your workshops are live on the site and nobody has booked one. The
-            first booking appears here the minute someone pays, with the money
-            and that workshop&rsquo;s refund date already worked out.
+            Your workshops and courses are live on the site and nobody has
+            booked one. The first booking appears here the minute someone pays,
+            with the money and that offering&rsquo;s refund date already worked
+            out.
           </Empty>
         ) : (
           <Table
             id="upcoming-table"
-            caption="Bookings for days that have not happened yet, soonest first. Columns: name, email, type of offering, offering and date with its own refund period, deposit for courses, money paid, and the cancel, refund and delete actions available for that booking's state."
+            caption="Bookings for days that have not happened yet, soonest first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the cancel, refund and delete actions available for that booking's state."
             bookings={upcoming}
           />
         )}
