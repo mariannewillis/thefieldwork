@@ -1,6 +1,14 @@
 import type { CSSProperties } from "react";
+import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { home, type LedgerRow, type Plate as PlateT } from "@/content/home";
-import { formatDayShort, formatMoney } from "@/lib/format";
+import { capitalise, runShape } from "@/lib/course-run";
+import { listPublishedCourses } from "@/lib/courses";
+import { formatDayShort, formatDuration, formatMoney } from "@/lib/format";
+import {
+  listPublishedServices,
+  placeInOneLine,
+  servicePlace,
+} from "@/lib/services";
 import { listWorkshopLedgerRows } from "@/lib/workshops";
 import "./home.css";
 
@@ -55,15 +63,28 @@ function Plate({
 }
 
 export default async function HomePage() {
-  const { root, sacral, method, throat, schedule, turn, crown, nav } = home;
+  const { root, sacral, method, throat, schedule, turn, crown } = home;
 
-  // The Workshops column is DERIVED, as the comment on this beat has always
-  // said it would be: the rows come from what is published in Offerings, so a
-  // workshop she puts up appears here as well as on /workshops. Courses and
-  // Services keep their seeded rows because there are no models behind them
-  // yet — and a seeded row that says so plainly is better than an empty column
-  // that reads as a broken page.
-  const workshops = await listWorkshopLedgerRows();
+  // ALL THREE COLUMNS ARE DERIVED, as the comment on this beat has always said
+  // they would be: every row comes from what is published in Offerings, so
+  // anything she puts up appears here as well as on its own index — and, more
+  // to the point, nothing appears here that is not on the site. The seeded
+  // rows this replaced named nine offerings that had never existed, and every
+  // one of their links was a 404.
+  //
+  // One query per kind, in parallel: three lists of at most a handful of rows
+  // each, and this beat is the only thing on the page that touches the
+  // database.
+  const [workshops, courses, services] = await Promise.all([
+    listWorkshopLedgerRows(),
+    listPublishedCourses(),
+    listPublishedServices(),
+  ]);
+
+  // WHAT EACH ROW LEADS WITH IS WHAT THAT KIND IS DECIDED ON — a workshop by
+  // its date, a course by the shape of its run, a service by how long it takes.
+  // Three columns side by side make that difference legible in a way three
+  // separate pages cannot.
   const workshopRows: LedgerRow[] = workshops.map((workshop) => ({
     href: `/workshops/${workshop.slug}`,
     date: formatDayShort(workshop.date),
@@ -78,33 +99,63 @@ export default async function HomePage() {
       .join(" · "),
   }));
 
+  // A run that has finished is not "on", so it is not in a block headed "what
+  // is on". The courses index keeps its own archive; this is a sample of what
+  // somebody can still join.
+  const courseRows: LedgerRow[] = courses
+    .filter((course) => !runShape(course.sessions)?.finished)
+    .map((course) => {
+      const run = runShape(course.sessions);
+      return {
+        href: `/courses/${course.slug}`,
+        // The SPAN, not a single date — a course is decided on as a whole.
+        date: run ? run.span : "Dates to come",
+        price: formatMoney(course.priceGBP),
+        title: course.name,
+        meta: [
+          run && capitalise(run.words),
+          run?.hours,
+          course.venueName,
+          `${course.capacity} places`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      };
+    });
+
+  // No date and no capacity, so the two columns a workshop fills with those
+  // carry the two facts a service actually has: how long it lasts, and that
+  // you ask for it rather than buying it.
+  const serviceRows: LedgerRow[] = services.map((service) => ({
+    href: `/services/${service.slug}`,
+    date: "By arrangement",
+    price: formatMoney(service.priceGBP),
+    title: service.name,
+    meta: [
+      formatDuration(service.durationMinutes),
+      placeInOneLine(servicePlace(service)),
+    ].join(" · "),
+  }));
+
+  const rowsByLabel: Record<string, LedgerRow[]> = {
+    Courses: courseRows,
+    Workshops: workshopRows,
+    Services: serviceRows,
+  };
+
   return (
     <>
       {/* ══ 1 · ROOT — the clearing at the size of one seated person · LEFT ══ */}
       <section className="beat hero anchor-left" id={root.id}>
         <Plate plate={root.plate} />
 
-        <header className="masthead">
-          <a href="/" aria-label="The Field Work — home">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="masthead__logo"
-              src="/logo-horizontal.svg"
-              alt="The Field Work"
-            />
-          </a>
-          <nav className="nav" aria-label="Main">
-            {nav.map((n) => (
-              <a
-                key={n.href}
-                className={"current" in n && n.current ? "nav--now" : undefined}
-                href={n.href}
-              >
-                {n.label}
-              </a>
-            ))}
-          </nav>
-        </header>
+        {/* The site's masthead, floated over the hero photograph. Same
+            component, same lockup at the same size, same four tabs as every
+            other public page — this page is not one of the four, so none of
+            them is marked. */}
+        <div className="hero__head">
+          <SiteNav />
+        </div>
 
         <div className="pool hero__pool ink">
           <p className="eyebrow" data-slot="root.eyebrow">
@@ -233,21 +284,22 @@ export default async function HomePage() {
         </div>
         <div className="schedule__cols">
           {schedule.groups.map((group) => {
-            const derived = group.label === "Workshops";
-            const rows: readonly LedgerRow[] = derived
-              ? workshopRows
-              : group.rows;
+            const rows: readonly LedgerRow[] = rowsByLabel[group.label] ?? [];
             return (
               <div className="pool ink schedule-col" key={group.label}>
                 <p className="disp schedule-group__label">{group.label}</p>
                 <div className="ledger">
                   {rows.length === 0 ? (
-                    // Only reachable on the derived column. A column that just
-                    // stops is indistinguishable from one that failed to load.
-                    <p className="small ledger-row__meta">
-                      Nothing in the diary just now. The next dates usually go
-                      up a couple of months ahead.
-                    </p>
+                    // A column that just stops is indistinguishable from one
+                    // that failed to load — so an empty kind says WHY it is
+                    // empty, and carries the one link that would otherwise be
+                    // missing from the page when she has none of that kind.
+                    <>
+                      <p className="small ledger-row__meta">{group.empty}</p>
+                      <p className="small ledger-row__meta">
+                        <a href={group.href}>{group.emptyLink}</a>
+                      </p>
+                    </>
                   ) : (
                     rows.map((row) => (
                       <a className="ledger-row" href={row.href} key={row.href}>
@@ -289,8 +341,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ══ 8 · CROWN — the swing rests, centred; the footer dissolves into
-           the same plate so the page ends on the photograph ══ */}
+      {/* ══ 8 · CROWN — the swing rests, centred. The footer that used to
+           be nested here is the whole site's now and follows as a sibling ══ */}
       <section className="crown beat" id={crown.id}>
         <div className="crown__pool">
           <h2 className="disp crown__ask" data-slot="crown.ask">
@@ -300,52 +352,12 @@ export default async function HomePage() {
             {crown.ctaLabel}
           </a>
         </div>
-
-        <footer className="crown__foot">
-          {/* MUST be a direct child of .crown__foot and MUST carry the class.
-              The stylesheet lays the footer out with
-                .crown__foot > :not(.crown__foot-plate) { position: relative; z-index: 1 }
-              so any wrapper element here is caught by that rule, becomes the
-              positioning context, and collapses this inset:0 image to zero
-              height. A <picture> wrapper did exactly that — the plate vanished.
-              Bare <img> with the JPEG: 0.24MB rather than 0.09MB for the AVIF,
-              which is the price of not fighting the approved stylesheet. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="crown__foot-plate"
-            src={`/media/${crown.footPlate.src}-2400.jpg`}
-            alt={crown.footPlate.alt}
-            loading="lazy"
-          />
-          <a
-            className="crown__foot__brand"
-            href="/"
-            aria-label="The Field Work — home"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-primary.svg" alt="The Field Work" />
-          </a>
-          <div>
-            <div className="crown__foot__cols">
-              {crown.footCols.map((col) => (
-                <div key={col.heading}>
-                  <h3>{col.heading}</h3>
-                  <ul>
-                    {col.links.map((l) => (
-                      <li key={l.href + l.label}>
-                        <a href={l.href}>{l.label}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-            <p className="crown__foot__legal" data-slot="crown.legal">
-              {crown.legal}
-            </p>
-          </div>
-        </footer>
       </section>
+
+      {/* The site's footer, not this page's. It sits OUTSIDE the Crown
+          because it is full-bleed on the site gutter and the Crown is not;
+          the old copy lived inside and escaped with negative margins. */}
+      <SiteFooter />
     </>
   );
 }

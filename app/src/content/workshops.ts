@@ -13,17 +13,13 @@
  * becomes the seeder. The components do not change.
  */
 
-/** The site's main navigation, as the approved screens set it. */
-export const workshopsNav = [
-  { label: "Sessions", href: "/services" },
-  { label: "Workshops", href: "/workshops", current: true },
-  { label: "Courses", href: "/courses" },
-  { label: "About", href: "/about" },
-] as const;
-
-/** §14 compliance surface — this wording is load-bearing, not decorative. */
-export const siteFooterLine =
-  "The Field Work · Frome, Somerset · Complementary work. Not a substitute for medical care.";
+/*
+ * The main navigation and the footer line used to live here. They moved to
+ * src/content/site.ts on 2026-08-15, when the home page started carrying the
+ * same masthead: they were never about workshops, they were about the site,
+ * and a second copy of them on the home page is exactly how the two mastheads
+ * drifted apart in the first place.
+ */
 
 export const workshopsIndex = {
   eyebrow: "Workshops",

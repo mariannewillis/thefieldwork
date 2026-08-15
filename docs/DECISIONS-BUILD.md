@@ -1505,3 +1505,368 @@ npm run db:deploy
 **Restart the app after deploying.** A running server holds a Prisma client
 generated against the old schema and will refuse every course save with an
 unrelated-looking error until it is restarted. That is how this was found here.
+
+---
+
+## D-24 · A session is ASKED FOR in words; the hold and the slot picker are refused (2026-08-15)
+
+The public services pages went up — `/services` and `/services/<slug>`, built as
+the courses pages were: the same composition, the same stylesheet reached
+through the same layout module, strings from the database, `notFound()` for
+anything missing or unpublished. The home page's products block now reads all
+three kinds from the database, and the navigation goes where it says it does.
+
+The one decision worth writing down is what the page ASKS FOR.
+
+### The brief asks for a slot picker and a hold. Neither could be honest.
+
+`brief.md` §5 and the approved `booking-request` / `booking-confirmation`
+screens describe a live free-slot picker — real dates and times, computed — and
+a short hold placed on the chosen one, counting down ("Held for you · 9:47
+remaining") while Marianne decides.
+
+The hold rests entirely on **computed availability**, which §9 defines as a
+subtraction: her recurring `AvailabilityRule` pattern, minus workshop dates,
+minus course session dates, minus personal `TimeBlock`s, minus other holds,
+minus the buffer and the minimum lead time. **None of that exists.** There is no
+availability table, no time-block table, no derivation and no scheduling module.
+
+A picker built on top of nothing would offer times nothing had checked. A hold
+would be a promise with no mechanism behind it — nothing to expire it, nothing
+to release, and nothing that could stop the same hour being offered twice. Both
+would be the one lie on a site whose whole argument is that it does not tell you
+anything it cannot show you.
+
+### So the preferred time is the visitor's own sentence
+
+`ServiceRequest.preferredTime` is TEXT. "Weekday mornings, ideally not Tuesdays"
+is a real answer that no picker can take, and it is the answer she needs in
+order to write back. The field's note on the form says there is no calendar and
+that nothing is taken, so nobody types "14:00" and leaves believing they have it.
+
+When availability is built, a chosen slot arrives as its own nullable pair of
+columns beside this one. The sentence somebody typed is worth keeping either way.
+
+### What the page promises, and what it refuses to
+
+Three places say the same thing, because this is exactly what a reader assumes
+the other way round: above the fields, under the button, and again on the sent
+panel — **a reply is coming; nothing is booked; no time is held; nothing is
+charged.** Both emails say it too. The word "booking" does not appear on the
+public form at all.
+
+### The model
+
+`ServiceRequest` — the service, name, email, optional phone, the preferred time
+as text, an optional message, `status` (`pending` only; `confirmed` and
+`declined` are named because the brief names the two answers she gives, and
+nothing writes them yet), and timestamps. `onDelete: Restrict` on the service,
+because deleting a service somebody wrote in about would take their message with
+it — `deleteService` now refuses and says so, exactly as `deleteWorkshop` does
+for a paid place. There is deliberately no `expired` status: the brief's fourth
+state belongs to the hold.
+
+### The guard on the one public write
+
+This is the only endpoint the outside world can POST to that has neither
+Stripe's signature nor a token behind it (§13 asks for a rate limit and a spam
+guard). Three cheap layers, no new dependency: a honeypot field clipped by `.vh`
+and out of the accessibility tree; a minimum fill time read off a hidden
+`drawnAt`; and a per-caller count over the hour with a global ceiling beneath it,
+in memory, exactly as `lib/auth/throttle.ts` keeps its counters and for the same
+reason (one always-on instance, D-4). A discarded submission is answered with
+the **same** acknowledgement a real one gets — a robot that learns which field is
+the trap gets past the trap next time — and only the log says otherwise. A second
+identical submission inside two minutes is a double-click, not a second
+question, and writes nothing.
+
+### The answer is an email, so the queue only shows
+
+`/admin/bookings` lists the requests with what was asked for and the visitor's
+words printed whole. It has **no accept, no decline and no status control**, and
+that is this pass rather than an oversight: the next one is approve → payment
+link → an unpaid link releasing the slot → she is told, and every step of it
+needs something that does not exist. A button that only changed a column would
+put a record of a decision in the portal while the person decided about heard
+nothing. Her notice email sets `Reply-To` to theirs instead, so pressing reply in
+the mailbox she already has open IS the workflow.
+
+### Two other things this pass settled
+
+- **The nav goes somewhere.** Sessions → `/services`, Workshops → `/workshops`,
+  Courses → `/courses`, each marking itself current. About pointed at `/about`,
+  an approved screen that is not built; until it is, it goes to the home page's
+  `#not` beat, where her portrait and what she trained in already are. A nav
+  entry that 404s is worse than a shorter answer. It reverts to `/about` when
+  that page lands, and nothing else changes.
+- **The home products block is derived.** All three columns read the database.
+  The nine seeded rows it used to draw named offerings that had never existed
+  and every one of their links was a 404. An empty column keeps the composition
+  and says why it is empty — a course runs two or three times a year, so months
+  with nothing in them are the normal state — and carries the link to that
+  kind's index, which is the one route that would otherwise be missing from the
+  page when she has none of a kind.
+
+### What it is verified by
+
+Driven against a running app and the real database on 5433. Two services created
+through the real `saveService` action — one at a venue, one travelling — and both
+branches drawn correctly on the public pages: the venue one prints its address,
+Getting There and the map link; the travelling one prints where she sets out
+from, how far she goes and her own sentence about what it costs. Never both.
+
+The request action was exercised over the **no-JavaScript form-submit path**, so
+progressive enhancement is proven rather than assumed: a valid request writes one
+row and shows the sent panel; the same person again inside two minutes writes
+nothing; a blank name, half an address and no preferred time come back as three
+field errors with nothing written; a filled honeypot and an instantly-submitted
+form both return the ordinary acknowledgement and write nothing. Both requests
+appear in the queue with their words intact. Emails were intercepted at the
+module boundary (`RESEND_API_KEY=""`, so the log adapter runs) and asserted on:
+the notice carries the service, the duration, the price, the place, their words
+and a `Reply-To` of their address; the acknowledgement says NOTHING IS BOOKED YET
+before it says anything else.
+
+`sitemap.xml` carries `/services` and both published services. Every link on the
+home page and the services pages resolves except the four the home footer has
+always pointed at — `/about`, `/contact`, `/privacy`, `/subscribe` — which are
+approved screens nobody has built yet and are not this pass's to build.
+
+### Applying it
+
+```
+npm run db:deploy
+```
+
+**Restart the app after deploying**, for the reason D-23 gives: a running server
+holds a Prisma client generated against the old schema, and every request will
+fail on `prisma.serviceRequest` being undefined until it is restarted. That is
+how this was found here, again.
+---
+
+## D-25 · A session is APPROVED before it is paid for; the approval is the thing that lapses (2026-08-15)
+
+D-24 shipped the requests queue with no controls at all and said why: the next
+pass was **approve → payment link → an unpaid link releasing the slot → she is
+told**, and every step of it needed something that did not exist. All of it
+exists now. The operator's decisions, in his words: **a visitor asks, she
+approves, and only then does a payment link go to the client**; **if it goes
+unpaid the slot returns automatically and she is told**; **approval happens in
+the admin, from the Requests screen**.
+
+Everything below follows from those and from the rules that already govern
+workshops and courses — the webhook confirms and the browser never does (D-17),
+the event id is recorded before anything acts on it (D-20), the amount comes
+from our database and never the client, refunds are idempotency-keyed, the site
+stamp keeps a preview's payment out of the live ledger (D-19).
+
+### A Booking learned a third offering, exactly as D-23 said it would
+
+`Booking_one_offering` was written as a SUM rather than a pair of branches
+precisely so that services could arrive as one more term in it. They did:
+`serviceId` joins `workshopId` and `courseId`, all three nullable, all three
+`Restrict`, and the CHECK is one more `CASE` in the same expression.
+
+A session booking carries a **fourth** key, and it is the one that makes it
+different from the other two. A workshop place is bought off the page by
+anybody; a session is bought only by the person she approved, at the figure she
+approved, through the one link she sent. So `Booking.serviceRequestId` names the
+approval, is UNIQUE (one approval buys one session), and a second CHECK —
+`Booking_service_from_request` — makes the two null together: a session booking
+with no approval behind it would be money taken for something nobody agreed to.
+
+`offeringOf()` gained its third branch, and with it the one honest consequence:
+**`firstDate` and `lastDate` are now nullable, and only a session makes them
+so.** There is no availability engine (D-24), so a session's time is the
+sentence she and the client agreed and there is no day behind it. A sentinel
+date would have been a lie that every reader then printed. `hasBeen()` is what
+almost every reader of those fields actually wanted, and a session is never
+"past" — nothing here can read her sentence, so nothing here may retire a
+cancellation link or file a booking into the archive on a date the portal
+invented.
+
+### The amount is HERS, and it is copied, not read through
+
+`ServiceRequest.approvedPence` is what she approved. The form offers
+`Service.priceGBP` as the default and she can change it before approving,
+because services carry travel and vary in length — a fixed figure would be wrong
+the first time she drives somewhere. What is stored is what she agreed, and it
+is what the client is asked for, what the checkout charges, and what becomes
+`Booking.totalPence`. Editing the service's price next month must not change
+what somebody was already asked to pay, which is the same reasoning that copies
+a venue's address onto a workshop.
+
+`agreedTime` is her answer to their `preferredTime`, and it is TEXT for exactly
+the reason theirs is: a datetime here would be a time nothing had checked. Both
+sentences are kept — theirs is what they asked for, hers is what was agreed.
+
+The approval email prints the duration and the place but **not** the service's
+list price, because the figure beside it is hers and two numbers in one email
+asking for money is a coin toss. The smoke test asserts the list price is absent.
+
+### The pay link is the balance link, reused
+
+`/pay/<token>` resolves EITHER a `Booking.balanceTokenHash` or a
+`ServiceRequest.payTokenHash` — one address, one token scheme, one set of
+reasons (D-23): stored as SHA-256 so a leaked dump cannot open a payment; a page
+of ours rather than a Stripe URL, because a Checkout URL is dead in a day and
+this one mints the session on the press; and able to say things a spent Stripe
+link cannot. A session's states are four rather than five, because it is paid at
+once: there to pay, already paid, run out, and a link that no longer works.
+
+A token that matches nothing produces ONE sentence whichever table it failed to
+match — which is why `payPage.deadBody` no longer says "the run it belonged to".
+That wording would have reached somebody whose session had never been a run.
+
+### Release is lazy, and the approval is what lapses
+
+**The window is 48 hours from the moment she presses approve.** Why that:
+`brief.md` §5 already names 48 hours as the working default for the hold it
+wanted at the pending stage, and this is the other half of the same
+conversation — a second figure would make "how long do people get?" a question
+with two answers. §20 Q7 says the number is a guess and that she will know which
+way to move it after a fortnight, and §12 already assigns hold duration to Site
+settings, a screen that does not exist yet. So it is `APPROVAL_HOLD_HOURS` in
+`src/lib/service-requests.ts` — **one named constant, in the place the future
+Settings column will read its default from**, rather than a new per-service or
+per-request configurable invented in a place the brief has already assigned
+somewhere else. HOURS, not days: "by Thursday" from a Tuesday-evening approval
+is one day, not two.
+
+It is **copied onto the row as `payBy`** at the moment of approval, for the
+reason `Booking.balanceDueAt` is copied from the course: moving the constant
+later must not move a deadline somebody has already been told in writing.
+
+**The lapse itself is derived, not swept** — `payBy < now` with no Booking
+against the row. Nothing runs, nothing sweeps, no column is set, and there is
+still deliberately no `expired` in `ServiceRequestStatus`: `confirmed` records
+what SHE did, and the passing of a Tuesday is not something she did. It is true
+the moment it becomes true, in the queue, on the pay page and under the lock in
+the webhook, and a job that has to fire could not say the same.
+
+**What lapsing actually releases** is worth being exact about, because the brief
+imagines a calendar and there is none. Nothing was held in a diary — there is no
+diary. What ran out is her answer: the link stops working, the figure stops
+standing, and the request is back on her desk. Approving again is the recovery
+path and it is hers: a new figure, a new time, a new token, and the link in the
+old email dies by existing.
+
+### Telling her needs something to fire, and nothing does
+
+The same honest gap as D-23, and the same answer. It surfaces where she will see
+it: the Requests headline says "2 approvals ran out unpaid and are back with
+you" above everything else, and the row says it again in red with the moment it
+ran out and that nothing was charged.
+
+**What a scheduled job would add** — so the operator can decide about Replit
+scheduling separately: (1) a reminder to the client a few hours before the
+approval runs out, which is the thing most likely to stop one lapsing at all;
+(2) an email to Marianne the moment one lapses, rather than her finding out when
+she next opens the queue; (3) a weekly digest of approvals still unpaid. None of
+them changes what is TRUE — the arithmetic is already correct without them — so
+all three are notification rather than mechanism, and can be added later without
+touching any of the above.
+
+### A session has no refund period, and none was invented
+
+`Offering.refundDays` is 0 on a session, and that is the ABSENCE of a policy
+rather than a strict one. Nothing anybody has agreed says a session is
+refundable; §20 Q5 records that cancellation terms are still unspecified. So the
+automatic path declines to decide: `isRefundable()` is false, cancelling never
+refunds by itself, and the money stays where the operator put it — with
+Marianne, under the refund control on the row, which was always available and is
+unchanged. Every sentence that would otherwise have read "this cannot be
+refunded once it is taken" has a session branch saying the true thing instead:
+the link tells her, and the money is a conversation with a person.
+
+### Two answers, both under a row lock, both sending an email
+
+`approveRequest` and `declineRequest` each re-read the row inside the same
+transaction that writes, under `SELECT … FOR UPDATE`. Two tabs on the queue is
+ordinary: of two simultaneous approvals exactly one approves and sends an email,
+and the other reads back "this was already approved" and sends nothing. A second
+approval would otherwise be two links in two emails, one quietly dead, possibly
+at two different figures.
+
+Approving again is allowed on a LAPSED one and only on a lapsed one. Declining
+is refused on one that has been paid for — that is a cancellation, and a
+cancellation is about money, which is the bookings page's job.
+
+The email is sent OUTSIDE the transaction, deliberately: the approval is the
+durable fact and a message that would not send must not undo a decision she
+made. The cost is that a failed send leaves an approval whose link nobody holds,
+which is why the screen says so and the row shows the state plainly.
+
+### Two more things a webhook can have done
+
+`approvalGone` — somebody paid for a session whose approval was no longer live
+(it ran out, she declined it, she replaced it). Its own value rather than
+`noPlace`, because no place was ever the question: a session has no room, and
+what ran out was the approval.
+
+`duplicatePayment` — a SECOND, distinct payment arrived for a session already
+paid for: two checkouts opened from one link, both completed. Its own value
+because it is the only outcome here that means somebody was charged twice, and
+that is the one a year later that has to be findable. Both refund and tell both
+people; neither is silently kept.
+
+### What it is verified by
+
+`e2e/service-bookings-smoke.mjs` — 52 assertions against a running app and the
+real database on 5433, on the same harness as its two siblings and with the same
+guarantees: no real money (a made-up `sk_test_` key belonging to no account), no
+real email (`RESEND_API_KEY=""`, so the log adapter runs — asserted, not
+assumed), `EMAIL_TO_OWNER` pointed at `.invalid`, and **an assertion over the
+whole server log that not one message in the run was even ADDRESSED to
+marianne@thefieldwork.co.uk**.
+
+It covers, in order: the operator's Booking 25, his two pending requests, her
+`credentialVersion` and `ifr-course` all read-only and unchanged, checked before
+anything happens and again at the end; the database refusing a booking that
+names two offerings and one that names a service with no approval; the queue
+closed to strangers; the approve panel defaulting to the list price and to their
+own words; approving at £95 against a £70 service and storing exactly that; only
+the token's hash stored, and the window being 48 hours from the press; the email
+carrying the link, £95, the agreed time and the deadline — and NOT the list
+price; the stored hash being the SHA-256 of the token in that email; the pay page
+stating all three; paying creating ONE booking and ONE payment of kind `full`
+against the approval at her figure, with no balance and no second link; the same
+event delivered twice making one of each; a second distinct payment refunded and
+recorded as `duplicatePayment` with the client told they were charged twice; the
+link then reading "already paid for"; declining closing the request with her own
+words, clearing the token, and sending her sentence rather than a template; an
+approval lapsing with nothing having run, the queue headline and the row saying
+so, and the link saying so; a payment landing after the lapse writing nothing,
+recorded as `approvalGone`, refunded, both told; approving again issuing a new
+link and killing the old one; a stale second tab failing to approve twice and
+being told why, with the first approval's figure, token and time unchanged; and
+the paid session appearing in the ledger typed as a Session and placed by her
+sentence.
+
+`bookings-smoke.mjs` (86), `course-bookings-smoke.mjs` (69) and
+`admin-bookings-smoke.mjs` (56) all still pass unchanged.
+
+### What was deliberately left out
+
+Availability, a calendar, and any real hold on a time — all still absent, and
+D-24's reasoning for that is unchanged. No refund policy for services beyond the
+shared path. No payment plans on a session: it is paid at once. No bookings-table
+tabs. And no cron.
+
+### Applying it
+
+The migration adds two enum values, seven nullable columns to `ServiceRequest`,
+two nullable columns and two indexes to `Booking`, and replaces
+`Booking_one_offering` with the three-term version alongside a new
+`Booking_service_from_request`. It is written by hand because the end of it is a
+CHECK constraint Prisma cannot express. Nothing in it is destructive: every
+column is nullable, every existing Booking keeps naming what it named, and every
+existing ServiceRequest stays `pending`. Locally it is applied. On Replit:
+
+```
+npm run db:deploy
+```
+
+**Restart the app after deploying**, for the reason D-23 and D-24 both give: a
+running server holds a Prisma client generated against the old schema and will
+fail on the new columns until it is restarted.

@@ -12,6 +12,11 @@ import {
   placesLeft,
 } from "@/lib/bookings";
 import {
+  approvalState,
+  factsOf,
+  findApprovalByPayToken,
+} from "@/lib/service-requests";
+import {
   paymentsConfigured,
   SITE_METADATA_KEY,
   stripe,
@@ -131,5 +136,101 @@ export async function payBalance(
 
   // Outside every try/catch on purpose: redirect() works by throwing, and a
   // catch around it would turn a successful redirect into an error message.
+  redirect(session.url);
+}
+
+/**
+ * Paying for a session Marianne has approved.
+ *
+ * THE SAME SHAPE AS `payBalance` ABOVE, and every sentence of its reasoning
+ * applies here too: the token is the whole credential, the session is minted on
+ * the press so the link never goes stale, and every rule the page drew is
+ * applied AGAIN, because a server action is a POST endpoint of its own and the
+ * approval can have lapsed, been paid or been withdrawn since the page rendered.
+ *
+ * THE AMOUNT IS THE ONE SHE APPROVED, read from the row at this moment. Never a
+ * figure from the form, never the service's list price, and never the number
+ * written into the approval email — which is the same figure, but reading it
+ * from the row is what makes that true rather than hoped.
+ */
+export async function payForSession(
+  _previous: PayState,
+  formData: FormData,
+): Promise<PayState> {
+  const token = String(formData.get("token") ?? "");
+  const approval = await findApprovalByPayToken(token);
+
+  if (!approval) {
+    return { error: "This link no longer works." };
+  }
+  if (!paymentsConfigured()) {
+    return { error: "Payments cannot be taken on this site yet." };
+  }
+
+  const state = approvalState(
+    factsOf({
+      status: approval.status,
+      payBy: approval.payBy,
+      booking: approval.booking,
+    }),
+  );
+
+  if (state === "paid") {
+    return {
+      error:
+        "This session is already paid for. Nothing has been charged again.",
+    };
+  }
+  if (state !== "awaitingPayment") {
+    return {
+      error:
+        "This ran out before it was paid, so the time has gone back to Marianne. Nothing has been charged. Write to her if you would still like the session.",
+    };
+  }
+
+  const owed = approval.approvedPence ?? 0;
+
+  const session = await stripe().checkout.sessions.create({
+    mode: "payment",
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "gbp",
+          // PENCE, as she approved it, read from the row a moment ago.
+          unit_amount: owed,
+          product_data: {
+            name: approval.service.name,
+            description:
+              approval.agreedTime?.trim() ||
+              "A one-to-one session with Marianne",
+          },
+        },
+      },
+    ],
+    billing_address_collection: "required",
+    success_url: `${SITE_URL}/services/${approval.service.slug}/booked?session={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${SITE_URL}/pay/${token}`,
+    // WHICH APPROVAL THIS PAYS FOR. The webhook branches on this key before it
+    // reads anything else, so a session can never be mistaken for a workshop
+    // place or a balance — and the site stamp keeps a preview's payment out of
+    // the live site's ledger (D-19).
+    metadata: {
+      serviceRequestFor: String(approval.id),
+      offeringName: approval.service.name,
+      [SITE_METADATA_KEY]: thisSite,
+    },
+  });
+
+  if (!session.url) {
+    console.error(
+      `[stripe] session checkout ${session.id} came back with no url; nobody was sent to pay.`,
+    );
+    return {
+      error:
+        "Stripe did not give us a checkout page. Nothing has been charged.",
+    };
+  }
+
   redirect(session.url);
 }

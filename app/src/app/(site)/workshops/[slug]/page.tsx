@@ -135,9 +135,14 @@ export default async function Page({
         )}
         <div className="field-scrim" aria-hidden="true" />
 
-        <div className="relative z-10 mx-auto max-w-[1180px] px-6 lg:px-10">
-          <SiteNav />
+        {/* Over the masthead photograph, but on the site's gutter rather
+            than this page's measure, so the mark does not move between here
+            and the index. The words below keep the measure. */}
+        <div className="relative z-10">
+          <SiteNav current="/workshops" />
+        </div>
 
+        <div className="relative z-10 mx-auto max-w-[1180px] px-6 lg:px-10">
           <div className="pb-14 pt-10 lg:pb-16 lg:pt-16">
             <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold">
               {workshopDetail.eyebrow}

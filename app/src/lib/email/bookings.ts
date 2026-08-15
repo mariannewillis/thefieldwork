@@ -8,6 +8,7 @@ import {
   outstandingPence,
   paidPence,
   refundOwed,
+  whenWords,
   type BookingWithOffering,
   type Offering,
 } from "@/lib/bookings";
@@ -36,10 +37,16 @@ import { sendMail, type Mail } from "./index";
  * amount actually charged, what is still owed and by when, and the refund date
  * worked out from that offering's OWN refundDays.
  *
- * ONE SET OF MESSAGES FOR BOTH KINDS. A workshop and a course differ in two
- * sentences — how the dates read, and whether anything is still owed — and
- * writing a second family of functions for courses would be two places for
- * every future correction to a sentence about money.
+ * ONE SET OF MESSAGES FOR ALL THREE KINDS. A workshop, a course and a session
+ * differ in three sentences — how the time reads, whether anything is still
+ * owed, and what the refund terms are — and writing a second and third family
+ * of functions would be three places for every future correction to a sentence
+ * about money.
+ *
+ * A SESSION HAS NO DATE, and that is why `whenWords` below exists rather than
+ * `formatDayLong(offering.firstDate)` appearing in nine places. The time it
+ * happens is the sentence Marianne and the client agreed (D-24, D-25); nothing
+ * here may turn that into a day, and nothing here may print an empty one.
  */
 
 /**
@@ -63,6 +70,12 @@ const SIGN_OFF = "The Field Work · Frome, Somerset";
  * four Wednesdays wants to write all four down.
  */
 function when(offering: Offering): string[] {
+  if (offering.kind === "service") {
+    // Her sentence, whole, and nothing else. It may be one line or three, and
+    // it may say "at yours" — which is the address as well as the time.
+    return offering.agreedTime ? [offering.agreedTime] : [];
+  }
+
   if (offering.kind === "workshop") {
     const one = offering.dates[0];
     if (!one) return [];
@@ -102,6 +115,7 @@ function places(n: number): string {
 
 /** "Saturday 31 October" — or null when this cannot be refunded at all. */
 function deadlineWords(offering: Offering): string | null {
+  if (!offering.firstDate) return null;
   const deadline = refundDeadline(offering.firstDate, offering.refundDays);
   return deadline ? formatDayLong(deadline) : null;
 }
@@ -136,10 +150,14 @@ export function confirmationEmail(
     to: booking.buyerEmail,
     subject:
       offering.kind === "workshop"
-        ? `Your place on ${offering.name} — ${formatDayLong(offering.firstDate)}`
-        : `Your place on ${offering.name}`,
+        ? `Your place on ${offering.name} — ${whenWords(offering)}`
+        : offering.kind === "service"
+          ? `Paid — ${offering.name}, ${whenWords(offering)}`
+          : `Your place on ${offering.name}`,
     text: [
-      `Thank you. ${some} on ${offering.name} ${booking.places === 1 ? "is" : "are"} booked.`,
+      offering.kind === "service"
+        ? `Thank you. ${offering.name} is paid for and in the diary.`
+        : `Thank you. ${some} on ${offering.name} ${booking.places === 1 ? "is" : "are"} booked.`,
       "",
       ...when(offering),
       "",
@@ -155,7 +173,9 @@ export function confirmationEmail(
                 : ""
             }`,
           ]
-        : [`${some} · ${formatMoney(paidPence(booking))} paid`]),
+        : offering.kind === "service"
+          ? [`${formatMoney(paidPence(booking))} paid`]
+          : [`${some} · ${formatMoney(paidPence(booking))} paid`]),
       `Reference ${bookingReference(booking.id)}`,
       "",
       ...(owed > 0 && tokens.balance
@@ -189,11 +209,21 @@ export function confirmationEmail(
             "place is held for you and cannot be refunded, though you are still",
             "welcome to use the link to say you are not coming.",
           ]
-        : [
-            `A place on this ${offering.kind} cannot be refunded once it is taken. The`,
-            "link still works if you cannot come — it frees the place for somebody",
-            "else and tells Marianne not to expect you.",
-          ]),
+        : offering.kind === "service"
+          ? // A SESSION HAS NO PUBLISHED REFUND TERMS, and this must not invent
+            // any. There is no refund window on one — nothing anybody agreed
+            // says what it would be — so the honest sentence is that the link
+            // tells her, and the money is a conversation with a person.
+            [
+              "Use the link and Marianne will know not to expect you. There is no",
+              "refund period on a session — if you have to cancel, reply to this",
+              "email and she will sort out the money with you herself.",
+            ]
+          : [
+              `A place on this ${offering.kind} cannot be refunded once it is taken. The`,
+              "link still works if you cannot come — it frees the place for somebody",
+              "else and tells Marianne not to expect you.",
+            ]),
       "",
       ...(owed > 0 && tokens.balance
         ? [
@@ -223,10 +253,14 @@ export function bookingNoticeEmail(
     to: OWNER,
     subject:
       offering.kind === "workshop"
-        ? `${places(booking.places)} booked — ${offering.name}, ${formatDayLong(offering.firstDate)}`
-        : `${places(booking.places)} booked — ${offering.name}`,
+        ? `${places(booking.places)} booked — ${offering.name}, ${whenWords(offering)}`
+        : offering.kind === "service"
+          ? `Paid — ${offering.name}, ${whenWords(offering)}`
+          : `${places(booking.places)} booked — ${offering.name}`,
     text: [
-      `${booking.buyerName} has booked ${places(booking.places).toLowerCase()} on ${offering.name}.`,
+      offering.kind === "service"
+        ? `${booking.buyerName} has paid for ${offering.name}.`
+        : `${booking.buyerName} has booked ${places(booking.places).toLowerCase()} on ${offering.name}.`,
       "",
       ...when(offering),
       offering.venueName,
@@ -247,9 +281,15 @@ export function bookingNoticeEmail(
         : [`${formatMoney(paidPence(booking))} paid`]),
       `Reference ${bookingReference(booking.id)}`,
       "",
-      left === 0
-        ? `That is the last place. ${offering.name} is now full.`
-        : `${left} of ${offering.capacity} places left.`,
+      // A session has no room to count, so there is nothing true to say here
+      // about places left. The line is left out rather than filled with "0 of 1".
+      ...(offering.kind === "service"
+        ? []
+        : [
+            left === 0
+              ? `That is the last place. ${offering.name} is now full.`
+              : `${left} of ${offering.capacity} places left.`,
+          ]),
     ].join("\n"),
   };
 }
@@ -335,16 +375,16 @@ export function cancellationEmail(
   const deadline = deadlineWords(offering);
   const refunded = booking.status === "cancelledRefunded";
   const owed = refundOwed(booking);
-  const day = formatDayLong(offering.firstDate);
+  const day = whenWords(offering);
   const some = places(booking.places);
   const isAre = booking.places === 1 ? "is" : "are";
   const paid = paidPence(booking);
   const held = heldPence(booking);
 
   const heading =
-    offering.kind === "workshop"
-      ? `${offering.name}, ${day}`
-      : `${offering.name}, from ${day}`;
+    offering.kind === "course"
+      ? `${offering.name}, from ${day}`
+      : `${offering.name}, ${day}`;
 
   // Usually the refund is a minute old and "on its way" is exactly right. It is
   // not when she refunded somebody weeks ago, left them their place, and is
@@ -369,9 +409,13 @@ export function cancellationEmail(
         ? [
             "I am sorry.",
             "",
-            `I have had to cancel your ${some.toLowerCase()} on ${heading}.`,
+            offering.kind === "service"
+              ? `I have had to cancel your session — ${heading}.`
+              : `I have had to cancel your ${some.toLowerCase()} on ${heading}.`,
           ]
-        : [`${some} on ${heading}, ${isAre} cancelled.`]),
+        : offering.kind === "service"
+          ? [`Your session — ${heading} — is cancelled.`]
+          : [`${some} on ${heading}, ${isAre} cancelled.`]),
       "",
       ...(refunded
         ? refundedEarlierOn
@@ -399,19 +443,29 @@ export function cancellationEmail(
                 "through. Marianne has been told and will return it by hand.",
                 "Nothing is needed from you.",
               ]
-          : by === "marianne"
+          : // A SESSION HAS NO REFUND DATE TO HAVE PASSED. Saying one had would
+            // be inventing terms nobody agreed, and saying "the place is free
+            // for somebody else" would be nonsense about an hour with one
+            // person in it. Either way the money is a conversation with her.
+            offering.kind === "service"
             ? [
-                "No money has gone back. The refund date on this booking had already",
-                "passed, so nothing was returned automatically. If that seems wrong,",
-                "reply to this email and it reaches Marianne.",
+                `${formatMoney(held)} has not gone back yet. There is no refund period on`,
+                "a session — Marianne decides that herself and will be in touch. If",
+                "you would rather ask now, reply to this email and it reaches her.",
               ]
-            : [
-                deadline
-                  ? `The refund date was ${deadline}, which has passed, so nothing has`
-                  : `A place on this ${offering.kind} could not be refunded once it was taken, so nothing has`,
-                "been refunded. The place is free for somebody else, and Marianne",
-                "knows not to expect you.",
-              ]),
+            : by === "marianne"
+              ? [
+                  "No money has gone back. The refund date on this booking had already",
+                  "passed, so nothing was returned automatically. If that seems wrong,",
+                  "reply to this email and it reaches Marianne.",
+                ]
+              : [
+                  deadline
+                    ? `The refund date was ${deadline}, which has passed, so nothing has`
+                    : `A place on this ${offering.kind} could not be refunded once it was taken, so nothing has`,
+                  "been refunded. The place is free for somebody else, and Marianne",
+                  "knows not to expect you.",
+                ]),
       ...(outstandingPence(booking) > 0
         ? ["", "Nothing further is owed. The balance is no longer due."]
         : []),
@@ -440,7 +494,7 @@ export function cancellationEmail(
  */
 export function refundIssuedEmail(booking: BookingWithOffering): Mail {
   const offering = offeringOf(booking);
-  const day = formatDayLong(offering.firstDate);
+  const day = whenWords(offering);
   const amount = formatMoney(paidPence(booking));
   const stillComing = booking.status === "paid";
 
@@ -491,9 +545,9 @@ export function cancellationNoticeEmail(
     to: OWNER,
     subject: owed
       ? `ACTION NEEDED: refund by hand — ${offering.name}`
-      : `A place released — ${offering.name}, ${formatDayLong(offering.firstDate)}`,
+      : `A place released — ${offering.name}, ${whenWords(offering)}`,
     text: [
-      `${booking.buyerName} has cancelled ${places(booking.places).toLowerCase()} on ${offering.name}, ${formatDayLong(offering.firstDate)}.`,
+      `${booking.buyerName} has cancelled ${places(booking.places).toLowerCase()} on ${offering.name}, ${whenWords(offering)}.`,
       "",
       booking.buyerEmail,
       refunded
@@ -532,7 +586,7 @@ export function refundFailedNoticeEmail(
       "",
       `Stripe said: ${error}`,
       "",
-      `${offering.name}, ${formatDayLong(offering.firstDate)}`,
+      `${offering.name}, ${whenWords(offering)}`,
       booking.buyerEmail,
       `Reference ${bookingReference(booking.id)}`,
       // Every payment, because a course is two and the one that failed is not
@@ -552,26 +606,40 @@ export function refundFailedNoticeEmail(
 
 /**
  * The losing side of the race (D-16), the rarer case of something taken down
- * while somebody was at the checkout, and the balance that arrived for a place
- * already gone (D-23). One pair of messages for all three, because from where
- * the buyer is standing they are the same event: they paid, and there is no
- * place.
+ * while somebody was at the checkout, the balance that arrived for a place
+ * already gone (D-23), and the session paid for against an approval that had
+ * run out or been paid already (D-25). One pair of messages for all of them,
+ * because from where the buyer is standing they are the same event: they paid,
+ * and there is nothing to give them.
  *
  * The refunded flag is never assumed. If the refund did not go through, this
  * says so — telling somebody their money is on its way when it is not is the
  * one thing that turns a bad morning into a complaint.
  */
+export type CannotHonour =
+  | "soldOut"
+  | "offeringGone"
+  | "placeReleased"
+  /** The approval this paid against was no longer live — it had run out, or
+   *  she had declined it, or she had replaced it. */
+  | "approvalGone"
+  /** They were charged twice for one session. The second one goes back. */
+  | "paidTwice";
+
 export function cannotHonourEmail(args: {
   to: string;
   offeringName: string;
   offeringDay: string;
   amountPence: number;
-  why: "soldOut" | "offeringGone" | "placeReleased";
+  why: CannotHonour;
   refunded: boolean;
 }): Mail {
   return {
     to: args.to,
-    subject: `Your payment for ${args.offeringName} — refunded`,
+    subject:
+      args.why === "paidTwice"
+        ? `You were charged twice for ${args.offeringName} — refunded`
+        : `Your payment for ${args.offeringName} — refunded`,
     text: [
       "I am sorry.",
       "",
@@ -579,7 +647,11 @@ export function cannotHonourEmail(args: {
         ? `Somebody paid for the last place on ${args.offeringName}, ${args.offeringDay}, while you were paying for yours, so there was no place left to give you.`
         : args.why === "placeReleased"
           ? `The balance on ${args.offeringName} was overdue, so the place had been released, and it has since been taken by somebody else.`
-          : `${args.offeringName} on ${args.offeringDay} is no longer running, and your payment arrived after it came off the site.`,
+          : args.why === "approvalGone"
+            ? `The time Marianne agreed for ${args.offeringName} ran out before this was paid, so the payment arrived after the arrangement had ended.`
+            : args.why === "paidTwice"
+              ? `${args.offeringName} was already paid for, and this is a second payment for the same session. It should never have been taken.`
+              : `${args.offeringName} on ${args.offeringDay} is no longer running, and your payment arrived after it came off the site.`,
       "",
       ...(args.refunded
         ? [
@@ -592,11 +664,20 @@ export function cannotHonourEmail(args: {
             "go through. Marianne has been told and will return it by hand today.",
             "Nothing is needed from you.",
           ]),
-      ...(args.why === "placeReleased"
+      ...(args.why === "placeReleased" || args.why === "approvalGone"
         ? [
             "",
-            "If you would still like a place, reply to this email and it reaches",
+            args.why === "approvalGone"
+              ? "If you would still like the session, reply to this email and it reaches"
+              : "If you would still like a place, reply to this email and it reaches",
             "Marianne.",
+          ]
+        : []),
+      ...(args.why === "paidTwice"
+        ? [
+            "",
+            "Your session is unaffected. It is still paid for and still in the",
+            "diary — only the duplicate has gone back.",
           ]
         : []),
       "",
@@ -610,7 +691,7 @@ export function cannotHonourNoticeEmail(args: {
   offeringDay: string;
   buyerEmail: string;
   amountPence: number;
-  why: "soldOut" | "offeringGone" | "placeReleased";
+  why: CannotHonour;
   refunded: boolean;
   reference: string | null;
   error?: string;
@@ -625,7 +706,11 @@ export function cannotHonourNoticeEmail(args: {
         ? `Two people paid for the last place on ${args.offeringName}, ${args.offeringDay}. The second one has no place.`
         : args.why === "placeReleased"
           ? `A balance arrived for ${args.offeringName} after that place had lapsed and been taken by somebody else. Their deposit is still with you — that one is your decision, and the row on the bookings page says so.`
-          : `A payment arrived for ${args.offeringName}, ${args.offeringDay}, after it was taken off the site.`,
+          : args.why === "approvalGone"
+            ? `Somebody paid for ${args.offeringName} after the approval had run out. Nothing is booked, and the request is on the requests page marked as lapsed — approve it again if you still want to see them.`
+            : args.why === "paidTwice"
+              ? `${args.offeringName} was paid for TWICE — two checkouts were opened from one link and both went through. The session itself is fine; this is the duplicate.`
+              : `A payment arrived for ${args.offeringName}, ${args.offeringDay}, after it was taken off the site.`,
       "",
       args.buyerEmail,
       formatMoney(args.amountPence),

@@ -6,11 +6,13 @@ import type {
   CourseSession,
   Payment,
   Prisma,
+  Service,
+  ServiceRequest,
   Workshop,
 } from "@prisma/client";
 import { SITE_URL } from "@/content/site";
 import { prisma } from "@/lib/db";
-import { isPast, refundDeadline } from "@/lib/format";
+import { formatDayLong, isPast, refundDeadline } from "@/lib/format";
 import { stripe } from "@/lib/stripe";
 
 /**
@@ -48,19 +50,34 @@ export type CourseWithSessions = Course & { sessions: CourseSession[] };
 
 /**
  * A booking with everything hanging off it. The only shape any page, email or
- * decision in this file wants — exactly one of `workshop` and `course` is set,
- * and the database refuses anything else (`Booking_one_offering`).
+ * decision in this file wants — exactly one of `workshop`, `course` and
+ * `service` is set, and the database refuses anything else
+ * (`Booking_one_offering`).
+ *
+ * `serviceRequest` travels with `service` and never without it — the approval
+ * is where a session's agreed time and agreed figure live, and the database
+ * refuses one without the other (`Booking_service_from_request`).
  */
 export type BookingWithOffering = Booking & {
   workshop: Workshop | null;
   course: CourseWithSessions | null;
+  service: Service | null;
+  serviceRequest: ServiceRequest | null;
   payments: Payment[];
 };
 
-/** Read on every query, so nothing downstream has to ask twice. */
-const withOffering = {
+/**
+ * Read on every query, so nothing downstream has to ask twice.
+ *
+ * Exported because `lib/service-requests.ts` writes the third kind of booking
+ * and has to return the same shape. One include, so a page cannot be handed a
+ * booking whose service is missing depending on which module made it.
+ */
+export const withOffering = {
   workshop: true,
   course: { include: { sessions: { orderBy: { date: "asc" } } } },
+  service: true,
+  serviceRequest: true,
   payments: { orderBy: { paidAt: "asc" } },
 } satisfies Prisma.BookingInclude;
 
@@ -75,36 +92,54 @@ export type OfferingDate = {
 };
 
 /**
- * The thing that was bought, said the same way whichever of the two it was.
+ * The thing that was bought, said the same way whichever of the three it was.
  *
- * A workshop and a course differ in one fact — a day versus a run of them —
- * and every page, email and rule downstream of a booking wants the other eight
- * facts identically. Normalising them HERE means the ledger, the cancellation
- * page and the emails each have one shape to draw rather than two, and a rule
- * about the refund date cannot quietly be applied to one kind and not the
- * other.
+ * A workshop, a course and a session differ in when they happen — a day, a run
+ * of them, and a sentence two people agreed — and every page, email and rule
+ * downstream of a booking wants the other facts identically. Normalising them
+ * HERE means the ledger, the cancellation page and the emails each have one
+ * shape to draw rather than three, and a rule about the refund date cannot
+ * quietly be applied to one kind and not another.
+ *
+ * THE DATES ARE NULLABLE, AND ONLY A SESSION MAKES THEM SO. This is the one
+ * fact a service genuinely cannot answer: there is no availability engine, so
+ * `agreedTime` is her sentence and there is no day behind it (D-24, D-25). A
+ * sentinel date would be a lie every reader would then print, so the type says
+ * "there may be no day" and every reader has to have decided what that means.
+ * `hasBeen()` below is the answer for almost all of them.
  */
 export type Offering = {
-  kind: "workshop" | "course";
+  kind: "workshop" | "course" | "service";
   id: number;
   slug: string;
   name: string;
   /** Its own page on the site. */
   href: string;
   capacity: number;
+  /**
+   * Days before the day that it is still refundable in full. ZERO ON A SESSION,
+   * which is not a refund policy but the absence of one: nothing anybody has
+   * agreed says a session is refundable, so the automatic path returns nothing
+   * and the money stays a decision of Marianne's, taken on the row (D-25).
+   */
   refundDays: number;
-  /** The day, or the FIRST day of a run — what a refund is counted back from. */
-  firstDate: Date;
-  /** The last day. The same day as `firstDate` on a workshop. */
-  lastDate: Date;
+  /**
+   * The day, or the FIRST day of a run — what a refund is counted back from.
+   * NULL on a session, which happens at a time agreed in words.
+   */
+  firstDate: Date | null;
+  /** The last day. The same day as `firstDate` on a workshop; null on a session. */
+  lastDate: Date | null;
   dates: OfferingDate[];
+  /** Her answer to "when would suit you", as she wrote it. Null on the other two. */
+  agreedTime: string | null;
   venueName: string;
   addressLines: string;
   postcode: string;
 };
 
 export function offeringOf(booking: BookingWithOffering): Offering {
-  const { workshop, course } = booking;
+  const { workshop, course, service, serviceRequest } = booking;
 
   if (workshop) {
     return {
@@ -126,9 +161,40 @@ export function offeringOf(booking: BookingWithOffering): Offering {
           venue: workshop.venueName,
         },
       ],
+      agreedTime: null,
       venueName: workshop.venueName,
       addressLines: workshop.addressLines,
       postcode: workshop.postcode,
+    };
+  }
+
+  if (service) {
+    // WHERE A SESSION HAPPENS has two answers and no third, and the branch not
+    // in force is null by constraint (`Service_location_branch`). A session she
+    // travels for has no venue at all — the address is the client's, and this
+    // side has never been told it — so what stands in its place is the sentence
+    // her own service page prints. That is the honest version of an address
+    // this system does not hold.
+    const travels = service.location === "travels";
+    return {
+      kind: "service",
+      id: service.id,
+      slug: service.slug,
+      name: service.name,
+      href: `/services/${service.slug}`,
+      // One-to-one means one. Nothing counts places on a session, and this is
+      // here so that a reader which does gets the true answer rather than zero.
+      capacity: 1,
+      refundDays: 0,
+      firstDate: null,
+      lastDate: null,
+      dates: [],
+      agreedTime: serviceRequest?.agreedTime?.trim() || null,
+      venueName: travels
+        ? "She comes to you"
+        : (service.venueName ?? "").trim(),
+      addressLines: travels ? "" : (service.addressLines ?? ""),
+      postcode: travels ? "" : (service.postcode ?? ""),
     };
   }
 
@@ -137,7 +203,7 @@ export function offeringOf(booking: BookingWithOffering): Offering {
     // loud rather than typing `!` at every call site: if it ever does happen,
     // the row is money against nothing and somebody has to look at it.
     throw new Error(
-      `Booking ${booking.id} points at neither a workshop nor a course. The Booking_one_offering constraint should make that impossible.`,
+      `Booking ${booking.id} points at no offering at all. The Booking_one_offering constraint should make that impossible.`,
     );
   }
 
@@ -166,10 +232,46 @@ export function offeringOf(booking: BookingWithOffering): Offering {
       title: session.title,
       venue: session.venue,
     })),
+    agreedTime: null,
     venueName: course.venueName,
     addressLines: course.addressLines,
     postcode: course.postcode,
   };
+}
+
+/**
+ * Whether the thing that was bought has already happened.
+ *
+ * The one question almost every reader of `firstDate` / `lastDate` was really
+ * asking, and the reason those two could become nullable without a `!` at every
+ * call site.
+ *
+ * A SESSION IS NEVER "PAST", and that is a statement about what this system
+ * knows rather than about the session. She and the client agreed a time in
+ * words; nothing here can read that sentence, so nothing here may decide the
+ * hour has been and quietly retire a cancellation link somebody still needs.
+ * The archive on the ledger works the same way — a session stays in "still to
+ * come" until it is cancelled, because the alternative is the portal filing it
+ * on a date it invented.
+ */
+export function hasBeen(offering: Offering, now = new Date()): boolean {
+  return offering.lastDate !== null && isPast(offering.lastDate, now);
+}
+
+/**
+ * WHEN IT IS, in the one line a subject, a heading or a sentence has room for.
+ *
+ * "Saturday 14 November" for a workshop, the same for the first date of a run,
+ * and her own agreed sentence for a session. Here rather than in each of the
+ * three places that print it, so that a session cannot end up with an empty gap
+ * in a sentence in one of them.
+ *
+ * The fallback covers a session whose agreed time is somehow missing: "the time
+ * you agreed" is true even then, where a blank is not.
+ */
+export function whenWords(offering: Offering): string {
+  if (offering.firstDate) return formatDayLong(offering.firstDate);
+  return offering.agreedTime ?? "the time you agreed";
 }
 
 /** "TFW-0042" — what somebody quotes in an email. Derived, never stored. */
@@ -453,8 +555,9 @@ export async function findBookingByToken(
   if (!booking) return null;
   // The link dies with the last day, as the approved page says it does. On a
   // course that is the end of the run, not the start: somebody four weeks into
-  // six still has something to give up.
-  if (isPast(offeringOf(booking).lastDate)) return null;
+  // six still has something to give up. On a session there is no last day, so
+  // it does not die of one.
+  if (hasBeen(offeringOf(booking))) return null;
   return booking;
 }
 
@@ -468,7 +571,7 @@ export async function findBookingByBalanceToken(
     include: withOffering,
   });
   if (!booking) return null;
-  if (isPast(offeringOf(booking).lastDate)) return null;
+  if (hasBeen(offeringOf(booking))) return null;
   return booking;
 }
 
@@ -484,8 +587,17 @@ export async function findBookingByBalanceToken(
  *
  * The deadline day itself still counts, which is what "cancel by 6 September"
  * means to the person reading it.
+ *
+ * FALSE ON A SESSION, ALWAYS, and not because a session is unrefundable. It is
+ * because a refund window is a count of days back from a date, a session has no
+ * date, and nothing anybody agreed says what the terms are. So the automatic
+ * path declines to decide and the money stays where the operator put it — with
+ * Marianne, on the row, under the refund control that is always available
+ * (D-25). Inventing "14 days before a day we do not know" would be the portal
+ * writing a refund policy on her behalf.
  */
 export function isRefundable(offering: Offering, now = new Date()): boolean {
+  if (!offering.firstDate) return false;
   const deadline = refundDeadline(offering.firstDate, offering.refundDays);
   return deadline !== null && !isPast(deadline, now);
 }
@@ -1231,7 +1343,7 @@ export async function findBookingBySession(
  * only thing left worth doing.
  */
 export function isCancellable(booking: BookingWithOffering): boolean {
-  return booking.status === "paid" && !isPast(offeringOf(booking).lastDate);
+  return booking.status === "paid" && !hasBeen(offeringOf(booking));
 }
 
 /** Deleting is only ever reachable on a booking that was cancelled — see D-18. */
@@ -1274,7 +1386,7 @@ export async function cancelBookingFromPortal(
       reason: "This one has already been cancelled.",
     };
   }
-  if (isPast(offering.lastDate)) {
+  if (hasBeen(offering)) {
     return {
       outcome: "refused",
       reason:
@@ -1414,7 +1526,12 @@ export async function deleteBookingFromPortal(
   return { ok: true };
 }
 
-function isUniqueViolation(error: unknown): boolean {
+/**
+ * A collision on something declared unique — an event id already recorded, a
+ * session already turned into a payment, an approval already paid for. Every
+ * one of them means the same thing: this money has been dealt with.
+ */
+export function isUniqueViolation(error: unknown): boolean {
   return (
     typeof error === "object" &&
     error !== null &&

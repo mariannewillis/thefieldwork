@@ -236,49 +236,17 @@ p {
   line-height: 1.6;
 }
 
-/* ═══ SHARED — masthead (hero only) ══════════════════════════════════════ */
-.masthead__logo {
-  height: clamp(46px, 4.6vw, 74px);
-  width: auto;
-  display: block;
-}
-.masthead {
+/* ═══ SHARED — where the masthead SITS ═══════════════════════════════════
+   What the masthead LOOKS like is no longer here. There is one masthead for
+   the site now — src/components/site/site-chrome.css — drawn identically on
+   this page and on every workshop, course and service page. What is left is
+   the only part of it this page decides: that it floats over the hero
+   photograph instead of sitting above it in the flow, anchored to the same
+   gutter every pool on the page anchors to. */
+.hero__head {
   position: absolute;
   inset: 0 0 auto 0;
   z-index: 3;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  padding: clamp(20px, 2.4vw, 32px) var(--gut) 0;
-}
-.masthead img {
-  height: clamp(74px, 6.8vw, 104px);
-  width: auto;
-}
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(16px, 2vw, 34px);
-  align-items: center;
-  padding-top: 14px;
-}
-.nav a {
-  color: var(--blush);
-  text-decoration: none;
-  font-size: 17px;
-  letter-spacing: 0.02em;
-  border-bottom: 1px solid rgba(251, 243, 241, 0.34);
-  padding-bottom: 3px;
-}
-.nav a:hover,
-.nav a:focus-visible {
-  border-bottom-color: var(--gold);
-  color: var(--gold);
-}
-.nav a.nav--now {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
 }
 
 /* ═══ 1 · ROOT — small, dense, floor-level, LEFT ═════════════════════════ */
@@ -592,6 +560,11 @@ a.ledger-row:hover .ledger-row__title {
   display: block;
 }
 
+/* The footer left this file on 2026-08-15. It is the whole site's footer now
+   rather than this page's ending — src/components/site/site-chrome.css,
+   .site-foot — so every .crown__foot rule went with it. What stays below is
+   the Crown itself, which is still only this page. */
+
 /* ═══ 8 · CROWN — the swing rests, CENTRED, sized to its one sentence,
          the footer dissolved into the same plate (F-5 / F-6 / F-10, fix #3) ═ */
 .crown {
@@ -647,93 +620,6 @@ a.ledger-row:hover .ledger-row__title {
   background: var(--plum-900);
 }
 
-/* ── the footer, WHITE at the operator's request (2026-08-08). It was
-         previously dissolved into the Crown's plate; it is now its own blush
-         field, full width, with the plate framing it via the section gutter. ── */
-.crown__foot {
-  position: relative;
-  z-index: 2;
-  width: auto;
-  max-width: none;
-  overflow: hidden;
-  background: var(--plum-900);
-  color: var(--blush);
-  padding: clamp(96px, 13vh, 170px) var(--gut);
-  min-height: 550px;
-  align-content: center;
-  margin-top: 0;
-  align-self: stretch;
-  margin-left: calc(-1 * var(--gut));
-  margin-right: calc(-1 * var(--gut));
-  margin-bottom: calc(-1 * clamp(48px, 6vh, 76px));
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 64px);
-  align-items: start;
-}
-/* the altar carries the footer, cropped to the row of saints' cards */
-.crown__foot-plate {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 77%;
-  filter: brightness(0.38) saturate(1.06);
-  z-index: 0;
-}
-.crown__foot > :not(.crown__foot-plate) {
-  position: relative;
-  z-index: 1;
-}
-.crown__foot__brand img {
-  height: clamp(52px, 4.6vw, 70px);
-  width: auto;
-}
-.crown__foot__brand {
-  display: inline-block;
-}
-.crown__foot__cols {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: clamp(20px, 3vw, 48px);
-}
-.crown__foot h3 {
-  font-size: 17px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin: 0 0 12px;
-  font-weight: 600;
-}
-.crown__foot ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.crown__foot li {
-  margin-bottom: 9px;
-}
-.crown__foot a {
-  color: var(--blush);
-  text-decoration: none;
-  font-size: 17px;
-  border-bottom: 1px solid rgba(251, 243, 241, 0.34);
-  padding-bottom: 2px;
-}
-.crown__foot a:hover,
-.crown__foot a:focus-visible {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
-}
-.crown__foot__legal {
-  font-size: 17px;
-  line-height: 1.6;
-  max-width: 62ch;
-  color: var(--dim);
-  margin-top: clamp(22px, 3vw, 40px);
-}
-
 /* ── focus visibility (3:1+ against every ground it lands on) ───────────── */
 a:focus-visible,
 button:focus-visible {
@@ -742,9 +628,6 @@ button:focus-visible {
 }
 .pool a:focus-visible {
   outline-color: var(--plum-900);
-}
-.crown__foot a:focus-visible {
-  outline-color: var(--gold);
 }
 
 /* ── the whole motion budget: one 24s drift on the first plate only ─────── */
@@ -809,15 +692,8 @@ button:focus-visible {
   .ledger-row__price {
     text-align: left;
   }
-  .masthead {
-    flex-direction: column;
-    gap: 14px;
-  }
   .crown {
     align-items: stretch;
-  }
-  .crown__foot {
-    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 480px) {

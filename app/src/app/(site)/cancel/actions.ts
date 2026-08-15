@@ -49,10 +49,14 @@ export async function cancelPlace(formData: FormData): Promise<void> {
   // booking, so neither can claim a refund that failed. Only "alreadyCancelled"
   // stays silent — somebody has already had both of these.
   if (result.outcome === "cancelled" || result.outcome === "refundFailed") {
+    // A session has no room to count. `left` reaches a line in her notice that
+    // a session leaves out, so 0 is never printed — see `bookingNoticeEmail`.
     const sold =
       offering.kind === "workshop"
         ? await placesSold(offering.id)
-        : await coursePlacesSold(offering.id);
+        : offering.kind === "course"
+          ? await coursePlacesSold(offering.id)
+          : 0;
     const left = placesLeft(offering.capacity, sold);
     await sendBookingMail(cancellationEmail(result.booking), "cancellation");
     await sendBookingMail(
@@ -62,7 +66,13 @@ export async function cancelPlace(formData: FormData): Promise<void> {
   }
 
   // The place is back, so every page that counts places is now wrong.
-  revalidatePath(offering.kind === "workshop" ? "/workshops" : "/courses");
+  revalidatePath(
+    offering.kind === "workshop"
+      ? "/workshops"
+      : offering.kind === "course"
+        ? "/courses"
+        : "/services",
+  );
   revalidatePath(offering.href);
   revalidatePath("/");
 }

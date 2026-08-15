@@ -80,6 +80,34 @@ export function formatInstant(date: Date): string {
   }).format(date);
 }
 
+/**
+ * "Monday 17 August at 7:14pm" — a DEADLINE, said to the minute.
+ *
+ * London, like `formatInstant` and for the same reason: this is an instant
+ * rather than a day, and the hour it names has to be the hour on the clock of
+ * the person reading it. It is the one thing in this app measured in hours
+ * rather than days — an approval runs out 48 hours after it was given (D-25) —
+ * so rounding it to a day would take most of one away from somebody.
+ */
+export function formatMoment(date: Date): string {
+  const day = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/London",
+  }).format(date);
+  const time = new Intl.DateTimeFormat("en-GB", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Europe/London",
+  })
+    .format(date)
+    // "7:14 pm" → "7:14pm". The space is not how anybody writes it down.
+    .replace(/\s/g, "");
+  return `${day} at ${time}`;
+}
+
 /** "2026-09-20" — what an `<input type="date">` wants back. */
 export function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);

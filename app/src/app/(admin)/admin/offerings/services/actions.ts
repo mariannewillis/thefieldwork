@@ -285,11 +285,13 @@ export type DeleteState = { error: string | null };
 /**
  * Deleting a service.
  *
- * Its pictures go with it, by the cascade on the relation. Nothing refuses
- * this the way `deleteWorkshop` refuses a workshop somebody has paid for:
- * services cannot be asked for or bought yet, so there is no record of
- * anybody's money or anybody's request on this side to take down with it. When
- * there is, this needs the same guard, for the same reason.
+ * Its pictures go with it, by the cascade on the relation. Its REQUESTS do
+ * not, and that is what stops the delete: a request is somebody's message and
+ * the record of a person waiting on an answer, and taking it down with the
+ * service they wrote about would lose the answer as well as the question. Same
+ * guard as `deleteWorkshop`'s, for the same reason, and the database would
+ * refuse it anyway — the relation is Restrict — so this is what turns that
+ * refusal into a sentence rather than an unhandled error.
  */
 export async function deleteService(
   _prev: DeleteState,
@@ -303,6 +305,18 @@ export async function deleteService(
   const service = await prisma.service.findUnique({ where: { id } });
   if (!service) return { error: "That service no longer exists." };
 
+  const asked = await prisma.serviceRequest.count({
+    where: { serviceId: id },
+  });
+  if (asked > 0) {
+    return {
+      error:
+        asked === 1
+          ? "Somebody has written in about this one, so it cannot be deleted — their message would go with it. Take it off the site instead, and it stops appearing without anything being lost."
+          : `${asked} people have written in about this one, so it cannot be deleted — their messages would go with it. Take it off the site instead, and it stops appearing without anything being lost.`,
+    };
+  }
+
   await prisma.service.delete({ where: { id } });
 
   revalidateService(service.slug);
@@ -312,15 +326,24 @@ export async function deleteService(
 /**
  * Everything that changes when a service does.
  *
- * Only the portal's own list, for now. The public services pages are not built
- * yet, so there is nothing prerendered under /services to go stale — when
- * there is, this is where "/", "/services" and "/services/<slug>" go, exactly
- * as `revalidateWorkshop` lists them for workshops.
+ * The public pages are prerendered and would otherwise keep serving what they
+ * were built with — she saves, looks at the site, and sees the old words. The
+ * home page is in the list because its products block reads all three kinds
+ * now, so a service she publishes has to appear there as well as on its own
+ * index.
+ *
+ * The old address is cleared too when she has renamed one, or the page at the
+ * slug nobody links to any more keeps answering with the service that has
+ * moved.
  */
 function revalidateService(slug: string, previousSlug?: string) {
   revalidatePath("/admin/offerings");
   revalidatePath(`/admin/offerings/services/${slug}`);
+  revalidatePath("/");
+  revalidatePath("/services");
+  revalidatePath(`/services/${slug}`);
   if (previousSlug && previousSlug !== slug) {
     revalidatePath(`/admin/offerings/services/${previousSlug}`);
+    revalidatePath(`/services/${previousSlug}`);
   }
 }

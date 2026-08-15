@@ -1006,9 +1006,8 @@ export default function ServiceForm({
                     Show this on the site
                     <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
                       It needs a picture behind the title and something written.
-                      The services pages on the site are not built yet, so for
-                      now this is a decision the site will honour rather than
-                      one anybody can see.
+                      Once it is up, people can read it and write in about it —
+                      they cannot pay for it.
                     </span>
                   </span>
                 </label>

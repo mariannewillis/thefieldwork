@@ -401,10 +401,10 @@ export default async function Page({
           {/* The one thing this list cannot say, said once rather than as a
               dash on every row. */}
           <p className="mt-8 max-w-[62ch] fig font-mono text-[15px] leading-relaxed text-plate-soft">
-            Services cannot be asked for yet — the pages that would let somebody
-            request a slot are not built, and neither is the queue you would
-            answer them from. Each line shows how long a session runs and what
-            it costs.
+            A session is asked for rather than bought — nobody can pay for one
+            online, and there is no diary to pick a time out of. Requests land
+            in Requests and you answer them by email. Each line here shows how
+            long a session runs and what it costs.
           </p>
         </section>
       ) : showing === "courses" ? (

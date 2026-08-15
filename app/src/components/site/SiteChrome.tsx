@@ -1,72 +1,133 @@
-import { siteFooterLine, workshopsNav } from "@/content/workshops";
+import { siteFooter, siteNav } from "@/content/site";
+import "./site-chrome.css";
 
 /**
- * The logo, the navigation and the footer line, as the approved workshops
- * screens draw them. Both pages carry them identically, so they are one
- * definition — the index and the detail page cannot drift apart into two
- * slightly different mastheads.
+ * The masthead and the footer, as every public page draws them.
  *
- * The home page has its own masthead and footer in `home.css`'s vocabulary and
- * does not use these: it is a different composition, not a variant of this one.
+ * One definition for the whole site, the home page included. There were three
+ * mastheads until 2026-08-15: the home page's own `.masthead` in home.css at a
+ * fluid 74–104px with five in-page anchors; the workshops, courses and
+ * services pages at a fixed 52px with four links to elsewhere; and the
+ * cancellation and balance-payment pages at 56px with no nav at all. There
+ * were three footers to match — the home page's full one, a single grey
+ * sentence on the section pages, and a hand-copied duplicate of that sentence
+ * on the two transactional pages.
+ *
+ * Both bands are full-bleed and sit on the same gutter on every page, so the
+ * logo's left edge and the last tab's right edge do not move as you navigate.
+ * The page CONTENT keeps its own measure underneath; only the chrome is shared.
+ *
+ * The styles are hand CSS in `site-chrome.css` rather than utilities because
+ * the home page does not load Tailwind; see the note at the top of that file.
  */
+
+/**
+ * The lockup, linked home, at the site's one logo size. Every surface that
+ * shows the mark uses this.
+ */
+export function SiteBrand({ className }: { className?: string } = {}) {
+  return (
+    <a
+      className={className ?? "site-brand"}
+      href="/"
+      aria-label="The Field Work — home"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-horizontal.svg"
+        alt="The Field Work"
+        width={440}
+        height={120}
+        className="site-brand__logo"
+      />
+    </a>
+  );
+}
 
 export function SiteNav({
   /**
-   * Which entry this page IS, as its href. The seeded navigation carries a
-   * `current` flag of its own for the workshops pages it was written for; a
-   * page that is somewhere else says so here rather than the content module
-   * growing one list per section.
+   * Which entry this page IS, as its href. The home page passes nothing: it is
+   * not one of the four sections, so none of them is marked.
    */
   current,
 }: {
   current?: string;
 } = {}) {
   return (
-    <div className="flex items-center justify-between py-7">
-      <a href="/" aria-label="The Field Work — home">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo-horizontal.svg"
-          alt="The Field Work"
-          width={440}
-          height={120}
-          className="h-[52px] w-auto"
-        />
-      </a>
-      <nav
-        className="hidden items-center gap-8 text-[17px] md:flex"
-        aria-label="Main"
-      >
-        {workshopsNav.map((item) => {
-          const here = current
-            ? item.href === current
-            : "current" in item && item.current;
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              aria-current={here ? "page" : undefined}
-              className={
-                here
-                  ? "t text-plate-text underline decoration-gold underline-offset-8"
-                  : "t text-plate-soft hover:text-plate-text"
-              }
-            >
-              {item.label}
-            </a>
-          );
-        })}
+    <header className="site-head">
+      <SiteBrand />
+      <nav className="site-head__nav" aria-label="Main">
+        {siteNav.map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            // The gold marker is styled off this attribute, so a page cannot
+            // look current without also announcing it.
+            aria-current={item.href === current ? "page" : undefined}
+            className="site-head__link"
+          >
+            {item.label}
+          </a>
+        ))}
       </nav>
-    </div>
+    </header>
   );
 }
 
+/**
+ * The footer: the altar photograph, the mark, three columns and the compliance
+ * paragraph. This was the home page's ending and is now every page's.
+ *
+ * Three of the column entries carry no href because the pages they named have
+ * never been built; they render as plain text rather than as links to a 404.
+ * The reasoning, and what to do the day those pages exist, is on `siteFooter`
+ * in src/content/site.ts.
+ */
 export function SiteFooter() {
   return (
-    <footer className="border-t border-plate-rule/30">
-      <div className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
-        <p className="fig font-mono text-[15px] text-plate-rule">
-          {siteFooterLine}
+    <footer className="site-foot">
+      {/* MUST be a direct child of .site-foot and MUST carry the class. The
+          band is laid out with
+            .site-foot > :not(.site-foot__plate) { position: relative; z-index: 1 }
+          so any wrapper element here is caught by that rule, becomes the
+          positioning context, and collapses this inset:0 image to zero height.
+          A <picture> wrapper did exactly that on the home page and the plate
+          vanished. A bare <img> with the JPEG costs 0.24MB against 0.09MB for
+          the AVIF, which is the price of not fighting the approved layout. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className="site-foot__plate"
+        src={`/media/${siteFooter.plate.src}-2400.jpg`}
+        alt={siteFooter.plate.alt}
+        loading="lazy"
+      />
+
+      <SiteBrand className="site-foot__brand" />
+
+      <div>
+        <div className="site-foot__cols">
+          {siteFooter.cols.map((col) => (
+            <div key={col.heading}>
+              <h3>{col.heading}</h3>
+              <ul>
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    {link.href ? (
+                      <a href={link.href}>{link.label}</a>
+                    ) : (
+                      // No page to send anyone to yet. The words stay, the
+                      // link does not — see siteFooter in content/site.ts.
+                      <span className="site-foot__soon">{link.label}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className="site-foot__legal">
+          <span className="site-foot__place">{siteFooter.place}</span>
+          {siteFooter.legal}
         </p>
       </div>
     </footer>

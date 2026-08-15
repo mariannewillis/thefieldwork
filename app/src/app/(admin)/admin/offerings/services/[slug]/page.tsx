@@ -95,14 +95,14 @@ export default async function Page({
           </p>
         </div>
 
-        {/* Said once, at the top, rather than beside every field it touches.
-            The record is real and complete; what is not built yet is the page
-            that reads it — and the portal does not imply otherwise (D-9). */}
+        {/* Said once, at the top, rather than beside every field it touches:
+            the one thing about this kind that is different from the other two
+            (D-24). */}
         {service.published && (
           <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
-            The services pages on the site are not built yet, so nothing at that
-            address answers so far. Everything written here is saved and is what
-            those pages will show.
+            That page is live. Nobody can pay for a session on it — they send
+            you a message with a time that would suit them, and it arrives in
+            Requests.
           </p>
         )}
       </section>

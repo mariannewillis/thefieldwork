@@ -135,7 +135,12 @@ function Booked({ booking }: { booking: BookingWithOffering }) {
   const offering = offeringOf(booking);
   const run = runShape(offering.dates);
   const c = bookingConfirmation;
-  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+  // Only ever a course here — the page is reached at /courses/<slug>/booked and
+  // checks the slug matches — so the date is always there. The guard is what
+  // the type asks for since a session's offering has none (D-25).
+  const deadline = offering.firstDate
+    ? refundDeadline(offering.firstDate, offering.refundDays)
+    : null;
   const paid = paidPence(booking);
   const owed = outstandingPence(booking);
   const deposit = booking.payments.find((one) => one.kind === "deposit");

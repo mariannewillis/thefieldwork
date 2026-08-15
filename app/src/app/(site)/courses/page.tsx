@@ -161,9 +161,11 @@ export default async function Page() {
         Skip to the courses
       </a>
 
-      <header className="mx-auto max-w-[1180px] px-6 lg:px-10">
-        <SiteNav current="/courses" />
+      <SiteNav current="/courses" />
 
+      {/* The masthead is full-bleed on the site's gutter, as on every page.
+          This page's own words keep the 1180 measure. */}
+      <div className="mx-auto max-w-[1180px] px-6 lg:px-10">
         <div className="max-w-[54ch] pb-14 pt-8 lg:pb-20 lg:pt-14">
           <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold">
             {coursesIndex.eyebrow}
@@ -175,7 +177,7 @@ export default async function Page() {
             {coursesIndex.lede}
           </p>
         </div>
-      </header>
+      </div>
 
       <main id="main" className="mx-auto max-w-[1180px] px-6 pb-24 lg:px-10">
         <section id="list" aria-labelledby="coming">

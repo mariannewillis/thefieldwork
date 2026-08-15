@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { cancelPage, siteFooterLine } from "@/content/workshops";
+import { SiteBrand, SiteFooter } from "@/components/site/SiteChrome";
+import { cancelPage } from "@/content/workshops";
 import {
   findBookingByToken,
   heldPence,
@@ -78,11 +79,18 @@ function Receipt({
           ? `${run.words} · ${run.span}`
           : one
             ? `${formatDayShort(one.date)} · ${one.startTime}${one.endTime ? `–${one.endTime}` : ""}`
-            : formatDayShort(offering.firstDate)}
+            : offering.firstDate
+              ? formatDayShort(offering.firstDate)
+              : // A session has no date at all — the time is the sentence she
+                // and the client agreed (D-25).
+                (offering.agreedTime ?? "At the time you agreed")}
         <br />
         {offering.venueName}
         <br />
-        {booking.places} {booking.places === 1 ? "place" : "places"} &middot;{" "}
+        {offering.kind === "service"
+          ? "One session"
+          : `${booking.places} ${booking.places === 1 ? "place" : "places"}`}{" "}
+        &middot;{" "}
         {showPaid
           ? `${formatMoney(paidPence(booking))} paid on ${formatInstant(booking.paidAt)}`
           : `cancelled on ${formatInstant(booking.cancelledAt ?? booking.updatedAt)}`}
@@ -107,29 +115,16 @@ function Shell({ children }: { children: React.ReactNode }) {
       <div className="page-scrim" aria-hidden="true" />
 
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
-        <a href="/" aria-label="The Field Work — home" className="inline-block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logo-horizontal.svg"
-            alt="The Field Work"
-            width={440}
-            height={120}
-            className="h-[56px] w-auto"
-          />
-        </a>
+        {/* The mark at the site's one size, without the nav — see the
+            note on SiteFooter. */}
+        <SiteBrand />
 
         <section className="mt-14 max-w-[620px]">
           <div className="pool on-pool mt-5 px-8 py-9 sm:px-10">{children}</div>
         </section>
       </main>
 
-      <footer className="border-t border-plate-rule/30">
-        <div className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
-          <p className="fig font-mono text-[15px] text-plate-rule">
-            {siteFooterLine}
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
@@ -219,6 +214,12 @@ export default async function Page({
             Marianne has been told and will return it by hand. Nothing is needed
             from you.
           </p>
+        ) : offering.kind === "service" ? (
+          <p className="mt-7 text-[19px] leading-relaxed text-ink">
+            Marianne knows not to expect you. Nothing has gone back to your card
+            yet &mdash; there is no refund period on a session, so that one is
+            hers to decide, and she will be in touch about it.
+          </p>
         ) : (
           <p className="mt-7 text-[19px] leading-relaxed text-ink">
             The place is free for somebody else. Nothing was refunded — the
@@ -230,12 +231,20 @@ export default async function Page({
             given up a course to the workshops page would be answering a
             question they did not ask. */}
         <a
-          href={offering.kind === "workshop" ? "/workshops" : "/courses"}
+          href={
+            offering.kind === "workshop"
+              ? "/workshops"
+              : offering.kind === "course"
+                ? "/courses"
+                : "/services"
+          }
           className="t mt-8 flex min-h-[56px] w-full items-center justify-center border border-ink px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
         >
           {offering.kind === "workshop"
             ? cancelPage.doneOther
-            : "See the other courses"}
+            : offering.kind === "course"
+              ? "See the other courses"
+              : "See the other sessions"}
         </a>
       </Shell>
     );
@@ -245,7 +254,11 @@ export default async function Page({
   // worked out from its OWN refundDays and counted back from the first date.
   // Null means it was never refundable, which is a real answer and not a
   // missing one.
-  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+  // Null on a session too, which has no date to count back from and no refund
+  // window at all — see the third branch below.
+  const deadline = offering.firstDate
+    ? refundDeadline(offering.firstDate, offering.refundDays)
+    : null;
   const refundable = isRefundable(offering);
   // What a course still owes stops being owed the moment the place goes back.
   // Said out loud, because somebody who has paid a deposit and is cancelling
@@ -314,6 +327,42 @@ export default async function Page({
               {cancelPage.keepLink}
             </a>
             .
+          </p>
+        </>
+      ) : offering.kind === "service" ? (
+        /* ── STATE 3 · a session, which has no refund window at all ───────
+           NOT "past the refund date" — there is no date and there are no
+           terms. Saying the money will not come back would be inventing a
+           policy nobody agreed; saying it will would be promising one. What
+           is true is that using this tells her, and the money is a
+           conversation with a person (D-25). */
+        <>
+          <p className="mt-7 border-l-2 border-pool-rule px-4 py-4 text-[19px] leading-relaxed text-ink">
+            There is no refund period on a session. Cancelling here tells
+            Marianne you cannot come; what happens to the {formatMoney(paid)} is{" "}
+            <strong className="font-semibold">hers to decide</strong>, and she
+            will be in touch about it.
+          </p>
+
+          <form action={cancelPlace}>
+            <input type="hidden" name="token" value={token} />
+            <button
+              type="submit"
+              className="t mt-8 min-h-[56px] w-full border border-ink bg-transparent px-6 text-[19px] font-semibold text-ink hover:bg-ink hover:text-pool"
+            >
+              Tell her I cannot come
+            </button>
+          </form>
+
+          <p className="mt-5 text-[17px] leading-relaxed text-ink-soft">
+            {cancelPage.writeToHer}{" "}
+            <a
+              href={`mailto:${cancelPage.contact}`}
+              className="text-action underline"
+            >
+              {cancelPage.writeToHerLink}
+            </a>{" "}
+            {cancelPage.writeToHerAfter}
           </p>
         </>
       ) : (

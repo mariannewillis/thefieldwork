@@ -15,9 +15,11 @@ import {
  * dialog — a `confirm()` box is chrome she cannot read her own service's name
  * in.
  *
- * Nothing refuses this the way a paid-up workshop refuses it. Services cannot
- * be asked for or bought yet, so there is nothing on this side to take down
- * with them. When they can be, this needs the guard `deleteWorkshop` has.
+ * It IS refused, the way a paid-up workshop's delete is refused — by
+ * `deleteService`, when somebody has written in about this one (D-24). Their
+ * message would go with it, and a message is the record of a person waiting on
+ * an answer. The sentence comes back into the block above; the database would
+ * refuse it in any case, because the relation is Restrict.
  */
 
 const INITIAL: DeleteState = { error: null };

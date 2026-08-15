@@ -147,9 +147,14 @@ export const payPage = {
   releasedTitle: "This place has been released",
   cancelledTitle: "This place was cancelled",
 
-  deadTitle: "This link has expired",
+  // THE ONE SENTENCE FOR ANY TOKEN THAT MATCHES NOTHING, whichever kind it was
+  // — a course balance or a session Marianne approved (D-25). The page cannot
+  // know which, because a token that matches nothing matches nothing, so this
+  // wording deliberately names neither: "the run it belonged to" used to be
+  // here, and it reached somebody whose session had never been a run.
+  deadTitle: "This link no longer works.",
   deadBody:
-    "It may have been replaced by a newer one, or the run it belonged to may have finished. If you think that is wrong,",
+    "It may have been replaced by a newer one, or what it was for may already have happened. If you think that is wrong,",
   deadBodyLink: "write to Marianne",
   deadBodyAfter: "and she will sort it out.",
 

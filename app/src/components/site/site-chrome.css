@@ -1,0 +1,249 @@
+/* ===========================================================================
+   The Field Work — the masthead and the footer, on every public page
+   ---------------------------------------------------------------------------
+   Written in hand CSS rather than utilities because this chrome has to render
+   identically on two surfaces that never load the same stylesheet: the home
+   page is bespoke CSS (home.css) and the workshops, courses and services pages
+   are Tailwind (workshops.css), and D-8 keeps those two apart on purpose.
+   Utilities would only work on one side of that boundary. Hand CSS works on
+   both, and this file is imported by the component itself, so the rules follow
+   the markup wherever it is used and cannot be left behind.
+
+   Everything is a class, so Tailwind's preflight — which loads on the interior
+   pages and not on the home page — cannot reach any of it from either side.
+
+   The palette and the gutter are restated here rather than read from a custom
+   property, for the same reason: home.css names these --blush / --dim / --gold
+   / --gut and workshops.css names the colours --color-plate-text /
+   --color-plate-soft / --color-gold and has no gutter at all. Shared chrome
+   cannot depend on whichever stylesheet happens to be loaded. Every value
+   below is identical to the home page's.
+   =========================================================================== */
+
+.site-head,
+.site-foot {
+  --fw-blush: #fbf3f1;
+  --fw-dim: #d8bfc9;
+  --fw-gold: #e9c87e;
+  --fw-plum: #160712;
+
+  /* The page spine. The same clamp home.css calls --gut, so the mark's left
+     edge and the last tab's right edge land in the same place on every page
+     — which they did not when the masthead was inside the interior pages'
+     max-width:1180px measure and 92px further in at 1440. The page CONTENT
+     keeps that measure; only these two bands are full-bleed. */
+  --fw-gut: clamp(22px, 5.4vw, 92px);
+}
+
+/* ── the mark ──────────────────────────────────────────────────────────────
+   The logo scales with the viewport rather than sitting at a fixed height: it
+   is the first thing on a full-bleed photograph on every page, and a mark that
+   holds its size while the picture behind it grows shrinks as you widen the
+   window. The ceiling is 92px rather than the home page's old 104px — at 104
+   the lockup started to compete with the display title directly beneath it on
+   a workshop detail page, which carries an eyebrow, a 76px name, a sentence
+   and a facts row under the same masthead. The floor is what makes the
+   letterspaced WORK in the lockup legible at all: it is 13% of the mark's
+   height, so 74px gives it ten pixels and anything less gives it fewer. */
+.site-brand {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.site-brand__logo {
+  display: block;
+  height: clamp(74px, 6.2vw, 92px);
+  width: auto;
+}
+
+/* ── the masthead ─────────────────────────────────────────────────────────── */
+.site-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 2.4vw, 32px) var(--fw-gut);
+}
+
+.site-head__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(16px, 2vw, 34px);
+  padding-top: 14px;
+}
+
+.site-head__link {
+  color: var(--fw-dim);
+  text-decoration: none;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 3px;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.site-head__link:hover,
+.site-head__link:focus-visible {
+  color: var(--fw-blush);
+  border-bottom-color: rgb(251 243 241 / 0.34);
+}
+
+/* The page you are on, in gold and underlined in gold — the one place the
+   masthead uses colour to say something. Driven off aria-current so the
+   assistive answer and the visible answer are the same fact, not two. */
+.site-head__link[aria-current="page"] {
+  color: var(--fw-gold);
+  border-bottom-color: var(--fw-gold);
+}
+
+/* Below this the mark and four tabs will not sit on one line, so the tabs drop
+   under it. They stay visible rather than hiding behind a breakpoint: there is
+   no menu button on this site, and a hidden nav would leave a phone with no
+   way out of an interior page at all. Four short words fit one row at 390px. */
+@media (max-width: 760px) {
+  .site-head {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .site-head__nav {
+    padding-top: 0;
+  }
+}
+
+/* ── the footer ────────────────────────────────────────────────────────────
+   The home page's ending, now every page's. The altar photograph fills the
+   band at 38% brightness, the mark sits in its own column, and the three
+   columns and the compliance paragraph fill the rest.
+
+   Three of the column entries have no page to point at and render as plain
+   text (.site-foot__soon) rather than as links to a 404 — see siteFooter in
+   src/content/site.ts for which, and why. */
+.site-foot {
+  position: relative;
+  overflow: hidden;
+  background: var(--fw-plum);
+  color: var(--fw-blush);
+  padding: clamp(96px, 13vh, 170px) var(--fw-gut);
+  min-height: 550px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-content: center;
+  align-items: start;
+}
+
+/* the altar, cropped to the row of saints' cards */
+.site-foot__plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 77%;
+  filter: brightness(0.38) saturate(1.06);
+  z-index: 0;
+}
+
+.site-foot > :not(.site-foot__plate) {
+  position: relative;
+  z-index: 1;
+}
+
+/* The mark is a link, so the .site-foot a rule underlines it. It is a
+   picture, not a word in a list — take the rule back off. */
+.site-foot__brand {
+  display: inline-block;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* The same lockup at the same size as the masthead, so the page opens and
+   closes on one mark. It was the stacked primary mark at 52–70px, where WORK
+   is 4.9% of the mark's height — three pixels, which is a texture and not a
+   word, and half the practice's name unreadable in its own footer. Making it
+   read in the stacked mark would have meant a footer logo over 220px tall. */
+.site-foot__brand .site-brand__logo {
+  height: clamp(74px, 6.2vw, 92px);
+}
+
+.site-foot__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+}
+
+.site-foot h3 {
+  font-size: 17px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fw-gold);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.site-foot ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-foot li {
+  margin-bottom: 9px;
+}
+
+.site-foot a {
+  color: var(--fw-blush);
+  text-decoration: none;
+  font-size: 17px;
+  border-bottom: 1px solid rgb(251 243 241 / 0.34);
+  padding-bottom: 2px;
+}
+
+.site-foot a:hover,
+.site-foot a:focus-visible {
+  color: var(--fw-gold);
+  border-bottom-color: var(--fw-gold);
+}
+
+/* Named, but not yet a place you can go. Dimmer than the links around it and
+   carrying no underline, so it does not read as a link that failed. */
+.site-foot__soon {
+  font-size: 17px;
+  color: rgb(216 191 201 / 0.55);
+}
+
+.site-foot__legal {
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 62ch;
+  color: var(--fw-dim);
+  margin-top: clamp(22px, 3vw, 40px);
+}
+
+.site-foot__place {
+  display: block;
+  color: var(--fw-blush);
+  margin-bottom: 6px;
+}
+
+.site-foot a:focus-visible,
+.site-head__link:focus-visible {
+  outline: 3px solid var(--fw-gold);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-head__link {
+    transition: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-foot {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+}

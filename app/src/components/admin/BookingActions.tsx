@@ -59,11 +59,13 @@ export type LedgerRow = {
   refunded: boolean;
   /** Cancelled, and the money is still with her. */
   owed: boolean;
-  /** Which of the two this is. It changes two sentences and no rules. */
-  kind: "workshop" | "course";
+  /** Which of the three this is. It changes some sentences and no rules. */
+  kind: "workshop" | "course" | "service";
   offeringName: string;
-  /** The day, or the first day of a run. */
-  offeringDate: Date;
+  /** The day, or the first day of a run. NULL on a session, which has none. */
+  offeringDate: Date | null;
+  /** Her agreed sentence, on a session. Null on the other two. */
+  agreedTime: string | null;
   refundDays: number;
   refundDeadline: Date | null;
   /** The day — or the last date of the run — has been and gone. */
@@ -245,12 +247,24 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
   // promising the price is promising money that never arrived.
   const money = formatMoney(booking.heldPence);
   const who = booking.buyerName;
-  const day = formatDayShort(booking.offeringDate);
-  // A workshop IS on a day; a course STARTS on one. One word, and getting it
-  // wrong makes the modal read as though the run were a single evening.
-  const isOn = booking.kind === "workshop" ? "is on" : "starts on";
-  const thePlaces =
-    booking.places === 1 ? "place" : `all ${booking.places} places`;
+  const session = booking.kind === "service";
+  // A session has no date at all, so what stands in the sentence is the time
+  // she and the client agreed, in her own words (D-25).
+  const day = booking.offeringDate
+    ? formatDayShort(booking.offeringDate)
+    : (booking.agreedTime ?? "the agreed time");
+  const dayLong = booking.offeringDate
+    ? formatDayLong(booking.offeringDate)
+    : (booking.agreedTime ?? "the agreed time");
+  // A workshop IS on a day; a course STARTS on one; a session simply IS. One
+  // word, and getting it wrong makes the modal read as though the run were a
+  // single evening.
+  const isOn = booking.kind === "course" ? "starts on" : "is on";
+  const thePlaces = session
+    ? "session"
+    : booking.places === 1
+      ? "place"
+      : `all ${booking.places} places`;
   const live = booking.status === "paid";
 
   // ── which controls are available, and what the unavailable ones say ────────
@@ -261,14 +275,14 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
   const canCancel = live && !booking.dayHasBeen;
   const cancelWhyNot = !live
     ? `Cancel is spent — this booking was already cancelled${booking.cancelledAt ? ` on ${formatInstant(booking.cancelledAt)}` : ""}.`
-    : `Cancel is spent — that ${booking.kind === "workshop" ? "day" : "run"} has already been, so there is no place left to release. You can still send the money back.`;
+    : `Cancel is spent — that ${booking.kind === "course" ? "run" : booking.kind === "service" ? "session" : "day"} has already been, so there is no place left to release. You can still send the money back.`;
 
   const canRefund = !booking.refunded;
   const refundWhyNot = `Refund is spent — the money already went back${booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}. There is nothing left to send.`;
 
   const canDelete = !live;
   const deleteWhyNot = booking.dayHasBeen
-    ? `Delete stays out of reach — it is available once a booking is cancelled, and a ${booking.kind === "workshop" ? "day" : "run"} that has been cannot be cancelled, so this record stays.`
+    ? `Delete stays out of reach — it is available once a booking is cancelled, and a ${booking.kind === "course" ? "run" : booking.kind === "service" ? "session" : "day"} that has been cannot be cancelled, so this record stays.`
     : "Delete stays out of reach until this booking has been cancelled. It never acts on a place somebody is still holding.";
 
   /** A control that cannot be used says so out loud, in the row. */
@@ -378,9 +392,11 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
         <p className={EYEBROW}>
           {booking.refunded
             ? "Cancel · the money has already gone back"
-            : booking.insidePeriod
-              ? "Cancel · inside the refund period"
-              : "Cancel · past the refund period"}
+            : session
+              ? "Cancel · a session"
+              : booking.insidePeriod
+                ? "Cancel · inside the refund period"
+                : "Cancel · past the refund period"}
         </p>
 
         {booking.refunded ? (
@@ -415,8 +431,7 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               back?
             </h2>
             <p className={BODY}>
-              {booking.offeringName} {isOn}{" "}
-              {formatDayLong(booking.offeringDate)} and its refund period runs
+              {booking.offeringName} {isOn} {dayLong} and its refund period runs
               for {booking.refundDays} days, until{" "}
               {booking.refundDeadline
                 ? formatDayLong(booking.refundDeadline)
@@ -428,6 +443,30 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               back on sale straight away and they are told. If you refund,
               Stripe usually takes five to ten working days to show the {money}{" "}
               on their statement.
+            </p>
+          </>
+        ) : session ? (
+          /* ── a session ────────────────────────────────────────────────────
+             NOT "past the refund period". A session has no period and no
+             terms, so the modal must neither claim the money stays nor
+             promise it back: cancelling tells them, and the money is a
+             separate decision she makes on the row (D-25). */
+          <>
+            <h2
+              id={`cancel-title-${booking.id}`}
+              className="mt-2 font-display text-[26px] leading-tight text-ink"
+            >
+              Cancel {who}&rsquo;s session?
+            </h2>
+            <p className={BODY}>
+              {booking.offeringName}, {dayLong}. They are told you have had to
+              cancel it, and told that the {money} has not gone back yet and
+              that you will be in touch about it.
+            </p>
+            <p className={WARNING}>
+              There is no refund period on a session, so nothing goes back
+              automatically. The {money} stays with you until you decide &mdash;
+              use refund on the row when you have.
             </p>
           </>
         ) : (
@@ -447,9 +486,8 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               ) : (
                 <>
                   {booking.offeringName} has a refund period of{" "}
-                  {booking.refundDays} days. It {isOn}{" "}
-                  {formatDayLong(booking.offeringDate)}, so that period closed
-                  on{" "}
+                  {booking.refundDays} days. It {isOn} {dayLong}, so that period
+                  closed on{" "}
                   {booking.refundDeadline
                     ? formatDayLong(booking.refundDeadline)
                     : "the day it was set"}
@@ -519,8 +557,11 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
               >
                 {cancelling
                   ? "Working…"
-                  : booking.refunded
-                    ? `Cancel the ${thePlaces}`
+                  : booking.refunded || session
+                    ? // "and return nothing" is a claim about terms, and a
+                      // session has none — the money is simply a later
+                      // decision, which the modal above says.
+                      `Cancel the ${thePlaces}`
                     : `Cancel the ${thePlaces} and return nothing`}
               </button>
               <button

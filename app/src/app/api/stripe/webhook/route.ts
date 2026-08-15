@@ -11,6 +11,8 @@ import {
   placesSold,
   refundOnePayment,
   refundSoldOut,
+  whenWords,
+  type Offering,
 } from "@/lib/bookings";
 import {
   balanceNoticeEmail,
@@ -21,7 +23,7 @@ import {
   confirmationEmail,
   sendBookingMail,
 } from "@/lib/email/bookings";
-import { formatDayLong } from "@/lib/format";
+import { confirmServicePayment } from "@/lib/service-requests";
 import {
   paymentsConfigured,
   SITE_METADATA_KEY,
@@ -62,11 +64,12 @@ import {
  *  - An unexpected failure is left to become a 500 on purpose, so Stripe
  *    retries it. Swallowing it into a 200 would lose the payment quietly.
  *
- * THREE THINGS CAN BE BEING PAID FOR (D-23), and the session's own metadata
- * says which: a place on a workshop, a place on a course, or the balance on a
- * course place already held. Which one it is decides everything below, so it is
- * read once, at the top, from a field this app wrote when it opened the
- * session — never inferred from which other fields happen to be present.
+ * FOUR THINGS CAN BE BEING PAID FOR (D-23, D-25), and the session's own
+ * metadata says which: a place on a workshop, a place on a course, the balance
+ * on a course place already held, or a session Marianne has approved. Which one
+ * it is decides everything below, so it is read once, at the top, from a field
+ * this app wrote when it opened the session — never inferred from which other
+ * fields happen to be present.
  */
 export async function POST(request: Request): Promise<Response> {
   if (!paymentsConfigured() || !webhookSecret) {
@@ -152,6 +155,17 @@ export async function POST(request: Request): Promise<Response> {
   // What they were CHARGED, from Stripe. Never a figure the browser sent.
   const amountPence = session.amount_total ?? 0;
   const currency = session.currency ?? "gbp";
+
+  if (session.metadata?.serviceRequestFor) {
+    return bookSession({
+      event,
+      session,
+      requestId: Number(session.metadata.serviceRequestFor),
+      amountPence,
+      currency,
+      paymentIntentId,
+    });
+  }
 
   if (session.metadata?.balanceFor) {
     return settleBalance({
@@ -257,7 +271,7 @@ export async function POST(request: Request): Promise<Response> {
         cannotHonourEmail({
           to: booking.buyerEmail,
           offeringName: own.name,
-          offeringDay: formatDayLong(own.firstDate),
+          offeringDay: whenWords(own),
           amountPence,
           why: "soldOut",
           refunded,
@@ -267,7 +281,7 @@ export async function POST(request: Request): Promise<Response> {
       await sendBookingMail(
         cannotHonourNoticeEmail({
           offeringName: own.name,
-          offeringDay: formatDayLong(own.firstDate),
+          offeringDay: whenWords(own),
           buyerEmail: booking.buyerEmail,
           amountPence,
           why: "soldOut",
@@ -467,7 +481,7 @@ async function settleBalance(args: {
         cannotHonourEmail({
           to: booking.buyerEmail,
           offeringName: own.name,
-          offeringDay: formatDayLong(own.firstDate),
+          offeringDay: whenWords(own),
           amountPence,
           why: "placeReleased",
           refunded,
@@ -477,7 +491,7 @@ async function settleBalance(args: {
       await sendBookingMail(
         cannotHonourNoticeEmail({
           offeringName: own.name,
-          offeringDay: formatDayLong(own.firstDate),
+          offeringDay: whenWords(own),
           buyerEmail: booking.buyerEmail,
           amountPence,
           why: "placeReleased",
@@ -490,6 +504,139 @@ async function settleBalance(args: {
       return Response.json({ received: true, acted: true });
     }
   }
+}
+
+/**
+ * A session somebody has been approved for, paid for.
+ *
+ * The third confirming path and the shape is the same as the other two: the
+ * decision is made in one transaction under a row lock, every side effect
+ * happens here afterwards, and a redelivered event never reaches either.
+ *
+ * WHAT IS BEING ASKED UNDER THE LOCK IS NOT "IS THERE A PLACE?" — a session has
+ * no room and no capacity. It is "is the approval this paid against still
+ * live?", and the three answers that are not yes all end the same way: the
+ * money goes back and both people are told (D-25).
+ */
+async function bookSession(args: {
+  event: Stripe.Event;
+  session: Stripe.Checkout.Session;
+  requestId: number;
+  amountPence: number;
+  currency: string;
+  paymentIntentId: string | null;
+}): Promise<Response> {
+  const { event, session, requestId, amountPence, currency } = args;
+
+  if (!Number.isInteger(requestId) || requestId < 1) {
+    console.error(
+      `[stripe] session ${session.id} is stamped as a session for "${session.metadata?.serviceRequestFor}", which is not a request. Nothing written; it needs sorting out by hand.`,
+    );
+    return Response.json({ received: true, acted: false });
+  }
+
+  const result = await confirmServicePayment({
+    eventId: event.id,
+    eventType: event.type,
+    requestId,
+    amountPence,
+    currency,
+    buyerName: session.customer_details?.name?.trim() || "Someone",
+    buyerEmail:
+      session.customer_details?.email?.trim() || session.customer_email || "",
+    stripeSessionId: session.id,
+    stripePaymentIntentId: args.paymentIntentId,
+    paidAt: new Date(event.created * 1000),
+  });
+
+  if (result.outcome === "alreadyHandled") {
+    console.info(
+      `[stripe] ALREADY SEEN — event ${event.id} (session ${session.id}) was acted on when it first arrived, so nothing has been done again: no booking, no refund, no email.`,
+    );
+    return Response.json({ received: true, acted: false, replay: true });
+  }
+
+  if (result.outcome === "confirmed") {
+    const { booking, cancelToken } = result;
+    const own = offeringOf(booking);
+    console.info(
+      `[stripe] ${bookingReference(booking.id)} — ${own.name} paid for against approval ${requestId}.`,
+    );
+    // The requests queue counts what is waiting on her, and one fewer is.
+    revalidatePath("/admin/bookings");
+    revalidatePath("/admin/workshop-bookings");
+    await sendBookingMail(
+      // A session is paid at once, so there is never a balance link on one.
+      confirmationEmail(booking, { cancel: cancelToken, balance: null }),
+      "session confirmation",
+    );
+    // `left` is unread on a session — there is no room to count — and the
+    // notice leaves that line out rather than printing "0 of 1".
+    await sendBookingMail(bookingNoticeEmail(booking, 0), "session notice");
+    return Response.json({ received: true, acted: true });
+  }
+
+  // ── everything else is money that has to go back ──────────────────────────
+  const buyer =
+    session.customer_details?.email ?? session.customer_email ?? null;
+  const name =
+    result.outcome === "requestGone"
+      ? (session.metadata?.offeringName ?? "a session")
+      : result.request.service.name;
+  const why = result.outcome === "duplicate" ? "paidTwice" : "approvalGone";
+
+  let refunded = false;
+  let error: string | undefined;
+  try {
+    if (!args.paymentIntentId) throw new Error("the session has no payment");
+    await stripe().refunds.create(
+      { payment_intent: args.paymentIntentId },
+      // The session, not a payment row: on these paths there is no Payment
+      // written to key against, and the session is what was charged.
+      { idempotencyKey: `refund-session-${session.id}` },
+    );
+    refunded = true;
+  } catch (e) {
+    error = e instanceof Error ? e.message : "unknown error";
+  }
+
+  console.error(
+    `[stripe] SESSION NOT HONOURED — ${session.id} paid ${amountPence} against request ${requestId}, but ${
+      result.outcome === "requestGone"
+        ? "the request no longer exists"
+        : result.outcome === "duplicate"
+          ? "it had already been paid for"
+          : result.why
+    }. Refund ${refunded ? "issued" : `FAILED: ${error}`}.`,
+  );
+
+  if (buyer) {
+    await sendBookingMail(
+      cannotHonourEmail({
+        to: buyer,
+        offeringName: name,
+        offeringDay: "the time you agreed",
+        amountPence,
+        why,
+        refunded,
+      }),
+      "session refund",
+    );
+  }
+  await sendBookingMail(
+    cannotHonourNoticeEmail({
+      offeringName: name,
+      offeringDay: "the time you agreed",
+      buyerEmail: buyer ?? "an address Stripe did not give us",
+      amountPence,
+      why,
+      refunded,
+      reference: null,
+      error,
+    }),
+    "session refund notice",
+  );
+  return Response.json({ received: true, acted: true });
 }
 
 function soldNow(offering: {
@@ -506,10 +653,14 @@ function soldNow(offering: {
  * date. The public pages are cached and would otherwise keep serving the old
  * count until something else happened to change them.
  */
-function revalidateFor(kind: "workshop" | "course", slug: string) {
-  revalidatePath(kind === "workshop" ? "/workshops" : "/courses");
-  revalidatePath(
-    kind === "workshop" ? `/workshops/${slug}` : `/courses/${slug}`,
-  );
+function revalidateFor(kind: Offering["kind"], slug: string) {
+  const index =
+    kind === "workshop"
+      ? "/workshops"
+      : kind === "course"
+        ? "/courses"
+        : "/services";
+  revalidatePath(index);
+  revalidatePath(`${index}/${slug}`);
   revalidatePath("/");
 }

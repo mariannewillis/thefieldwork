@@ -38,6 +38,22 @@ export type LedgerRow = {
   meta: string;
 };
 
+/**
+ * One of the three columns in the products block.
+ *
+ * The rows are NOT here. All three kinds are read from the database now, so
+ * what this file carries is the frame around them: the column's name, where it
+ * goes, and what it says on the months when she has none of that kind — which
+ * for a practitioner running a course twice a year is most months.
+ */
+export type LedgerGroup = {
+  label: string;
+  /** The index this column is a sample of, and the way out of an empty one. */
+  href: string;
+  empty: string;
+  emptyLink: string;
+};
+
 export const home = {
   root: {
     id: "what-happens",
@@ -145,89 +161,35 @@ export const home = {
     lead: "Everything runs here, in three groups, with the date and the price on every line.",
     intro:
       "Courses, workshops and one-to-one sessions, at the same billing. If a date has gone, ask — most of them run again.",
-    /** DERIVED, not authored: once the offerings module lands these come from
-     *  the database, not this file. The portal must show them as read-only in
-     *  editing mode (D-2 open question). */
+    /** DERIVED, not authored. All three columns are read from the database
+     *  (see the products beat in app/(site)/page.tsx). What is here is the
+     *  frame: the name of each column, the page it is a sample of, and what
+     *  it says on a month when she has none of that kind — which is an
+     *  ordinary month rather than a fault. The portal must show the rows as
+     *  read-only in editing mode (D-2 open question). */
     groups: [
       {
         label: "Courses",
-        rows: [
-          {
-            href: "/courses/aura-healing-foundations",
-            date: "15 Sep–20 Oct",
-            price: "£480",
-            title: "Aura Healing: Foundations",
-            meta: "Six evenings, 19:00–21:00, Tuesdays · Garden room · 6 places",
-          },
-          {
-            href: "/courses/aura-healing-practitioner-pathway",
-            date: "7 Nov–12 Dec",
-            price: "£650",
-            title: "Aura Healing: Practitioner Pathway",
-            meta: "Six Saturdays, 10:00–16:00 · Garden room · 6 places",
-          },
-          {
-            href: "/courses/working-with-the-field-evening-series",
-            date: "From 21 Oct",
-            price: "£320",
-            title: "Working with the Field: An Evening Series",
-            meta: "Four evenings, 19:00–21:00, Wednesdays · Garden room · 8 places",
-          },
-        ] satisfies LedgerRow[],
+        href: "/courses",
+        empty:
+          "No course running just now. One runs two or three times a year, and the dates go up about two months ahead.",
+        emptyLink: "The courses page",
       },
       {
         label: "Workshops",
-        rows: [
-          {
-            href: "/workshops/the-hour-explained",
-            date: "Sat 26 Sep",
-            price: "£45",
-            title: "The Hour, Explained",
-            meta: "10:00–13:00 · Garden room · 12 places",
-          },
-          {
-            href: "/workshops/reading-the-field",
-            date: "Sat 24 Oct",
-            price: "£95",
-            title: "Reading the Field",
-            meta: "10:00–16:00 · Garden room · 10 places",
-          },
-          {
-            href: "/workshops/grounding-for-beginners",
-            date: "Sat 14 Nov",
-            price: "£35",
-            title: "Grounding for Beginners",
-            meta: "10:00–13:00 · Garden room · 12 places",
-          },
-        ] satisfies LedgerRow[],
+        href: "/workshops",
+        empty:
+          "Nothing in the diary just now. The next dates usually go up a couple of months ahead.",
+        emptyLink: "The workshops page",
       },
       {
         label: "Services",
-        rows: [
-          {
-            href: "/services/first-session",
-            date: "By arrangement",
-            price: "£95",
-            title: "First session, with time to ask",
-            meta: "90 minutes · Garden room · clothed and seated throughout",
-          },
-          {
-            href: "/services/one-to-one-session",
-            date: "By arrangement",
-            price: "£75",
-            title: "One-to-one session",
-            meta: "60 minutes · Garden room · for anyone who has been before",
-          },
-          {
-            href: "/services/follow-up-session",
-            date: "By arrangement",
-            price: "£60",
-            title: "Follow-up session",
-            meta: "45 minutes · Garden room · booked after a first visit",
-          },
-        ] satisfies LedgerRow[],
+        href: "/services",
+        empty:
+          "The one-to-one hours are not listed at the moment. That is not the same as being fully booked.",
+        emptyLink: "The sessions page",
       },
-    ],
+    ] satisfies LedgerGroup[],
   },
 
   turn: {
@@ -251,49 +213,13 @@ export const home = {
     ask: "Ask for an hour in the clearing, where nothing has crossed the edge since the first page you read.",
     ctaLabel: "Ask for an hour",
     ctaHref: "#ask",
-    footPlate: {
-      src: "marianne-altar-light",
-      alt: "",
-    },
-    footCols: [
-      {
-        heading: "The work",
-        links: [
-          { label: "What the hour is like", href: "#the-hour" },
-          { label: "The four verbs", href: "#method" },
-          { label: "What this is not", href: "#not" },
-          { label: "Who she is", href: "/about" },
-        ],
-      },
-      {
-        heading: "Dates",
-        links: [
-          { label: "Courses", href: "/courses" },
-          { label: "Workshops", href: "/workshops" },
-          { label: "One-to-one sessions", href: "/services" },
-        ],
-      },
-      {
-        heading: "Practicalities",
-        links: [
-          { label: "Ask a question", href: "/contact" },
-          { label: "Monthly letter", href: "/subscribe" },
-          { label: "Privacy", href: "/privacy" },
-        ],
-      },
-    ],
-    /** §14 compliance surface — this wording is load-bearing, not decorative */
-    legal:
-      "Complementary work. Not a substitute for medical care, and never a reason to delay it. Nothing here treats, cures, diagnoses or prevents any condition.",
+    /*
+     * The plate, the link columns and the legal paragraph moved to
+     * src/content/site.ts on 2026-08-15. This footer is now the whole site's
+     * footer, not this page's — see siteFooter there, including why three of
+     * its entries no longer carry an href.
+     */
   },
-
-  nav: [
-    { label: "What happens", href: "#what-happens", current: true },
-    { label: "The hour", href: "#the-hour" },
-    { label: "What this is not", href: "#not" },
-    { label: "Dates & prices", href: "#dates" },
-    { label: "Ask for an hour", href: "#ask" },
-  ],
 } as const;
 
 export type HomeContent = typeof home;

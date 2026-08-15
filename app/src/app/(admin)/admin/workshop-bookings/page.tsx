@@ -5,6 +5,7 @@ import BookingActions, {
 import {
   alreadyRefunded,
   bookingReference,
+  hasBeen,
   hasLapsed,
   heldPence,
   isRefundable,
@@ -40,10 +41,18 @@ import {
  * a state anybody sets, so there is no column to keep in step and nothing that
  * can get stuck in the wrong one.
  *
- * THE TWO COLUMNS THE APPROVED SCREEN DREW EMPTY ARE FULL NOW (D-23). Type says
- * Workshop or Course, because both can be bought; Deposit says what was taken at
- * booking and what is still owed, because a course can be sold on one. Services
- * are still not bookable, so no row has ever said Service, and none pretends to.
+ * A SESSION NEVER MOVES TO THE ARCHIVE, and that is the same principle rather
+ * than an exception to it. It has no date — the time is the sentence she and
+ * the client agreed (D-25) — so there is no fact here that could file it, and
+ * inventing one would put a session in the past while somebody was still
+ * expecting it. It sorts by the day it was paid for and stays in "still to
+ * come" until it is cancelled.
+ *
+ * THE TWO COLUMNS THE APPROVED SCREEN DREW EMPTY ARE FULL NOW (D-23, D-25).
+ * Type says Workshop, Course or Session — all three can be paid for, a session
+ * once Marianne has approved the request that asked for one. Deposit says what
+ * was taken at booking and what is still owed, because a course can be sold on
+ * one; it stays empty on the other two, which are paid at once.
  *
  * AND THIS IS WHERE A LAPSED PLACE SURFACES. A course place whose balance was
  * never paid stops counting toward the room the morning after it was due — no
@@ -99,9 +108,12 @@ function toLedgerRow(booking: BookingWithOffering): LedgerRow {
     kind: offering.kind,
     offeringName: offering.name,
     offeringDate: offering.firstDate,
+    agreedTime: offering.agreedTime,
     refundDays: offering.refundDays,
-    refundDeadline: refundDeadline(offering.firstDate, offering.refundDays),
-    dayHasBeen: isPast(offering.lastDate),
+    refundDeadline: offering.firstDate
+      ? refundDeadline(offering.firstDate, offering.refundDays)
+      : null,
+    dayHasBeen: hasBeen(offering),
     insidePeriod: isRefundable(offering),
   };
 }
@@ -111,8 +123,12 @@ function places(n: number): string {
   return `${n} ${n === 1 ? "place" : "places"}`;
 }
 
-/** "Sat 20 Sep" for a workshop · "Four Wednesdays · 7–28 Oct" for a course. */
+/**
+ * "Sat 20 Sep" for a workshop · "Four Wednesdays · 7–28 Oct" for a course ·
+ * her own agreed sentence for a session, which has no date to print.
+ */
 function whenWords(offering: Offering): string {
+  if (!offering.firstDate) return offering.agreedTime ?? "time to be agreed";
   if (offering.kind === "workshop") return formatDayShort(offering.firstDate);
   const run = runShape(offering.dates);
   return run
@@ -132,7 +148,9 @@ function whenWords(offering: Offering): string {
  */
 function StateLine({ booking }: { booking: BookingWithOffering }) {
   const offering = offeringOf(booking);
-  const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+  const deadline = offering.firstDate
+    ? refundDeadline(offering.firstDate, offering.refundDays)
+    : null;
   const owed = refundOwed(booking);
 
   if (booking.status === "paid") {
@@ -168,10 +186,19 @@ function StateLine({ booking }: { booking: BookingWithOffering }) {
         </span>
       );
     }
+    // A session has no refund period, which is not the same as being
+    // unrefundable: refund on the row is available and always was (D-25).
+    if (offering.kind === "service") {
+      return (
+        <span className={NOTE}>
+          No refund period on a session — refunding is yours to decide
+        </span>
+      );
+    }
     if (offering.refundDays === 0) {
       return <span className={NOTE}>This one cannot be refunded</span>;
     }
-    if (isPast(offering.lastDate)) {
+    if (hasBeen(offering)) {
       return (
         <span className={NOTE}>Refund period {offering.refundDays} days</span>
       );
@@ -330,14 +357,19 @@ function Row({ booking }: { booking: BookingWithOffering }) {
       <td
         className={`${CELL} whitespace-nowrap fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft`}
       >
-        {offering.kind === "workshop" ? "Workshop" : "Course"}
+        {offering.kind === "workshop"
+          ? "Workshop"
+          : offering.kind === "course"
+            ? "Course"
+            : "Session"}
       </td>
       <td className={CELL}>
         <span className="block font-display text-[21px] leading-tight text-ink">
           {offering.name}
         </span>
         <span className={NOTE}>
-          {whenWords(offering)} &middot; {places(booking.places)}
+          {whenWords(offering)} &middot;{" "}
+          {offering.kind === "service" ? "one session" : places(booking.places)}
           {booking.status === "paid" ? "" : ", released"}
         </span>
         <StateLine booking={booking} />
@@ -467,10 +499,15 @@ export default async function Page({
   // the top", which is a different sort on either side of today. The date is
   // read off the offering rather than the row, because a course has none of its
   // own — its run does (D-21).
+  //
+  // A SESSION HAS NO DATE AT ALL, so it sorts by when it was paid for and never
+  // moves to the archive: nothing here can read the sentence she and the client
+  // agreed, and filing a session on a date the portal invented would put it in
+  // the past while somebody was still expecting it (D-25).
   const dateOf = (booking: BookingWithOffering) =>
-    offeringOf(booking).firstDate.getTime();
+    (offeringOf(booking).firstDate ?? booking.paidAt).getTime();
   const stillToCome = (booking: BookingWithOffering) =>
-    !isPast(offeringOf(booking).lastDate);
+    !hasBeen(offeringOf(booking));
 
   const upcoming = all
     .filter(stillToCome)

@@ -7,7 +7,8 @@
 // Workshops were the first offering to land, and bookings followed them.
 // Courses came next — the same offering spread over a run of dates — and are
 // now on sale too, on a deposit and a balance. Services came third, and are the
-// last of the three kinds; they are still not bookable. Subscribers and page
+// last of the three kinds; they are now paid for as well, but only after
+// Marianne has approved the request that asked for one. Subscribers and page
 // content are still to come. Money is counted in PENCE as
 // an Int everywhere it appears: 0.1 + 0.2 is not 0.3, and these figures are
 // what somebody gets charged and refunded.
@@ -388,13 +389,17 @@ enum ServiceLocation {
 /// TWO THINGS A WORKSHOP HAS THAT THIS DOES NOT, and the reasons are the shape
 /// of the thing rather than work left undone:
 ///
-///  · NO DATE AND NO TIME. A visitor asks for a slot against her availability
-///    and she answers; she does not set one while writing the service. There
-///    is no column here for a day because there is no day.
+///  · NO DATE AND NO TIME. A visitor says when would suit them and she
+///    answers; she does not set a day while writing the service. There is no
+///    column here for one because there is no day.
 ///  · NO CAPACITY. One-to-one means one.
 ///
-/// It is not bookable yet — nothing here implies a checkout, a hold or an
-/// approval. That flow is a later pass and will bring its own tables.
+/// It is ASKED FOR rather than bought, and that is still true now that money
+/// can change hands for one: a visitor sends a ServiceRequest, Marianne
+/// approves it, and only then is a payment link sent. There is no price on this
+/// row that a visitor can pay against — `priceGBP` is what the page says a
+/// session costs, and what she is asked to approve is `ServiceRequest.approvedPence`
+/// (D-25). Nothing here implies a checkout of its own.
 model Service {
   id Int @id @default(autoincrement())
 
@@ -472,18 +477,18 @@ model Service {
   filmPoster   String?
   filmDuration String?
 
-  /// Whether it is on the site. Written and honoured here; the public services
-  /// pages are not built yet, so for the moment this decides what they will
-  /// show rather than what anybody can see.
+  /// Whether it is on the site. /services lists the published ones and
+  /// /services/<slug> answers 404 for the rest, exactly as a workshop's does.
   published Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  images ServiceImage[]
+  images   ServiceImage[]
+  requests ServiceRequest[]
+  bookings Booking[]
 
-  /// Both lists that will exist — the portal's and the public index — split on
-  /// published.
+  /// The portal's list and the public index, split on published.
   @@index([published])
 }
 
@@ -506,6 +511,150 @@ model ServiceImage {
   position Int
 
   @@index([serviceId, position])
+}
+
+/// Where a request stands. THESE ARE THE ANSWERS SHE GAVE, and nothing else.
+///
+/// `pending` — it has arrived and she has not answered it.
+/// `confirmed` — she approved it. The row then carries what she approved, by
+///   when it must be paid, and the hash of the link that pays it.
+/// `declined` — she said no, and the note she gave is on the row.
+///
+/// THERE IS STILL DELIBERATELY NO `expired`, and now for a stronger reason than
+/// before. An approval that goes unpaid past its window lapses, but lapsing is
+/// a CONSEQUENCE OF THE CLOCK rather than an answer anybody gave: it is
+/// `payBy < now` with no Booking against the row, derived exactly as
+/// `hasLapsed` is on a booking (D-23), true the moment it becomes true, and
+/// needing nothing to fire. A fourth value here would be a column somebody —
+/// or something scheduled — has to remember to set, and the morning it did not
+/// run the row would say the approval was still live when it was not.
+enum ServiceRequestStatus {
+  pending
+  confirmed
+  declined
+}
+
+/// Somebody asking for a session, in their own words — and, once she has
+/// answered, what she answered.
+///
+/// STILL NOT A BOOKING WHILE IT IS PENDING. Nothing is charged, nothing is
+/// reserved and nothing is promised — §5, "a BookingRequest is not a booking".
+/// It is a message with a service attached to it, and the answer comes from
+/// Marianne rather than from this system.
+///
+/// WHAT APPROVING ADDS (D-25) is the second half of the columns below: what she
+/// approved, when it happens in her words, by when it must be paid, and the
+/// hash of the one link that pays it. A Booking appears only when Stripe says
+/// the money arrived, exactly as it does for a workshop and a course — so the
+/// row can say "approved and waiting", "approved and paid", or "approved and
+/// nobody paid" without any of the three being a flag somebody sets.
+model ServiceRequest {
+  id Int @id @default(autoincrement())
+
+  /// What they are asking for. Restrict, not cascade, for the reason
+  /// `Booking.workshopId` gives: deleting a service somebody has written in
+  /// about would take their message with it. The portal refuses the delete and
+  /// says why.
+  serviceId Int
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  name  String
+  email String
+
+  /// Optional, and it stays optional. Somebody who would rather not leave a
+  /// number is not somebody to turn away at the form.
+  phone String?
+
+  /// WHEN WOULD SUIT THEM, AS THEY WROTE IT — not a slot, not a datetime.
+  ///
+  /// The brief asks for a start and an end here, chosen from a live picker
+  /// backed by computed availability: the recurring pattern, minus workshops,
+  /// minus course dates, minus personal blocks, minus other holds. None of
+  /// that exists — there is no AvailabilityRule table, no TimeBlock table and
+  /// no derivation — so a picker would be offering times nothing had checked,
+  /// and a stored datetime would be a slot the calendar had never heard of.
+  ///
+  /// Text is the honest version of what this system actually knows. "Weekday
+  /// mornings, not Tuesdays" is a real answer that no picker can take, and it
+  /// is the answer she needs in order to write back. When availability is
+  /// built, a chosen slot arrives as its own nullable pair of columns beside
+  /// this one; this column stays, because the sentence somebody typed is worth
+  /// keeping either way.
+  preferredTime String
+
+  /// Anything else they want to say. Optional, as the approved form marks it
+  /// — most people write nothing and the request is still worth answering.
+  message String?
+
+  status ServiceRequestStatus @default(pending)
+
+  /// ── what she answered ───────────────────────────────────────────────────
+  /// All null while it is pending, and all written in one transaction when she
+  /// approves. Nullable rather than a second table because they are facts about
+  /// THIS request — a request is answered once, and answering it again after it
+  /// lapsed overwrites these rather than adding a row.
+
+  /// When she approved it. Null on a request she has not answered, and on one
+  /// she declined.
+  approvedAt DateTime?
+
+  /// PENCE, AS SHE APPROVED IT — not the service's list price.
+  ///
+  /// The default the form offers is `Service.priceGBP`, and she can change it
+  /// before approving, because services carry travel and vary in length: a
+  /// fixed figure would be wrong the first time she drives somewhere. What is
+  /// stored here is what she actually agreed, and it is what the client is
+  /// asked for and what the Booking's `totalPence` becomes. Editing the
+  /// service's price next month must not change what somebody was already
+  /// asked to pay, which is the same reasoning that copies a venue's address
+  /// onto a workshop rather than reading through the relation.
+  approvedPence Int?
+  /// WHEN IT HAPPENS, IN HER WORDS. `preferredTime` above is the visitor's
+  /// sentence; this is her answer to it — "Thursday 3rd at 10, at yours".
+  ///
+  /// TEXT, for exactly the reason `preferredTime` is text: there is no
+  /// availability engine, no calendar and no slot, so a datetime here would be
+  /// a time nothing had checked. When availability is built this becomes the
+  /// prose beside a chosen slot rather than a thing to migrate.
+  agreedTime String?
+
+  /// The SHA-256 of the token in the /pay/<token> link, never the token itself
+  /// — the same rule as `Booking.balanceTokenHash` and for the same reason: the
+  /// usable secret exists only in the email, so a leaked dump of this table
+  /// cannot open a payment against anybody's session.
+  ///
+  /// Approving again after a lapse ISSUES A NEW ONE, which retires the link in
+  /// the old email. That is the cost of not storing the token, and it is the
+  /// right way round.
+  payTokenHash String? @unique
+
+  /// WHEN THE APPROVAL RUNS OUT. An instant, not a day: "48 hours from when she
+  /// pressed approve" is what was promised, and a DATE would give somebody
+  /// approved on Tuesday evening less than a day.
+  ///
+  /// COPIED HERE AT THE MOMENT OF APPROVAL from `APPROVAL_HOLD_HOURS`
+  /// (src/lib/service-requests.ts), for the reason `Booking.balanceDueAt` is
+  /// copied from the course: moving the window afterwards must not move a
+  /// deadline somebody has already been told in writing.
+  payBy DateTime?
+
+  /// When she declined it, and what she said. The note is sent to them and kept
+  /// here, so the queue can show what was said rather than only that something
+  /// was.
+  declinedAt  DateTime?
+  declineNote String?
+
+  /// The session they paid for, once they have. Written by the Stripe webhook
+  /// and by nothing else.
+  booking Booking?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// The queue reads oldest-unanswered-first within a status, which is the
+  /// order she works in.
+  @@index([status, createdAt])
+  @@index([serviceId])
 }
 
 /// What happened to the money. Three states, and no fourth: a place is either
@@ -553,12 +702,12 @@ enum CancelReason {
 /// Neither is a column, because a column would be a figure somebody has to keep
 /// correct and arithmetic is not (D-23).
 ///
-/// ONE OFFERING, AND EXACTLY ONE. Two nullable foreign keys with a CHECK
-/// constraint rather than a `kind` column and a bare integer: this way both
-/// relations are real, both are `Restrict`, and the database can refuse a
-/// booking that points at a workshop AND a course — or at neither. Services are
-/// not bookable and have no column here; when they are, they arrive as a third
-/// nullable key and one more branch in the same constraint.
+/// ONE OFFERING, AND EXACTLY ONE. Three nullable foreign keys with a CHECK
+/// constraint rather than a `kind` column and a bare integer: this way every
+/// relation is real, every one is `Restrict`, and the database can refuse a
+/// booking that points at two of them — or at none. The constraint is written
+/// as a sum precisely so that services could arrive as one more term in it,
+/// which is what they did (D-25).
 model Booking {
   /// Null when this is a course booking.
   workshopId Int?
@@ -570,6 +719,29 @@ model Booking {
   /// Null when this is a workshop booking. Restrict for the same reason.
   courseId Int?
   course   Course? @relation(fields: [courseId], references: [id], onDelete: Restrict)
+
+  /// Null unless this is a session. Restrict for the same reason again.
+  serviceId Int?
+  service   Service? @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  /// WHICH APPROVAL THIS CAME FROM, and the reason a session booking has a
+  /// fourth key when the other two have none.
+  ///
+  /// A workshop place is bought off the page by anybody; a session is bought
+  /// only by the person Marianne approved, at the figure she approved, through
+  /// the one link she sent. That link is a token on the ServiceRequest, so the
+  /// approval — not the service — is what a payment is actually against.
+  ///
+  /// Set together with `serviceId` and null together with it, by
+  /// `Booking_service_from_request`: a session booking with no approval behind
+  /// it would be money taken for something nobody agreed to.
+  ///
+  /// UNIQUE, so one approval buys one session. Two checkout sessions opened
+  /// from the same link race here and the second is refused by the row lock
+  /// before it reaches this index; the index is the backstop that means it
+  /// cannot happen even if that reasoning is wrong one day.
+  serviceRequestId Int?            @unique
+  serviceRequest   ServiceRequest? @relation(fields: [serviceRequestId], references: [id], onDelete: Restrict)
 
   id Int @id @default(autoincrement())
 
@@ -638,8 +810,11 @@ model Booking {
 
   /// Places sold is `sum(places) where status = paid` for one offering, less
   /// anything lapsed, and it is read on every public workshop and course page.
+  /// A service has no capacity — one-to-one means one — so its index is here to
+  /// answer "has this service been paid for?" when one is about to be deleted.
   @@index([workshopId, status])
   @@index([courseId, status])
+  @@index([serviceId, status])
 }
 
 /// What a payment was for. Three kinds and no fourth, because the operator's
@@ -748,6 +923,19 @@ enum StripeEventOutcome {
   /// been cancelled, or it had lapsed and the place had gone to somebody else.
   /// The payment is refunded and both people are told.
   balanceUnwanted
+  /// Somebody paid for a session whose approval was no longer live — it had
+  /// lapsed unpaid, or she had declined it, or she had withdrawn it and
+  /// approved it again at a different figure. The payment is refunded and both
+  /// people are told. Its own value rather than `noPlace`, because no place was
+  /// ever the question: a session has no room and no capacity, and what ran out
+  /// was the approval (D-25).
+  approvalGone
+  /// A SECOND payment arrived for a session that was already paid for — two
+  /// checkout sessions opened from one link, both completed. The second is
+  /// refunded. Its own value because it is the only outcome here that means
+  /// somebody was charged twice, and that is the one a year later that has to
+  /// be findable.
+  duplicatePayment
 }
 
 /// A Stripe event we have already acted on.
