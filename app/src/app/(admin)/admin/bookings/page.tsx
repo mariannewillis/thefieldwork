@@ -9,6 +9,7 @@ import {
   formatInstant,
   formatMoment,
   formatMoney,
+  formatSlot,
 } from "@/lib/format";
 import {
   approvalState,
@@ -123,12 +124,21 @@ function Row({ request }: { request: ServiceRequestWithService }) {
   const service = request.service;
   const state = approvalState(factsOf(request));
 
+  // The slot if they chose one, their sentence if they did not — turned into
+  // one line HERE, on the server, because it is a conversion into her timezone
+  // and the browser's clock is not hers.
+  const wanted =
+    request.slotStart && request.slotEnd
+      ? formatSlot(request.slotStart, request.slotEnd)
+      : (request.preferredTime ?? "They did not say.");
+
   const row: RequestRow = {
     id: request.id,
     name: request.name,
     serviceName: service.name,
     listPence: service.priceGBP,
-    preferredTime: request.preferredTime,
+    wanted,
+    chosen: request.slotStart !== null,
     state,
     approvedPence: request.approvedPence,
     agreedTime: request.agreedTime,
@@ -190,9 +200,25 @@ function Row({ request }: { request: ServiceRequestWithService }) {
           queue that hides it is a queue she has to click through twice to work.
           `whitespace-pre-line` keeps the line breaks they typed. */}
       <td className={CELL}>
-        <span className="block max-w-[42ch] whitespace-pre-line text-[19px] leading-relaxed text-ink">
-          {request.preferredTime}
+        {/* A CHOSEN SLOT LOOKS DIFFERENT FROM A SENTENCE, and it should: one is
+            a time out of her diary that nobody else is being offered, and the
+            other is a wish somebody typed. Reading them the same way would let
+            her answer the second as though it were the first. */}
+        <span
+          className={
+            request.slotStart
+              ? "block max-w-[42ch] fig font-mono text-[18px] tabular-nums leading-relaxed text-ink"
+              : "block max-w-[42ch] whitespace-pre-line text-[19px] leading-relaxed text-ink"
+          }
+        >
+          {wanted}
         </span>
+        {request.slotStart && state !== "declined" && state !== "lapsed" && (
+          <span className={`${NOTE} text-gold`}>Held for them</span>
+        )}
+        {request.slotStart && (state === "declined" || state === "lapsed") && (
+          <span className={NOTE}>That time is back in your diary</span>
+        )}
         {request.agreedTime && (
           <span className="mt-3 block max-w-[42ch] whitespace-pre-line border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink">
             You said: {request.agreedTime}

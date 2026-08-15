@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { addPicture } from "@/app/(admin)/admin/offerings/actions";
+import { clockOfMinutes, minutesOfClock } from "@/lib/london";
 
 /**
  * The pieces both offering forms are built from.
@@ -106,6 +107,177 @@ export function Section({
       <div className="mt-6">{children}</div>
     </section>
   );
+}
+
+/**
+ * What this takes out of the diary — the margin either side, or the whole day.
+ *
+ * ONE COMPONENT FOR BOTH FORMS, because it is one question asked twice and the
+ * answer has to mean the same thing in both places. A workshop sets it for its
+ * day; a course sets it once for every date of its run.
+ *
+ * THE READBACK IS THE POINT. "60" is not what she is deciding — "which keeps
+ * 09:00 to 17:30 clear" is, and that sentence is what stops an afternoon
+ * disappearing from the site for a reason nobody can find later. It is the same
+ * move the refund field makes with its deadline and the duration field makes
+ * with its hours, and it is the only explanation either number needs.
+ */
+export function DiaryMargins({
+  what,
+  startTime,
+  endTime,
+  before,
+  onBefore,
+  after,
+  onAfter,
+  wholeDay,
+  onWholeDay,
+  errors,
+}: {
+  /** "workshop" or "course" — the only thing that differs in the wording. */
+  what: "workshop" | "course";
+  startTime: string;
+  endTime: string;
+  before: string;
+  onBefore: (value: string) => void;
+  after: string;
+  onAfter: (value: string) => void;
+  wholeDay: boolean;
+  onWholeDay: (value: boolean) => void;
+  errors: Record<string, string>;
+}) {
+  const dates = what === "course" ? "every date of this run" : "this day";
+
+  return (
+    <>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div>
+          <label className="block">
+            <span className={LABEL}>Kept clear before</span>
+            <span className="flex items-baseline gap-3">
+              <input
+                name="marginBefore"
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={before}
+                onChange={(event) => onBefore(event.target.value)}
+                className={`${FIELD_FIG} w-28 text-[28px]`}
+              />
+              <span className="text-[18px] text-ink-soft">minutes</span>
+            </span>
+          </label>
+          <p className={HELP}>Getting there, and setting up.</p>
+          <FieldError error={errors.marginBefore} />
+        </div>
+
+        <div>
+          <label className="block">
+            <span className={LABEL}>Kept clear after</span>
+            <span className="flex items-baseline gap-3">
+              <input
+                name="marginAfter"
+                type="number"
+                min={0}
+                inputMode="numeric"
+                value={after}
+                onChange={(event) => onAfter(event.target.value)}
+                className={`${FIELD_FIG} w-28 text-[28px]`}
+              />
+              <span className="text-[18px] text-ink-soft">minutes</span>
+            </span>
+          </label>
+          <p className={HELP}>Packing down, and getting home.</p>
+          <FieldError error={errors.marginAfter} />
+        </div>
+      </div>
+
+      {/* Its own question rather than "margin = a very large number", because it
+          means something different: a retreat is not a short thing with a wide
+          margin, it is a day that has gone. */}
+      <label className="mt-7 flex items-start gap-3">
+        <input
+          type="checkbox"
+          name="blocksWholeDay"
+          checked={wholeDay}
+          onChange={(event) => onWholeDay(event.target.checked)}
+          className="mt-1 h-5 w-5 accent-action"
+        />
+        <span>
+          <span className="block text-[19px] text-ink">
+            This takes the whole day
+          </span>
+          <span className={HELP}>
+            For a retreat, or anything you would not want a session either side
+            of. The two figures above are ignored while this is ticked, and kept
+            in case you untick it.
+          </span>
+        </span>
+      </label>
+
+      <p className="mt-6 font-display text-[24px] leading-tight text-ink">
+        {claimSentence({ startTime, endTime, before, after, wholeDay, dates })}
+      </p>
+    </>
+  );
+}
+
+/** The one sentence `DiaryMargins` exists to be able to say. */
+function claimSentence({
+  startTime,
+  endTime,
+  before,
+  after,
+  wholeDay,
+  dates,
+}: {
+  startTime: string;
+  endTime: string;
+  before: string;
+  after: string;
+  wholeDay: boolean;
+  dates: string;
+}): string {
+  if (wholeDay) {
+    return `The whole of ${dates} is taken, so nobody can be offered a session on it whatever time this runs.`;
+  }
+
+  const start = minutesOfClock(startTime);
+  if (start === null) {
+    return "Put the times in above and this will say what it keeps clear.";
+  }
+
+  const marginBefore = whole(before);
+  const marginAfter = whole(after);
+
+  const opens =
+    start - marginBefore < 0
+      ? "the start of the day"
+      : clockOfMinutes(start - marginBefore);
+
+  // No end time is not a missing figure to guess at — it is a stated
+  // consequence, and this is where it is stated. The diary treats the rest of
+  // the day as taken rather than offering an afternoon on the strength of an
+  // assumption about how long this runs.
+  const end = minutesOfClock(endTime);
+  if (end === null) {
+    return `There is no end time on this, so ${opens} to the end of ${dates} is kept clear.`;
+  }
+
+  const closes =
+    end + marginAfter >= 24 * 60
+      ? "the end of the day"
+      : clockOfMinutes(end + marginAfter);
+
+  if (marginBefore === 0 && marginAfter === 0) {
+    return `Only the hours themselves are taken — ${opens} to ${closes}, on ${dates}.`;
+  }
+  return `Which keeps ${opens} to ${closes} clear, on ${dates}.`;
+}
+
+/** A number field's value as a number. Anything else is none. */
+function whole(value: string): number {
+  return /^\d+$/.test(value.trim()) ? Number(value) : 0;
 }
 
 /**

@@ -44,6 +44,25 @@ model AdminUser {
   credentialVersion  Int      @default(1)
   /// True while the seeded temporary password is still in use.
   mustChangePassword Boolean  @default(true)
+
+  /// The secret in her calendar subscription address, /api/calendar/<token>.
+  ///
+  /// STORED IN THE CLEAR, and it is the one bearer token in this schema that
+  /// is — every other one (`PasswordResetToken.tokenHash`,
+  /// `Booking.cancellationTokenHash`, `ServiceRequest.payTokenHash`) keeps only
+  /// a SHA-256, because the usable secret exists in an email and never has to
+  /// be shown twice. This one does: Outlook and Google want an address she can
+  /// look up and paste again months later, and a hash cannot produce one.
+  ///
+  /// What makes that acceptable is what the address can do. It is READ-ONLY —
+  /// a GET that renders her diary as text and writes nothing — and it is
+  /// rotatable from the Calendar screen, which mints a new token and kills
+  /// every subscription made from the old one. It is not a session: it cannot
+  /// reach the portal, change anything, or see a single card detail.
+  ///
+  /// Null until she asks for one. A feed nobody wanted should not exist.
+  calendarFeedToken  String?  @unique
+
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -139,6 +158,30 @@ model Workshop {
   /// may need different terms. 0 means it cannot be refunded at all, and the
   /// page says so rather than printing a date.
   refundDays Int @default(14)
+
+  /// ── what it takes out of the diary ──────────────────────────────────────
+  ///
+  /// How long either side of the day is unavailable for a session, in MINUTES.
+  /// Setting up, packing down, and getting there and back.
+  ///
+  /// PER WORKSHOP, not a site-wide margin, and that is the whole point: a
+  /// ninety-minute evening talk in the garden room takes an hour either side; a
+  /// full-day retreat two counties away takes the day. One global figure would
+  /// be wrong for both, and would be wrong in the expensive direction — either
+  /// selling her an hour she needs for driving, or refusing a morning she was
+  /// free for.
+  marginBeforeMinutes Int @default(0)
+  marginAfterMinutes  Int @default(0)
+
+  /// The whole day, rather than a margin around the hours.
+  ///
+  /// Its own column and not "margin = 1440", because it means something
+  /// different and the form asks it as a different question. A retreat is not a
+  /// two-hour workshop with a very large margin; it is a day that is gone. When
+  /// this is true the two figures above are ignored, and the diary blocks
+  /// midnight to midnight in LONDON — the day she means, not a UTC window that
+  /// slides an hour in October.
+  blocksWholeDay Boolean @default(false)
 
   /// The picture behind the title. Optional so a workshop can be written
   /// before there is a photograph for it, but required to publish — a page
@@ -263,6 +306,20 @@ model Course {
   /// Days before the FIRST date that the run is still refundable in full. A
   /// course is bought once, so it is cancelled once.
   refundDays Int @default(14)
+
+  /// ── what it takes out of the diary ──────────────────────────────────────
+  ///
+  /// The same three as a Workshop's, meaning the same thing, and on the COURSE
+  /// rather than on each of its dates. A run is one arrangement — the same room,
+  /// the same drive, the same packing up — so the margin around one Wednesday
+  /// evening is the margin around all of them. Giving each CourseSession its own
+  /// would be four copies of one answer, and the day she edited three of them
+  /// would be the day the fourth was wrong.
+  ///
+  /// Applied to EVERY date of the run by `lib/availability.ts`.
+  marginBeforeMinutes Int     @default(0)
+  marginAfterMinutes  Int     @default(0)
+  blocksWholeDay      Boolean @default(false)
 
   /// The picture behind the title, as a media basename, and the line saying
   /// what is in it. Required together, and required to publish.
@@ -421,6 +478,75 @@ model Service {
   /// 75, and the page reads it back in words.
   durationMinutes Int
 
+  /// ── when she will do this one ───────────────────────────────────────────
+  ///
+  /// PER SERVICE, and that is a decision rather than an omission. A global
+  /// working week was considered and rejected: she will drive to somebody on a
+  /// Tuesday afternoon and will not do a two-hour session at eight in the
+  /// morning, and one site-wide pattern would have to be the intersection of
+  /// every service she offers — which is to say, the least she does anywhere.
+  ///
+  /// These four columns are read by `lib/availability.ts` and are never a list
+  /// of slots. What a visitor is offered is COMPUTED from them, per request,
+  /// against everything already in the diary. There is deliberately no table of
+  /// bookable times: a stored list is a second copy of an answer the diary
+  /// already gives, and it would be wrong from the moment a workshop moved.
+
+  /// The days of the week she will do it, as ISO weekday numbers — 1 is Monday
+  /// and 7 is Sunday. An array rather than seven booleans because the question
+  /// is "which days" and the answer is a set; and because the form posts a set
+  /// of checkboxes, which is the same shape.
+  ///
+  /// Monday to Friday is the DEFAULT, not a claim about her week. Every
+  /// existing service got it at migration, because a service offering nothing
+  /// is a form nobody can use — and the form says in as many words that these
+  /// are a starting point. Empty is legal and means the honest thing: nothing
+  /// is offered, and the page falls back to asking in words.
+  availableDays Int[] @default([1, 2, 3, 4, 5])
+
+  /// The earliest a session may START and the latest one may FINISH, as
+  /// wall-clock times in her own day: "09:00", "17:00". Stored the way a
+  /// workshop's `startTime` is, and for the same reason — these are the hours in
+  /// the room, and attaching them to an instant would mean picking a timezone
+  /// for a thing that repeats every week through two of them.
+  ///
+  /// `availableTo` is the FINISH, not the last start. Ninety minutes against a
+  /// five o'clock finish means the last session starts at half past three, and
+  /// that arithmetic is done once, in `lib/slots.ts`, so no screen has to.
+  availableFrom String @default("09:00")
+  availableTo   String @default("17:00")
+
+  /// MINUTES kept clear before and after a session of this one, for getting
+  /// there and getting back.
+  ///
+  /// Separate from `Workshop.marginBeforeMinutes` because it is a different
+  /// kind of fact. A workshop's margin belongs to the workshop and blocks the
+  /// diary for everything; a travel buffer belongs to the SERVICE BEING ASKED
+  /// FOR and travels with the candidate slot. So the buffer is added to the
+  /// slot a visitor is being offered rather than to what is already booked —
+  /// which is why two sessions of a fifteen-minute-buffer service end up half
+  /// an hour apart, and why that is right: fifteen minutes to get away from one
+  /// and fifteen to get to the next is half an hour of driving, not a quarter.
+  ///
+  /// Zero by default, which is correct for a service that happens in her own
+  /// room and never moves.
+  travelBufferMinutes Int @default(0)
+
+  /// The least warning she will take, in HOURS from now.
+  ///
+  /// 24 by default so that nobody books nine o'clock this morning at half past
+  /// eight — the diary would say yes and she would find out when she opened it.
+  /// Hours rather than days for the reason `APPROVAL_HOLD_HOURS` is hours:
+  /// "tomorrow" from ten at night is twelve hours, not one day.
+  ///
+  /// PER SERVICE and editable, because an hour in the garden room and a
+  /// half-day she drives to are not the same amount of notice. How far AHEAD
+  /// she takes bookings is not here — that is `BOOKING_WINDOW_DAYS` in
+  /// `lib/slots.ts`, one figure for the whole site, because it is a statement
+  /// about how far into the future this diary is trusted rather than about any
+  /// one service.
+  minimumNoticeHours Int @default(24)
+
   /// Which of the two answers below is the live one. Exactly one branch is
   /// filled in; the other is null, on every save and by constraint.
   location ServiceLocation
@@ -565,22 +691,50 @@ model ServiceRequest {
   /// number is not somebody to turn away at the form.
   phone String?
 
-  /// WHEN WOULD SUIT THEM, AS THEY WROTE IT — not a slot, not a datetime.
+  /// THE SLOT THEY CHOSE — an instant, and the thing that decides everything.
   ///
-  /// The brief asks for a start and an end here, chosen from a live picker
-  /// backed by computed availability: the recurring pattern, minus workshops,
-  /// minus course dates, minus personal blocks, minus other holds. None of
-  /// that exists — there is no AvailabilityRule table, no TimeBlock table and
-  /// no derivation — so a picker would be offering times nothing had checked,
-  /// and a stored datetime would be a slot the calendar had never heard of.
+  /// This is what D-24 said would arrive "as its own nullable pair of columns
+  /// beside `preferredTime`" once availability existed, and it has. It is a real
+  /// start and a real end, picked from times the server computed and re-checked
+  /// on the way in (D-26), so unlike the sentence below it, it is a time
+  /// something has actually looked at.
   ///
-  /// Text is the honest version of what this system actually knows. "Weekday
-  /// mornings, not Tuesdays" is a real answer that no picker can take, and it
-  /// is the answer she needs in order to write back. When availability is
-  /// built, a chosen slot arrives as its own nullable pair of columns beside
-  /// this one; this column stays, because the sentence somebody typed is worth
-  /// keeping either way.
-  preferredTime String
+  /// UTC, RENDERED LONDON. Every instant in this database is UTC and this is no
+  /// different, but it is the one that would hurt: the clocks go back on 25
+  /// October, and a naive local-time store moves every autumn slot by an hour
+  /// on the morning it happens. Stored as an instant, ten o'clock in Frome stays
+  /// ten o'clock in Frome on both sides of the change.
+  ///
+  /// `slotEnd` is COPIED rather than derived from `Service.durationMinutes`, for
+  /// the reason `Booking.balanceDueAt` is copied from the course: she may
+  /// lengthen a service next month, and that must not silently lengthen an hour
+  /// somebody already asked for and may already have been told about.
+  ///
+  /// NULL ON A REQUEST OLDER THAN THE CALENDAR, and on one made against a
+  /// service that is offering nothing — see `preferredTime`. Nullable is the
+  /// honest shape: those requests do not have a slot, and inventing one would
+  /// put a time in her diary that nobody agreed to.
+  slotStart DateTime?
+  slotEnd   DateTime?
+
+  /// WHEN WOULD SUIT THEM, AS THEY WROTE IT — their sentence, not their slot.
+  ///
+  /// NULLABLE NOW, and it is the pair above that made it so. A visitor who
+  /// picked ten o'clock on Thursday did not write a sentence, and storing
+  /// "Thursday at 10:00" here would be a second copy of `slotStart` that says
+  /// the same thing in worse words and disagrees the first time one of them
+  /// moves.
+  ///
+  /// It is still filled in, and still required, on the path that has no slot:
+  /// a service with no days set, or one whose next sixty days are full. "Weekday
+  /// mornings, not Tuesdays" is a real answer no picker can take, and it is the
+  /// answer she needs in order to write back. The two operator requests that
+  /// predate the calendar are on that path and are unchanged.
+  ///
+  /// Exactly one of the two is set. Nothing enforces that in the database,
+  /// because a request with neither is a request that should not have been
+  /// written and the form is what refuses it.
+  preferredTime String?
 
   /// Anything else they want to say. Optional, as the approved form marks it
   /// — most people write nothing and the request is still worth answering.
@@ -655,6 +809,55 @@ model ServiceRequest {
   /// order she works in.
   @@index([status, createdAt])
   @@index([serviceId])
+
+  /// Every read of the diary asks "what is claimed between these two instants?"
+  /// and this is what answers it. Which of them are LIVE is arithmetic on top
+  /// (D-26) rather than another column, for the reason there is no `expired`.
+  @@index([slotStart])
+}
+
+/// Time she has taken out of her own diary, and the fifth thing that makes an
+/// hour unavailable.
+///
+/// The other four are things somebody else can see — a workshop, a date in a
+/// course, a session that has been paid for, a request holding its slot. This
+/// one is hers: the school run, a funeral, a week in Wales, an afternoon she
+/// simply does not want to work. It is made on the calendar, it is never
+/// published, and no public page has ever read this table.
+///
+/// WHAT IT IS NOT is a second calendar. It holds no title, no attendees and no
+/// repeat: `reason` is one line for her own eye, so that a stretch of grey in
+/// October says WHY it is grey when she looks at it in September. A recurring
+/// block would need an expansion, an exception list and a screen to manage
+/// both, and nothing anybody has asked for needs one — a fortnight in Wales is
+/// one row.
+///
+/// INSTANTS, not a day and two clock times, unlike everything else in this
+/// schema that has a time on it. A workshop's day is a day and its times are
+/// the times in the room; a block is a span of the diary, it is compared
+/// directly against slots that are already instants, and half of them will not
+/// start or end on a day boundary at all.
+model PersonalBlock {
+  id Int @id @default(autoincrement())
+
+  /// UTC, rendered London. The whole of 25 October is exactly why: a block over
+  /// the morning of the clock change is 25 hours of wall clock, and only an
+  /// instant pair can say that without arguing with itself.
+  startsAt DateTime
+  endsAt   DateTime
+
+  /// One line, in her words — "Dentist", "Wales". Required, and refusing a
+  /// blank one is the same judgement `declineNote` makes: a grey stripe with
+  /// nothing on it is a thing she will not recognise in three months and will
+  /// not dare to delete.
+  reason String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// The calendar reads a month at a time, and availability reads a window.
+  /// Both ask the same question of this column.
+  @@index([startsAt])
 }
 
 /// What happened to the money. Three states, and no fourth: a place is either

@@ -5,9 +5,11 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/server";
 import { parseFilm, type Film } from "@/lib/film";
+import { formatDuration } from "@/lib/format";
 import {
   collectImages,
   collectValues,
+  isTime,
   parsePence,
   parseWholeNumber,
   resolveFilm,
@@ -15,6 +17,7 @@ import {
 } from "@/lib/offering-form";
 import { slugify, type OfferingFormState } from "@/lib/offering-rules";
 import { toHtml } from "@/lib/rich-text";
+import { lastStartClock } from "@/lib/slots";
 
 /**
  * Writing a service.
@@ -99,6 +102,74 @@ export async function saveService(
   const pricePence = parsePence(values.price ?? "");
   if (pricePence === null) {
     errors.price = "Write the price in numbers, like 65.";
+  }
+
+  // ── when she will do this one ───────────────────────────────────────────
+  //
+  // PER SERVICE, and the operator asked for it that way having considered a
+  // single working week for the whole site and turned it down. One pattern
+  // would have to be the intersection of everything she offers — the least she
+  // does anywhere — and the two facts below travel with the service rather than
+  // with her: an hour in the garden room needs no notice to speak of and no
+  // driving, and a half-day she goes out for needs both.
+  //
+  // `getAll`, not `values`, because the days arrive as a set of checkboxes
+  // sharing one name and `collectValues` keeps only the last of them.
+  const availableDays = [
+    ...new Set(
+      formData
+        .getAll("availableDays")
+        .map((day) => Number(day))
+        .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7),
+    ),
+  ].sort((a, b) => a - b);
+
+  const availableFrom = (values.availableFrom ?? "").trim();
+  const availableTo = (values.availableTo ?? "").trim();
+
+  if (!isTime(availableFrom)) {
+    errors.availableFrom = "Write the time as 09:00.";
+  }
+  if (!isTime(availableTo)) {
+    errors.availableTo = "Write the time as 17:00.";
+  } else if (isTime(availableFrom) && availableTo <= availableFrom) {
+    // String comparison is exactly right for zero-padded 24-hour times, and it
+    // is what the workshop form already uses on its own pair.
+    errors.availableTo = `This finishes at ${availableTo}, before its ${availableFrom} start. One of the two is the wrong way round.`;
+  }
+
+  const travelBufferMinutes = parseWholeNumber(
+    (values.travelBuffer ?? "").trim() || "0",
+    0,
+  );
+  if (travelBufferMinutes === null) {
+    errors.travelBuffer =
+      "Minutes, as a whole number — 30 for half an hour, or 0 if it never moves.";
+  }
+
+  const minimumNoticeHours = parseWholeNumber(
+    (values.minimumNotice ?? "").trim() || "0",
+    0,
+  );
+  if (minimumNoticeHours === null) {
+    errors.minimumNotice =
+      "Hours, as a whole number. 24 is a day; 0 means somebody could take this afternoon.";
+  }
+
+  // THE ONE THAT WOULD OTHERWISE FAIL SILENTLY. A ninety-minute session offered
+  // between nine and ten has no start that finishes in time, so the page would
+  // list her days and then offer nothing on any of them, with nowhere to find
+  // out why. Only worth saying when she has actually named days — with none set
+  // the page already says plainly that nothing is on offer.
+  if (
+    availableDays.length > 0 &&
+    durationMinutes !== null &&
+    isTime(availableFrom) &&
+    isTime(availableTo) &&
+    availableTo > availableFrom &&
+    lastStartClock({ availableFrom, availableTo, durationMinutes }) === null
+  ) {
+    errors.availableTo = `${formatDuration(durationMinutes)} does not fit between ${availableFrom} and ${availableTo}, so nothing could ever be offered. Either shorten the session or open the hours out.`;
   }
 
   // ── where it is ─────────────────────────────────────────────────────────
@@ -253,6 +324,11 @@ export async function saveService(
     summary,
     bodyHtml: toHtml(bodySource),
     durationMinutes: durationMinutes as number,
+    availableDays,
+    availableFrom,
+    availableTo,
+    travelBufferMinutes: travelBufferMinutes as number,
+    minimumNoticeHours: minimumNoticeHours as number,
     ...where,
     priceGBP: pricePence as number,
     heroImage: heroImage || null,

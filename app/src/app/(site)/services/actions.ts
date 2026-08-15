@@ -1,6 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
+import {
+  hoursOf,
+  lockTheDiary,
+  offeredFor,
+  stillOffered,
+} from "@/lib/availability";
 import { prisma } from "@/lib/db";
 import {
   requestAcknowledgementEmail,
@@ -10,6 +16,7 @@ import {
 import { DRAWN_AT_FIELD, HONEYPOT_FIELD } from "@/lib/request-fields";
 import { allowRequest, callerKey, looksAutomated } from "@/lib/request-guard";
 import { getPublishedServiceBySlug } from "@/lib/services";
+import { offeredView, slotEnd, type OfferedDayView } from "@/lib/slots";
 
 /**
  * Asking for a session.
@@ -20,17 +27,31 @@ import { getPublishedServiceBySlug } from "@/lib/services";
  * outside world can POST to either has Stripe's signature on it or a token
  * behind it, and this has neither.
  *
- * WHAT IT DOES NOT DO IS AS DELIBERATE AS WHAT IT DOES. It does not hold a
- * time, it does not take a payment, it does not decide anything and it does
- * not tell the visitor an hour is theirs. The brief's hold rests on computed
- * availability — a recurring pattern minus workshops minus course dates minus
- * personal blocks minus other holds — and none of that exists (D-24), so the
- * preferred time is the visitor's own sentence and the answer is a person's.
+ * IT NOW HOLDS A TIME, which is the one sentence D-24 said it did not (D-26).
+ * A visitor picks from times the server worked out against her whole diary, and
+ * writing the request RESERVES that slot — derived, not stamped: from the moment
+ * this row exists, `lib/availability.ts` counts it as taken, so the next person
+ * is not offered it. Approving keeps it. Declining or lapsing gives it back,
+ * with nothing running.
+ *
+ * SO THE SLOT IS CHECKED TWICE, and the second time is what makes it true. The
+ * list the browser is holding was computed when the page was drawn, and filling
+ * in a form takes a minute or two — in which somebody else can ask for the same
+ * ten o'clock. The re-check happens inside the transaction that writes, under a
+ * lock on the whole diary, using the same `slotVerdict` that made the offer. Of
+ * two people racing one Thursday, exactly one gets it and the other is told so
+ * and shown what is left.
+ *
+ * IT STILL TAKES WORDS when there is nothing to pick from — a service with no
+ * days set, or one whose next two months are full. That is not a fallback bolted
+ * on; it is the same conversation the site had before there was a calendar, and
+ * it is the honest answer when the calendar has nothing to say.
  *
  * NOTHING FROM THE BROWSER IS TRUSTED except what somebody typed. Which
- * service is a slug looked up here; the duration, the price and the address in
- * both emails are read off that row. A price that arrives from a browser is a
- * price somebody can edit.
+ * service is a slug looked up here; the duration, the price, the hours and the
+ * address are read off that row. A slot that arrives from a browser is checked
+ * against the diary before it is believed, and a slot nobody was offered is
+ * refused whatever it says.
  */
 
 export type RequestState = {
@@ -40,6 +61,15 @@ export type RequestState = {
   error: string | null;
   /** True once it is written down and the two emails are away. */
   sent: boolean;
+  /**
+   * The times as they are NOW, sent back when the chosen one went while they
+   * were typing. The panel draws these over the list it was given, so the
+   * refusal and the fresh choice arrive together — being told "that one has
+   * gone" beside a list that still shows it is worse than not being told.
+   *
+   * Absent on every other outcome, and the panel then keeps what it has.
+   */
+  days?: OfferedDayView[];
 };
 
 /**
@@ -122,9 +152,34 @@ export async function requestService(
     errors.phone = "That is longer than a phone number.";
   }
 
-  // The one field that stands in for the picker, so it is the one field the
-  // form insists on: without it she has nothing to answer with.
-  if (!preferredTime) {
+  // ── the time ──────────────────────────────────────────────────────────────
+  //
+  // Two paths, and which one is live is decided HERE from the service's own
+  // row rather than from what the browser posted. A form that could choose its
+  // own path is a form that could send a sentence to a service with a calendar
+  // and quietly skip every check on this page.
+  const picking = service.availableDays.length > 0;
+  const chosen = field(formData, "slot");
+  let slotStart: Date | null = null;
+
+  if (picking) {
+    if (!chosen) {
+      errors.slot = "Pick a time from the list before you send this.";
+    } else {
+      const parsed = new Date(chosen);
+      if (Number.isNaN(parsed.getTime())) {
+        // Not something a picker ever produces. Answered with the same sentence
+        // as a slot that has gone, because to the person at the other end the
+        // two are the same event and the difference is only interesting to us.
+        errors.slot =
+          "That time is not one of the ones on offer. Pick another.";
+      } else {
+        slotStart = parsed;
+      }
+    }
+  } else if (!preferredTime) {
+    // The field that stands where the picker would be when there is nothing to
+    // pick from. Without it she has nothing to answer with.
     errors.preferredTime =
       "Say roughly when would suit you — a day, or a part of the week. It is what she answers with.";
   } else if (preferredTime.length > LIMITS.preferredTime) {
@@ -157,33 +212,80 @@ export async function requestService(
     return { errors: {}, error: null, sent: true };
   }
 
-  // ── the double-press ──────────────────────────────────────────────────────
-  // The same person, about the same session, inside a couple of minutes. That
-  // is a second click or a browser retry rather than a second question, and
-  // writing it twice would put the same message in front of her twice and send
-  // them two acknowledgements.
-  const recent = await prisma.serviceRequest.findFirst({
-    where: {
-      serviceId: service.id,
-      email,
-      createdAt: { gt: new Date(Date.now() - 2 * 60 * 1000) },
-    },
-  });
-  if (recent) {
-    return { errors: {}, error: null, sent: true };
-  }
-
+  const hours = hoursOf(service);
   const submitted = {
     name,
     email,
     phone: phone || null,
-    preferredTime,
+    // Exactly one of the two is written. A slot AND a sentence saying the same
+    // thing in worse words is two facts to keep in step, and the one nobody is
+    // looking at is the one that goes wrong.
+    preferredTime: slotStart ? null : preferredTime,
+    slotStart,
+    slotEnd: slotStart ? slotEnd(slotStart, service.durationMinutes) : null,
     message: message || null,
   };
 
-  await prisma.serviceRequest.create({
-    data: { serviceId: service.id, ...submitted },
+  /**
+   * The whole decision, in one transaction, under one lock.
+   *
+   * THE LOCK IS WHY "only one of them gets it" IS TRUE. Without it, two people
+   * asking for the same Thursday both read a free diary, both are told yes, and
+   * both rows exist — and the first anybody knows is when she opens the queue.
+   * With it, the second one waits for the first to commit, reads the diary
+   * again, and finds the hour gone.
+   *
+   * THE DOUBLE-PRESS CHECK MOVED IN HERE with it, and had to: the same person
+   * pressing twice would otherwise race themselves, and the second press would
+   * be refused as "somebody took that time" — which would be us, a second ago,
+   * on their behalf. Inside the lock it reads its own first row and answers the
+   * way it always did, silently and as though it had worked, because it did.
+   */
+  const outcome = await prisma.$transaction(async (tx) => {
+    await lockTheDiary(tx);
+
+    // The same person, about the same session, inside a couple of minutes. That
+    // is a second click or a browser retry rather than a second question, and
+    // writing it twice would put the same message in front of her twice and
+    // send them two acknowledgements.
+    const recent = await tx.serviceRequest.findFirst({
+      where: {
+        serviceId: service.id,
+        email,
+        createdAt: { gt: new Date(Date.now() - 2 * 60 * 1000) },
+      },
+    });
+    if (recent) return { kind: "duplicate" as const };
+
+    if (slotStart) {
+      const verdict = await stillOffered(tx, { startsAt: slotStart, hours });
+      if (!verdict.ok) return { kind: "gone" as const, why: verdict.why };
+    }
+
+    await tx.serviceRequest.create({
+      data: { serviceId: service.id, ...submitted },
+    });
+    return { kind: "written" as const };
   });
+
+  if (outcome.kind === "duplicate") {
+    return { errors: {}, error: null, sent: true };
+  }
+
+  if (outcome.kind === "gone") {
+    // The fresh list travels back WITH the refusal, so the sentence and the
+    // choice arrive together. Read after the transaction committed, so it
+    // already reflects whoever won.
+    return {
+      errors: {},
+      error:
+        outcome.why === "taken"
+          ? "That time went while you were filling this in — somebody else asked for it first. Nothing has been sent. The times below are up to date; pick another."
+          : "That time is no longer being offered. Nothing has been sent. The times below are up to date; pick another.",
+      sent: false,
+      days: offeredView(await offeredFor(service)),
+    };
+  }
 
   // Written down FIRST, then told. Both messages are awaited so a failure is
   // in the log beside the request it belongs to, and neither can undo the row

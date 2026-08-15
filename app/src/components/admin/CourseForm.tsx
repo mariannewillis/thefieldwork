@@ -12,6 +12,7 @@ import {
 import { MAX_IMAGES, NO_ATTEMPT_YET, slugify } from "@/lib/offering-rules";
 import DeleteCourse from "./DeleteCourse";
 import {
+  DiaryMargins,
   FieldError,
   FIELD,
   FIELD_BIG,
@@ -64,6 +65,9 @@ export type CourseFormValues = {
   /** The day the rest is due. Null when there is no deposit. */
   balanceDueAt: Date | null;
   refundDays: number;
+  marginBeforeMinutes: number;
+  marginAfterMinutes: number;
+  blocksWholeDay: boolean;
   heroImage: string | null;
   heroAlt: string | null;
   /** The Vimeo or YouTube address. The still and the length come from there. */
@@ -138,6 +142,13 @@ export default function CourseForm({
   const [refundDays, setRefundDays] = useState(
     String(course?.refundDays ?? 14),
   );
+  const [marginBefore, setMarginBefore] = useState(
+    String(course?.marginBeforeMinutes ?? 0),
+  );
+  const [marginAfter, setMarginAfter] = useState(
+    String(course?.marginAfterMinutes ?? 0),
+  );
+  const [wholeDay, setWholeDay] = useState(course?.blocksWholeDay ?? false);
   // The deposit and the day the rest is due are one arrangement, so the form
   // holds both: the second field only means anything while the first has a
   // figure in it, and the sentence under them is written from the two together
@@ -641,6 +652,35 @@ export default function CourseForm({
                 what the top of the course&rsquo;s page says.
               </p>
             </div>
+          </Section>
+
+          {/* ══ IN THE DIARY ══════════════════════════════════════════════ */}
+          <Section
+            id="diary-h"
+            title="In the diary"
+            note="What this stops you being asked for, on every date of it"
+          >
+            <p className="mb-7 max-w-[62ch] text-[17px] leading-relaxed text-ink-soft">
+              Every date below already takes its own hours out of your diary.
+              What you set here is the time either side of each of them that
+              nobody can ask for a session in. It is set once for the run,
+              because it is the same room and the same drive every week.
+            </p>
+            {/* The first date's times stand for all of them: the run is one
+                arrangement, and the sentence is about what a margin DOES rather
+                than about any particular Wednesday. */}
+            <DiaryMargins
+              what="course"
+              startTime={dated[0]?.startTime ?? ""}
+              endTime={dated[0]?.endTime ?? ""}
+              before={marginBefore}
+              onBefore={setMarginBefore}
+              after={marginAfter}
+              onAfter={setMarginAfter}
+              wholeDay={wholeDay}
+              onWholeDay={setWholeDay}
+              errors={state.errors}
+            />
           </Section>
 
           {/* ══ WHERE IT IS ═══════════════════════════════════════════════ */}

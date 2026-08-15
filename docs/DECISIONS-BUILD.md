@@ -1870,3 +1870,342 @@ npm run db:deploy
 **Restart the app after deploying**, for the reason D-23 and D-24 both give: a
 running server holds a Prisma client generated against the old schema and will
 fail on the new columns until it is restarted.
+---
+
+## D-26 · The diary decides what a visitor may ask for; a request HOLDS its hour (2026-08-15)
+
+D-24 refused a slot picker and said exactly why: the brief's hold rests on
+computed availability — a recurring pattern minus workshops minus course dates
+minus personal blocks minus other holds — and **none of that existed**, so a
+picker would have offered times nothing had checked and a stored datetime would
+have been a slot the calendar had never heard of. It also said what would happen
+when availability was built: "a chosen slot arrives as its own nullable pair of
+columns beside this one; this column stays, because the sentence somebody typed
+is worth keeping either way." That is precisely what has happened.
+
+The operator's decisions, in his words: **one calendar in admin**; **busy comes
+from five places**; **personal blocks are made directly on the calendar**;
+**margin is a property of the offering, not a global rule**; **working hours are
+per service** — having considered a global working week and rejected it;
+**offered times are computed, never stored as a list**; **a request holds its
+slot**; and **the slot returns automatically and she is told**.
+
+Everything about the approval flow it sits under is unchanged. The amount is
+still hers to set, the window is still 48 hours copied onto the row, the five
+states are still derived, the token is still stored only as a hash.
+
+### The busy list is five reads and one shape
+
+`lib/availability.ts` reads the five things the operator named and returns them
+as one list of occupied spans:
+
+1. every workshop's day and hours, **published or not** — an unpublished workshop
+   is one she has not put on the site yet, not one that is not happening;
+2. every `CourseSession`, with its course's margin around each;
+3. sessions that have been **paid for** — a `Booking` at the slot its approval
+   named;
+4. requests that are **still live** — asked and unanswered, or approved and
+   waiting to be paid for;
+5. her own blocks.
+
+Margins and whole-day toggles are applied there, so everything downstream — the
+grid, the calendar, the re-check on submit — compares plain spans and no reader
+has to know which offering carries which rule. **The calendar draws that same
+list.** A month view assembled from its own queries would be a second opinion
+about her diary, and the morning the two disagreed the site would be the one
+that was wrong. What she sees at `/admin/calendar` is, exactly, what a visitor
+is being refused.
+
+### Holding is DERIVED, by the same arithmetic as lapsing
+
+**A slot is taken if a live request or a booking claims it.** "Live" is not a
+column: `approvalState` already answers it in five values, and the busy list asks
+the same function the queue, the pay page and the webhook ask. So requesting
+reserves the hour, approving keeps it, and declining or lapsing gives it back —
+with nothing running, nothing sweeping, and nothing to remember.
+
+There is still no `expired` in `ServiceRequestStatus`, and now for a third
+reason on top of D-25's two: a status meaning "released" would be a column
+somebody has to set, and the morning it did not get set the diary would refuse
+an hour nobody wanted.
+
+One consequence worth naming because it surprises people: **cancelling a paid
+session frees its hour.** `approvalState` still reads `paid` — a Booking exists
+and always will — but only `paid` Bookings are read into the busy list, and a
+cancelled one is not. The hour goes back the moment she cancels, which is the
+whole point of cancelling it.
+
+### Offered times are computed, and the same rule is applied twice
+
+`lib/slots.ts` is pure and knows nothing about the database. Given a service's
+five bookable facts and a list of occupied spans it walks her days, lays a
+half-hour grid inside her hours, and keeps what is clear. **Nothing is stored.**
+A saved list of bookable times is a second copy of an answer the diary already
+gives, and it is wrong from the moment a workshop moves.
+
+`slotVerdict` is the whole rule, and everything else is a loop around it. The
+public page calls it through `offeredSlots` to build the picker; the action that
+writes a request calls it **again**, inside the transaction that writes. One
+rule, applied twice, so the two cannot disagree — the list a browser is holding
+is seconds old, and the honest answer to "it went while you were typing" is to
+say so rather than to take the hour anyway.
+
+**The arithmetic the operator gave himself is the acceptance test.** Ninety
+minutes against a five o'clock finish makes **15:30** the last start. It is
+written as "does it finish in time" rather than "is it before the last start",
+because the two are the same sentence and only the first is still right on the
+morning the clocks change — the end is elapsed time and the finish is her clock.
+The portal prints the answer back at her as she types, on the service form and
+again on Availability, because it is the one figure on those screens she cannot
+see by looking at the two beside it.
+
+**Availability is never computed in the browser.** The picker is handed days in
+words, clock times in words, and an opaque value to post back; it does no
+conversion of any kind. One that worked out its own times would show somebody in
+Madrid eleven o'clock for her ten, and would still be wrong here twice a year.
+
+### Margin belongs to the offering; the buffer belongs to the service being asked for
+
+They are different kinds of fact and they are applied at different ends, which is
+the only part of this that is easy to get wrong.
+
+A **workshop's or course's margin** (`marginBeforeMinutes`, `marginAfterMinutes`,
+`blocksWholeDay`) belongs to that offering and blocks the diary for everything —
+so it is baked into the busy span. Per offering rather than site-wide because a
+ninety-minute evening talk in the garden room takes an hour either side and a
+full-day retreat two counties away takes the day; one figure would be wrong for
+both, and wrong in the expensive direction. The whole-day toggle is its own
+column rather than "margin = 1440" because it means something different and the
+form asks it as a different question. It is set once on a Course rather than per
+date: a run is one arrangement, and four copies of one answer is three that can
+disagree.
+
+A **service's travel buffer** belongs to the thing being ASKED FOR, so it travels
+with the candidate slot rather than with what is already booked. The consequence
+is that two sessions of a fifteen-minute-buffer service end up half an hour
+apart — and that is right: a quarter of an hour to get away from one and a
+quarter to get to the next is half an hour of driving, not a quarter.
+
+**A workshop with no end time takes the rest of the day.** She has said when it
+starts and not when it stops, and the diary must not offer an afternoon on the
+strength of a guess. The form now says so under the field, so it is a stated
+consequence rather than a surprise. The calendar feed is the one place that
+differs, and says why: a calendar has to draw something, and a bar to midnight
+would be more wrong than an hour.
+
+### Working hours are per service, and Availability is the other half of that
+
+Four columns on `Service`: the days of the week, the earliest start, the latest
+**finish**, and the travel buffer. Plus `minimumNoticeHours`, which is also per
+service, because an hour in the garden room and a half-day she drives to do not
+need the same warning.
+
+The decision to keep this off a global settings screen was the operator's, and
+what was missing from it was somewhere to see whether the five answers agreed.
+`/admin/availability` is that: one table, every session, with the last-start sum
+spelled out and a link to the row that is wrong. Nothing is set there.
+
+**Two defaults, and the reasoning is in the code beside each.** A **minimum
+notice of 24 hours**, so nobody takes nine o'clock this morning at half past
+eight — per service and editable, because it is a fact about the session. A
+**booking window of 60 days**, which is `BOOKING_WINDOW_DAYS` in `lib/slots.ts`
+and one figure for the whole site, because it is a statement about how far into
+the future this diary is worth trusting rather than about any one service. Both
+follow `APPROVAL_HOLD_HOURS`'s precedent: a named constant in the place the
+future Settings column will read its default from, not a configurable invented
+in a place the brief has already assigned somewhere else.
+
+**Monday to Friday, nine to five, is a migration DEFAULT and not a claim about
+her week.** An empty day-set would have left every service on the site offering
+nothing the morning this ran, and a service that offers nothing is a form nobody
+can use. The form opens on those figures and says in as many words that they are
+a starting point.
+
+### Two people, one Thursday
+
+The check and the write are separated by however long the network takes, so they
+are wrapped in one transaction under **one advisory lock on the whole diary**
+(`pg_advisory_xact_lock`). One lock and not one per slot, deliberately: slots
+that clash are not only the ones starting at the same minute — a ninety-minute
+session at ten and a sixty-minute one at eleven overlap, and so do a session and
+the travel buffer around it — so a per-slot key would let exactly the pairs this
+exists to catch through. Two people asking about different weeks queue for a few
+milliseconds; for a sole practitioner taking a handful of requests a day that is
+correctness for nothing.
+
+It is transaction-scoped, so Postgres releases it on commit or rollback whatever
+happens and there is no path that leaves the diary locked.
+
+The double-press guard **moved inside** the lock with it, and had to: the same
+person pressing twice would otherwise race themselves and be told "somebody took
+that time" — which would be us, a second ago, on their behalf.
+
+Two things had to be fixed to make this work at all, and both are recorded in
+the code because both fail in ways that look like something else.
+`pg_advisory_xact_lock` returns SQL `void`, which the pg driver adapter refuses
+to deserialise — it throws `UnsupportedNativeDataType` and takes the request
+down; it is cast to text. And the five busy reads run **one after another**
+rather than in a `Promise.all`: Prisma's interactive-transaction client owns a
+single connection and does not support concurrent queries on it, and the same
+function is handed a transaction client by the re-check on submit.
+
+### Time: UTC stored, London rendered, and 25 October
+
+Every instant is stored in UTC and rendered in Europe/London, and `lib/london.ts`
+is the only place the two are converted. It uses `Intl`, which has carried the
+full IANA rule set for years and is already how dates are printed; a library here
+would be a second copy of the same table.
+
+The whole problem in one sentence: **the clocks go back at two in the morning on
+25 October, and a diary that stores local times moves every slot after it by an
+hour on the morning it happens.** Ten o'clock on 23 October is `09:00Z`; ten
+o'clock on 26 October is `10:00Z`; the same wall-clock hour, an hour apart. The
+smoke test asserts both, from the block form, through the real conversion.
+
+Consequences that follow and are written down where they bite:
+
+- **The whole of 25 October is 25 hours.** A whole-day workshop, and an all-day
+  block, count in DAYS rather than adding 86,400,000. Asserted.
+- **`slotEnd` is elapsed time.** Ninety minutes is ninety minutes of the world
+  whichever side of the change it starts on.
+- **Day-walking adds to the day NUMBER**, never 24 hours to an instant, or the
+  grid drifts into the previous evening in October and stays there.
+- **The hour that happens twice** (01:00–01:59 on the 25th) resolves to the
+  second, GMT reading, so the grid offers 00:30 and then 01:00 — ninety minutes
+  of real time apart — rather than printing one wall-clock time twice as two
+  bookable slots.
+- **The hour that does not exist** (01:00–01:59 on the last Sunday in March)
+  resolves an hour later, which is what every calendar does and the only answer
+  that is a real moment.
+
+### `preferredTime` went nullable, and that is the honest shape
+
+Somebody who picks ten o'clock on Thursday writes no sentence. Storing
+"Thursday at 10:00" in `preferredTime` would be a second copy of `slotStart` in
+worse words — two facts to keep in step, and the one nobody was looking at would
+be the one that went wrong. So exactly one of the two is set.
+
+The sentence path is **not a fallback bolted on**. A service with no days set,
+and one whose next two months are full, both come through with nothing to offer,
+and then the panel is the one D-24 built, sentence for sentence, because for that
+conversation every one of them is still true. "Weekday mornings, not Tuesdays" is
+a real answer no picker can take.
+
+**The operator's requests 3 and 4 are on that path and are untouched.** They keep
+their typed sentences, they have no slot, they still list, and they are still
+approvable. Nothing invented a time for them, and nothing will: a slot they never
+chose would be an hour in her diary that nobody agreed to. Asserted at the start
+of the smoke run and again at the end.
+
+### What the emails may now say, and what they still may not
+
+D-24's acknowledgement said "no time has been held", because none was. One is
+now, so the acknowledgement says that — and stops at exactly the same place it
+did: it is **not booked**, and **nothing has been charged**, and she may still
+write back and suggest another time. Her own notice says the hour is out of her
+diary until she answers, and how it comes back.
+
+The request with no slot gets the OLD sentences, unchanged. Which set is used is
+decided by the row rather than by a flag: `slotStart` is either there or it is
+not.
+
+### Calendar sync — the cheap half, and only that
+
+**Built:** a private subscription feed at `/api/calendar/<token>.ics`, carrying
+workshops, course dates and sessions that have been paid for. She subscribes once
+— Outlook: Add calendar → Subscribe from web; Google: Other calendars → From URL
+— and they appear and keep themselves up to date. `UID` is stable and derived
+from the row, so an update replaces rather than duplicates; `SEQUENCE` goes up
+with `updatedAt`, counted from 2020 rather than 1970 because several clients have
+historically kept it in a signed 32-bit integer and Unix seconds cross that in 2038. Every stamp is UTC with a trailing `Z`, so no `VTIMEZONE` block has to be
+shipped and nothing can shift across the clock change. Lines are CRLF and folded
+at 75 **octets** rather than characters, because her own words contain em-dashes
+and pound signs and Outlook truncates the difference silently.
+
+Personal blocks are **not** in it — they came out of her own calendar in the
+first place, and sending them back would show her every appointment twice.
+Neither are requests merely holding a slot: an hour nobody has agreed to is not
+an appointment.
+
+**Both providers refresh on their own schedule, often several hours**, and
+neither says what it is. The portal says so beside the address rather than
+letting her think it is broken.
+
+The token is **the one bearer token in this schema stored in the clear**, and it
+has to be: a subscription address must be readable again in six months and a
+SHA-256 cannot produce one. What makes that acceptable is what it can do — a GET
+that renders her diary as text, writes nothing, reaches no part of the portal,
+and can be replaced from the Calendar screen, which kills every subscription made
+from the old one at once. A wrong token gets the same 404 as an address that
+never existed.
+
+**Not built, and deliberately separate:** reading her personal Outlook or Google
+appointments back in. That needs Microsoft Graph or the Google Calendar API, an
+app registration the operator has to create in his own name, a consent screen,
+and somewhere to keep and refresh a token that can read a person's whole
+calendar. Half-building it would be worse than not — a diary that knew SOME of
+her commitments would be a diary she trusts and should not.
+
+### What it is verified by
+
+`e2e/availability-smoke.mjs` — 97 assertions against a running app and the real
+database on 5433, on the same harness as its siblings and with the same
+guarantees: no real money (**no checkout is opened at all in this run**), no real
+email (`RESEND_API_KEY=""`, so the log adapter runs — asserted, not assumed),
+`EMAIL_TO_OWNER` pointed at `.invalid`, and an assertion over the whole server
+log that not one message was even ADDRESSED to marianne@thefieldwork.co.uk.
+
+It covers, in order: his data surviving the migration; **15:30 being the last
+start** for ninety minutes against a five o'clock finish, with 16:00 never
+offered and the grid on the half-hour; minimum notice, and a service with none
+offering something sooner; the sixty-day window; a workshop's **margin** taking
+11:00 and 13:30 while 09:00 and 14:00 survive; a **whole-day** toggle taking
+everything; asking for an hour and the panel saying it is held; the row carrying
+a real slot in UTC with the end copied and NO sentence; that hour and the one
+before it disappearing from what anybody else is offered while 11:30 returns;
+**two people racing one two o'clock with exactly one row written**, the loser
+told and shown the times as they are now; a **travel buffer** refusing 11:30 and
+08:30 and allowing 12:00; a lapsed approval's hour coming back **with nothing
+having run**, a live one keeping it, and a decline returning it; ten o'clock on
+both sides of the clock change storing an hour apart; the whole of 25 October
+being 25 hours; the calendar drawing them; Availability printing the last-start
+sum; the feed's headers, UID, DTSTAMP, SEQUENCE and UTC stamps, what is in it and
+what is deliberately not, a wrong address answering 404 and rotation killing the
+old one; the words path still writing a sentence with no slot invented; the queue
+printing both kinds; and his Booking 25, requests 3 and 4, `credentialVersion`,
+`ifr-course` and both workshops coming out exactly as they went in.
+
+`bookings-smoke.mjs` (86), `course-bookings-smoke.mjs` (69),
+`admin-bookings-smoke.mjs` (56) and `service-bookings-smoke.mjs` (54) all still
+pass unchanged.
+
+### What was deliberately left out
+
+Reading her personal calendar back in (above). The bookings-table tabs. Recurring
+personal blocks — a block that repeats needs an expansion, an exception list and
+a screen to manage both, and a fortnight away is one row with a last day on it.
+Multi-practitioner anything. Payment plans. Cron — nothing here needs anything to
+fire, which is the same claim D-23 and D-25 make and is now the claim the hold
+makes too. And no refund policy for services beyond the shared path.
+
+**What a scheduled job would still add**, unchanged from D-25 and still
+notification rather than mechanism: a reminder before an approval runs out, an
+email the moment one lapses, and a weekly digest. None of them changes what is
+TRUE.
+
+### Applying it
+
+The migration adds three columns to `Workshop` and to `Course`, five to
+`Service`, two to `ServiceRequest`, one to `AdminUser`, and one table with a
+CHECK constraint — and drops `NOT NULL` from `ServiceRequest.preferredTime`.
+Nothing in it is destructive: every column added is nullable or has a default, no
+row is deleted, and no existing value is overwritten. Locally it is applied. On
+Replit:
+
+```
+npm run db:deploy
+```
+
+**Restart the app after deploying**, for the reason D-23, D-24 and D-25 all give:
+a running server holds a Prisma client generated against the old schema and will
+fail on the new columns until it is restarted.

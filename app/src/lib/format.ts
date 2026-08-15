@@ -62,6 +62,41 @@ export function formatDayLong(date: Date): string {
 }
 
 /**
+ * "Thursday 3 September" — the day an INSTANT falls on, in Frome.
+ *
+ * `formatDayLong` above prints a SQL `DATE` and formats it in UTC, because a
+ * workshop's 14 November is 14 November wherever the server is. This is the
+ * other case: a chosen slot is a real instant, and the day it belongs to is the
+ * day it is in London. Ten o'clock on the evening of 31 October is the 31st
+ * here; formatted in UTC in the summer it would sometimes be the 1st.
+ */
+export function formatLondonDay(instant: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/London",
+  }).format(instant);
+}
+
+/**
+ * "Thursday 3 September, 10:00–11:30" — a slot, whole, in one line.
+ *
+ * What the queue prints, what the two emails print, and what the calendar puts
+ * in an event's description. One function, so the time somebody chose reads the
+ * same in the portal as it does in their inbox.
+ */
+export function formatSlot(startsAt: Date, endsAt: Date): string {
+  const clock = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "Europe/London",
+  });
+  return `${formatLondonDay(startsAt)}, ${clock.format(startsAt)}–${clock.format(endsAt)}`;
+}
+
+/**
  * "14 Aug" for a MOMENT rather than a day — when a payment cleared, when a
  * refund went out.
  *

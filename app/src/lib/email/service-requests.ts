@@ -1,6 +1,11 @@
 import "server-only";
 import { SITE_URL } from "@/content/site";
-import { formatDuration, formatMoment, formatMoney } from "@/lib/format";
+import {
+  formatDuration,
+  formatMoment,
+  formatMoney,
+  formatSlot,
+} from "@/lib/format";
 import { placeInOneLine, servicePlace } from "@/lib/services";
 import { sendMail, type Mail } from "./index";
 
@@ -11,12 +16,18 @@ import { sendMail, type Mail } from "./index";
  * gives on its own: both functions below are pure, so what somebody will
  * receive can be read and tested without anything being delivered to anybody.
  *
- * WHAT THE FIRST TWO MAY PROMISE IS A REPLY, AND NOTHING ELSE. No hour is held,
- * no place is reserved and no price is charged — the whole of what has happened
- * is that a message arrived. Every sentence in them is written against that:
- * "she will write back" is true, "your session is booked for Thursday" would
- * not be, and neither would "your time is held while she decides", which is
- * what the approved screen says and what the absent hold cannot support.
+ * WHAT THE FIRST TWO MAY PROMISE HAS CHANGED, AND THIS IS THE ONE PLACE IT
+ * SHOWS (D-26). They used to say that no hour was held, because none was: there
+ * was no diary to hold one in. There is now, and asking for a slot takes it out
+ * of what anybody else is offered until she answers — so the acknowledgement
+ * says that, in as many words, and stops short of the two things that are still
+ * not true. It is not booked, and nothing is charged; she may still write back
+ * and suggest another time.
+ *
+ * The request that has no slot — a service with no days set, or one whose next
+ * two months are full — gets the OLD sentences, unchanged, because for that one
+ * they are still exactly right. Which set is used is decided by the row rather
+ * than by a flag: `slotStart` is either there or it is not.
  *
  * THE OTHER TWO ARE HER ANSWER (D-25), and they may say more, because by then
  * she has said it: a session at a time she has agreed, at a figure she has
@@ -52,14 +63,39 @@ export type RequestedService = {
   travelNote: string | null;
 };
 
-/** What somebody sent, as they typed it. */
+/**
+ * What somebody sent.
+ *
+ * Exactly one of `slotStart` and `preferredTime` is set, which is the shape the
+ * column itself now has. `whenLine` below is the only thing that reads either,
+ * so no message has to know which path it is on.
+ */
 export type SubmittedRequest = {
   name: string;
   email: string;
   phone: string | null;
-  preferredTime: string;
+  /** Their own sentence, when there was nothing to pick from. */
+  preferredTime: string | null;
+  /** The slot they chose, which is held from the moment the request exists. */
+  slotStart: Date | null;
+  slotEnd: Date | null;
   message: string | null;
 };
+
+/**
+ * When they want it, whichever way they said it.
+ *
+ * "Thursday 3 September, 10:00–11:30" from a chosen slot; their own words when
+ * there was no calendar to choose from. The fallback covers neither, which the
+ * form does not allow and which would otherwise print an empty line in an email
+ * about a time.
+ */
+function whenLine(request: SubmittedRequest): string {
+  if (request.slotStart && request.slotEnd) {
+    return formatSlot(request.slotStart, request.slotEnd);
+  }
+  return request.preferredTime ?? "They did not say.";
+}
 
 /** "60 minutes · £70 · The garden room" */
 function summaryLine(service: RequestedService): string {
@@ -109,8 +145,10 @@ export function requestNoticeEmail(
       "",
       summaryLine(service),
       "",
-      "WHEN WOULD SUIT THEM (their words)",
-      request.preferredTime,
+      request.slotStart
+        ? "WHEN THEY CHOSE"
+        : "WHEN WOULD SUIT THEM (their words)",
+      whenLine(request),
       "",
       ...(request.message
         ? ["WHAT THEY SAID", request.message, ""]
@@ -118,8 +156,15 @@ export function requestNoticeEmail(
       request.email,
       ...(request.phone ? [request.phone] : []),
       "",
-      "Nothing is booked and nothing has been charged. Reply to this email and",
-      "you are replying to them.",
+      ...(request.slotStart
+        ? [
+            "That time is out of your diary while this sits here — nobody else",
+            "is being offered it. It comes back the moment you decline, or if",
+            "you approve it and the payment link runs out.",
+          ]
+        : ["Nothing is booked and nothing has been charged."]),
+      "",
+      "Reply to this email and you are replying to them.",
       "",
       `The request is also in the portal: ${SITE_URL}/admin/bookings`,
     ].join("\n"),
@@ -148,14 +193,23 @@ export function requestAcknowledgementEmail(
       `Thank you. Your message about ${service.name} has arrived, and Marianne`,
       "will read it and write back herself.",
       "",
-      "NOTHING IS BOOKED YET. No time has been held and nothing has been",
-      "charged. When she writes back you will agree a time between you.",
+      ...(request.slotStart
+        ? [
+            "THAT TIME IS HELD WHILE SHE DECIDES. Nobody else is being offered",
+            "it. It is NOT booked and nothing has been charged — she may still",
+            "write back and suggest another time — but it is not going anywhere",
+            "in the meantime.",
+          ]
+        : [
+            "NOTHING IS BOOKED YET. No time has been held and nothing has been",
+            "charged. When she writes back you will agree a time between you.",
+          ]),
       "",
       `${service.name}`,
       summaryLine(service),
       "",
-      "WHEN YOU SAID WOULD SUIT YOU",
-      request.preferredTime,
+      request.slotStart ? "THE TIME YOU CHOSE" : "WHEN YOU SAID WOULD SUIT YOU",
+      whenLine(request),
       ...(request.message ? ["", "WHAT YOU WROTE", request.message] : []),
       "",
       "If any of that is wrong, reply to this email and say so.",

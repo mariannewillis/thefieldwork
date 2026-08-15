@@ -5,6 +5,7 @@ import { addPicture } from "@/app/(admin)/admin/offerings/actions";
 import { saveService } from "@/app/(admin)/admin/offerings/services/actions";
 import { formatDuration } from "@/lib/format";
 import { MAX_IMAGES, NO_ATTEMPT_YET, slugify } from "@/lib/offering-rules";
+import { BOOKING_WINDOW_DAYS, lastStartClock, WEEKDAYS } from "@/lib/slots";
 import DeleteService from "./DeleteService";
 import {
   FieldError,
@@ -47,6 +48,12 @@ export type ServiceFormValues = {
   summary: string;
   body: string;
   durationMinutes: number;
+  /** ISO weekdays, 1 (Monday) to 7. Empty means nothing is offered. */
+  availableDays: number[];
+  availableFrom: string;
+  availableTo: string;
+  travelBufferMinutes: number;
+  minimumNoticeHours: number;
   location: "venue" | "travels";
   /** The venue branch. All null when she travels. */
   venueName: string | null;
@@ -125,6 +132,44 @@ export default function ServiceForm({
   const durationMinutes = /^\d+$/.test(duration.trim())
     ? Number(duration.trim())
     : null;
+
+  // ── when she will do this one ───────────────────────────────────────────
+  // All four are held here because the sentence under them is the whole reason
+  // the fields are worth filling in: "ninety minutes, finishing at five" has to
+  // read back as "so the last one starts at half past three" without her doing
+  // the sum. That is the arithmetic the offered times are actually made of, and
+  // this is the only place she can see it before somebody books against it.
+  const [days, setDays] = useState<number[]>(
+    service?.availableDays ?? [1, 2, 3, 4, 5],
+  );
+  const [openFrom, setOpenFrom] = useState(
+    kept("availableFrom", service?.availableFrom ?? "09:00"),
+  );
+  const [openTo, setOpenTo] = useState(
+    kept("availableTo", service?.availableTo ?? "17:00"),
+  );
+  const [travelBuffer, setTravelBuffer] = useState(
+    kept("travelBuffer", String(service?.travelBufferMinutes ?? 0)),
+  );
+  const [minimumNotice, setMinimumNotice] = useState(
+    kept("minimumNotice", String(service?.minimumNoticeHours ?? 24)),
+  );
+
+  const toggleDay = (day: number) =>
+    setDays((chosen) =>
+      chosen.includes(day)
+        ? chosen.filter((one) => one !== day)
+        : [...chosen, day].sort((a, b) => a - b),
+    );
+
+  const lastStart =
+    durationMinutes === null
+      ? null
+      : lastStartClock({
+          availableFrom: openFrom,
+          availableTo: openTo,
+          durationMinutes,
+        });
 
   // ── where it is ─────────────────────────────────────────────────────────
   // The branch, and both branches' fields. Everything is held here rather than
@@ -464,9 +509,165 @@ export default function ServiceForm({
                 by its absence. A form that simply has no date field leaves her
                 wondering where it went. */}
             <p className="mt-9 max-w-[62ch] border-t border-pool-rule/25 pt-7 text-[17px] leading-relaxed text-ink-soft">
-              There is no date and no time here, and that is deliberate: a
-              service is not in the diary until somebody asks for a slot and you
-              say yes. What you set is how long it runs.
+              There is no single date here, and that is deliberate: a service is
+              not in the diary until somebody asks for a time and you say yes.
+              What you set is how long it runs, and below, which times are
+              offered.
+            </p>
+          </Section>
+
+          {/* ══ WHEN YOU WILL DO IT ═══════════════════════════════════════ */}
+          <Section
+            id="when-h"
+            title="When you will do it"
+            note="The times this one is offered at, and nothing else is"
+          >
+            <p className="mb-8 max-w-[64ch] text-[17px] leading-relaxed text-ink-soft">
+              These belong to this service rather than to your week, so an hour
+              in the garden room and a half-day you drive to can have different
+              answers. Nothing is offered outside them &mdash; and nothing is
+              offered inside them either if a workshop, a course date, another
+              session or a block of your own is already there.
+            </p>
+
+            <fieldset>
+              <legend className={LABEL}>Days you will do this one</legend>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {WEEKDAYS.map((day) => {
+                  const on = days.includes(day.iso);
+                  return (
+                    <label
+                      key={day.iso}
+                      className={`t inline-flex min-h-[48px] cursor-pointer items-center border px-5 text-[18px] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action ${
+                        on
+                          ? "border-action bg-action/10 text-ink"
+                          : "border-pool-rule text-ink-soft"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name="availableDays"
+                        value={day.iso}
+                        checked={on}
+                        onChange={() => toggleDay(day.iso)}
+                        className="sr-only"
+                      />
+                      {day.short}
+                    </label>
+                  );
+                })}
+              </div>
+              {/* An empty set is legal, and it is a real answer rather than an
+                  error — she may be taking this one off the diary for a while
+                  without taking it off the site. It has to SAY so, though,
+                  because a page that quietly offers nothing looks broken. */}
+              {days.length === 0 && (
+                <p className="mt-4 max-w-[58ch] text-[17px] leading-relaxed text-ink">
+                  With no days set nothing is offered, and the page falls back
+                  to asking people when would suit them in their own words
+                  &mdash; which you then answer yourself.
+                </p>
+              )}
+              <FieldError error={state.errors.availableDays} />
+            </fieldset>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Earliest start</span>
+                  <input
+                    name="availableFrom"
+                    type="time"
+                    value={openFrom}
+                    onChange={(event) => setOpenFrom(event.target.value)}
+                    className={`${FIELD_FIG} text-[26px]`}
+                  />
+                </label>
+                <FieldError error={state.errors.availableFrom} />
+              </div>
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Finished by</span>
+                  <input
+                    name="availableTo"
+                    type="time"
+                    value={openTo}
+                    onChange={(event) => setOpenTo(event.target.value)}
+                    className={`${FIELD_FIG} text-[26px]`}
+                  />
+                </label>
+                <p className={HELP}>
+                  When the session must be OVER, not the last time it can start.
+                </p>
+                <FieldError error={state.errors.availableTo} />
+              </div>
+            </div>
+
+            {/* THE SUM, SAID OUT LOUD. It is the arithmetic the offered times
+                are actually made of, and the one thing about this screen that
+                is easy to get wrong in your head. */}
+            <p className="mt-6 font-display text-[24px] leading-tight text-ink">
+              {durationMinutes === null
+                ? "Put the length in above and this will say when the last one can start."
+                : lastStart
+                  ? `Which makes ${lastStart} the last one that can start — ${formatDuration(durationMinutes)} finishing by ${openTo}.`
+                  : `${formatDuration(durationMinutes)} does not fit between ${openFrom} and ${openTo}, so nothing can be offered at all.`}
+            </p>
+
+            <div className="mt-9 grid gap-6 border-t border-pool-rule/25 pt-8 sm:grid-cols-2">
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Travel either side</span>
+                  <span className="flex items-baseline gap-3">
+                    <input
+                      name="travelBuffer"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      value={travelBuffer}
+                      onChange={(event) => setTravelBuffer(event.target.value)}
+                      className={`${FIELD_FIG} w-28 text-[28px]`}
+                    />
+                    <span className="text-[18px] text-ink-soft">minutes</span>
+                  </span>
+                </label>
+                <p className={HELP}>
+                  Kept clear before and after every session of this one, so two
+                  of them across the county cannot sit end to end. Leave it at 0
+                  for something that never moves.
+                </p>
+                <FieldError error={state.errors.travelBuffer} />
+              </div>
+
+              <div>
+                <label className="block">
+                  <span className={LABEL}>Least notice you will take</span>
+                  <span className="flex items-baseline gap-3">
+                    <input
+                      name="minimumNotice"
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      value={minimumNotice}
+                      onChange={(event) => setMinimumNotice(event.target.value)}
+                      className={`${FIELD_FIG} w-28 text-[28px]`}
+                    />
+                    <span className="text-[18px] text-ink-soft">hours</span>
+                  </span>
+                </label>
+                <p className={HELP}>
+                  So nobody takes nine o&rsquo;clock this morning at half past
+                  eight. 24 is a day.
+                </p>
+                <FieldError error={state.errors.minimumNotice} />
+              </div>
+            </div>
+
+            <p className="mt-8 max-w-[62ch] border-t border-pool-rule/25 pt-7 text-[17px] leading-relaxed text-ink-soft">
+              People are shown times up to {BOOKING_WINDOW_DAYS} days ahead.
+              That figure is the same across the whole site &mdash; it is about
+              how far into the future this diary is worth trusting rather than
+              about any one session.
             </p>
           </Section>
 

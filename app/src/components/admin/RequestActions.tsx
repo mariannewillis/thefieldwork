@@ -39,8 +39,19 @@ export type RequestRow = {
   serviceName: string;
   /** What the service's own page says a session costs — the default she edits. */
   listPence: number;
-  /** Their words, offered as the starting point for hers. */
-  preferredTime: string;
+  /**
+   * WHEN THEY WANT IT, already turned into one line by the server — the slot
+   * they chose, or their own sentence when there was nothing to choose from
+   * (D-26). It is the starting point for hers, so the cheapest thing she can do
+   * is agree with what is already true.
+   *
+   * Written on the server rather than assembled here, because turning an
+   * instant into "Thursday 3 September, 10:00–11:30" is a timezone conversion
+   * and the browser is the one machine in this system whose clock is not hers.
+   */
+  wanted: string;
+  /** True when that line came from a real slot rather than from a sentence. */
+  chosen: boolean;
   state: "pending" | "awaitingPayment" | "lapsed" | "paid" | "declined";
   /** PENCE she approved. Null while pending. */
   approvedPence: number | null;
@@ -273,13 +284,15 @@ export default function RequestActions({ request }: { request: RequestRow }) {
           <label className="mt-6 block">
             <span className={LABEL}>When it will happen</span>
             <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
-              In your words, and this is what their email will say. Theirs was:
-              &ldquo;{request.preferredTime}&rdquo;
+              In your words, and this is what their email will say.{" "}
+              {request.chosen
+                ? "It is filled in with the time they chose, which is held for them — changing it here changes only what the email says, not what is out of your diary."
+                : `Theirs was: “${request.wanted}”`}
             </span>
             <textarea
               name="agreedTime"
               rows={2}
-              defaultValue={request.agreedTime ?? request.preferredTime}
+              defaultValue={request.agreedTime ?? request.wanted}
               className={FIELD}
               required
             />

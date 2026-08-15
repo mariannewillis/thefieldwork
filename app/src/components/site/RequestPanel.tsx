@@ -7,6 +7,7 @@ import {
 } from "@/app/(site)/services/actions";
 import { serviceDetail } from "@/content/services";
 import { DRAWN_AT_FIELD, HONEYPOT_FIELD } from "@/lib/request-fields";
+import type { OfferedDayView } from "@/lib/slots";
 
 /**
  * The one blush pool on a service's page — and the whole action of it.
@@ -18,20 +19,31 @@ import { DRAWN_AT_FIELD, HONEYPOT_FIELD } from "@/lib/request-fields";
  * and this is ASKED FOR. So there is no stepper, no total and no card: there
  * is a message, and a person at the other end of it.
  *
- * WHAT IT PROMISES, IT PROMISES IN THREE PLACES, because this is exactly the
- * thing somebody will read the way they expect rather than the way it is
- * written. Above the fields, on the button's own note, and again on the sent
- * screen: a reply is coming, nothing is booked, no time is held. The approved
- * screen says "held for you · 9:47 remaining" beside a countdown; there is no
- * hold behind that sentence and there is no availability to build one from
- * (D-24), so it is not said here.
+ * IT HAS A PICKER NOW (D-26), and the sentence beside it has changed with it.
+ * D-24 wrote a textarea where the approved screen's slot picker stood, and said
+ * plainly that nothing was held — because there was no diary to hold anything
+ * in. There is now: the times below are the ones the SERVER worked out against
+ * her whole diary, and choosing one takes it out of what anybody else is
+ * offered. So the panel may say "held", and does. It still may not say booked,
+ * and does not: she has not answered yet, and nothing has been charged.
+ *
+ * THE BROWSER DOES NO ARITHMETIC. It is handed days in words and clock times in
+ * words, and posts back an opaque value it never reads. A picker that worked
+ * out its own times would show somebody in Madrid eleven o'clock for her ten,
+ * and would still be wrong here on the two mornings a year the clocks move.
+ *
+ * THE WORDS PATH IS NOT GONE. A service with no days set, and one whose next two
+ * months are full, both come through with no times to offer — and then this is
+ * the panel D-24 built, sentence for sentence, because for that conversation
+ * every one of them is still true.
  *
  * A CLIENT COMPONENT for the reason the other two panels are: it holds the
  * result of one submission and has to draw the errors against the fields they
  * belong to. It renders WHOLE on the server before any of that — the fields,
- * the labels, the notes and the button are all in the delivered HTML, so a
- * static screenshot of this page is the finished composition and not an empty
- * card waiting for script.
+ * the labels, the times, the notes and the button are all in the delivered
+ * HTML, so a static screenshot of this page is the finished composition and not
+ * an empty card waiting for script. The later dates sit in a `<details>`, which
+ * opens without any script at all.
  */
 
 /**
@@ -51,6 +63,44 @@ const NOTE = "mt-1.5 block text-[15px] leading-relaxed text-ink-soft";
 const FIELD =
   "mt-2.5 block w-full border border-pool-rule bg-transparent px-4 py-3 text-[19px] leading-relaxed text-ink placeholder:text-ink-soft/60";
 
+/**
+ * One of her days, and what is left of it.
+ *
+ * RADIO BUTTONS, hidden and worn as chips. The times are a choice of one, and a
+ * radio group is what a browser and a screen reader both already understand:
+ * arrow keys move between them, the label announces the day it is under, and
+ * the whole thing works with the form's own submit and no script whatsoever.
+ * `sr-only` rather than `hidden`, because a hidden input cannot be focused, and
+ * the focus ring below is drawn from the input.
+ */
+function Day({ day, id }: { day: OfferedDayView; id: string }) {
+  return (
+    <div className="mt-4 first:mt-0">
+      <p className="fig font-mono text-[14px] uppercase tracking-[0.1em] text-ink-soft">
+        {day.words}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {day.slots.map((slot) => (
+          <label
+            key={slot.value}
+            className="t inline-flex min-h-[44px] cursor-pointer items-center border border-pool-rule px-4 text-[17px] tabular-nums text-ink hover:border-ink has-[:checked]:border-action has-[:checked]:bg-action has-[:checked]:text-pool has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-action"
+          >
+            <input
+              type="radio"
+              name="slot"
+              value={slot.value}
+              required
+              aria-label={`${day.words} at ${slot.clock}`}
+              className="sr-only"
+            />
+            {slot.clock}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FieldError({ error }: { error?: string }) {
   if (!error) return null;
   return (
@@ -60,13 +110,29 @@ function FieldError({ error }: { error?: string }) {
   );
 }
 
+/**
+ * How many days of times are shown before the rest go behind "Later dates".
+ *
+ * Ten, because two working weeks is what somebody is actually deciding between
+ * — and because sixty days of half-hours in one list is a wall of figures that
+ * hides the two dates that matter. The rest are one press away and are in the
+ * delivered HTML either way.
+ */
+const DAYS_SHOWN = 10;
+
 export default function RequestPanel({
   slug,
   serviceName,
+  days,
 }: {
   slug: string;
   /** Named on the button, so a page open in a second tab cannot be confused. */
   serviceName: string;
+  /**
+   * The times on offer when this page was drawn, worked out on the server. It
+   * can be empty, and that is an answer rather than a failure — see the panel.
+   */
+  days: OfferedDayView[];
 }) {
   const [state, submit, pending] = useActionState<RequestState, FormData>(
     requestService,
@@ -74,6 +140,11 @@ export default function RequestPanel({
   );
   const id = useId();
   const panel = serviceDetail.panel;
+
+  // A refused submission sends the times back as they are NOW, so being told
+  // "that one went" and being shown what is left happen together.
+  const offered = state.days ?? days;
+  const picking = offered.length > 0;
 
   // When the form was drawn, for the guard's clock. Fixed at mount rather than
   // read at submit, because the question it answers is "how long did this take
@@ -91,7 +162,7 @@ export default function RequestPanel({
             {panel.sentTitle}
           </h2>
           <p className="mt-5 text-[19px] leading-relaxed text-ink">
-            {panel.sentBody}
+            {picking ? panel.sentBodyPicking : panel.sentBody}
           </p>
           <p className="mt-4 text-[17px] leading-relaxed text-ink-soft">
             {panel.sentCheck}
@@ -117,7 +188,7 @@ export default function RequestPanel({
           {panel.title}
         </h2>
         <p className="mt-5 text-[17px] leading-relaxed text-ink">
-          {panel.lede}
+          {picking ? panel.ledePicking : panel.lede}
         </p>
 
         <form
@@ -198,26 +269,68 @@ export default function RequestPanel({
             <FieldError error={state.errors.phone} />
           </div>
 
-          {/* WHERE THE SLOT PICKER WOULD BE. It asks for words, and the note
-              under it says there is no calendar — so nobody types a time and
-              walks away believing they have taken it. */}
-          <div className="mt-6">
-            <label htmlFor={`${id}-when`} className={LABEL}>
-              {panel.whenLabel}
-            </label>
-            <span className={NOTE}>{panel.whenNote}</span>
-            <textarea
-              id={`${id}-when`}
-              name="preferredTime"
-              required
-              rows={2}
-              maxLength={500}
-              placeholder={panel.whenPlaceholder}
-              aria-invalid={state.errors.preferredTime ? true : undefined}
-              className={FIELD}
-            />
-            <FieldError error={state.errors.preferredTime} />
-          </div>
+          {/* THE PICKER, or the words that stand where it would be. Exactly one
+              of the two is rendered, so only one of them can post — a form
+              carrying both would let a chosen slot arrive with a sentence
+              beside it saying something else. */}
+          {picking ? (
+            <fieldset className="mt-6">
+              <legend className={LABEL}>{panel.pickLabel}</legend>
+              <span className={NOTE}>{panel.pickNote}</span>
+
+              <div className="mt-4">
+                {offered.slice(0, DAYS_SHOWN).map((day) => (
+                  <Day key={day.dayKey} day={day} id={id} />
+                ))}
+              </div>
+
+              {/* A real `<details>`: it opens with no script, so every time on
+                  offer is in the delivered HTML and reachable by keyboard. */}
+              {offered.length > DAYS_SHOWN && (
+                <details className="mt-5 border-t border-pool-rule pt-4">
+                  <summary className="t cursor-pointer text-[17px] font-medium text-ink">
+                    {panel.pickLater} &mdash; {offered.length - DAYS_SHOWN} more
+                  </summary>
+                  <div className="mt-4">
+                    {offered.slice(DAYS_SHOWN).map((day) => (
+                      <Day key={day.dayKey} day={day} id={id} />
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              <FieldError error={state.errors.slot} />
+            </fieldset>
+          ) : (
+            <div className="mt-6">
+              {/* Said before the field rather than after it, so nobody fills in
+                  a textarea wondering why there was no calendar. */}
+              <p className="border-l-2 border-pool-rule pl-4">
+                <span className="block text-[17px] font-semibold text-ink">
+                  {panel.pickNoneTitle}
+                </span>
+                <span className="mt-1 block text-[16px] leading-relaxed text-ink-soft">
+                  {panel.pickNoneBody}
+                </span>
+              </p>
+
+              <label htmlFor={`${id}-when`} className={`${LABEL} mt-6 block`}>
+                {panel.whenLabel}
+              </label>
+              <span className={NOTE}>{panel.whenNote}</span>
+              <textarea
+                id={`${id}-when`}
+                name="preferredTime"
+                required
+                rows={2}
+                maxLength={500}
+                placeholder={panel.whenPlaceholder}
+                aria-invalid={state.errors.preferredTime ? true : undefined}
+                className={FIELD}
+              />
+              <FieldError error={state.errors.preferredTime} />
+            </div>
+          )}
 
           <div className="mt-6">
             <label htmlFor={`${id}-message`} className={LABEL}>

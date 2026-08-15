@@ -92,22 +92,45 @@ export const serviceDetail = {
      * THE PROMISE, AND THE WHOLE OF IT. It says what happens next and what has
      * not happened, in that order, because the second is the sentence somebody
      * is going to assume the wrong way round.
+     *
+     * TWO OF THEM NOW (D-26), and which one is shown is decided by whether the
+     * service has any times to offer rather than by a setting. The picker
+     * version may say the time is held, because it is; the words version may
+     * not, because for that path nothing has changed. Both stop at the same
+     * place: it is not booked, and nothing is charged.
      */
     lede: "Send this and Marianne reads it herself. Nothing is booked, no time is held and nothing is charged — you settle a time between you when she writes back.",
+    ledePicking:
+      "Choose a time and Marianne reads your message herself. The time is held for you while she does — it is not booked and nothing is charged, but nobody else is offered it in the meantime.",
 
     nameLabel: "Your name",
     emailLabel: "Email",
     emailNote: "So she can reply.",
     phoneLabel: "Phone",
     optional: "optional",
+
     /**
-     * The field that stands where the approved screen's slot picker stands.
-     * The label asks for words rather than a time, so nobody types "14:00" and
-     * believes they have taken it.
+     * The picker. Only the times she can actually do are here — worked out
+     * against her whole diary when this page was drawn, and checked again the
+     * moment you send it.
+     */
+    pickLabel: "Choose a time",
+    pickNote:
+      "These are the times she has left for this one. All times are UK time.",
+    pickLater: "Later dates",
+    /** Above the list, when there is nothing in it. Not an error — an answer. */
+    pickNoneTitle: "Nothing free in the next two months",
+    pickNoneBody:
+      "Every time for this one is taken, or Marianne has not set days for it yet. Say when would suit you below and she will write back herself.",
+
+    /**
+     * The field that stands where the picker stands when there is nothing to
+     * pick from. The label asks for words rather than a time, so nobody types
+     * "14:00" and believes they have taken it.
      */
     whenLabel: "When would suit you",
     whenNote:
-      "In your own words — a day, a part of the week, or whatever you can manage. There is no calendar to pick from and nothing here is taken.",
+      "In your own words — a day, a part of the week, or whatever you can manage. Nothing here is taken; she answers it herself.",
     whenPlaceholder: "Weekday mornings, ideally not Tuesdays",
     messageLabel: "Anything else",
     messageNote:
@@ -123,6 +146,8 @@ export const serviceDetail = {
     sentTitle: "That has gone to her.",
     sentBody:
       "Nothing is booked and nothing has been charged. Marianne reads these herself and writes back, usually within a day — and the two of you agree a time in that reply.",
+    sentBodyPicking:
+      "That time is held for you while she reads this. It is not booked and nothing has been charged — she writes back herself, usually within a day, and if she can do it she will send you a link to pay.",
     sentCheck:
       "A copy is on its way to your email. If it does not arrive, check the address you typed and send it again.",
     sentAgain: "Ask about another session",

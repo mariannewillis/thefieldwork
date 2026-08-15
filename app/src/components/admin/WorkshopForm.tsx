@@ -9,6 +9,7 @@ import { formatDayLong, refundDeadline, toDateInputValue } from "@/lib/format";
 import { MAX_IMAGES, NO_ATTEMPT_YET, slugify } from "@/lib/offering-rules";
 import DeleteWorkshop from "./DeleteWorkshop";
 import {
+  DiaryMargins,
   FieldError,
   FIELD,
   FIELD_BIG,
@@ -60,6 +61,9 @@ export type WorkshopFormValues = {
   capacity: number;
   priceGBP: number;
   refundDays: number;
+  marginBeforeMinutes: number;
+  marginAfterMinutes: number;
+  blocksWholeDay: boolean;
   heroImage: string | null;
   heroAlt: string | null;
   /** The Vimeo or YouTube address. The still and the length come from there. */
@@ -117,6 +121,24 @@ export default function WorkshopForm({
   const [refundDays, setRefundDays] = useState(
     String(workshop?.refundDays ?? 14),
   );
+
+  // The two clock times are held here rather than left to the browser, because
+  // the diary line below reads them back with the margin already added — "which
+  // keeps 09:00 to 17:30 clear" is the sentence she is actually deciding, and it
+  // cannot be written from a field the form is not watching.
+  const [startTime, setStartTime] = useState(
+    kept("startTime", workshop?.startTime ?? ""),
+  );
+  const [endTime, setEndTime] = useState(
+    kept("endTime", workshop?.endTime ?? ""),
+  );
+  const [marginBefore, setMarginBefore] = useState(
+    kept("marginBefore", String(workshop?.marginBeforeMinutes ?? 0)),
+  );
+  const [marginAfter, setMarginAfter] = useState(
+    kept("marginAfter", String(workshop?.marginAfterMinutes ?? 0)),
+  );
+  const [wholeDay, setWholeDay] = useState(workshop?.blocksWholeDay ?? false);
 
   // The four address fields are held here rather than left to the browser,
   // because choosing a place has to visibly FILL them — not stand in for them.
@@ -402,7 +424,8 @@ export default function WorkshopForm({
                   <input
                     name="startTime"
                     type="time"
-                    defaultValue={kept("startTime", workshop?.startTime ?? "")}
+                    value={startTime}
+                    onChange={(event) => setStartTime(event.target.value)}
                     className={`${FIELD_FIG} text-[21px]`}
                   />
                 </label>
@@ -414,10 +437,16 @@ export default function WorkshopForm({
                   <input
                     name="endTime"
                     type="time"
-                    defaultValue={kept("endTime", workshop?.endTime ?? "")}
+                    value={endTime}
+                    onChange={(event) => setEndTime(event.target.value)}
                     className={`${FIELD_FIG} text-[21px]`}
                   />
                 </label>
+                <p className={HELP}>
+                  Leave this empty and your diary treats the rest of that day as
+                  taken — it will not offer anybody an afternoon it cannot be
+                  sure of.
+                </p>
                 <FieldError error={state.errors.endTime} />
               </div>
             </div>
@@ -506,6 +535,33 @@ export default function WorkshopForm({
               </p>
               <FieldError error={state.errors.refundDays} />
             </div>
+          </Section>
+
+          {/* ══ IN THE DIARY ══════════════════════════════════════════════ */}
+          <Section
+            id="diary-h"
+            title="In the diary"
+            note="What this stops you being asked for"
+          >
+            <p className="mb-7 max-w-[62ch] text-[17px] leading-relaxed text-ink-soft">
+              A workshop takes its own hours out of your diary already. What you
+              set here is the time either side of it that nobody can ask for a
+              session in &mdash; and it belongs to this day rather than being a
+              rule about all of them, because a full-day retreat and an evening
+              talk are not the same drive.
+            </p>
+            <DiaryMargins
+              what="workshop"
+              startTime={startTime}
+              endTime={endTime}
+              before={marginBefore}
+              onBefore={setMarginBefore}
+              after={marginAfter}
+              onAfter={setMarginAfter}
+              wholeDay={wholeDay}
+              onWholeDay={setWholeDay}
+              errors={state.errors}
+            />
           </Section>
 
           {/* ══ WHERE IT IS ═══════════════════════════════════════════════ */}

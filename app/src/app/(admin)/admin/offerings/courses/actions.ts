@@ -236,6 +236,28 @@ export async function saveCourse(
       "A whole number of days, or 0 if this one cannot be refunded at all.";
   }
 
+  // ── what it takes out of the diary ──────────────────────────────────────
+  // The same three questions a workshop is asked, with the same handling of a
+  // blank. Set ONCE for the run rather than per date: the same room, the same
+  // drive and the same packing up on every Wednesday of it, and four copies of
+  // one answer is three that can be wrong.
+  const marginBefore = parseWholeNumber(
+    (values.marginBefore ?? "").trim() || "0",
+    0,
+  );
+  const marginAfter = parseWholeNumber(
+    (values.marginAfter ?? "").trim() || "0",
+    0,
+  );
+  const blocksWholeDay = values.blocksWholeDay === "on";
+
+  if (marginBefore === null) {
+    errors.marginBefore = "Minutes, as a whole number — 60 for an hour, or 0.";
+  }
+  if (marginAfter === null) {
+    errors.marginAfter = "Minutes, as a whole number — 90, or 0.";
+  }
+
   // The film is a link to somewhere that already holds it, so the only thing
   // that can be wrong with it is that it is not one of the two addresses this
   // knows how to show. Nothing is asked of Vimeo or YouTube yet — that
@@ -370,6 +392,11 @@ export async function saveCourse(
     // takes the whole price at once is a fact about nothing.
     balanceDueAt: depositPence ? balanceDueAt : null,
     refundDays: refundDays as number,
+    // Kept even when the whole day is taken, for the reason a workshop's are:
+    // unticking the toggle next week should find the figures she set.
+    marginBeforeMinutes: marginBefore as number,
+    marginAfterMinutes: marginAfter as number,
+    blocksWholeDay,
     heroImage: heroImage || null,
     heroAlt: heroImage ? heroAlt : null,
     filmUrl: film?.watchUrl ?? null,

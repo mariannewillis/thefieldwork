@@ -171,6 +171,29 @@ export async function saveWorkshop(
       "A whole number of days, or 0 if this one cannot be refunded at all.";
   }
 
+  // ── what it takes out of the diary ──────────────────────────────────────
+  // Blank means none, which is why these are read through `|| "0"` rather than
+  // refused: a margin is a thing most workshops do not need, and a form that
+  // insisted on two zeroes would be asking a question it already knows the
+  // answer to. Anything that is not a whole number still fails, because "an
+  // hour" typed into a minutes field would silently become no margin at all.
+  const marginBefore = parseWholeNumber(
+    (values.marginBefore ?? "").trim() || "0",
+    0,
+  );
+  const marginAfter = parseWholeNumber(
+    (values.marginAfter ?? "").trim() || "0",
+    0,
+  );
+  const blocksWholeDay = values.blocksWholeDay === "on";
+
+  if (marginBefore === null) {
+    errors.marginBefore = "Minutes, as a whole number — 60 for an hour, or 0.";
+  }
+  if (marginAfter === null) {
+    errors.marginAfter = "Minutes, as a whole number — 90, or 0.";
+  }
+
   // The film is a link to somewhere that already holds it, so the only thing
   // that can be wrong with it is that it is not one of the two addresses this
   // knows how to show. Nothing is asked of Vimeo or YouTube yet — that
@@ -258,6 +281,12 @@ export async function saveWorkshop(
     capacity: capacity as number,
     priceGBP: pricePence as number,
     refundDays: refundDays as number,
+    // Written even when the whole day is taken, rather than zeroed. She may
+    // untick the toggle next week, and finding the hour she set still there is
+    // better than finding it quietly thrown away.
+    marginBeforeMinutes: marginBefore as number,
+    marginAfterMinutes: marginAfter as number,
+    blocksWholeDay,
     heroImage: heroImage || null,
     heroAlt: heroImage ? heroAlt : null,
     filmUrl: film?.watchUrl ?? null,

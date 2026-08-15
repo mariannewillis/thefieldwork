@@ -5,6 +5,7 @@ import PhotoRail from "@/components/site/PhotoRail";
 import RequestPanel from "@/components/site/RequestPanel";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { serviceDetail } from "@/content/services";
+import { offeredFor } from "@/lib/availability";
 import { parseFilm } from "@/lib/film";
 import { formatDuration, formatMoney } from "@/lib/format";
 import { mapSearchUrl } from "@/lib/maps";
@@ -14,6 +15,18 @@ import {
   servicePlace,
   type ServicePlace,
 } from "@/lib/services";
+import { offeredView } from "@/lib/slots";
+
+/**
+ * READ ON EVERY REQUEST, never built once and served.
+ *
+ * The times in the panel are true for as long as nobody else asks for one, so a
+ * cached copy of this page would offer an hour that has gone — and the person
+ * who chose it would be told so only after filling the form in. The re-check on
+ * submit means that is a sentence rather than a double booking, but the honest
+ * place to be right is here.
+ */
+export const dynamic = "force-dynamic";
 
 /**
  * One service's own page.
@@ -224,6 +237,23 @@ export default async function Page({
   // 403, which would confirm it is there.
   if (!service) notFound();
 
+  /**
+   * The times on offer, worked out HERE and never in the browser.
+   *
+   * It reads her whole diary — every workshop, every course date, every session
+   * paid for, every request still holding its hour, and every block of her own —
+   * and returns only what is left. The panel is handed the answer; it is never
+   * handed the rule.
+   *
+   * WHICH IS WHY THIS PAGE CANNOT BE PRERENDERED AND CACHED. `dynamic` below
+   * says so: availability changes the moment anybody else asks for a slot, and a
+   * page built ten minutes ago would offer an hour that has gone. The rest of
+   * the page is prose off one row and would happily cache; the panel is what
+   * makes the whole thing perishable, and the re-check on submit is what makes
+   * that survivable rather than merely fast.
+   */
+  const days = offeredView(await offeredFor(service));
+
   const place = servicePlace(service);
   const film = service.filmUrl ? parseFilm(service.filmUrl) : null;
   const mapUrl =
@@ -408,10 +438,16 @@ export default async function Page({
 
           {/* ══ ASKING FOR IT ═════════════════════════════════════════════
               The one blush pool on the page. Where the other two kinds put a
-              checkout, this puts a message — because that is what actually
-              happens next, and a "Book now" button on a page with no diary
-              behind it would be the one lie on the site. */}
-          <RequestPanel slug={service.slug} serviceName={service.name} />
+              checkout, this puts a message — because that is still what happens
+              next. What has changed is that the message now carries a time out
+              of her actual diary, and asking for it holds it (D-26). It is
+              still not a "Book now": she answers, and the payment link comes
+              after she does. */}
+          <RequestPanel
+            slug={service.slug}
+            serviceName={service.name}
+            days={days}
+          />
         </div>
       </main>
 
