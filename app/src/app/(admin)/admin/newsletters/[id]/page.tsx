@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteDraft from "@/components/admin/DeleteDraft";
+import { DraftGuard, PreviewLink } from "@/components/admin/DraftGuard";
 import NewsletterEditor, {
   type EditableAttachment,
   type EditableBlock,
@@ -137,25 +138,19 @@ export default async function Page({
       </h1>
 
       {letter.status === "draft" ? (
-        <>
+        // The sheet, the preview and the send share one piece of state: whether
+        // what is on the screen is what is stored. See `DraftGuard` for the
+        // empty letters that made it necessary.
+        <DraftGuard>
           <p className="mt-5 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
             Nobody has seen this. It saves when you press save and goes nowhere
             until you send it.
           </p>
 
-          <p className="mt-4">
-            <a
-              href={`/admin/newsletters/${letter.id}/preview`}
-              target="_blank"
-              rel="noreferrer"
-              className="t text-[17px] font-medium text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
-            >
-              See the letter as it will arrive
-            </a>
-            <span className="ml-3 text-[15px] text-plate-soft">
-              (opens in a new tab; save first, it shows what is saved)
-            </span>
-          </p>
+          <PreviewLink
+            id={letter.id}
+            label="See the letter as it will arrive"
+          />
 
           <NewsletterEditor
             newsletter={{
@@ -163,6 +158,7 @@ export default async function Page({
               subject: letter.subject,
               preheader: letter.preheader,
               mastheadLabel: letter.mastheadLabel,
+              backgroundBasename: letter.backgroundBasename ?? "",
             }}
             blocks={blocks}
             attachments={attachments}
@@ -175,12 +171,13 @@ export default async function Page({
             testTo={session?.email ?? null}
             pending={0}
             sent={false}
+            written={letter.blocks.length}
           />
 
           <div className="mt-9 border-t border-plate-rule/40 pt-7">
             <DeleteDraft id={letter.id} subject={letter.subject} />
           </div>
-        </>
+        </DraftGuard>
       ) : (
         <>
           <p className="mt-5 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
@@ -209,6 +206,7 @@ export default async function Page({
               testTo={null}
               pending={pending}
               sent
+              written={letter.blocks.length}
             />
           )}
 

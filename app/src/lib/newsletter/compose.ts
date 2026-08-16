@@ -70,10 +70,35 @@ export const NEWSLETTER_WHY =
  * with room to spare, and the 2400 would add roughly a megabyte to a message
  * that is already carrying attachments.
  *
- * ABSOLUTE, and against the CANONICAL origin rather than SITE_URL — the same
- * rule the masthead follows in `render.ts`. An email has no document base, and
- * a picture has to still resolve from somebody's inbox in a year's time, so it
- * cannot point at whichever deployment happened to compose the letter.
+ * ABSOLUTE, and against the CANONICAL origin rather than SITE_URL. An email has
+ * no document base, and a picture has to still resolve from somebody's inbox in
+ * a year's time, so it cannot point at whichever deployment happened to compose
+ * the letter.
+ *
+ * ── AND IT IS FETCHED BY THE MAIL CLIENT, NOT BY THE READER ──────────────────
+ *
+ * This is the one thing about a picture in a letter that has to be understood
+ * before a picture is put in one. Gmail and Outlook do not let the reader's
+ * browser fetch this URL: THEIR servers fetch it, cache it, and serve the
+ * reader a copy. Which means the address has to be reachable from the public
+ * internet and has to be serving THIS app's `/media/`, and while neither is
+ * true a letter arrives with a hole in it — every picture, every time.
+ *
+ * As of 2026-08-16 that is exactly where things stand: `thefieldwork.co.uk`
+ * answers, but it is not yet this app, so `/media/<basename>-1200.jpg` is a
+ * 404 and so is every letter's photograph. It is not a bug in the letter and no
+ * change here can fix it — it is the deployment, and it fixes itself the day
+ * this app is the thing at that domain.
+ *
+ * SO WHY NOT ATTACH THE PICTURE, the way the mark is attached? Because the mark
+ * is 13 kB and there is one of it. A photograph is a 1200px JPEG — a few
+ * hundred kilobytes to a megabyte — and attaching one puts those bytes in EVERY
+ * recipient's copy: three pictures for two hundred people is most of a gigabyte
+ * of sending for something a single cached URL serves once. It would also push
+ * many letters past the size at which gateways start weighting them as spam,
+ * which is the same threshold `attachments.ts` already turns a 2 MB document
+ * into a link over. The mark rides because it is small, constant, and the one
+ * image whose absence makes the letter look broken rather than plain.
  */
 export function newsletterImageUrl(basename: string): string {
   return `${CANONICAL_SITE_URL}/media/${basename}-1200.jpg`;
@@ -260,6 +285,11 @@ export async function composeNewsletter(input: {
   subject: string;
   preheader: string;
   mastheadLabel: string;
+  /**
+   * A picture from the library to sit behind the masthead, or null. Decoration
+   * only — see `render.ts::masthead` for what may and may not depend on it.
+   */
+  backgroundBasename?: string | null;
   blocks: ComposableBlock[];
   attachments: ComposableAttachment[];
   /** Null on a test copy — there is nothing for her to unsubscribe from. */
@@ -441,6 +471,11 @@ export async function composeNewsletter(input: {
             ],
       why: NEWSLETTER_WHY,
       unsubscribe: input.unsubscribe,
+      // The same `-1200.jpg` rule every other picture in a letter follows, and
+      // for the same reason: Outlook decodes neither AVIF nor WebP.
+      mastheadBackground: input.backgroundBasename?.trim()
+        ? newsletterImageUrl(input.backgroundBasename.trim())
+        : null,
     }),
   };
 }

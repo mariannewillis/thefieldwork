@@ -1,7 +1,9 @@
 import "server-only";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { Resend } from "resend";
 import { SITE_URL } from "@/content/site";
-import { copy, renderLetter, type Block } from "./render";
+import { copy, LOGO_CID, LOGO_PATH, renderLetter, type Block } from "./render";
 import { resolveSlots, type Wording } from "./wording";
 
 /**
@@ -89,6 +91,35 @@ const FROM =
 const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "marianne@thefieldwork.co.uk";
 
 /**
+ * The mark's bytes, read once and kept.
+ *
+ * A promise rather than a buffer, so two messages sent in the same second
+ * cannot both start the read. `process.cwd()` is the app root under `next dev`
+ * and under `next start` alike, and `public/` is copied into the standalone
+ * output, so one path serves every environment.
+ *
+ * A read that fails does NOT stop a message going out. The letter's images-off
+ * contingency is already the whole answer: the mark's alt text is styled blush
+ * display serif on the plum plate, so a masthead with no picture in it is the
+ * practice's name in its own type. Refusing to send a booking confirmation over
+ * a missing logo would be the wrong trade by a wide margin.
+ */
+let markBytes: Promise<Buffer | null> | null = null;
+
+function theMark(): Promise<Buffer | null> {
+  markBytes ??= readFile(path.join(process.cwd(), "public", LOGO_PATH)).catch(
+    (e: unknown) => {
+      console.error(
+        `[email] ${LOGO_PATH} could not be read; letters will show the masthead's alt text instead`,
+        e,
+      );
+      return null;
+    },
+  );
+  return markBytes;
+}
+
+/**
  * Send it, as multipart/alternative when there is a branded half.
  *
  * BOTH PARTS OR TEXT ALONE — never HTML alone, and that is a rule rather than a
@@ -111,6 +142,20 @@ const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "marianne@thefieldwork.co.uk";
 export async function sendMail(mail: Mail): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
 
+  /**
+   * The mark goes in the envelope, HERE and nowhere else.
+   *
+   * `render.ts` writes `src="cid:…"` into every branded masthead; this is the
+   * one place that puts the matching file beside it. Doing it at the port
+   * rather than in each composer means no caller can send a branded message
+   * with a hole where the logo should be, and there is one thing to change when
+   * the mark changes.
+   *
+   * Keyed off the HTML actually containing the reference, so the six plain-text
+   * notices to her own inbox stay 2 kB of text with nothing attached.
+   */
+  const mark = mail.html?.includes(`cid:${LOGO_CID}`) ? await theMark() : null;
+
   if (!key) {
     // Deliberately loud and complete. During development this IS the inbox.
     // The HTML is reported by size rather than printed: 11kB of table markup in
@@ -123,6 +168,11 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
         `Reply-To: ${mail.replyTo ?? REPLY_TO}`,
         `Subject:  ${mail.subject}`,
         `Parts:    text${mail.html ? ` + html (${(mail.html.length / 1024).toFixed(1)}kB)` : " only"}`,
+        ...(mark
+          ? [
+              `Inline:   ${LOGO_PATH} as cid:${LOGO_CID} (${(mark.length / 1024).toFixed(1)}kB)`,
+            ]
+          : []),
         ...(mail.attachments?.length
           ? [
               `Files:    ${mail.attachments
@@ -147,6 +197,38 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
     return { delivered: false, via: "log" };
   }
 
+  /**
+   * What actually rides in the envelope: her documents, then the mark.
+   *
+   * BASE64 RATHER THAN THE BUFFER. `resend@6` types `content` as
+   * `string | Buffer` and passes a Buffer straight into `JSON.stringify`, which
+   * serialises it as `{"type":"Buffer","data":[137,80,…]}` — four times the
+   * bytes on the wire and dependent on the API special-casing that shape. A
+   * base64 string is what the wire format is.
+   *
+   * `contentId` — camelCase — is the SDK's field; it maps it to `content_id`
+   * itself. Setting it is what makes the part INLINE: there is no separate
+   * disposition to set, and a client that will not resolve `cid:` shows a
+   * 13 kB PNG called logo-horizontal@2x.png beside the message rather than
+   * nothing.
+   */
+  const files = [
+    ...(mail.attachments ?? []).map((file) => ({
+      filename: file.filename,
+      content: file.content.toString("base64"),
+    })),
+    ...(mark
+      ? [
+          {
+            filename: path.basename(LOGO_PATH),
+            contentType: "image/png",
+            content: mark.toString("base64"),
+            contentId: LOGO_CID,
+          },
+        ]
+      : []),
+  ];
+
   try {
     const resend = new Resend(key);
     const { error } = await resend.emails.send({
@@ -159,9 +241,7 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
       // first and the HTML second, which is the order RFC 2046 asks for: a
       // client shows the last part it understands.
       ...(mail.html ? { html: mail.html } : {}),
-      ...(mail.attachments?.length
-        ? { attachments: mail.attachments.map((file) => ({ ...file })) }
-        : {}),
+      ...(files.length > 0 ? { attachments: files } : {}),
       ...(mail.headers ? { headers: mail.headers } : {}),
     });
     if (error) return { delivered: false, via: "resend", error: error.message };

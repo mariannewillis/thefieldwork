@@ -1,6 +1,7 @@
 import { CANONICAL_SITE_URL, SITE_URL } from "@/content/site";
 import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
+import { forBrowserPreview } from "@/lib/email/render";
 import {
   composeNewsletter,
   type ComposableAttachment,
@@ -52,6 +53,7 @@ export async function GET(
     subject: letter.subject,
     preheader: letter.preheader,
     mastheadLabel: letter.mastheadLabel,
+    backgroundBasename: letter.backgroundBasename,
     blocks: letter.blocks as ComposableBlock[],
     attachments: letter.attachments as ComposableAttachment[],
     // A real letter carries one person's token. There is no person here, so
@@ -62,8 +64,11 @@ export async function GET(
     origin: SITE_URL,
   });
 
+  // The pictures AND the mark. `forBrowserPreview` carries the reasoning for
+  // both swaps — the second of them is why the masthead used to be a broken
+  // image here the moment the mark started riding in the envelope.
   const forPreview = (html: string) =>
-    html.replaceAll(`src="${CANONICAL_SITE_URL}/`, 'src="/');
+    forBrowserPreview(html, CANONICAL_SITE_URL);
 
   return new Response(forPreview(composed.html), {
     headers: {

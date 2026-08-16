@@ -648,6 +648,13 @@ try {
       sent.includes("The link works once and expires in 60 minutes."),
   );
   ok(
+    "  …and the mark rides IN the message rather than being fetched",
+    /Inline:\s+brand\/logo-horizontal@2x\.png as cid:thefieldwork-mark \(\d+(\.\d+)?kB\)/.test(
+      sent,
+    ),
+    sent.split("\n").find((line) => line.startsWith("Inline:")) ?? "no Inline:",
+  );
+  ok(
     "  …and nothing was actually delivered",
     sent.includes("not sent — no RESEND_API_KEY") ||
       server.out().includes("EMAIL (not sent — no RESEND_API_KEY)"),

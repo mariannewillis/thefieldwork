@@ -100,6 +100,37 @@ export async function beginSend(
   newsletterId: number,
   chosenSubscriberIds: number[],
 ): Promise<BeginOutcome> {
+  /**
+   * A LETTER WITH NOTHING WRITTEN IN IT DOES NOT GO OUT.
+   *
+   * On 2026-08-16 two letters reached the list carrying an attachment and no
+   * words at all. The blocks lived in the editor's own state until Save wrote
+   * them, Save had never once run, and every screen in the flow — the sheet,
+   * the modal, the count of recipients — reported a healthy letter, because
+   * every one of them was true about something other than what would be sent.
+   *
+   * The screen now refuses to send while the sheet differs from what is stored
+   * (see `NewsletterEditor` and `DraftGuard`), and that is the fix. This is the
+   * floor UNDER it: the screen is a claim about a browser, and the send is a
+   * request that anything can make. An empty letter is never intentional, so
+   * the one place that can actually stop it says so.
+   *
+   * It reads BLOCKS and not attachments on purpose. A letter that is only a
+   * file is the exact thing that went wrong — the two that went out had one
+   * each — and a document arriving with nothing said about it is worse than no
+   * document.
+   */
+  const written = await prisma.newsletterBlock.count({
+    where: { newsletterId },
+  });
+  if (written === 0) {
+    return {
+      ok: false,
+      error:
+        "There is nothing written in this letter, so it cannot be sent. If you have just written it, press Save this draft first — nothing is stored until you do, and a letter is sent from what is stored.",
+    };
+  }
+
   const chosen = new Set(
     chosenSubscriberIds.filter((id) => Number.isInteger(id)),
   );
@@ -227,6 +258,7 @@ export async function sendBatch(newsletterId: number): Promise<BatchResult> {
     subject: letter.subject,
     preheader: letter.preheader,
     mastheadLabel: letter.mastheadLabel,
+    backgroundBasename: letter.backgroundBasename,
     blocks: letter.blocks as ComposableBlock[],
     attachments: letter.attachments as ComposableAttachment[],
     unsubscribe: nonce,
@@ -376,10 +408,29 @@ export async function sendTest(
   });
   if (!letter) return { ok: false, error: "That letter no longer exists." };
 
+  /**
+   * The same floor the real send has, and for a sharper reason.
+   *
+   * A test is how she finds out what a letter looks like. A test of an EMPTY
+   * letter is the single most misleading thing this app could put in an inbox:
+   * it arrives branded, with the masthead and the footer and the attachment,
+   * looking like a letter — and it is the letter she is about to send to
+   * everybody, which is not the one on her screen. That is precisely the trap
+   * that let two empty letters go out on 2026-08-16.
+   */
+  if (letter.blocks.length === 0) {
+    return {
+      ok: false,
+      error:
+        "There is nothing written in this letter yet, so a test would show you an empty one. If you have just written it, press Save this draft first — nothing is stored until you do.",
+    };
+  }
+
   const composed = await composeNewsletter({
     subject: `[Test] ${letter.subject}`,
     preheader: letter.preheader,
     mastheadLabel: letter.mastheadLabel,
+    backgroundBasename: letter.backgroundBasename,
     blocks: letter.blocks as ComposableBlock[],
     attachments: letter.attachments as ComposableAttachment[],
     unsubscribe: `${origin}/subscribe`,

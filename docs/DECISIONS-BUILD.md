@@ -2561,3 +2561,140 @@ last checks assert that `marianne@thefieldwork.co.uk` appears NOWHERE in the run
 and that every address written to ends `.invalid`. Proofs of the letter at 600px
 and 375px, the editor, the send modal, the subscribers screen and the sent
 record in `e2e/_newsletter-shots/`.
+---
+
+## D-30 · A letter cannot leave in a state she did not compose; the mark rides in the envelope; the plate is plum in an inbox (2026-08-16)
+
+The operator sent himself a real letter, opened it in Gmail and in Outlook, and
+found four things. Two of them are the same mistake in different places: the app
+was reasoning about a letter that was not the one anybody would receive.
+
+### 1 · Two letters went out empty, and nothing warned him
+
+He wrote a heading, a paragraph, a picture and a button, attached a file, and
+pressed Send. The file arrived. Nothing else did — and nothing else had ever
+existed: `saveNewsletter` had not run once in the whole session, and
+`NewsletterBlock` held no rows at all. Newsletters 12 and 13 reached the list
+carrying an attachment and no words round it.
+
+**Nothing on the screen was lying.** The sheet was showing his blocks, because
+D-29's "one save, and the blocks are the form" keeps them in the browser until
+Save writes them. The modal was showing the real confirmed subscribers. The
+count on the button was right. Every part was true about something, and the one
+question nobody asked was whether the two halves were the SAME LETTER. The
+preview had the same hole and printed a caption about it — "save first, it shows
+what is saved" — which is a screen asking her to remember something the screen
+already knows.
+
+**The fix is a refusal, not a silent save.** The alternative considered was
+making Send save first; it was rejected because the sheet and the send are two
+forms with two actions, and the irreversible button would then also raise every
+validation failure the reversible one can — "a button needs words on it", first
+seen by pressing Send to two hundred people. Instead:
+
+- `DraftGuard` (a context the editor, the send and the preview share) holds one
+  fact: has the sheet changed since the last successful save. Every edit sets
+  it; a clean save clears it.
+- While it is set, **Send, the test copy and the preview all refuse**, each
+  saying the same sentence in the place its button was, and the save button
+  reads "Not saved yet" rather than "Saved".
+- `beginSend` and `sendTest` refuse a letter with **zero blocks**, whatever any
+  screen believes. An empty letter is never intentional, and the screen is a
+  claim about a browser — the server is the only thing that can actually stop
+  it. Blocks and not attachments: a letter that is only a file is precisely
+  what went wrong.
+
+### 2 · The mark now rides in the envelope (`cid:`), not at a URL
+
+The masthead pointed at `https://thefieldwork.co.uk/brand/logo-horizontal@2x.png`.
+That domain answers — but it is not yet this app, so the file is a **404**, and
+Gmail and Outlook fetch images from THEIR OWN servers rather than the reader's
+browser, cache the result, and serve everybody the miss. The logo could not
+appear from a laptop, and would not have appeared in production either until the
+day this app is what answers there.
+
+`render.ts` now emits `src="cid:thefieldwork-mark"`, and `sendMail` — the one
+port every branded message goes through — attaches
+`public/brand/logo-horizontal@2x.png` (13 kB) with a matching `contentId`, keyed
+off the HTML actually containing the reference so the six plain-text notices
+stay 2 kB. `resend@6` takes `contentId` camelCase and maps it to `content_id`
+itself; the bytes go as base64, because it passes a `Buffer` straight into
+`JSON.stringify` and that serialises four times as large. The alt text is
+unchanged: a client that will not resolve `cid:` still draws "The Field Work" in
+blush display serif on the plum, which was always the images-off contingency.
+
+**Content pictures are NOT attached, and that is a decision.** The mark is
+13 kB, constant, and the one image whose absence makes a letter look broken. A
+photograph is a 1200px JPEG — a few hundred kilobytes each — and attaching one
+puts those bytes in every recipient's copy: three pictures for two hundred
+people is most of a gigabyte of sending for something one cached URL serves
+once, and it pushes letters past the size at which gateways start weighting them
+as spam (the same threshold `attachments.ts` turns a 2 MB document into a link
+over). So they stay absolute URLs against the canonical domain, they will not
+load from a development machine, and they will not load in production either
+until this app is deployed at `thefieldwork.co.uk`. That is the deployment, not
+the letter, and no change here can fix it. `compose.ts::newsletterImageUrl`
+carries the whole of that note.
+
+Both preview routes swap `cid:` for the local file through one shared
+`forBrowserPreview()` — they were each doing half of this rewrite already, and
+the half they were both missing is the one that would have broken.
+
+### 3 · The plate reads as plum rather than black
+
+`GROUND` was `#160712` — the site's own `--plum-900`, RGB 22, 7, 18. On the site,
+surrounded by blush and gold and photography, it reads as deep plum. In an inbox
+it does not: there is no surrounding page, the plate is a 600px column on the
+client's own chrome, often on a phone at half brightness, and at 6% lightness
+the hue is below the threshold at which the eye finds it. Everybody who was
+asked said black.
+
+`GROUND` is now **`#33132B`** — hsl(315, 46%, 14%) against plum-900's
+hsl(316, 52%, 6%). Same hue, two steps up the ramp: recognisably the site's
+colour, and unmistakably plum in an inbox. `SURFACE` moved with it to `#45193B`
+so the raised plate keeps its step, and `PLATE_RULE` was re-blended over the new
+ground (`#533149`). Nothing was spent: blush is 15.1:1, gold 10.3:1 and the soft
+plate text 9.6:1 — all far past AAA. **The site is not changed**; a page has the
+context an email does not.
+
+### 4 · A picture behind the masthead — built, with the constraint on the sheet
+
+She picks one from the media library like any other picture
+(`Newsletter.backgroundBasename`). It is drawn ONLY behind the masthead band —
+the one region carrying a mark and an uppercase label, and no sentence, date,
+amount or link — over the plum `bgcolor`, under an 82% plum scrim. 82 is a floor
+rather than a taste: it is what holds the gold eyebrow at 5.9:1 against the
+worst photograph she could choose (a white sky), where 72% took it to 4.2:1.
+
+**Outlook for Windows will never show it**, because it renders through Word,
+which supports no CSS background at all — and it draws the flat plum plate
+instead, which is the approved design exactly. That sentence is printed on the
+editor's own sheet in bold, because the alternative is her choosing a
+photograph, seeing it in her own inbox, and assuming everybody else did.
+
+**No VML fallback, deliberately.** A `v:rect` with a `v:fill type="frame"` is how
+you put a background image into Outlook, and it was considered and rejected: it
+re-implements the masthead a second time inside a conditional comment, in a
+dialect that cannot be tested from here, to give the one client whose readers are
+likeliest to have images off a decoration the design does not need. Getting it
+wrong breaks the real masthead in the one client the whole renderer was hardened
+for. The flat plate is not a degraded Outlook — it IS the letter.
+
+### Proof
+
+`e2e/newsletter-smoke.mjs` — **83 checks** (was 69), same rules: a copy of the
+app with no `.env.local`, the log adapter, nothing delivered, and the closing
+assertions that `marianne@thefieldwork.co.uk` appears nowhere and every address
+written to ends `.invalid`. The fourteen new ones exercise: an edited sheet
+saying so and disabling the send, the test AND the preview link; saving giving
+all three back; a letter with nothing in it refusing both buttons and saying
+what is missing; and — the one that matters — a letter whose block is deleted
+from the database UNDERNEATH a page that has already drawn the send as
+available, where pressing it writes no recipient row, leaves the letter a draft,
+and says so. `e2e/email-templates-smoke.mjs` — **95** (was 94), the new one
+asserting the mark leaves as `cid:` bytes rather than a URL. Proofs at 600px and
+375px, plus `masthead-plain.png` and `masthead-with-picture.png`, in
+`e2e/_newsletter-shots/`.
+
+One migration, `20260816200000_add_newsletter_background`: one nullable column,
+no default, so every letter already sent keeps the plate it was sent against.

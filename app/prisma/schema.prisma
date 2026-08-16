@@ -1334,6 +1334,17 @@ model Newsletter {
   /// The eyebrow over the masthead — "The monthly letter · August".
   mastheadLabel String @default("The monthly letter")
 
+  /// A picture from the media library to sit behind the masthead, or null.
+  ///
+  /// The basename only, exactly as a block's `imageBasename` is: the letter
+  /// builds `/media/<basename>-1200.jpg` from it, because Outlook decodes
+  /// neither of the two newer formats the site itself serves.
+  ///
+  /// DECORATION, AND NOTHING DEPENDS ON IT. Outlook for Windows renders through
+  /// Word and ignores CSS backgrounds outright, so a large share of readers
+  /// will never see it. The plum plate underneath is what carries every word.
+  backgroundBasename String?
+
   status NewsletterStatus @default(draft)
 
   /// When the send started. Null while it is a draft.

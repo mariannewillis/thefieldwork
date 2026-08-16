@@ -1,5 +1,6 @@
 import { CANONICAL_SITE_URL } from "@/content/site";
 import { getSession } from "@/lib/auth/server";
+import { forBrowserPreview } from "@/lib/email/render";
 import { sampleMessage } from "@/lib/email/samples";
 import { loadWording } from "@/lib/email/templates";
 import { isTemplateKey } from "@/lib/email/wording";
@@ -40,18 +41,12 @@ export async function GET(
   const mail = sampleMessage(key, wording);
 
   /**
-   * The pictures, fetched from HERE rather than from the live domain.
-   *
-   * A real message points its `<img>` at `https://thefieldwork.co.uk/...`,
-   * which is right: an email has no document base, and an asset URL has to
-   * still resolve months after the message was sent. In a preview that same
-   * URL asks the live site for a file this deployment may not have published
-   * yet, and the operator gets a broken mark and no way to tell whether the
-   * masthead is wrong or merely undeployed. Only the ORIGIN is swapped, only
-   * on `src`, and only here — the letter itself is untouched.
+   * The pictures and the mark, served from HERE rather than from the envelope
+   * or the live domain. `forBrowserPreview` carries the reasoning for both
+   * swaps; nothing about the letter itself changes.
    */
   const forPreview = (html: string) =>
-    html.replaceAll(`src="${CANONICAL_SITE_URL}/`, 'src="/');
+    forBrowserPreview(html, CANONICAL_SITE_URL);
 
   // Every one of the nine has an HTML half. If one somehow did not, showing the
   // plain text is the honest answer rather than a blank frame.

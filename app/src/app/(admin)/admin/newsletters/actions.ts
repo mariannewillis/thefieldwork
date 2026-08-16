@@ -231,12 +231,27 @@ export async function saveNewsletter(
     };
   }
 
+  /**
+   * The picture behind the masthead.
+   *
+   * NOT VALIDATED AGAINST THE LIBRARY, on purpose. The field is a `<select>`
+   * built from the library, and a basename that names nothing produces a
+   * background that does not load — which is the same outcome as choosing
+   * none, and the same outcome a large share of readers get anyway (see
+   * `render.ts::masthead`). There is nothing here for a forged value to reach:
+   * it becomes one URL, escaped, inside a `background-image`.
+   *
+   * Blank means none, which is what the picker's own "No picture" posts.
+   */
+  const backgroundBasename = (values.backgroundBasename ?? "").trim() || null;
+
   await prisma.newsletter.update({
     where: { id },
     data: {
       subject,
       preheader,
       mastheadLabel,
+      backgroundBasename,
       blocks: { deleteMany: {}, create: blocks },
     },
   });
@@ -297,6 +312,11 @@ export async function duplicateNewsletter(formData: FormData): Promise<void> {
       subject: source.subject,
       preheader: source.preheader,
       mastheadLabel: source.mastheadLabel,
+      // The picture travels with the copy, unlike the files: it is a reference
+      // to something in the shared library rather than bytes stored under this
+      // letter's id, so two letters naming it cost nothing and deleting either
+      // takes nothing away from the other.
+      backgroundBasename: source.backgroundBasename,
       duplicatedFromId: source.id,
       blocks: {
         create: source.blocks.map((block, position) => ({

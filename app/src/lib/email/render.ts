@@ -1,5 +1,3 @@
-import { CANONICAL_SITE_URL } from "@/content/site";
-
 /**
  * The branded HTML half of every message this site sends.
  *
@@ -20,9 +18,13 @@ import { CANONICAL_SITE_URL } from "@/content/site";
  *    re-assertion; several clients strip <head> entirely.
  *  - 600px and a single column, so the phone case is the same composition.
  *  - No web fonts. See FONTS below for the stacks and why they were chosen.
- *  - NO BACKGROUND IMAGES ANYWHERE. The plum plate is a `bgcolor` on a <td>.
- *    A plate built from `background-image` is a white void with blush text on
- *    it in Outlook.
+ *  - NO BACKGROUND IMAGE MAY EVER CARRY A WORD. The plum plate is a `bgcolor`
+ *    on a <td> and always will be. A plate built OUT OF `background-image` is a
+ *    white void with blush text on it in Outlook for Windows, which ignores CSS
+ *    backgrounds entirely. The one background image this renderer will draw is
+ *    the masthead's optional photograph, and it is layered OVER that same
+ *    `bgcolor` — a client that drops it renders the approved plate exactly.
+ *    See `masthead` for the whole of that argument.
  *
  * COLOUR IS CONTEXT-LOCKED, exactly as the site locks it: gold labels the dark
  * ground and never appears inside a blush pool; magenta works inside a pool and
@@ -36,21 +38,42 @@ import { CANONICAL_SITE_URL } from "@/content/site";
  * amount or a link. `figure()` is blush for that reason and no other.
  */
 
-/* ── the origin every ASSET is absolute against ─────────────────────────────
-   An email has no document base: a relative `src` resolves against the mail
-   client's own domain — mail.google.com — and 404s.
+/* ── where a picture in a letter comes from ─────────────────────────────────
+   THIS MODULE NO LONGER NAMES AN ORIGIN. It used to build the masthead's URL
+   from the canonical domain; the mark now rides in the envelope instead, so
+   there is nothing here to be absolute against — see LOGO_CID below.
 
-   CANONICAL and not SITE_URL. `SITE_URL` follows NEXT_PUBLIC_SITE_URL so a
-   preview deployment can be browsed, and an email sent from a preview would
-   otherwise carry preview asset URLs into somebody's inbox forever, where they
-   outlive the preview. Links that have to work on the deployment that issued
-   them — the cancellation link, the pay link — still use SITE_URL, because
-   those are tokens this deployment minted and only this one can honour. */
-const ASSETS = CANONICAL_SITE_URL;
+   An email still has no document base, so every OTHER `src` a letter carries
+   has to arrive absolute, built by whoever composed it. There is exactly one
+   place that does it — `newsletter/compose.ts::newsletterImageUrl` — and its
+   note carries the rest of this argument: canonical rather than SITE_URL,
+   because a picture has to still resolve from somebody's inbox in a year and
+   cannot point at whichever deployment happened to compose the letter. */
 
-/* ── palette — verbatim from docs/screens/email/_build.mjs ───────────────── */
-export const GROUND = "#160712"; // plum-900, the plate
-export const SURFACE = "#260F20"; // plum-800, the plate one step up
+/* ── palette ──────────────────────────────────────────────────────────────────
+   Carried from docs/screens/email/_build.mjs, with ONE deliberate divergence
+   from the site, made 2026-08-16 after the operator read a real letter in Gmail
+   and in Outlook.
+
+   THE PLATE IS NOT THE SITE'S plum-900. The site's `--plum-900` is #160712 —
+   RGB 22, 7, 18 — and on a screen, surrounded by the site's own blush and gold
+   and photography, it reads as deep plum. In an inbox it does not. There is no
+   surrounding page: the plate is a 600px column on the client's own white or
+   grey chrome, usually smaller than a browser window and often on a phone at
+   half brightness, and at 6% lightness the hue is below the threshold at which
+   the eye can find it. Every reader the operator asked reported black.
+
+   So the ground is lifted to 14% lightness at the SAME HUE — #33132B is
+   hsl(315, 46%, 14%) against plum-900's hsl(316, 52%, 6%). It is recognisably
+   the same colour, one the site's own ramp would reach two steps up, and in an
+   inbox it reads as plum rather than as a dark rectangle. The site is not
+   changed: a page has the context an email does not.
+
+   Nothing was spent to buy it. Against the new ground blush is 15.1:1, gold is
+   10.3:1 and the soft plate text is 9.6:1 — every one of them still far past
+   AAA, and past what the old ground gave by margins nobody can see. */
+export const GROUND = "#33132B"; // the plate — the site's plum, two steps up
+export const SURFACE = "#45193B"; // the plate one step up again
 export const POOL = "#FBF3F1"; // blush, the panel
 export const INK = "#1E0A1C";
 export const INK_SOFT = "#5A4356";
@@ -63,7 +86,7 @@ export const PLATE_SOFT = "#D8BFC9";
    are pre-blended here against the ground each one actually sits on. Same
    pixel, no alpha. */
 const POOL_RULE = "#D3C6CB"; // 35% #8A7285 over #FBF3F1
-const PLATE_RULE = "#402A39"; // 35% #8E6A82 over #160712
+const PLATE_RULE = "#533149"; // 35% #8E6A82 over the ground above
 
 /* ── FONTS ──────────────────────────────────────────────────────────────────
    The site is Cormorant Garamond over Source Sans 3. Neither can load here.
@@ -475,6 +498,70 @@ function spacer(pad: string): string {
 // ── the chrome ───────────────────────────────────────────────────────────────
 
 /**
+ * The mark, and how it travels.
+ *
+ * IT RIDES IN THE MESSAGE rather than being fetched from a URL, and that is the
+ * fix for a real failure the operator found by sending himself a letter and
+ * opening it (2026-08-16). A mail client does NOT fetch a remote image the way
+ * a browser does: Gmail and Outlook fetch it from THEIR OWN servers, cache it,
+ * and serve it to the reader from there. Neither of those servers can reach a
+ * development machine, so while the site runs locally the mark can never appear
+ * — and the person testing has no way to tell that apart from a broken letter.
+ *
+ * A CID attachment has no origin to be unreachable. The bytes are part of the
+ * message, so the mark is identical from a laptop, from a preview deployment
+ * and from production, and it survives the reader who has told their client
+ * never to load remote images — which is the default in Outlook and in a good
+ * share of everything else.
+ *
+ * `sendMail` is what attaches it: it looks for this reference in the HTML and
+ * puts the file in the envelope with a matching `contentId`. One place, so
+ * every branded message the app sends carries the mark and no caller can
+ * forget. The preview route swaps the reference for the local file instead
+ * (there is no envelope to put anything in).
+ */
+export const LOGO_CID = "thefieldwork-mark";
+/** Under `public/`. Generated from the SVG by `scripts/build-email-logo.mjs`. */
+export const LOGO_PATH = "brand/logo-horizontal@2x.png";
+
+/**
+ * The masthead scrim: the ground, at 82%.
+ *
+ * The number is a floor rather than a taste. She picks the photograph, so the
+ * scrim has to hold for the WORST one she could pick — a white sky, a lit
+ * window, an overexposed wall. 82% of the ground over pure white composites to
+ * rgb(88, 61, 81), against which the gold eyebrow is 5.9:1 and blush is 8.7:1;
+ * at the 72% this started on, the same white took gold to 4.2:1,
+ * which is below the line for a 17px label and no photograph is worth that.
+ * The picture still reads clearly through it — see `e2e/_newsletter-shots/`.
+ */
+const SCRIM = "rgba(51,19,43,0.82)";
+
+/**
+ * The same letter, as a BROWSER can draw it.
+ *
+ * Two swaps, both of them the frame's problem and never the message's:
+ *
+ *  - `cid:` resolves against the envelope a message travels in, and a preview
+ *    has no envelope. The mark is served from this deployment's own `public/`
+ *    instead, which is the same file `sendMail` attaches.
+ *  - A picture in a real letter is absolute against the canonical domain,
+ *    because it has to still resolve from an inbox in a year. In a preview that
+ *    would ask the LIVE site for a photograph this deployment may not have
+ *    published yet, so it is made relative and served from here.
+ *
+ * One function because two preview routes were doing half of it each, and the
+ * half they were both missing is the one the operator hit.
+ */
+export function forBrowserPreview(html: string, origin: string): string {
+  return html
+    .replaceAll(`src="cid:${LOGO_CID}"`, `src="/${LOGO_PATH}"`)
+    .replaceAll(`src="${origin}/`, 'src="/')
+    .replaceAll(`background="${origin}/`, 'background="/')
+    .replaceAll(`url('${origin}/`, "url('/");
+}
+
+/**
  * The masthead.
  *
  * The mark is a PNG, because NO MAIL CLIENT RENDERS SVG — Gmail, Outlook and
@@ -490,15 +577,51 @@ function spacer(pad: string): string {
  * 280×76 and not smaller. `site-chrome.css` puts a floor of 74px on the mark's
  * height for a stated reason — the letterspaced WORK in the lockup is 13% of
  * that height, so 74px gives it ten pixels and anything less gives it fewer.
+ *
+ * ── THE OPTIONAL PHOTOGRAPH BEHIND IT ────────────────────────────────────────
+ *
+ * The module note above bans building a plate OUT OF a background image. This
+ * does not do that, and the difference is the whole of why it is allowed:
+ *
+ *  - The `bgcolor` and the `background-color` are painted FIRST and are never
+ *    conditional. Outlook for Windows renders through Word, which supports no
+ *    CSS background at all — it therefore draws the approved plum plate, and
+ *    the letter it shows is byte-for-byte the design that was signed off.
+ *  - The picture is drawn over that, and then a 72% plum scrim is drawn over
+ *    the picture, so the gold eyebrow and the blush mark keep the contrast they
+ *    were measured at whatever the photograph turns out to be. A client that
+ *    understands `background-image` also understands `rgba()`; a client that
+ *    understands neither gets the flat plate, which is the same composition.
+ *  - It is only ever behind the MASTHEAD — a band carrying a mark and one
+ *    uppercase label. No sentence, no date, no amount and no link is ever on
+ *    it. Nothing legible depends on it arriving.
+ *
+ * NO VML FALLBACK, deliberately. `<v:rect><v:fill type="frame">` is the way to
+ * put a background image into Outlook for Windows, and it was considered and
+ * rejected: it re-implements the masthead a second time inside a conditional
+ * comment, in a dialect that cannot be tested from here, to give the one client
+ * whose readers are most likely to have images off a decoration that the design
+ * does not need. Getting it wrong breaks the real masthead in the one client
+ * the whole renderer was hardened for. The flat plate is not a degraded
+ * Outlook; it IS the approved letter.
  */
-function masthead(label: string): string {
-  return plateSection(
-    `<img src="${ASSETS}/brand/logo-horizontal@2x.png" width="280" height="76" alt="The Field Work" style="display:block;border:0;outline:none;text-decoration:none;width:280px;height:76px;font-family:${DISPLAY};font-size:26px;line-height:76px;color:${POOL};">` +
-      `<div style="height:22px;line-height:22px;font-size:0;">&nbsp;</div>` +
-      eyebrow(label, "plate", "0"),
-    "34px 44px 32px",
-    GROUND,
-  );
+function masthead(label: string, background: string | null): string {
+  const mark =
+    `<img src="cid:${LOGO_CID}" width="280" height="76" alt="The Field Work" style="display:block;border:0;outline:none;text-decoration:none;width:280px;height:76px;font-family:${DISPLAY};font-size:26px;line-height:76px;color:${POOL};">` +
+    `<div style="height:22px;line-height:22px;font-size:0;">&nbsp;</div>` +
+    eyebrow(label, "plate", "0");
+
+  const pad = "34px 44px 32px";
+  if (!background) return plateSection(mark, pad, GROUND);
+
+  // `background=` as well as the CSS: it is the HTML 4 attribute, and it is
+  // what Outlook.com and several Android clients read instead of the property.
+  // The scrim is a nested cell rather than a gradient — Word and Gmail's
+  // Android app both drop multi-layer backgrounds, and one that half-applied
+  // would be worse than none.
+  return `<tr><td class="p plate" bgcolor="${GROUND}" background="${esc(background)}" style="background-color:${GROUND};background-image:url('${esc(background)}');background-position:center center;background-repeat:no-repeat;background-size:cover;padding:0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="scrim" style="background-color:${SCRIM};padding:${pad};">${mark}</td></tr></table>
+</td></tr>`;
 }
 
 /**
@@ -553,6 +676,12 @@ export type Letter = {
   sections: Section[];
   why: string;
   unsubscribe?: string | null;
+  /**
+   * An absolute URL for a photograph behind the masthead. Decoration only —
+   * see `masthead` for what is and is not allowed to depend on it. The nine
+   * transactional messages never set it; only a letter she has chosen one for.
+   */
+  mastheadBackground?: string | null;
 };
 
 /**
@@ -641,13 +770,17 @@ export function renderLetter(letter: Letter): string {
     .shot { width:100% !important; height:auto !important; }
   }
 
-  /* Layer 2 — re-assert, never re-theme. */
+  /* Layer 2 — re-assert, never re-theme. The masthead scrim is excluded from
+     both layers: it is deliberately translucent, and re-asserting an opaque
+     plum onto it would paint out the photograph behind it for every reader
+     whose phone is in dark mode. Its own colour is the ground already. */
   @media (prefers-color-scheme: dark) {
-    .plate, .plate td { background-color:#160712 !important; }
+    .plate, .plate td:not(.scrim) { background-color:${GROUND} !important; }
     .p[bgcolor="#FBF3F1"] { background-color:#FBF3F1 !important; }
   }
   /* Layer 3 — Outlook.com. */
-  [data-ogsc] .plate, [data-ogsb] .plate { background-color:#160712 !important; }
+  [data-ogsc] .plate, [data-ogsb] .plate { background-color:${GROUND} !important; }
+  [data-ogsc] .plate td:not(.scrim), [data-ogsb] .plate td:not(.scrim) { background-color:${GROUND} !important; }
   [data-ogsc] .p[bgcolor="#FBF3F1"], [data-ogsb] .p[bgcolor="#FBF3F1"] { background-color:#FBF3F1 !important; }
 
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; animation:none !important; } }
@@ -658,7 +791,7 @@ export function renderLetter(letter: Letter): string {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${GROUND}" style="background-color:${GROUND};width:100%;">
 <tr><td align="center" style="padding:0;">
 <table role="presentation" class="w" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;border-collapse:collapse;">
-${masthead(letter.mastheadLabel)}
+${masthead(letter.mastheadLabel, letter.mastheadBackground ?? null)}
 ${body}
 ${footer(letter.why, letter.unsubscribe ?? null)}
 </table>

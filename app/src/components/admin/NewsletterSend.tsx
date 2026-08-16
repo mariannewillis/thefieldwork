@@ -9,6 +9,7 @@ import {
   type SendState,
   type TestState,
 } from "@/app/(admin)/admin/newsletters/actions";
+import { UNSAVED_REASON, useDraftGuard } from "@/components/admin/DraftGuard";
 
 /**
  * The two ways a letter leaves — to her, and to everybody.
@@ -25,6 +26,13 @@ import {
  * the last thing she sees before pressing send is WHO — and so that leaving
  * one person out is unticking a box rather than a support request. The count
  * on the button is still there; it counts the ticks.
+ *
+ * NEITHER BUTTON WORKS ON A LETTER THAT IS NOT SAVED, and neither works on a
+ * letter with nothing written in it. Both send what the DATABASE holds, which
+ * on 2026-08-16 turned out to be a thing nobody had checked was the same as
+ * what was on the screen: two letters went to the list carrying only their
+ * attachment. `DraftGuard` carries the whole of that account and why the fix is
+ * a refusal rather than a silent save.
  */
 
 const PRIMARY =
@@ -89,14 +97,37 @@ export default function NewsletterSend({
   /** Rows already written and still `pending` — a send that stopped part-way. */
   pending,
   sent,
+  /**
+   * How many blocks are STORED against this letter. Not how many are on the
+   * sheet — that is the number the screen already knows and the one that was
+   * never the answer.
+   */
+  written,
 }: {
   newsletterId: number;
   recipients: Recipient[];
   testTo: string | null;
   pending: number;
   sent: boolean;
+  written: number;
 }) {
   const router = useRouter();
+  const { unsaved } = useDraftGuard();
+
+  /**
+   * Why neither button will run, or null when both will.
+   *
+   * ONE SENTENCE, IN ONE PLACE. The test and the send are stopped by the same
+   * two conditions and drawn in two regions, and two copies of a reason drift
+   * into two different reasons. The order matters: an unsaved sheet is the
+   * likelier and the more misleading of the two — an empty letter she has saved
+   * at least looks empty in the preview.
+   */
+  const blocked = unsaved
+    ? UNSAVED_REASON
+    : written === 0
+      ? "There is nothing written in this letter yet — only the subject, and whatever is attached. Add a heading or a paragraph above and save it; a letter with no words in it is not one anybody meant to send."
+      : null;
 
   const [test, testAction, testing] = useActionState(sendTestCopy, NO_TEST);
   const [send, sendAction, starting] = useActionState(
@@ -232,10 +263,19 @@ export default function NewsletterSend({
         <div className="mt-8 border-t border-pool-rule/40 pt-7">
           <form action={testAction}>
             <input type="hidden" name="id" value={newsletterId} />
-            <button type="submit" disabled={testing} className={OUTLINE}>
+            <button
+              type="submit"
+              disabled={testing || blocked !== null}
+              className={OUTLINE}
+            >
               {testing ? "Sending the test…" : "Send a test to yourself"}
             </button>
           </form>
+          {blocked && (
+            <p className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-ink">
+              {blocked}
+            </p>
+          )}
           <p className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-ink-soft">
             {testTo ? (
               <>
@@ -292,16 +332,26 @@ export default function NewsletterSend({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            disabled={recipients.length === 0}
+            disabled={recipients.length === 0 || blocked !== null}
             className={`${PRIMARY} mt-6`}
           >
             Send this letter
           </button>
 
-          <p className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-ink-soft">
-            Once it starts, this letter is closed: it cannot be edited, and what
-            has gone cannot be recalled. You will see who it went to and when.
-          </p>
+          {blocked ? (
+            <p
+              role="status"
+              className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-ink"
+            >
+              {blocked}
+            </p>
+          ) : (
+            <p className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-ink-soft">
+              Once it starts, this letter is closed: it cannot be edited, and
+              what has gone cannot be recalled. You will see who it went to and
+              when.
+            </p>
+          )}
 
           {send.error && (
             <p

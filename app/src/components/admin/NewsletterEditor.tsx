@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import {
   addAttachment,
   removeAttachment,
   saveNewsletter,
 } from "@/app/(admin)/admin/newsletters/actions";
+import { useDraftGuard } from "@/components/admin/DraftGuard";
 import {
   FIELD,
   FIELD_BIG,
@@ -41,6 +42,13 @@ import { NO_ATTEMPT_YET } from "@/lib/offering-rules";
  * photograph does — a save that bounced must not throw four megabytes away,
  * and how the file will TRAVEL has to be said the moment it arrives rather
  * than on the send modal, which would be too late to do anything about.
+ *
+ * AND BECAUSE OF ALL THAT, THIS SHEET SAYS WHETHER IT IS SAVED. "One save, and
+ * the blocks are the form" is the right shape and it has one edge: between a
+ * change and a save, the letter on the screen is not the letter that would be
+ * sent, and on 2026-08-16 that gap put two empty letters in front of the list.
+ * Every change marks the sheet unsaved through `DraftGuard`; the send, the test
+ * and the preview all refuse while it is, and say why. See `DraftGuard`.
  */
 
 /** The five kinds, and what each of them is called on the button that adds it. */
@@ -106,6 +114,7 @@ export default function NewsletterEditor({
     subject: string;
     preheader: string;
     mastheadLabel: string;
+    backgroundBasename: string;
   };
   blocks: EditableBlock[];
   attachments: EditableAttachment[];
@@ -117,6 +126,22 @@ export default function NewsletterEditor({
     NO_ATTEMPT_YET,
   );
 
+  const { unsaved, setUnsaved } = useDraftGuard();
+
+  /**
+   * A save that landed clears the flag; one that bounced does not.
+   *
+   * `attempt` is bumped on every return, so it is the thing to watch. A bounce
+   * always carries either a field error or the line at the top — a clean return
+   * with neither is the only shape a successful save has, which is why this
+   * reads both rather than trusting the counter alone.
+   */
+  useEffect(() => {
+    if (state.attempt === 0) return;
+    const bounced = Object.keys(state.errors).length > 0 || state.message;
+    if (!bounced) setUnsaved(false);
+  }, [state.attempt, state.errors, state.message, setUnsaved]);
+
   /** What a bounced save echoed back, so nothing typed is lost. */
   const kept = (name: string, stored: string) => state.values[name] ?? stored;
 
@@ -125,21 +150,26 @@ export default function NewsletterEditor({
     blocks.map((block, index) => ({ ...block, key: index })),
   );
   const [nextKey, setNextKey] = useState(blocks.length);
+  const [background, setBackground] = useState(newsletter.backgroundBasename);
 
   const add = (kind: Kind) => {
+    setUnsaved(true);
     setRows((current) => [...current, { ...EMPTY, kind, key: nextKey }]);
     setNextKey((n) => n + 1);
   };
 
-  const remove = (key: number) =>
+  const remove = (key: number) => {
+    setUnsaved(true);
     setRows((current) => current.filter((row) => row.key !== key));
+  };
 
   /**
    * Moving one. The key travels with the row, so React keeps the block's own
    * fields with it rather than redrawing the two swapped rows from their
    * neighbour's values — which is what happens when the index is the key.
    */
-  const move = (key: number, by: -1 | 1) =>
+  const move = (key: number, by: -1 | 1) => {
+    setUnsaved(true);
     setRows((current) => {
       const at = current.findIndex((row) => row.key === key);
       const to = at + by;
@@ -148,16 +178,42 @@ export default function NewsletterEditor({
       [next[at], next[to]] = [next[to], next[at]];
       return next;
     });
+  };
 
-  const set = (key: number, field: keyof EditableBlock, value: string) =>
+  const set = (key: number, field: keyof EditableBlock, value: string) => {
+    setUnsaved(true);
     setRows((current) =>
       current.map((row) =>
         row.key === key ? { ...row, [field]: value } : row,
       ),
     );
+  };
 
   return (
-    <form action={formAction} className="pool on-pool mt-9 px-7 py-8 sm:px-9">
+    <form
+      action={formAction}
+      className="pool on-pool mt-9 px-7 py-8 sm:px-9"
+      /**
+       * Every typed character marks the sheet unsaved.
+       *
+       * At the form rather than on each field, because the fields it has to
+       * cover are the three at the top, the note under every attached document,
+       * and whatever a later block kind adds — and a rule that has to be
+       * remembered on each new field is a rule that will be forgotten on one.
+       * `onInput` and not `onChange`: React's `onChange` on a text input is
+       * already input-time, but the native event is what a paste or an
+       * autofill fires, and this listens for the bubbled native one.
+       *
+       * The file picker is the one exclusion. It uploads on its own the moment
+       * she chooses something and does not wait for a save, so marking the
+       * sheet dirty there would ask her to save a change that has already
+       * happened.
+       */
+      onInput={(event) => {
+        const target = event.target as HTMLInputElement;
+        if (target.type !== "file") setUnsaved(true);
+      }}
+    >
       <input type="hidden" name="id" value={newsletter.id} />
 
       <Section
@@ -221,6 +277,66 @@ export default function NewsletterEditor({
           The logo, the colours, the type and the footer &mdash; including the
           unsubscribe link the law requires &mdash; are part of the template.
           They apply to this letter without you touching them.
+        </p>
+      </Section>
+
+      {/**
+       * A picture behind the top of the letter.
+       *
+       * THE CONSTRAINT IS SAID HERE, IN FULL, RATHER THAN DISCOVERED LATER.
+       * Outlook for Windows draws email through Word, which does not do CSS
+       * backgrounds at all — so for a large share of any list this picture
+       * will never appear, and no amount of care changes that. It is written
+       * on the sheet in the plainest words available, because the alternative
+       * is her choosing a photograph, seeing it in her own inbox, and assuming
+       * everybody else saw it too.
+       *
+       * WHICH IS ALSO WHY IT IS ONLY BEHIND THE MASTHEAD. Every word of the
+       * letter sits on the blush panel or on the flat plum, exactly as before.
+       * The one band this touches carries the mark and one uppercase label,
+       * and both are drawn over a plum wash so they hold their contrast on any
+       * photograph — and read identically when there is none.
+       */}
+      <Section
+        id="letter-masthead"
+        title="A picture behind the masthead"
+        note={background ? "chosen" : "none — the plain plum"}
+      >
+        <PicturePicker
+          name="backgroundBasename"
+          label="The picture behind the top band"
+          library={library}
+          defaultValue={background}
+          value={background}
+          onChange={(basename) => {
+            setUnsaved(true);
+            setBackground(basename);
+          }}
+          onAdded={(basename) => {
+            setLibrary((current) =>
+              current.includes(basename)
+                ? current
+                : [...current, basename].sort(),
+            );
+            setUnsaved(true);
+            setBackground(basename);
+          }}
+        >
+          <p className={HELP}>
+            Optional, and decoration only. It sits behind the logo at the very
+            top, under a plum wash so the writing on it stays readable.
+          </p>
+        </PicturePicker>
+
+        <p className="mt-6 max-w-[62ch] text-[17px] leading-relaxed text-ink">
+          <strong className="font-semibold">
+            Outlook on Windows will not show it.
+          </strong>{" "}
+          It draws email through Word, which ignores background pictures
+          entirely &mdash; and many other people have pictures switched off
+          until they press &ldquo;show images&rdquo;. All of them see the plain
+          plum band instead, which is the letter as it was designed. Nothing you
+          write depends on this picture arriving, and nothing ever will.
         </p>
       </Section>
 
@@ -528,10 +644,26 @@ export default function NewsletterEditor({
         >
           {pending ? "Saving…" : "Save this draft"}
         </button>
-        <p className="max-w-[46ch] text-[15px] leading-relaxed text-ink-soft">
-          Saving changes nothing anybody else can see. Sending is the button
-          further down, behind a list of who would get it.
-        </p>
+        {/* WHICH STATE SHE IS IN, in words, beside the button that changes it.
+            The two sentences are different lengths and different colours on
+            purpose: "there is something to do here" has to be legible from
+            across the room, and the resting state must not look like an
+            alarm. */}
+        {unsaved ? (
+          <p
+            role="status"
+            className="max-w-[46ch] text-[17px] font-medium leading-relaxed text-ink"
+          >
+            Not saved yet. Nothing is stored until you press that &mdash; and
+            sending, testing and the preview all wait for it, because a letter
+            goes out as it was saved.
+          </p>
+        ) : (
+          <p className="max-w-[46ch] text-[15px] leading-relaxed text-ink-soft">
+            Saved. Saving changes nothing anybody else can see &mdash; sending
+            is the button further down, behind a list of who would get it.
+          </p>
+        )}
       </div>
 
       {state.message && (

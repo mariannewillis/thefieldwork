@@ -613,6 +613,148 @@ try {
 
   await page.screenshot({ path: join(SHOTS, "editor.png"), fullPage: true });
 
+  // ══ 3b · WHAT IS ON THE SCREEN IS NOT WHAT IS SENT ════════════════════════
+  //
+  // The claim, exercised: a letter cannot leave in a state that differs from
+  // the one she composed. On 2026-08-16 two did — the blocks lived in the
+  // editor's own state, Save had never run, and the list received an
+  // attachment with no words round it. Three checks in each direction: the
+  // screen refuses, the screen SAYS why, and the server refuses even when the
+  // screen is made to allow it.
+  console.log("\n— saved, or not —");
+
+  const sendButton = page.getByRole("button", { name: /^send this letter$/i });
+  const testButton = page.getByRole("button", {
+    name: /send a test to yourself/i,
+  });
+  const PREHEADER =
+    "The chair has moved nearer the window, and the autumn dates are open.";
+
+  await page.fill(
+    'input[name="preheader"]',
+    `${PREHEADER} And one more thing.`,
+  );
+  await page.waitForTimeout(300);
+
+  ok(
+    "an edited sheet says out loud that it is not saved",
+    await page
+      .getByText(/not saved yet/i)
+      .first()
+      .isVisible(),
+  );
+  ok("…and the send will not open while it is", await sendButton.isDisabled());
+  ok("…nor will the test", await testButton.isDisabled());
+  ok(
+    "…and the reason is on the screen where the button is",
+    await page
+      .getByText(/a letter is sent from what is saved/i)
+      .first()
+      .isVisible(),
+  );
+  ok(
+    "…and the preview is not a link either, rather than a caption asking her to remember",
+    (await page.locator(`a[href$="/${newsletterId}/preview"]`).count()) === 0,
+  );
+
+  await page.fill('input[name="preheader"]', PREHEADER);
+  await page.getByRole("button", { name: /save this draft/i }).click();
+  await page.waitForTimeout(2500);
+
+  ok(
+    "saving gives all three back",
+    !(await sendButton.isDisabled()) &&
+      !(await testButton.isDisabled()) &&
+      (await page.locator(`a[href$="/${newsletterId}/preview"]`).count()) === 1,
+  );
+
+  // ── a letter with nothing written in it ────────────────────────────────────
+  await page.goto(`${BASE}/admin/newsletters`);
+  await page.getByRole("button", { name: /write a new letter/i }).click();
+  await page.waitForURL(/\/admin\/newsletters\/\d+$/, { timeout: 120_000 });
+  const emptyId = Number(page.url().split("/").pop());
+  // `SMOKE ` so cleanUp() sweeps it up with the rest.
+  await page.fill('input[name="subject"]', "SMOKE An empty one");
+  await page.fill('input[name="preheader"]', "Nothing was written in this.");
+  await page.getByRole("button", { name: /save this draft/i }).click();
+  await page.waitForTimeout(2500);
+
+  ok(
+    "a letter with nothing written in it cannot be sent",
+    await page
+      .getByRole("button", { name: /^send this letter$/i })
+      .isDisabled(),
+  );
+  ok(
+    "…nor tested, which is how the empty one would have looked like a letter",
+    await page
+      .getByRole("button", { name: /send a test to yourself/i })
+      .isDisabled(),
+  );
+  ok(
+    "…and it says what is missing",
+    await page
+      .getByText(/nothing written in this letter/i)
+      .first()
+      .isVisible(),
+  );
+
+  /**
+   * And the refusal survives a screen that believes otherwise.
+   *
+   * The screen is a claim about a browser, and the whole of 2026-08-16's
+   * failure was a screen making a true claim about the wrong thing. So: give
+   * the letter a block so the page draws with sending enabled, take the block
+   * away UNDERNEATH IT, and press send. Every button is genuine and nothing is
+   * forced; the browser simply holds a page that is no longer true — which is
+   * exactly the state the operator was in.
+   */
+  await db.query(
+    `INSERT INTO "NewsletterBlock" ("newsletterId", position, kind, text)
+     VALUES ($1, 0, 'paragraph', 'A paragraph that is about to be taken away.')`,
+    [emptyId],
+  );
+  await page.reload();
+  ok(
+    "a letter with a block in it offers to send",
+    !(await page
+      .getByRole("button", { name: /^send this letter$/i })
+      .isDisabled()),
+  );
+  await db.query(`DELETE FROM "NewsletterBlock" WHERE "newsletterId" = $1`, [
+    emptyId,
+  ]);
+
+  await page.getByRole("button", { name: /^send this letter$/i }).click();
+  await page.getByRole("checkbox").first().waitFor({ timeout: 90_000 });
+  await page.getByRole("button", { name: /^send it to /i }).click();
+  await page.waitForTimeout(4000);
+
+  {
+    const rows = await db.query(
+      `SELECT count(*)::int AS n FROM "NewsletterSend" WHERE "newsletterId" = $1`,
+      [emptyId],
+    );
+    const letter = await db.query(
+      `SELECT status FROM "Newsletter" WHERE id = $1`,
+      [emptyId],
+    );
+    ok(
+      "the SERVER refuses it too: nobody was written down and it is still a draft",
+      rows.rows[0].n === 0 && letter.rows[0].status === "draft",
+      `${rows.rows[0].n} rows · ${letter.rows[0].status}`,
+    );
+  }
+  ok(
+    "…and it says so rather than failing quietly",
+    await page
+      .getByText(/there is nothing written in this letter/i)
+      .first()
+      .isVisible(),
+  );
+
+  await page.goto(`${BASE}/admin/newsletters/${newsletterId}`);
+
   // ══ 4 · THE LETTER ITSELF ═════════════════════════════════════════════════
   console.log("\n— the letter —");
 
@@ -657,6 +799,11 @@ try {
     html.includes(`${BASE}/courses`),
   );
   ok("the letter carries an unsubscribe line", html.includes("Unsubscribe"));
+  ok(
+    "the preview serves the mark from this machine, not from a cid: it cannot resolve",
+    html.includes('src="/brand/logo-horizontal@2x.png"') &&
+      !html.includes("cid:"),
+  );
 
   // The letter itself, at the width it is composed for and at a phone's.
   {
@@ -709,6 +856,19 @@ try {
   ok(
     "the test copy carries no live unsubscribe token",
     !lastEmailTo(server.out(), MAILBOX).match(/\/unsubscribe\/[a-f0-9]{64}/),
+  );
+  // The mark is IN the envelope. A URL would be fetched by Gmail's and
+  // Outlook's own servers, which cannot reach a development machine and, until
+  // this app is what answers at thefieldwork.co.uk, get a 404 from production
+  // too — so the masthead was a broken image everywhere it was tested.
+  ok(
+    "the mark rides in the message rather than being fetched from anywhere",
+    /Inline:\s+brand\/logo-horizontal@2x\.png as cid:thefieldwork-mark \(\d+(\.\d+)?kB\)/.test(
+      lastEmailTo(server.out(), MAILBOX),
+    ),
+    lastEmailTo(server.out(), MAILBOX)
+      .split("\n")
+      .find((line) => line.startsWith("Inline:")) ?? "no Inline: line",
   );
 
   // ══ 6 · SOMEBODY LEAVES ═══════════════════════════════════════════════════
