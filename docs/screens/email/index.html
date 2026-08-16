@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Email templates · The Field Work</title>
+<style>
+  :root { --ground:#160712; --pool:#FBF3F1; --ink:#1E0A1C; --ink-soft:#5A4356;
+          --gold:#E9C87E; --action:#C2187A; --soft:#D8BFC9; --rule:#402A39;
+          --gut: clamp(22px,5.4vw,92px); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; }
+  body { background:var(--ground); color:var(--pool);
+         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; font-size:17px; line-height:1.6; }
+  header { padding:clamp(48px,8vh,96px) var(--gut) clamp(32px,5vh,56px); }
+  .eyebrow { font-size:17px; letter-spacing:0.18em; text-transform:uppercase;
+             font-weight:600; color:var(--gold); margin:0 0 18px; }
+  h1 { font-family:'Palatino Linotype','Book Antiqua',Palatino,'Iowan Old Style',Georgia,serif; font-weight:400; font-size:clamp(38px,6vw,64px);
+       line-height:1.08; letter-spacing:-0.005em; margin:0 0 20px; max-width:20ch; }
+  header p { max-width:66ch; color:var(--soft); margin:0; }
+  ul { list-style:none; margin:0; padding:0 var(--gut) clamp(64px,10vh,120px);
+       display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:1px;
+       background:var(--rule); border-top:1px solid var(--rule); }
+  .row { background:var(--pool); color:var(--ink); padding:34px 32px 36px; }
+  .kind { font-size:17px; letter-spacing:0.18em; text-transform:uppercase;
+          font-weight:600; color:var(--action); margin:0 0 14px; }
+  .row h2 { font-family:'Palatino Linotype','Book Antiqua',Palatino,'Iowan Old Style',Georgia,serif; font-weight:400; font-size:32px; line-height:1.1;
+            margin:0 0 22px; }
+  .row h2 a { color:var(--ink); text-decoration:none;
+              border-bottom:1px solid var(--action); padding-bottom:3px; }
+  .row h2 a:hover { color:var(--action); }
+  .lbl { font-size:17px; letter-spacing:0.18em; text-transform:uppercase;
+         font-weight:600; color:var(--action); margin:0 0 6px; }
+  .val { margin:0 0 18px; max-width:52ch; }
+  .val:last-child { margin-bottom:0; }
+  .dim { color:var(--ink-soft); }
+  footer { padding:0 var(--gut) clamp(64px,10vh,110px); color:var(--soft); max-width:74ch; }
+  footer a { color:var(--gold); }
+  a:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+</style>
+</head>
+<body>
+<header>
+  <p class="eyebrow">Design record</p>
+  <h1>Email templates</h1>
+  <p>Six branded messages. Five are transactional — the app sends them off the back of something somebody did, and their wording is carried across from <code>src/lib/email/bookings.ts</code> and <code>src/lib/email/service-requests.ts</code>. One is marketing: the monthly letter, which Marianne writes and sends herself.</p>
+</header>
+<ul>
+      <li class="row">
+        <p class="kind">Marketing</p>
+        <h2><a href="./newsletter.html">The monthly letter</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">A coat of paint, and the September dates</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">The garden room is repainted and the chair has moved nearer the window. Nothing about the hour has changed.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">Sent by hand from Admin → Newsletter, once a month, usually the first week.</p>
+      </li>
+      <li class="row">
+        <p class="kind">Transactional</p>
+        <h2><a href="./booking-confirmation.html">Booking confirmation</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">Your place on Reading the Field — Sat 20 Sep</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">Saturday 20 September, 10:00–16:30. The Garden Room, Frome. Reference TFW-4417.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">On the Stripe payment_intent.succeeded webhook for a workshop or course place — confirmationEmail() in src/lib/email/bookings.ts.</p>
+      </li>
+      <li class="row">
+        <p class="kind">Transactional</p>
+        <h2><a href="./session-request-received.html">Session request received</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">Your request — First session, with time to ask</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">Thursday 21 August, 10:00–11:30 is held while she decides. It is not booked and nothing has been charged.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">The moment the request form is submitted — requestAcknowledgementEmail() in src/lib/email/service-requests.ts.</p>
+      </li>
+      <li class="row">
+        <p class="kind">Transactional</p>
+        <h2><a href="./session-approved.html">Session approved, with the payment link</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">Yes — First session, with time to ask, Thursday the 21st at 10</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">£95.00, by Saturday 16 August, 5:12pm. After that the link stops working and the time goes back to her.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">When Marianne approves a request in Admin → Requests — approvalEmail() in src/lib/email/service-requests.ts.</p>
+      </li>
+      <li class="row">
+        <p class="kind">Transactional</p>
+        <h2><a href="./balance-due.html">Balance due</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">£330.00 still to pay on Aura Healing: Foundations</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">Due by Monday 8 September. The link works from today and will tell you if it has already been paid.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">No automatic trigger — sent by hand. The app ships this link inside the confirmation instead (D-23); see README.</p>
+      </li>
+      <li class="row">
+        <p class="kind">Transactional</p>
+        <h2><a href="./cancelled-refunded.html">Cancelled and refunded</a></h2>
+        <p class="lbl">Subject</p>
+        <p class="val">Cancelled — Reading the Field, Sat 20 Sep</p>
+        <p class="lbl">Preheader</p>
+        <p class="val dim">£190.00 is on its way back to the card you paid with. Nothing further is needed from you.</p>
+        <p class="lbl">Sent</p>
+        <p class="val dim">When the cancellation link is used and the Stripe refund goes through — cancellationEmail() in src/lib/email/bookings.ts.</p>
+      </li>
+</ul>
+<footer>
+  <p>These are static mockups at 600px, not app code. Nothing here is wired in — the app currently sends plain text. See <a href="./README.md">README.md</a> for what has to change when they become real, and <code>shots/</code> for the rendered proofs at 600px and 375px, with images on and off.</p>
+</footer>
+</body>
+</html>

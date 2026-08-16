@@ -15,7 +15,7 @@ import {
   servicePlace,
   type ServicePlace,
 } from "@/lib/services";
-import { offeredView } from "@/lib/slots";
+import { calendarMonths, offeredView } from "@/lib/slots";
 
 /**
  * READ ON EVERY REQUEST, never built once and served.
@@ -254,6 +254,16 @@ export default async function Page({
    */
   const days = offeredView(await offeredFor(service));
 
+  /**
+   * The calendar the picker draws those times on — every date in the booking
+   * window, whether she can do it or not, with the weekday each one falls on
+   * already worked out. Here rather than in the browser for the reason the
+   * times are: a grid is arithmetic too, and February is arithmetic that goes
+   * wrong every fourth year. It knows nothing about what is free; the panel
+   * matches the two by day.
+   */
+  const months = calendarMonths();
+
   const place = servicePlace(service);
   const film = service.filmUrl ? parseFilm(service.filmUrl) : null;
   const mapUrl =
@@ -447,6 +457,7 @@ export default async function Page({
             slug={service.slug}
             serviceName={service.name}
             days={days}
+            months={months}
           />
         </div>
       </main>

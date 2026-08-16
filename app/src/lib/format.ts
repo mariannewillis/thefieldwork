@@ -80,6 +80,21 @@ export function formatLondonDay(instant: Date): string {
 }
 
 /**
+ * "October 2026" — the heading over one month of the picker's calendar.
+ *
+ * London for the reason `formatLondonDay` above is: the grid is built out of
+ * real instants at midday on each of her days, and the month one of them falls
+ * in is the month it is in Frome.
+ */
+export function formatLondonMonth(instant: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/London",
+  }).format(instant);
+}
+
+/**
  * "Thursday 3 September, 10:00–11:30" — a slot, whole, in one line.
  *
  * What the queue prints, what the two emails print, and what the calendar puts

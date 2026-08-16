@@ -1,4 +1,4 @@
-import { formatLondonDay } from "@/lib/format";
+import { formatLondonDay, formatLondonMonth } from "@/lib/format";
 import {
   clockOfMinutes,
   londonClock,
@@ -376,6 +376,85 @@ export function offeredView(days: OfferedDay[]): OfferedDayView[] {
       clock: londonClock(slot.startsAt),
     })),
   }));
+}
+
+/**
+ * The months the picker draws a calendar over, and every date in them.
+ *
+ * WORKED OUT HERE FOR THE REASON THE TIMES ARE. Which weekday the first of
+ * October falls on is arithmetic like any other, and the browser does none of
+ * it: it is handed numbered cells, each with the day it names in words and a
+ * key, and it decides only which of them is worth drawing as live.
+ *
+ * IT DOES NOT KNOW WHAT IS FREE, deliberately. The offered days travel back and
+ * forth with the form — a refused submission returns a fresh list — and the
+ * grid does not change between one submission and the next. Two facts with two
+ * lifetimes, kept apart, so a stale calendar cannot outlive the times on it. The
+ * picker matches the two by `dayKey` and reads into neither.
+ *
+ * MONTHS WHOLLY OUTSIDE THE WINDOW ARE NOT DRAWN. Sixty days from today reaches
+ * into the month after next at most; offering somebody December in August is
+ * offering them thirty-one dead dates to page through.
+ */
+export type CalendarDate = {
+  /** "2026-10-29" — matched against an offered day, never parsed. */
+  dayKey: string;
+  /** The numeral in the cell. */
+  number: number;
+  /** "Thursday 29 October" — the same words the times underneath are labelled with. */
+  words: string;
+};
+
+export type CalendarMonth = {
+  /** "2026-10". Unique across the run, so it can be a key. */
+  key: string;
+  /** "October 2026" — the heading over the grid. */
+  words: string;
+  /** Blank cells before the 1st. Zero for a month that starts on a Monday. */
+  before: number;
+  dates: CalendarDate[];
+};
+
+export function calendarMonths(now: Date = new Date()): CalendarMonth[] {
+  const today = londonParts(now);
+  const last = londonParts(
+    londonInstant(today.year, today.month, today.day + BOOKING_WINDOW_DAYS, 12),
+  );
+  const span = (last.year - today.year) * 12 + (last.month - today.month) + 1;
+
+  const months: CalendarMonth[] = [];
+  for (let ahead = 0; ahead < span; ahead++) {
+    // Counted in MONTHS rather than in days, and `Date.UTC` rolls a thirteenth
+    // month into the next January on our behalf. Midday, like the day loop
+    // above and for the same reason: nothing here can land on the hour the
+    // clocks move and read as the day before.
+    const first = londonInstant(today.year, today.month + ahead, 1, 12);
+    const p = londonParts(first);
+    // Day zero of the month after is the last day of this one — which is how
+    // February knows about leap years without this file being told.
+    const length = londonParts(londonInstant(p.year, p.month + 1, 0, 12)).day;
+
+    const dates: CalendarDate[] = [];
+    for (let day = 1; day <= length; day++) {
+      const instant = londonInstant(p.year, p.month, day, 12);
+      dates.push({
+        dayKey: londonDayKey(instant),
+        number: day,
+        words: formatLondonDay(instant),
+      });
+    }
+
+    months.push({
+      key: `${p.year}-${String(p.month).padStart(2, "0")}`,
+      words: formatLondonMonth(first),
+      // MONDAY FIRST, the British week — `WEEKDAYS` above reads it in the same
+      // order, and the picker's column headings repeat it.
+      before: p.weekday - 1,
+      dates,
+    });
+  }
+
+  return months;
 }
 
 /**

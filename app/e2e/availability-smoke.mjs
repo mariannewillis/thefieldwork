@@ -375,23 +375,49 @@ async function panelOf(page) {
   return panel.innerText();
 }
 
+/**
+ * Step one: press a date.
+ *
+ * Pages the calendar forward until the month the date is in is the one on
+ * screen, which is what somebody looking for a date next month does. FORCED,
+ * because the radio is `sr-only` and its label sits over it — that is the
+ * design, the cell IS the label, and a real person presses the cell.
+ */
+async function pickDate(page, dayKey) {
+  const cell = page.locator(`input[name="date"][value="${dayKey}"]`);
+  const back = page.locator('button[aria-label="Earlier month"]');
+
+  // Wound back to the first month and then forward, rather than forward alone:
+  // the calendar opens on the month of the soonest free date, and a date chosen
+  // earlier in this run may have left it further on than the one wanted now.
+  for (let month = 0; month < 4 && !(await back.isDisabled()); month++) {
+    await back.click();
+  }
+  for (let month = 0; month < 4 && (await cell.count()) === 0; month++) {
+    await page.click('button[aria-label="Later month"]');
+  }
+  await cell.check({ force: true });
+}
+
+/** Every time SHOWING, as clock readings. The other dates' are display:none. */
+async function shownClocks(page) {
+  const values = await page
+    .locator('input[name="slot"]:visible')
+    .evaluateAll((nodes) => nodes.map((node) => node.value));
+  return values.map((value) => london(new Date(value)));
+}
+
 /** Everything but the press — so two of them can be raced against each other. */
 async function fillIn(page, slug, { slot, name, email }) {
   await page.goto(`${BASE}/services/${slug}`);
   await page.fill('input[name="name"]', name);
   await page.fill('input[name="email"]', email);
 
-  // The panel shows ten days and puts the rest behind "Later dates". It is a
-  // real `<details>`, so opening it is one press and needs no script — but a
-  // radio inside a closed one has no box to click, which is what a person would
-  // find too. Opened here for the same reason they would open it.
-  const later = page.locator("details");
-  if ((await later.count()) > 0)
-    await later.first().evaluate((el) => (el.open = true));
-
   if (slot) {
-    // FORCED, because the radio is `sr-only` and its label sits over it. That is
-    // the design — the chip IS the label — and a real person clicks the chip.
+    // TWO STEPS since D-27 — the date, and then the time on it. A time under a
+    // date that is not showing has no box to click, which is what a person
+    // would find too, so the date is pressed first exactly as they would.
+    await pickDate(page, london(new Date(slot)).day);
     await page
       .locator(`input[name="slot"][value="${slot}"]`)
       .check({ force: true });
@@ -603,6 +629,113 @@ try {
     before.includes("09:00") && before.includes("15:30"),
     before.join(" "),
   );
+
+  // ── the picker itself, as somebody uses it ───────────────────────────────
+  //
+  // The same claim as the arithmetic above, made through the two steps rather
+  // than off the delivered HTML: a date first, then the times on THAT date and
+  // no other, and the last of them is still half past three (D-27).
+  console.log("\n── a date first, then the times on it ──\n");
+
+  const picker = await browser.newPage();
+  await picker.goto(`${BASE}/services/${ninety}`);
+
+  const live = picker.locator('input[name="date"]:not([disabled])');
+  const crossedOff = picker.locator('input[name="date"][disabled]');
+  const liveCount = await live.count();
+  const crossedOffCount = await crossedOff.count();
+  ok(
+    "step one is a month of dates, some she can do and some she cannot",
+    liveCount > 0 && crossedOffCount > 0,
+    `${liveCount} she can do, ${crossedOffCount} crossed off`,
+  );
+
+  const offeredDays = new Set(first.slots.map((slot) => london(slot).day));
+  const crossedOffDay = await crossedOff.first().getAttribute("value");
+  ok(
+    "a date with nothing free is drawn, and cannot be chosen",
+    !offeredDays.has(crossedOffDay),
+    crossedOffDay,
+  );
+  ok(
+    "and says so in words rather than only looking faint",
+    /nothing free/.test(
+      (await crossedOff.first().getAttribute("aria-label")) ?? "",
+    ),
+    await crossedOff.first().getAttribute("aria-label"),
+  );
+
+  await pickDate(picker, clearDay);
+  const onIt = await shownClocks(picker);
+
+  ok(
+    "choosing a date shows times, and only that date's",
+    onIt.length > 0 && onIt.every((slot) => slot.day === clearDay),
+    [...new Set(onIt.map((slot) => slot.day))].join(" "),
+  );
+  ok(
+    "THE LAST ONE IT OFFERS IS 15:30 — the operator's own sum, through the picker",
+    onIt.some((slot) => slot.clock === "15:30"),
+    onIt.map((slot) => slot.clock).join(" "),
+  );
+  ok(
+    "and there is nothing after it on the page at all",
+    !onIt.some((slot) => slot.clock > "15:30"),
+    onIt
+      .map((slot) => slot.clock)
+      .sort()
+      .at(-1),
+  );
+  ok(
+    "exactly one date's times are showing",
+    (await picker.locator(".pick-day:visible").count()) === 1,
+    String(await picker.locator(".pick-day:visible").count()),
+  );
+
+  // A second date, to prove the first one's times went with it rather than
+  // piling up underneath.
+  const otherDay = [...offeredDays].find((day) => day !== clearDay);
+  await pickDate(picker, otherDay);
+  const onOther = await shownClocks(picker);
+  ok(
+    "and choosing another date replaces them rather than adding to them",
+    onOther.length > 0 && onOther.every((slot) => slot.day === otherDay),
+    [...new Set(onOther.map((slot) => slot.day))].join(" "),
+  );
+
+  // ── the keyboard ─────────────────────────────────────────────────────────
+  //
+  // Tab from the last text field and see what it lands on. A radio group is
+  // entered once and left once — the arrow keys move inside it — so a date and
+  // a time should each be reached in turn without touching the mouse.
+  await picker.locator('input[name="phone"]').focus();
+  const landed = [];
+  for (let press = 0; press < 30; press++) {
+    await picker.keyboard.press("Tab");
+    landed.push(
+      await picker.evaluate(() =>
+        document.activeElement
+          ? `${document.activeElement.tagName.toLowerCase()}:${
+              document.activeElement.getAttribute("name") ?? ""
+            }`
+          : "",
+      ),
+    );
+    if (landed.includes("input:slot")) break;
+  }
+  ok(
+    "a date is reachable with the Tab key alone",
+    landed.includes("input:date"),
+    landed.join(" "),
+  );
+  ok(
+    "and so is a time, after it",
+    landed.indexOf("input:slot") > landed.indexOf("input:date") &&
+      landed.indexOf("input:date") >= 0,
+    landed.join(" "),
+  );
+
+  await picker.close();
 
   await makeWorkshop({
     slug: `smoke-avail-margin-${stamp}`,

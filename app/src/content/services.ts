@@ -110,14 +110,25 @@ export const serviceDetail = {
     optional: "optional",
 
     /**
-     * The picker. Only the times she can actually do are here — worked out
-     * against her whole diary when this page was drawn, and checked again the
-     * moment you send it.
+     * The picker, in the order somebody decides in: a date first, then the
+     * times left on it (D-27). Only what she can actually do is here — worked
+     * out against her whole diary when this page was drawn, and checked again
+     * the moment you send it.
+     *
+     * The date step names the crossing-off, because a date drawn faintly and a
+     * date drawn crossed through mean the same thing only if somebody is told
+     * which. The screen-reader label says it in words on every dead date.
      */
+    pickDateLabel: "Choose a date",
+    pickDateNote:
+      "The dates she still has time on can be chosen. The rest are crossed off.",
+    pickNothingFree: "nothing free",
+    pickMonthBack: "Earlier month",
+    pickMonthOn: "Later month",
+
     pickLabel: "Choose a time",
     pickNote:
       "These are the times she has left for this one. All times are UK time.",
-    pickLater: "Later dates",
     /** Above the list, when there is nothing in it. Not an error — an answer. */
     pickNoneTitle: "Nothing free in the next two months",
     pickNoneBody:

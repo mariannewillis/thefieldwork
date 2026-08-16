@@ -2209,3 +2209,102 @@ npm run db:deploy
 **Restart the app after deploying**, for the reason D-23, D-24 and D-25 all give:
 a running server holds a Prisma client generated against the old schema and will
 fail on the new columns until it is restarted.
+
+---
+
+## D-27 · The slot picker becomes a date, and then a time (2026-08-16)
+
+D-26 shipped the picker as one flat stack: every offered day in order, each with
+its clock times under it as chips, the first ten showing and the rest behind a
+"Later dates" disclosure. It was accurate. On the live ninety-minute service it
+was also **578 half-hours across 42 days on one page**, and the operator's own
+reading of it was the whole brief for this change:
+
+> "I just checked the book service form and we have a list of available slots —
+> this should be a date time picker — first a client selects the date and then
+> available times."
+
+He is right, and the reason is not length. Somebody arrives at that panel already
+holding a date — the Thursday they can get childcare for — and the flat list
+makes them walk down it to find out whether she can do it. A month grid answers
+that question in the shape everybody already knows, and it answers it for the
+days she CANNOT do just as plainly: those dates are **drawn and crossed off**
+rather than left out, because a gap where a Tuesday should be tells nobody
+anything.
+
+### Nothing underneath it moved
+
+The availability engine is untouched. `offeredSlots()` and `offeredView()`
+already returned days each carrying its own slots — the grouping this needed was
+computed the day D-26 shipped. The posted value is the same opaque ISO instant,
+the re-check inside the transaction is the same `slotVerdict`, a slot can still
+go while somebody is deciding and the panel still says so and sends the fresh
+list back with the refusal.
+
+**The words path is unchanged and still load-bearing.** A service with no days
+set, and one whose next two months are full, both arrive with nothing to offer,
+and both get D-24's free-text panel sentence for sentence. A calendar with every
+date dead is a worse answer than a sentence.
+
+### The grid is computed on the server too
+
+`calendarMonths()` in `lib/slots.ts` returns the months the window touches, each
+with its dates, the weekday the 1st falls on, and every date's day in words. The
+browser is handed numbered cells and matches them to offered days by key. It
+reads into neither. Which weekday the first of October falls on is arithmetic
+like any other, and February is arithmetic that goes wrong every fourth year.
+
+The grid does **not** know what is free, deliberately: the offered days travel
+back and forth with the form and the grid does not change between one submission
+and the next. Two facts with two lifetimes, kept apart, so a stale calendar
+cannot outlive the times drawn on it.
+
+### It needs script, and that was not the first choice
+
+A radio per date plus `:has()` can reveal one day's times with no JavaScript at
+all, and that was tried first — it keeps the panel working exactly as it does
+today. It was rejected for **correctness, not accessibility**: CSS can hide the
+other dates' times but it cannot let go of a time already chosen under one of
+them. Someone who picks Thursday at ten, changes their mind and picks Friday
+would post Thursday at ten out of an input they can no longer see, and the
+acknowledgement in their inbox would name a day they were not looking at. Only
+script can un-press it.
+
+The two ways round it were both worse: putting the dates and the times in ONE
+radio group (so choosing a date clears the time by definition) gives a screen
+reader a single group of seven hundred controls mixing dates with clock times;
+generating a stylesheet rule per offered day gives sixty hand-rolled `:has()`
+selectors nobody can maintain.
+
+So the step is React state, in a component that was already a client component
+for its own reasons — and **without script the two steps collapse back into the
+one list they replaced.** A `<noscript>` rule hides the calendar and shows every
+day at once, which is the panel D-26 shipped, working exactly as it did. All 578
+times are in the delivered HTML either way, so a static screenshot of the page is
+still the finished composition.
+
+### Two smaller consequences, named rather than left to be found
+
+- **The time radios are no longer `required`.** A radio group is required as a
+  whole and the browser reports it on the first radio in the group — which, once
+  the other days are `display:none`, is usually not on screen. Chrome then
+  refuses to submit and tells nobody why. The server has always answered the
+  empty case in a sentence ("Pick a time from the list before you send this")
+  and the panel draws it against that fieldset; that is the check that runs now.
+- **The calendar posts a `date` field the action ignores.** It is the radio
+  group's name. Nothing reads it, and nothing may: which date a slot is on is a
+  fact about the instant that was posted, not a second field to keep in step.
+
+### Accessibility
+
+Dates and times are both radio groups — arrow keys inside, Tab between, which is
+what a keyboard and a screen reader already understand. Each time still announces
+the day with it ("Thursday 3 September at 10:00"). Dates she cannot do are
+`disabled` AND say "nothing free" in their label, so they are marked rather than
+merely greyed. The month name is a polite live region, and a visually-hidden
+status line names the chosen date and how many times are under it.
+
+`e2e/availability-smoke.mjs` drives all of it through the browser, including the
+operator's own acceptance test — ninety minutes finishing by five means the last
+offered time is 15:30 and there is nothing after it — asserted through the new
+picker rather than off the HTML. 107 checks, up from 97.
