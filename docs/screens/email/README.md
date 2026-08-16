@@ -1,9 +1,17 @@
 # Email templates — design record
 
-Six branded HTML messages for The Field Work, as static mockups. **These are
-design records, like the rest of `docs/screens/`. Nothing here is wired into the
-app.** The app currently sends **plain text only** — see "What has to change"
-below.
+> **These are now WIRED IN (D-28, 2026-08-16).** `app/src/lib/email/render.ts`
+> is this directory's `_build.mjs` promoted into the app, and every message the
+> site sends to a visitor now carries an HTML half built from it alongside the
+> plain text. The six points under "What has to change" below each
+> carry a note saying what landed and what did not. These files stay the design record and remain the
+> specification the renderer is checked against; edit `_build.mjs` and the
+> renderer together, or they drift.
+
+Six branded HTML messages for The Field Work. **These are design records, like
+the rest of `docs/screens/`**, and they are also the specification the app's
+renderer is held to — the smoke test asserts the rules below against the HTML
+the app actually emits.
 
 Open `index.html` (the contact sheet) through the project's static server:
 
@@ -83,7 +91,7 @@ somebody wants them.
 
 ## What has to change when these become real code
 
-1. **Absolute asset URLs must resolve.** Every `src` and `href` is absolute
+1. **DONE.** **Absolute asset URLs must resolve.** Every `src` and `href` is absolute
    against `https://thefieldwork.co.uk`, which is correct — an email has no
    document base, so a relative path resolves against `mail.google.com` and
    404s. In code they should be built from `SITE_URL` in `src/content/site.ts`,
@@ -92,7 +100,9 @@ somebody wants them.
    would carry preview URLs into somebody's inbox forever, so email assets want
    `CANONICAL_SITE_URL`.
 
-2. **The wordmark has to exist as a PNG, and it does not yet.**
+2. **DONE** — `scripts/build-email-logo.mjs` generates it and
+   `app/public/brand/logo-horizontal@2x.png` is committed.
+   **The wordmark has to exist as a PNG, and it does not yet.**
    `app/public/logo-horizontal.svg` is the only version. **No mail client
    renders SVG** — Gmail, Outlook and Yahoo all strip it. The templates point at
    `/brand/logo-horizontal@2x.png` (880×240, displayed at 280×76), which needs
@@ -103,26 +113,32 @@ somebody wants them.
    contingency for the mark, and it is why there is no second text wordmark
    beside it.
 
-3. **Photographs must be JPEG or PNG.** The site serves AVIF and WebP
+3. **STILL TRUE, and unenforced.** **Photographs must be JPEG or PNG.** The site serves AVIF and WebP
    derivatives. Outlook for Windows renders neither. `window-last-light-1200.jpg`
    already exists; any picture added to a letter needs its `.jpg` derivative
    present.
 
-4. **The unsubscribe token.** `newsletter.html` links to
+4. **SCHEMA DONE, ROUTE PENDING** — `Subscriber.unsubscribeToken` exists
+   (per recipient, single row, stored in the clear because it is printed into
+   every letter). The page and the `List-Unsubscribe` header are the newsletter
+   pass. **The unsubscribe token.** `newsletter.html` links to
    `/unsubscribe/9c1f4a7be2` — a placeholder. The real one is per-recipient,
    single-use, and the page behind it already exists as a design
    (`docs/screens/webapp/unsubscribe.html`, which has the used / expired states
    drawn). A `List-Unsubscribe` header should go out alongside the visible link;
    Gmail and Apple Mail surface it as a one-tap control above the message.
 
-5. **The app currently sends plain text.** `sendMail` takes `{to, subject,
+5. **DONE.** `Mail` has `html`, `sendMail` sends both parts, and the plain
+   text is unchanged. **The app currently sends plain text.** `sendMail` takes `{to, subject,
    text}`. Adding HTML means adding an `html` field and sending
    **multipart/alternative with both parts** — never HTML alone. The existing
    plain text is the alternative part, unchanged; these templates are the HTML
    one. That also keeps the messages readable in a client that refuses HTML, and
    it is what stops them scoring as spam.
 
-6. **Content regions are marked in `_build.mjs`.** The newsletter body is built
+6. **RENDERER DONE, EDITOR PENDING** — all five block kinds plus the
+   attachment plate exist in `render.ts::Block`; the editor that composes them
+   is the newsletter pass. **Content regions are marked in `_build.mjs`.** The newsletter body is built
    from exactly the five block kinds the admin editor offers — heading,
    paragraph, image, upcoming offerings, button — plus the optional
    attached-document plate. Each is bracketed `BLOCK` / `/BLOCK` and can be

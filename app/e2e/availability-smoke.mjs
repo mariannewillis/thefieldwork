@@ -481,8 +481,8 @@ const { rows: b25 } = await db.query(
   `SELECT id, "totalPence", status, "workshopId" FROM "Booking" WHERE id = 25`,
 );
 const { rows: hisBefore } = await db.query(
-  `SELECT id, status, "preferredTime", "slotStart" FROM "ServiceRequest"
-   WHERE id IN (3,4) ORDER BY id`,
+  `SELECT id, status, "preferredTime", "slotStart", "approvedAt"
+   FROM "ServiceRequest" WHERE id IN (3,4) ORDER BY id`,
 );
 const { rows: credBefore } = await db.query(
   `SELECT "credentialVersion" FROM "AdminUser" WHERE username <> $1 ORDER BY id LIMIT 1`,
@@ -499,12 +499,16 @@ const browser = await chromium.launch();
 try {
   console.log("\n── the migration left his data exactly where it was ──\n");
 
+  // The words-and-no-slot part is what the migration promised, and it holds
+  // however the operator later answers these. His STATUS is his own business —
+  // request 3 was approved and paid in a manual test, which turned this suite
+  // red without a line of code changing. What is checked at the end is that
+  // this run left them as it found them.
   ok(
-    "requests 3 and 4 are still pending, still carry their own words, and have no slot",
+    "requests 3 and 4 still carry their own words and have no slot",
     hisBefore.length === 2 &&
       hisBefore.every(
         (r) =>
-          r.status === "pending" &&
           typeof r.preferredTime === "string" &&
           r.preferredTime.length > 0 &&
           r.slotStart === null,
@@ -1384,17 +1388,17 @@ try {
      WHERE id IN (3,4) ORDER BY id`,
   );
   ok(
-    "requests 3 and 4 are still pending, still wordy, still unanswered, still without a slot",
+    "requests 3 and 4 are exactly as this run found them",
     hisAfter.length === 2 &&
       hisAfter.every((r, i) => {
         return (
-          r.status === "pending" &&
-          r.approvedAt === null &&
+          r.status === hisBefore[i].status &&
+          String(r.approvedAt) === String(hisBefore[i].approvedAt) &&
           r.slotStart === null &&
           r.preferredTime === hisBefore[i].preferredTime
         );
       }),
-    JSON.stringify(hisAfter),
+    JSON.stringify({ before: hisBefore, after: hisAfter }),
   );
 
   const { rows: credAfter } = await db.query(

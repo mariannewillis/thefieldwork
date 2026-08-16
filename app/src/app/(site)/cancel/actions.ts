@@ -14,6 +14,7 @@ import {
   cancellationNoticeEmail,
   sendBookingMail,
 } from "@/lib/email/bookings";
+import { loadWording } from "@/lib/email/templates";
 
 /**
  * Giving a place back.
@@ -58,7 +59,10 @@ export async function cancelPlace(formData: FormData): Promise<void> {
           ? await coursePlacesSold(offering.id)
           : 0;
     const left = placesLeft(offering.capacity, sold);
-    await sendBookingMail(cancellationEmail(result.booking), "cancellation");
+    await sendBookingMail(
+      cancellationEmail(result.booking, "buyer", await loadWording()),
+      "cancellation",
+    );
     await sendBookingMail(
       cancellationNoticeEmail(result.booking, left),
       "cancellation notice",

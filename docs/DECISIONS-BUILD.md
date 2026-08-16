@@ -2308,3 +2308,115 @@ status line names the chosen date and how many times are under it.
 operator's own acceptance test — ninety minutes finishing by five means the last
 offered time is 15:30 and there is nothing after it — asserted through the new
 picker rather than off the HTML. 107 checks, up from 97.
+## D-28 · Every letter is branded and multipart; she owns three sentences of it and nothing else (2026-08-16)
+
+Six finished HTML designs sat in `docs/screens/email/` and the app sent plain
+text. This wires them in, and answers the question the operator asked with them:
+what may Marianne change about what people receive?
+
+**Three parts of each message, and no more.** The subject, the opening and the
+sign-off. Everything load-bearing — the amount, the date, the venue, the
+deadline, the booking reference, the cancellation link, the pay link — is
+emitted by code into a block of its own and is not reachable from anything she
+types. That is the whole point of the choice rather than a side effect of it:
+**no edit she makes can stop somebody paying.**
+
+**Nine, not fifteen.** Booking confirmation · balance paid · cancellation ·
+refund issued · could-not-be-honoured · request acknowledgement · session
+approved · session declined · password reset. The six notices that go to her own
+inbox stay code-owned plain text and are not on the screen: they are read on a
+phone in a hurry, and branding an alarm is decoration.
+
+### What was built
+
+- **`src/lib/email/render.ts`** — the renderer. `docs/screens/email/_build.mjs`
+  promoted out of a design record and into the app: one masthead, one footer,
+  one palette, one type ramp, and a small set of BLOCKS (headline, paragraph,
+  facts, figure, button, image, offerings, attachment) that a message is a list
+  of. Every constraint the design pass established is carried across —
+  tables-only, inline styles, 600px, no background images, no web fonts, the
+  three dark-mode opt-outs, a preheader per message, and **no fact ever set in
+  gold** (Gmail's Android app force-inverts and honours no opt-out, so an
+  inverted eyebrow may cost a label, never a date, an amount or a link). The
+  smoke asserts each of those on the emitted HTML rather than trusting it.
+- **`Mail` gains `html`, and `sendMail` sends both parts.** Never HTML alone —
+  the existing plain text goes unchanged as the alternative, which is what keeps
+  a message readable in a client that refuses HTML and what stops it scoring as
+  spam. The six notices carry no `html` and are sent as text alone.
+- **`EmailTemplate`** — one row per editable message, every column nullable.
+  Null or blank means "as the app writes it", and the app's own wording is
+  branch-aware in a way one stored sentence cannot be: a workshop confirmation,
+  a course confirmation and a paid session say three different true things. So a
+  template she has never touched, and one she has emptied, both send exactly
+  what the app sent before the screen existed. The screen still opens showing
+  that wording, because the seed lives in `src/lib/email/wording.ts` beside each
+  template's placeholders.
+- **`/admin/email-templates`** — a new rail entry between Newsletter and
+  Subscribers. The nine listed, each openable, with the three fields, the list
+  of what the app owns drawn in the plum beside them, a reset, and **a preview
+  rendered by the real composer** with representative facts. Not a second
+  rendering path: a change that broke a letter breaks the preview in the same
+  way at the same moment.
+- **`public/brand/logo-horizontal@2x.png`** — 880×240, generated from the SVG by
+  `scripts/build-email-logo.mjs` and committed. No mail client renders SVG.
+
+### How the guard actually works
+
+Three mechanical things, none of them a validator anybody has to remember:
+
+1. **Her text is never a document, only a slot.** A message is a list of blocks;
+   her three strings land in three of them as text. There is no code path on
+   which a string from `EmailTemplate` becomes an element, an attribute, a URL
+   or a style.
+2. **It is escaped on the way in.** `render.ts` exports a `Safe` type that can
+   only be produced by escaping first, and every block value is either a `Safe`
+   or escaped by the renderer. A `<script>` she pastes arrives in the letter as
+   the characters `<script>`, in blush, in Palatino — which is in the proof
+   shots.
+3. **A subject cannot carry a newline.** Subjects become a header, and a newline
+   in a header value is how a second `Bcc:` gets injected. Every C0/C1 control
+   character is stripped before the string leaves `wording.ts`.
+
+Placeholders (`{{amount}}`, `{{when}}`, `{{offering}}`…) are substituted before
+escaping, so they cannot smuggle markup either, and **every placeholder value
+also appears in a block the code owns** — deleting one loses a nicety and never
+a fact.
+
+### The schema, and what the newsletter pass builds on it
+
+One migration, `20260816120000_add_email_templates_and_newsletters`, lays down
+the whole surface for both passes so the second never has to alter a table the
+first pass's screen is live against. Five models:
+
+| Model                  | What it holds                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EmailTemplate`        | key + nullable subject / opening / signOff. Nine rows seeded, all null.                                                                           |
+| `Subscriber`           | email, optional name, `joinedAt`, `confirmedAt`, `unsubscribedAt`, `unsubscribeToken`. Dates rather than flags — PECR wants evidence, not `true`. |
+| `Newsletter`           | subject, preheader, masthead label, `draft`/`sent`, `sentAt`, `recipientCount` frozen at send, `duplicatedFromId`.                                |
+| `NewsletterBlock`      | position + one of the five kinds the editor offers (heading, paragraph, image, offerings, button).                                                |
+| `NewsletterAttachment` | filename, `storedAs`, contentType, bytes, `attached` \| `linked`.                                                                                 |
+| `NewsletterSend`       | one row per recipient per letter — `pending`/`delivered`/`failed`, the address frozen, `subscriberId` nullable on delete.                         |
+
+Two decisions inside that are the operator's, made here:
+
+- **A sent letter is locked.** Forty people are holding a copy of what it said,
+  and a record that can be changed afterwards is not a record. The screen
+  duplicates a sent letter into a new draft, which is what "edit last month's"
+  actually means.
+- **Two megabytes attaches; more becomes a link.** Past a couple of megabytes an
+  attachment costs deliverability — spam weighting, corporate gateways, and
+  recipients whose own limit bounces the whole message rather than trimming the
+  file. `src/lib/newsletter/attachments.ts` holds the thresholds (2 MB per file,
+  4 MB across a letter, 25 MB hard upload ceiling) and `deliveryFor()` decides
+  at upload time so the screen can say which is happening before she sends.
+  Nothing is refused for being large; it travels differently.
+
+The second pass builds the newsletter editor, the send modal with its per-
+recipient records, the subscribers table, the public subscribe page and the
+unsubscribe route. It should not need to touch `prisma/schema.prisma`.
+
+`e2e/email-templates-smoke.mjs` — 94 checks, including the guard exercised with
+a script tag, an anchor, an `onerror` and a CRLF subject; a template with no row
+and one with blank fields both rendering byte-identically to the app's own
+wording; and a real send asserted to carry both parts. Proofs at 600px and 375px
+in `e2e/_email-shots/`.

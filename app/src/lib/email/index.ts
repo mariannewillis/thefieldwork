@@ -1,6 +1,8 @@
 import "server-only";
 import { Resend } from "resend";
 import { SITE_URL } from "@/content/site";
+import { copy, renderLetter, type Block } from "./render";
+import { resolveSlots, type Wording } from "./wording";
 
 /**
  * Sending email, behind a port.
@@ -21,6 +23,16 @@ export type Mail = {
   to: string;
   subject: string;
   text: string;
+  /**
+   * The branded half, when there is one.
+   *
+   * OPTIONAL, AND NEVER THE ONLY HALF. The six notices that go to Marianne's
+   * own inbox have none and are sent as text alone — they are read on a phone
+   * in a hurry and branding an alarm is decoration. The nine that reach a
+   * visitor carry both parts, and `sendMail` refuses to send HTML without the
+   * text: see the note on the send below.
+   */
+  html?: string;
   /** Where replies should land. Defaults to EMAIL_REPLY_TO. */
   replyTo?: string;
 };
@@ -52,11 +64,33 @@ const FROM =
  */
 const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "marianne@thefieldwork.co.uk";
 
+/**
+ * Send it, as multipart/alternative when there is a branded half.
+ *
+ * BOTH PARTS OR TEXT ALONE — never HTML alone, and that is a rule rather than a
+ * preference. Three things depend on it:
+ *
+ *  - A client that refuses HTML, or a person who has turned it off, still gets
+ *    the whole message. The plain text in `bookings.ts` and
+ *    `service-requests.ts` is not a fallback written to be a fallback; it is
+ *    the wording, and it says everything the branded half says.
+ *  - Spam scoring. An HTML-only message with no text alternative is one of the
+ *    oldest heuristics there is, and a confirmation somebody has just paid for
+ *    landing in junk is worse than an unbranded one landing in the inbox.
+ *  - A forward as plain text, a screen reader, and a search of an inbox two
+ *    months later all read the text part.
+ *
+ * The text is passed through UNCHANGED. Nothing here derives one part from the
+ * other; both are composed side by side and the two say the same thing because
+ * they were written from the same slots.
+ */
 export async function sendMail(mail: Mail): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
 
   if (!key) {
     // Deliberately loud and complete. During development this IS the inbox.
+    // The HTML is reported by size rather than printed: 11kB of table markup in
+    // a terminal buries the message it is a copy of.
     console.info(
       [
         "",
@@ -64,6 +98,7 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
         `To:       ${mail.to}`,
         `Reply-To: ${mail.replyTo ?? REPLY_TO}`,
         `Subject:  ${mail.subject}`,
+        `Parts:    text${mail.html ? ` + html (${(mail.html.length / 1024).toFixed(1)}kB)` : " only"}`,
         "",
         mail.text,
         "──────────────────────────────────────────────────────────────",
@@ -81,6 +116,10 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
       replyTo: mail.replyTo ?? REPLY_TO,
       subject: mail.subject,
       text: mail.text,
+      // Given both, Resend builds a multipart/alternative body with the text
+      // first and the HTML second, which is the order RFC 2046 asks for: a
+      // client shows the last part it understands.
+      ...(mail.html ? { html: mail.html } : {}),
     });
     if (error) return { delivered: false, via: "resend", error: error.message };
     return { delivered: true, via: "resend" };
@@ -93,21 +132,85 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
   }
 }
 
-/** The reset email. Plain text on purpose — it is one sentence and a link. */
-export function resetEmail(token: string, username: string): Omit<Mail, "to"> {
+/**
+ * The reset email.
+ *
+ * The one message here that reaches a person rather than a booking, and the
+ * ninth of the nine she may reword. Its opening and its closing reassurance are
+ * hers; the link, and the two sentences saying the link works once and expires
+ * in an hour, are not — those are the whole reason the message exists.
+ *
+ * THE LINK IS BUILT FROM SITE_URL AND NOT FROM THE CANONICAL ORIGIN, unlike the
+ * logo in the masthead. A reset token is minted by one deployment and only that
+ * deployment can spend it, so a preview's reset link has to point at the
+ * preview. Assets are the other way round — see `render.ts`.
+ */
+export function resetEmail(
+  token: string,
+  username: string,
+  wording: Wording = {},
+): Omit<Mail, "to"> {
   const link = `${SITE_URL}/admin/reset-password?token=${token}`;
+
+  const slots = resolveSlots(
+    "passwordReset",
+    wording,
+    {
+      subject: "Reset your password — The Field Work",
+      opening: `Someone asked to reset the password for ${username} on The Field Work.`,
+      signOff:
+        "If it wasn't you, you can ignore this. Nothing has changed, and your current password still works.",
+    },
+    { username },
+  );
+
   return {
-    subject: "Reset your password — The Field Work",
+    subject: slots.subject,
     text: [
-      `Someone asked to reset the password for ${username} on The Field Work.`,
+      slots.opening.text,
       "",
       "If that was you, open this link and choose a new one:",
       link,
       "",
       "The link works once and expires in 60 minutes.",
-      "",
-      "If it wasn't you, you can ignore this. Nothing has changed, and your",
-      "current password still works.",
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
     ].join("\n"),
+    html: renderLetter({
+      subject: slots.subject,
+      preheader:
+        "Open the link to choose a new password. It works once and expires in 60 minutes.",
+      mastheadLabel: "Your password",
+      sections: [
+        {
+          ground: "pool",
+          blocks: [
+            ...slots.opening.html.map((text): Block => ({
+              kind: "headline",
+              text,
+              size: 30,
+            })),
+          ],
+        },
+        {
+          ground: "pool",
+          blocks: [
+            { kind: "eyebrow", text: copy("If that was you") },
+            { kind: "button", label: "Choose a new password", href: link },
+            { kind: "rule" },
+            {
+              kind: "paragraph",
+              text: copy("The link works once and expires in *60 minutes*."),
+            },
+            ...(slots.signOff
+              ? slots.signOff.html.map((text): Block => ({
+                  kind: "note",
+                  text,
+                }))
+              : []),
+          ],
+        },
+      ],
+      why: "You are getting this because somebody asked to reset the password on The Field Work's portal. It is not a mailing list.",
+    }),
   };
 }

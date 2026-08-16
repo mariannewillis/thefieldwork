@@ -16,6 +16,7 @@ import {
   refundIssuedEmail,
   sendBookingMail,
 } from "@/lib/email/bookings";
+import { loadWording } from "@/lib/email/templates";
 import { getSession } from "@/lib/auth/server";
 
 /**
@@ -117,7 +118,7 @@ export async function cancelPlace(
   // about the money is what the ledger says. Both endings are told about — the
   // ordinary one, and the one where the place came back and the money did not.
   await sendBookingMail(
-    cancellationEmail(result.booking, "marianne"),
+    cancellationEmail(result.booking, "marianne", await loadWording()),
     "cancellation (from the portal)",
   );
 
@@ -174,7 +175,10 @@ export async function refundPlace(
     };
   }
 
-  await sendBookingMail(refundIssuedEmail(result.booking), "refund");
+  await sendBookingMail(
+    refundIssuedEmail(result.booking, await loadWording()),
+    "refund",
+  );
   revalidateEverywhere(booking);
   return { error: null, done: Date.now() };
 }

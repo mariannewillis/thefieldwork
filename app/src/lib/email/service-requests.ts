@@ -8,6 +8,13 @@ import {
 } from "@/lib/format";
 import { placeInOneLine, servicePlace } from "@/lib/services";
 import { sendMail, type Mail } from "./index";
+import { copy, copyOnPlate, plain, renderLetter, type Block } from "./render";
+import {
+  openingBlocks,
+  resolveSlots,
+  signOffBlocks,
+  type Wording,
+} from "./wording";
 
 /**
  * The two emails a request sends.
@@ -185,13 +192,28 @@ export function requestNoticeEmail(
 export function requestAcknowledgementEmail(
   service: RequestedService,
   request: SubmittedRequest,
+  wording: Wording = {},
 ): Mail {
+  const slots = resolveSlots(
+    "requestAcknowledgement",
+    wording,
+    {
+      subject: `Your request — ${service.name}`,
+      opening: `Thank you. Your message about ${service.name} has arrived, and Marianne\nwill read it and write back herself.`,
+      signOff: "If any of that is wrong, reply to this email and say so.",
+    },
+    {
+      service: service.name,
+      name: request.name,
+      when: whenLine(request),
+    },
+  );
+
   return {
     to: request.email,
-    subject: `Your request — ${service.name}`,
+    subject: slots.subject,
     text: [
-      `Thank you. Your message about ${service.name} has arrived, and Marianne`,
-      "will read it and write back herself.",
+      slots.opening.text,
       "",
       ...(request.slotStart
         ? [
@@ -211,13 +233,100 @@ export function requestAcknowledgementEmail(
       request.slotStart ? "THE TIME YOU CHOSE" : "WHEN YOU SAID WOULD SUIT YOU",
       whenLine(request),
       ...(request.message ? ["", "WHAT YOU WROTE", request.message] : []),
-      "",
-      "If any of that is wrong, reply to this email and say so.",
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       `${SITE_URL}/services/${service.slug}`,
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: request.slotStart
+        ? `${whenLine(request)} is held while she decides. It is not booked and nothing has been charged.`
+        : "Nothing is booked yet and nothing has been charged. Marianne will write back herself.",
+      mastheadLabel: "Your request has arrived",
+      sections: [
+        { ground: "pool", blocks: openingBlocks(slots.opening, 30) },
+
+        /* THE ONE THING THIS MESSAGE EXISTS TO SAY, and the one thing somebody
+           will get wrong if it is not said before they can assume otherwise.
+           On the plate, in blush, at display size — it is the message, not a
+           note attached to it (D-26). */
+        {
+          ground: "plate",
+          blocks: request.slotStart
+            ? ([
+                {
+                  kind: "eyebrow",
+                  text: "That time is held while she decides",
+                },
+                {
+                  kind: "headline",
+                  text: copy("Nobody else is being offered it."),
+                  size: 30,
+                },
+                {
+                  kind: "paragraph",
+                  text: copyOnPlate(
+                    "It is *not* booked and nothing has been charged — she may still write back and suggest another time — but it is not going anywhere in the meantime.",
+                  ),
+                },
+              ] as Block[])
+            : ([
+                { kind: "eyebrow", text: "Nothing is booked yet" },
+                {
+                  kind: "headline",
+                  text: copy("No time has been held."),
+                  size: 30,
+                },
+                {
+                  kind: "paragraph",
+                  text: copyOnPlate(
+                    "Nothing has been charged. When she writes back you will agree a time between you.",
+                  ),
+                },
+              ] as Block[]),
+        },
+
+        {
+          ground: "pool",
+          blocks: [
+            {
+              kind: "factList",
+              items: [
+                {
+                  label: "What you asked for",
+                  lines: [plain(service.name), plain(summaryLine(service))],
+                },
+                {
+                  label: request.slotStart
+                    ? "The time you chose"
+                    : "When you said would suit you",
+                  lines: [plain(whenLine(request))],
+                },
+                ...(request.message
+                  ? [
+                      {
+                        label: "What you wrote",
+                        lines: [plain(request.message)],
+                      },
+                    ]
+                  : []),
+              ],
+            },
+            { kind: "rule" },
+            ...signOffBlocks(slots.signOff),
+            {
+              kind: "link",
+              text: "Read the page again",
+              href: `${SITE_URL}/services/${service.slug}`,
+            },
+          ],
+        },
+      ],
+      why: "You are getting this because you asked about a session. It is the acknowledgement, not a mailing list.",
+    }),
   };
 }
 
@@ -251,14 +360,36 @@ export function approvalEmail(args: {
   payLink: string;
   /** True when this replaces an approval that had already run out. */
   again: boolean;
+  wording?: Wording;
 }): Mail {
-  return {
-    to: args.to,
-    subject: `Yes — ${args.service.name}, ${args.agreedTime}`,
-    text: [
-      args.again
+  const amount = formatMoney(args.amountPence);
+  const payBy = formatMoment(args.payBy);
+
+  const slots = resolveSlots(
+    "sessionApproved",
+    args.wording ?? {},
+    {
+      subject: `Yes — ${args.service.name}, ${args.agreedTime}`,
+      opening: args.again
         ? `${args.name} — the last link ran out before it was used, so here is a new one.`
         : `${args.name} — yes, let's do this.`,
+      signOff:
+        "If anything above is wrong, reply to this email before you pay. It\nreaches her.",
+    },
+    {
+      service: args.service.name,
+      name: args.name,
+      agreedTime: args.agreedTime,
+      amount,
+      payBy,
+    },
+  );
+
+  return {
+    to: args.to,
+    subject: slots.subject,
+    text: [
+      slots.opening.text,
       "",
       `${args.service.name}`,
       summaryWithoutPrice(args.service),
@@ -270,7 +401,7 @@ export function approvalEmail(args: {
       "",
       args.payLink,
       "",
-      `${formatMoney(args.amountPence)}, by ${formatMoment(args.payBy)}.`,
+      `${amount}, by ${payBy}.`,
       "",
       "The link opens a page on The Field Work and payment is taken by Stripe.",
       "Your card details are typed on their page and never reach this site.",
@@ -278,12 +409,78 @@ export function approvalEmail(args: {
       "IF IT IS NOT PAID BY THEN the time goes back to Marianne and this link",
       "stops working. Nothing will have been charged, and nothing else happens",
       "— write to her and she will sort out another time.",
-      "",
-      "If anything above is wrong, reply to this email before you pay. It",
-      "reaches her.",
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      // The deadline is the only thing here that takes something away, so it
+      // is in the line the inbox shows before the message is even opened.
+      preheader: `${amount}, by ${payBy}. After that the link stops working and the time goes back to her.`,
+      mastheadLabel: "She has said yes",
+      sections: [
+        {
+          ground: "pool",
+          blocks: [
+            ...openingBlocks(slots.opening),
+            {
+              kind: "factList",
+              items: [
+                {
+                  label: "What",
+                  lines: [
+                    plain(args.service.name),
+                    plain(summaryWithoutPrice(args.service)),
+                  ],
+                },
+                { label: "When", lines: [plain(args.agreedTime)] },
+              ],
+            },
+          ],
+        },
+
+        /* THE AMOUNT IS THE ONE SHE APPROVED, never the service's list price,
+           and the deadline is said TWICE — once beside the figure and once
+           under the link — because somebody skimming for the link should not
+           have to have read the paragraph above it. */
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: "To pay" },
+            { kind: "figure", amount },
+            { kind: "note", text: copyOnPlate(`by *${payBy}*.`) },
+          ],
+        },
+
+        {
+          ground: "pool",
+          blocks: [
+            {
+              kind: "button",
+              label: "Pay for this session",
+              href: args.payLink,
+            },
+            { kind: "rule" },
+            {
+              kind: "paragraph",
+              text: copy(
+                "The link opens a page on The Field Work and payment is taken by Stripe. Your card details are typed on their page and never reach this site.",
+              ),
+            },
+            {
+              kind: "paragraph",
+              text: copy(
+                `*If it is not paid by ${payBy}* the time goes back to Marianne and this link stops working. Nothing will have been charged, and nothing else happens — write to her and she will sort out another time.`,
+              ),
+            },
+            ...signOffBlocks(slots.signOff),
+          ],
+        },
+      ],
+      why: "You are getting this because you asked about a session and Marianne has answered. It is her reply, not a mailing list.",
+    }),
   };
 }
 
@@ -302,23 +499,73 @@ export function declineEmail(args: {
   name: string;
   to: string;
   note: string;
+  wording?: Wording;
 }): Mail {
+  const slots = resolveSlots(
+    "sessionDeclined",
+    args.wording ?? {},
+    {
+      subject: `About your request — ${args.service.name}`,
+      opening: `${args.name} — thank you for asking about ${args.service.name}.`,
+      signOff:
+        "Nothing has been charged, and there is nothing you need to do. If you\nwould like to ask about another time, reply to this email and it reaches\nMarianne.",
+    },
+    { service: args.service.name, name: args.name },
+  );
+
   return {
     to: args.to,
-    subject: `About your request — ${args.service.name}`,
+    subject: slots.subject,
     text: [
-      `${args.name} — thank you for asking about ${args.service.name}.`,
+      slots.opening.text,
       "",
       args.note,
-      "",
-      "Nothing has been charged, and there is nothing you need to do. If you",
-      "would like to ask about another time, reply to this email and it reaches",
-      "Marianne.",
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       `${SITE_URL}/services/${args.service.slug}`,
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader:
+        "Nothing has been charged, and there is nothing you need to do.",
+      mastheadLabel: "About your request",
+      sections: [
+        { ground: "pool", blocks: openingBlocks(slots.opening, 30) },
+
+        /* HER NOTE IS THE MESSAGE, whole, and it is given the plate so it is
+           read as somebody speaking rather than as a paragraph of template.
+           `plain()` escapes it: she is turning somebody down, and the last
+           thing that should be possible is a stray angle bracket eating the
+           sentence. */
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: "She writes" },
+            ...args.note
+              .split(/\n{2,}/)
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .map((part): Block => ({ kind: "paragraph", text: plain(part) })),
+          ],
+        },
+
+        {
+          ground: "pool",
+          blocks: [
+            ...signOffBlocks(slots.signOff),
+            {
+              kind: "link",
+              text: "Read the page again",
+              href: `${SITE_URL}/services/${args.service.slug}`,
+            },
+          ],
+        },
+      ],
+      why: "You are getting this because you asked about a session and Marianne has answered. It is her reply, not a mailing list.",
+    }),
   };
 }
 

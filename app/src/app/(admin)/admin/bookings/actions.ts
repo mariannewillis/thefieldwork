@@ -9,6 +9,7 @@ import {
   declineEmail,
   sendRequestMail,
 } from "@/lib/email/service-requests";
+import { loadWording } from "@/lib/email/templates";
 import { parsePence } from "@/lib/offering-form";
 import { approveRequest, declineRequest } from "@/lib/service-requests";
 
@@ -122,6 +123,7 @@ export async function approveSession(
       // the note on `balanceLink`.
       payLink: balanceLink(payToken),
       again,
+      wording: await loadWording(),
     }),
     again ? "approval (again)" : "approval",
   );
@@ -166,6 +168,7 @@ export async function declineSession(
       name: result.request.name,
       to: result.request.email,
       note: result.request.declineNote ?? "",
+      wording: await loadWording(),
     }),
     "decline",
   );

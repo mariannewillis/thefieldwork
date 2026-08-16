@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 
 /**
- * The admin rail — twelve sections, in the order the approved screens declare
- * them. The order is a claim about Marianne's day, not alphabetical filing:
+ * The admin rail — thirteen sections, in the order the approved screens declare
+ * them, plus Email templates, which the approved set had no screen for.
+ *
+ * The order is a claim about Marianne's day, not alphabetical filing:
  * what needs her attention first (Today, Calendar, Requests, Bookings) sits
  * above what she edits occasionally (the page, offerings, pictures) above what
  * she configures once (availability, settings).
@@ -13,7 +15,10 @@ import type { ReactNode } from "react";
  * other and give them separate rows, which is the shape this follows.
  *
  * Icon markup is copied verbatim from docs/screens/admin/*.html. Redrawing
- * them by hand is how an icon set quietly drifts out of one visual world.
+ * them by hand is how an icon set quietly drifts out of one visual world. The
+ * one exception is Email templates — there is no approved screen to copy from,
+ * so its icon is the Documents page glyph with the two text lines kept and the
+ * fold kept, drawn to the same 24×24 grid at the same 1.6 stroke.
  */
 
 export type NavItem = {
@@ -106,6 +111,21 @@ export const ADMIN_NAV: NavItem[] = [
       <>
         <rect x="2" y="5" width="20" height="14" rx="2" />
         <path d="m2 7 10 6 10-6" />
+      </>
+    ),
+  },
+  {
+    /* Under Newsletter and above Subscribers: the three of them are what the
+       site sends, and this is the one she sets once and rarely opens again —
+       the letter is written monthly, the list changes weekly, the wording on a
+       confirmation is looked at when something about it reads wrong. */
+    href: "/admin/email-templates",
+    label: "Email templates",
+    icon: (
+      <>
+        <path d="M4 4h11l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+        <path d="M15 4v5h5" />
+        <path d="M8 13h8M8 17h5" />
       </>
     ),
   },

@@ -136,6 +136,16 @@ app/_tmp-*
 # Splice scratch under the screens directories.
 docs/screens/**/_tmp-*
 
+# The app's OWN build scripts are part of the product and are committed.
+#
+# `scripts/` above was written for the factory's tooling at the repository root,
+# but a bare directory name in .gitignore matches at every depth — so it was
+# also swallowing app/scripts/, which is where build-email-logo.mjs lives. That
+# script generates app/public/brand/logo-horizontal@2x.png from the SVG, and a
+# committed asset whose generator is untracked is an asset nobody can re-derive.
+!app/scripts/
+!app/scripts/**
+
 # Agent test uploads — brown rectangles from a smoke run, not media.
 app/public/media/tmp-*
 docs/_d23-tmp.md

@@ -1,4 +1,5 @@
 import "server-only";
+import { SITE_URL } from "@/content/site";
 import {
   bookingReference,
   balanceLink,
@@ -21,6 +22,13 @@ import {
   refundDeadline,
 } from "@/lib/format";
 import { sendMail, type Mail } from "./index";
+import { copy, copyOnPlate, plain, renderLetter, type Block } from "./render";
+import {
+  openingBlocks,
+  resolveSlots,
+  signOffBlocks,
+  type Wording,
+} from "./wording";
 
 /**
  * The emails a booking sends.
@@ -120,6 +128,54 @@ function deadlineWords(offering: Offering): string | null {
   return deadline ? formatDayLong(deadline) : null;
 }
 
+// ── the branded half ─────────────────────────────────────────────────────────
+
+/**
+ * THE FACTS BELOW ARE EMITTED BY CODE INTO BLOCKS OF THEIR OWN, and that is
+ * what makes the admin's editable wording safe. Marianne owns the subject, the
+ * opening and the sign-off; the day, the room, the amount, the reference, the
+ * cancellation link and the balance link are built here from the booking and
+ * are not reachable from anything she types. No edit she makes can stop
+ * somebody paying, because there is no code path on which her text becomes an
+ * element, an attribute or a URL — see `email/wording.ts`.
+ *
+ * The placeholders she may drop into a sentence — `{{amount}}`, `{{when}}` —
+ * are a convenience and never the only carrier of a fact: every one of them
+ * also appears in a block below, so deleting a placeholder loses a nicety and
+ * nothing else.
+ */
+
+/** When and where, as the two columns the approved confirmation draws them in. */
+function whenWhereBlocks(offering: Offering): Block[] {
+  const whenLines = when(offering);
+  return [
+    {
+      kind: "factColumns",
+      columns: [
+        {
+          label: "When",
+          lines: (whenLines.length ? whenLines : [whenWords(offering)])
+            .filter((line) => line !== "")
+            .map(plain),
+        },
+        { label: "Where", lines: where(offering).map(plain) },
+      ],
+    },
+  ];
+}
+
+/** The facts a sentence of hers may borrow. Each one is also drawn as a block. */
+function bookingFacts(booking: BookingWithOffering): Record<string, string> {
+  const offering = offeringOf(booking);
+  return {
+    offering: offering.name,
+    when: whenWords(offering),
+    places: places(booking.places),
+    amount: formatMoney(paidPence(booking)),
+    reference: bookingReference(booking.id),
+  };
+}
+
 // ── to the buyer, when the payment is confirmed ──────────────────────────────
 
 /**
@@ -140,24 +196,46 @@ function deadlineWords(offering: Offering): string | null {
 export function confirmationEmail(
   booking: BookingWithOffering,
   tokens: { cancel: string; balance: string | null },
+  wording: Wording = {},
 ): Mail {
   const offering = offeringOf(booking);
   const deadline = deadlineWords(offering);
   const owed = outstandingPence(booking);
   const some = places(booking.places);
 
+  const slots = resolveSlots(
+    "bookingConfirmation",
+    wording,
+    {
+      subject:
+        offering.kind === "workshop"
+          ? `Your place on ${offering.name} — ${whenWords(offering)}`
+          : offering.kind === "service"
+            ? `Paid — ${offering.name}, ${whenWords(offering)}`
+            : `Your place on ${offering.name}`,
+      opening:
+        offering.kind === "service"
+          ? `Thank you. ${offering.name} is paid for and in the diary.`
+          : `Thank you. ${some} on ${offering.name} ${booking.places === 1 ? "is" : "are"} booked.`,
+      signOff:
+        owed > 0 && tokens.balance
+          ? "Keep this email. Those two links are the only ones, and you do not need to ask anyone to use either of them."
+          : "Keep this email. That link is the only one, and you do not need to ask anyone to use it.",
+    },
+    bookingFacts(booking),
+  );
+
+  const refundTerms = deadline
+    ? `Cancel by *${deadline}* and you are refunded in full. After that the place is held for you and cannot be refunded, though you are still welcome to use the link to say you are not coming.`
+    : offering.kind === "service"
+      ? "Use the link and Marianne will know not to expect you. There is no refund period on a session — if you have to cancel, reply to this email and she will sort out the money with you herself."
+      : `A place on this ${offering.kind} cannot be refunded once it is taken. The link still works if you cannot come — it frees the place for somebody else and tells Marianne not to expect you.`;
+
   return {
     to: booking.buyerEmail,
-    subject:
-      offering.kind === "workshop"
-        ? `Your place on ${offering.name} — ${whenWords(offering)}`
-        : offering.kind === "service"
-          ? `Paid — ${offering.name}, ${whenWords(offering)}`
-          : `Your place on ${offering.name}`,
+    subject: slots.subject,
     text: [
-      offering.kind === "service"
-        ? `Thank you. ${offering.name} is paid for and in the diary.`
-        : `Thank you. ${some} on ${offering.name} ${booking.places === 1 ? "is" : "are"} booked.`,
+      slots.opening.text,
       "",
       ...when(offering),
       "",
@@ -224,19 +302,128 @@ export function confirmationEmail(
               "link still works if you cannot come — it frees the place for somebody",
               "else and tells Marianne not to expect you.",
             ]),
-      "",
-      ...(owed > 0 && tokens.balance
-        ? [
-            "Keep this email. Those two links are the only ones, and you do not",
-            "need to ask anyone to use either of them.",
-          ]
-        : [
-            "Keep this email. That link is the only one, and you do not need to ask",
-            "anyone to use it.",
-          ]),
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      // Facts only, and the ones somebody scanning an inbox for this message
+      // in six weeks will search on.
+      preheader: [
+        whenWords(offering),
+        offering.venueName,
+        `Reference ${bookingReference(booking.id)}`,
+      ]
+        .filter(Boolean)
+        .join(". "),
+      mastheadLabel: "Your place is booked",
+      sections: [
+        {
+          ground: "pool",
+          blocks: [
+            ...openingBlocks(slots.opening),
+            ...whenWhereBlocks(offering),
+          ],
+        },
+
+        /* The money, on the plate. The figure is blush and never gold: an
+           amount is a fact, and no fact in this design is set in a colour a
+           forced inversion would take to 1.6:1. */
+        {
+          ground: "plate",
+          blocks: [
+            {
+              kind: "eyebrow",
+              text: owed > 0 ? "Paid so far" : "What you paid",
+            },
+            { kind: "figure", amount: formatMoney(paidPence(booking)) },
+            ...(owed > 0
+              ? ([
+                  {
+                    kind: "lines",
+                    emphasiseLast: true,
+                    lines: [
+                      copy(
+                        `${some} · ${formatMoney(booking.totalPence)} for the whole run`,
+                      ),
+                      copy(`${formatMoney(paidPence(booking))} deposit paid`),
+                      copyOnPlate(
+                        `*${formatMoney(owed)} still to pay*${
+                          booking.balanceDueAt
+                            ? `, by ${formatDayLong(booking.balanceDueAt)}`
+                            : ""
+                        }`,
+                      ),
+                    ],
+                  },
+                ] as Block[])
+              : ([
+                  {
+                    kind: "note",
+                    text: plain(
+                      offering.kind === "service" ? "paid" : `${some} · paid`,
+                    ),
+                  },
+                ] as Block[])),
+            {
+              kind: "reference",
+              text: `Reference ${bookingReference(booking.id)}`,
+            },
+          ],
+        },
+
+        ...(owed > 0 && tokens.balance
+          ? [
+              {
+                ground: "pool" as const,
+                blocks: [
+                  { kind: "eyebrow", text: "Paying the rest" },
+                  {
+                    kind: "button",
+                    label: "Pay the balance",
+                    href: balanceLink(tokens.balance),
+                  },
+                  { kind: "rule" },
+                  {
+                    kind: "paragraph",
+                    text: copy(
+                      `${formatMoney(owed)} is due${
+                        booking.balanceDueAt
+                          ? ` by *${formatDayLong(booking.balanceDueAt)}*`
+                          : ""
+                      }. The link works from today — pay it whenever you like, and it will tell you if it has already been paid. Your place is held until then.`,
+                    ),
+                  },
+                  {
+                    kind: "paragraph",
+                    text: copy(
+                      "If the balance is not paid by that date the place is released, and somebody else can take it.",
+                    ),
+                  },
+                ] as Block[],
+              },
+            ]
+          : []),
+
+        {
+          ground: "pool",
+          blocks: [
+            { kind: "eyebrow", text: "If you cannot come" },
+            {
+              kind: "button",
+              label: "Cancel this booking",
+              href: cancellationLink(tokens.cancel),
+            },
+            { kind: "rule" },
+            { kind: "paragraph", text: copy(refundTerms) },
+            ...signOffBlocks(slots.signOff),
+          ],
+        },
+      ],
+      why: "You are getting this because you booked a place. It is your confirmation, not a mailing list.",
+    }),
   };
 }
 
@@ -296,16 +483,31 @@ export function bookingNoticeEmail(
 
 // ── to the buyer, when the balance lands ─────────────────────────────────────
 
-export function balancePaidEmail(booking: BookingWithOffering): Mail {
+export function balancePaidEmail(
+  booking: BookingWithOffering,
+  wording: Wording = {},
+): Mail {
   const offering = offeringOf(booking);
   const balance = booking.payments.find((one) => one.kind === "balance");
+  const arrived = formatMoney(balance?.amountPence ?? 0);
+
+  const slots = resolveSlots(
+    "balancePaid",
+    wording,
+    {
+      subject: `Paid in full — ${offering.name}`,
+      opening: `Thank you. ${arrived} has been paid and ${offering.name} is settled in full. There is nothing else to pay.`,
+      signOff:
+        "The link in your first email still cancels the place if you cannot come. Its terms have not changed.",
+    },
+    { ...bookingFacts(booking), amount: arrived },
+  );
 
   return {
     to: booking.buyerEmail,
-    subject: `Paid in full — ${offering.name}`,
+    subject: slots.subject,
     text: [
-      `Thank you. ${formatMoney(balance?.amountPence ?? 0)} has been paid and ${offering.name} is`,
-      "settled in full. There is nothing else to pay.",
+      slots.opening.text,
       "",
       ...when(offering),
       "",
@@ -313,12 +515,44 @@ export function balancePaidEmail(booking: BookingWithOffering): Mail {
       "",
       `${places(booking.places)} · ${formatMoney(paidPence(booking))} paid in total`,
       `Reference ${bookingReference(booking.id)}`,
-      "",
-      "The link in your first email still cancels the place if you cannot come.",
-      "Its terms have not changed.",
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: `${arrived} received. Nothing else to pay. Reference ${bookingReference(booking.id)}.`,
+      mastheadLabel: "Paid in full",
+      sections: [
+        {
+          ground: "pool",
+          blocks: [
+            ...openingBlocks(slots.opening, 30),
+            ...whenWhereBlocks(offering),
+          ],
+        },
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: "Paid in total" },
+            { kind: "figure", amount: formatMoney(paidPence(booking)) },
+            {
+              kind: "note",
+              text: plain(`${places(booking.places)} · nothing outstanding`),
+            },
+            {
+              kind: "reference",
+              text: `Reference ${bookingReference(booking.id)}`,
+            },
+          ],
+        },
+        ...(slots.signOff
+          ? [{ ground: "pool" as const, blocks: signOffBlocks(slots.signOff) }]
+          : []),
+      ],
+      why: "You are getting this because you paid the rest of a course fee. It is your receipt, not a mailing list.",
+    }),
   };
 }
 
@@ -370,6 +604,7 @@ export type CancelledBy = "buyer" | "marianne";
 export function cancellationEmail(
   booking: BookingWithOffering,
   by: CancelledBy = "buyer",
+  wording: Wording = {},
 ): Mail {
   const offering = offeringOf(booking);
   const deadline = deadlineWords(offering);
@@ -401,11 +636,12 @@ export function cancellationEmail(
       ? formatInstant(lastRefundedAt)
       : null;
 
-  return {
-    to: booking.buyerEmail,
-    subject: `Cancelled — ${heading}`,
-    text: [
-      ...(by === "marianne"
+  const slots = resolveSlots(
+    "cancellation",
+    wording,
+    {
+      subject: `Cancelled — ${heading}`,
+      opening: (by === "marianne"
         ? [
             "I am sorry.",
             "",
@@ -415,7 +651,116 @@ export function cancellationEmail(
           ]
         : offering.kind === "service"
           ? [`Your session — ${heading} — is cancelled.`]
-          : [`${some} on ${heading}, ${isAre} cancelled.`]),
+          : [`${some} on ${heading}, ${isAre} cancelled.`]
+      ).join("\n"),
+      // No closing note in the app today: this message ends on a fact about
+      // the money and then the practice's name. The field opens empty on the
+      // screen rather than being given words nobody wrote.
+      signOff: "",
+    },
+    bookingFacts(booking),
+  );
+
+  /**
+   * What happened to the money, as the plate draws it.
+   *
+   * The same four endings the text below has, in the same order and with the
+   * same sentences. They are written out twice rather than derived from each
+   * other because the plain-text half is hand-wrapped at the width it has
+   * always been wrapped at, and re-flowing it to share one source would change
+   * every cancellation email the site has ever sent.
+   *
+   * `amount` is null in the one ending where nothing moved. A figure of £0.00
+   * on a plate reading "the money" would be a claim about a refund, and there
+   * was not one.
+   */
+  const money: {
+    label: string;
+    amount: string | null;
+    lines: string[];
+    /** The reassurance the approved design puts under the plate, when the
+     *  money has gone and there is genuinely nothing left to do. */
+    closing?: string;
+  } = refunded
+    ? refundedEarlierOn
+      ? {
+          label: "Already sent back",
+          amount: formatMoney(paid),
+          lines: [
+            `to the card you paid with, on ${refundedEarlierOn}. Nothing more moves now.`,
+          ],
+          closing: "Nothing further is needed from you.",
+        }
+      : {
+          label: "On its way back",
+          amount: formatMoney(paid),
+          lines: [
+            "to the card you paid with. Stripe usually takes five to ten working days to show it.",
+          ],
+          closing: "Nothing further is needed from you.",
+        }
+    : owed
+      ? by === "marianne"
+        ? {
+            label: "Not gone back yet",
+            amount: formatMoney(held),
+            lines: [
+              "has not gone back to your card yet. Marianne will be in touch about it. If you would rather ask now, reply to this email and it reaches her.",
+            ],
+          }
+        : {
+            label: "Owed back to you",
+            amount: formatMoney(held),
+            lines: [
+              "is owed back to you and the refund did not go through. Marianne has been told and will return it by hand. Nothing is needed from you.",
+            ],
+          }
+      : offering.kind === "service"
+        ? {
+            label: "Not gone back yet",
+            amount: formatMoney(held),
+            lines: [
+              "has not gone back yet. There is no refund period on a session — Marianne decides that herself and will be in touch. If you would rather ask now, reply to this email and it reaches her.",
+            ],
+          }
+        : {
+            label: "The money",
+            amount: null,
+            lines:
+              by === "marianne"
+                ? [
+                    "No money has gone back. The refund date on this booking had already passed, so nothing was returned automatically. If that seems wrong, reply to this email and it reaches Marianne.",
+                  ]
+                : [
+                    deadline
+                      ? `The refund date was *${deadline}*, which has passed, so nothing has been refunded. The place is free for somebody else, and Marianne knows not to expect you.`
+                      : `A place on this ${offering.kind} could not be refunded once it was taken, so nothing has been refunded. The place is free for somebody else, and Marianne knows not to expect you.`,
+                  ],
+          };
+
+  const closingBlocks: Block[] = [
+    ...(money.closing
+      ? ([{ kind: "headline", text: copy(money.closing), size: 26 }] as Block[])
+      : []),
+    ...signOffBlocks(slots.signOff),
+    // Named for the kind that was cancelled. A session has no index to send
+    // somebody back to — there is one page, and they have read it.
+    ...(offering.kind === "service"
+      ? []
+      : ([
+          {
+            kind: "link",
+            text: "See what else is on",
+            href: `${SITE_URL}/${offering.kind === "course" ? "courses" : "workshops"}`,
+          },
+        ] as Block[])),
+  ];
+
+  return {
+    to: booking.buyerEmail,
+    subject: slots.subject,
+    text: [
+      slots.opening.text,
       "",
       ...(refunded
         ? refundedEarlierOn
@@ -469,11 +814,57 @@ export function cancellationEmail(
       ...(outstandingPence(booking) > 0
         ? ["", "Nothing further is owed. The balance is no longer due."]
         : []),
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       `Reference ${bookingReference(booking.id)}`,
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: money.amount
+        ? `${money.amount} — ${money.lines[0]}`
+        : money.lines[0].replace(/\*/g, ""),
+      mastheadLabel: "Cancelled",
+      sections: [
+        { ground: "pool", blocks: openingBlocks(slots.opening) },
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: money.label },
+            ...(money.amount
+              ? ([{ kind: "figure", amount: money.amount }] as Block[])
+              : []),
+            ...money.lines.map((line): Block => ({
+              kind: "note",
+              text: copyOnPlate(line),
+            })),
+            ...(outstandingPence(booking) > 0
+              ? ([
+                  { kind: "rule" },
+                  {
+                    kind: "note",
+                    text: copyOnPlate(
+                      "Nothing further is owed. The balance is no longer due.",
+                    ),
+                  },
+                ] as Block[])
+              : []),
+            {
+              kind: "reference",
+              text: `Reference ${bookingReference(booking.id)}`,
+            },
+          ],
+        },
+        // Only when there is something to put on it. An empty blush band under
+        // the plate would read as a section that failed to load.
+        ...(closingBlocks.length
+          ? [{ ground: "pool" as const, blocks: closingBlocks }]
+          : []),
+      ],
+      why: "You are getting this because a booking of yours was cancelled. It is the record of it, not a mailing list.",
+    }),
   };
 }
 
@@ -492,21 +883,42 @@ export function cancellationEmail(
  * Read off the booking's status, like everything else here, so a caller cannot
  * pick the wrong one.
  */
-export function refundIssuedEmail(booking: BookingWithOffering): Mail {
+export function refundIssuedEmail(
+  booking: BookingWithOffering,
+  wording: Wording = {},
+): Mail {
   const offering = offeringOf(booking);
   const day = whenWords(offering);
   const amount = formatMoney(paidPence(booking));
   const stillComing = booking.status === "paid";
 
+  const slots = resolveSlots(
+    "refundIssued",
+    wording,
+    {
+      subject: stillComing
+        ? `${amount} refunded — your place on ${offering.name} is unchanged`
+        : `${amount} refunded — ${offering.name}, ${day}`,
+      // Wrapped where it has always been wrapped, so an untouched template
+      // sends the plain text this message has always sent.
+      opening: stillComing
+        ? `${amount} has been sent back to the card you paid with.`
+        : `${amount} for your cancelled ${places(booking.places).toLowerCase()} on\n${offering.name}, ${day}, has been sent back to the card you paid with.`,
+      // On a booking that is still live there is no closing note today, and
+      // "nothing further is needed" beside a place somebody is still expected
+      // at would read as a discharge. It stays empty on that branch.
+      signOff: stillComing ? "" : "Nothing further is needed from you.",
+    },
+    { ...bookingFacts(booking), amount },
+  );
+
   return {
     to: booking.buyerEmail,
-    subject: stillComing
-      ? `${amount} refunded — your place on ${offering.name} is unchanged`
-      : `${amount} refunded — ${offering.name}, ${day}`,
+    subject: slots.subject,
     text: [
       ...(stillComing
         ? [
-            `${amount} has been sent back to the card you paid with.`,
+            slots.opening.text,
             "",
             `YOUR PLACE IS UNCHANGED. ${places(booking.places)} on ${offering.name}`,
             `${booking.places === 1 ? "is" : "are"} still held for you, and you are still expected.`,
@@ -518,17 +930,71 @@ export function refundIssuedEmail(booking: BookingWithOffering): Mail {
             ...where(offering),
           ]
         : [
-            `${amount} for your cancelled ${places(booking.places).toLowerCase()} on`,
-            `${offering.name}, ${day}, has been sent back to the card you paid with.`,
+            slots.opening.text,
             "Stripe usually takes five to ten working days to show it.",
-            "",
-            "Nothing further is needed from you.",
           ]),
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       `Reference ${bookingReference(booking.id)}`,
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: stillComing
+        ? `${amount} is on its way back. Your place is unchanged and you are still expected.`
+        : `${amount} is on its way back to the card you paid with. Nothing further is needed from you.`,
+      mastheadLabel: stillComing ? "Money back to you" : "Refunded",
+      sections: [
+        { ground: "pool", blocks: openingBlocks(slots.opening, 30) },
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: "On its way back" },
+            { kind: "figure", amount },
+            {
+              kind: "note",
+              text: copyOnPlate(
+                "to the card you paid with. Stripe usually takes five to ten working days to show it.",
+              ),
+            },
+            {
+              kind: "reference",
+              text: `Reference ${bookingReference(booking.id)}`,
+            },
+          ],
+        },
+        /* THE ONE SENTENCE THIS MESSAGE EXISTS FOR, when the place is still
+           theirs. Somebody who reads "£95 refunded" and assumes they have been
+           cancelled does not turn up. */
+        ...(stillComing
+          ? [
+              {
+                ground: "pool" as const,
+                blocks: [
+                  {
+                    kind: "headline",
+                    text: copy("Your place is unchanged."),
+                    size: 26,
+                  },
+                  {
+                    kind: "paragraph",
+                    text: copy(
+                      `${places(booking.places)} on ${offering.name} ${booking.places === 1 ? "is" : "are"} still held for you, and you are still expected.`,
+                    ),
+                  },
+                  ...whenWhereBlocks(offering),
+                ] as Block[],
+              },
+            ]
+          : []),
+        ...(slots.signOff
+          ? [{ ground: "pool" as const, blocks: signOffBlocks(slots.signOff) }]
+          : []),
+      ],
+      why: "You are getting this because money has gone back to your card. It is the record of it, not a mailing list.",
+    }),
   };
 }
 
@@ -633,34 +1099,73 @@ export function cannotHonourEmail(args: {
   amountPence: number;
   why: CannotHonour;
   refunded: boolean;
+  wording?: Wording;
 }): Mail {
+  const amount = formatMoney(args.amountPence);
+
+  /** What actually happened, in one sentence. Never hers to soften. */
+  const whatHappened =
+    args.why === "soldOut"
+      ? `Somebody paid for the last place on ${args.offeringName}, ${args.offeringDay}, while you were paying for yours, so there was no place left to give you.`
+      : args.why === "placeReleased"
+        ? `The balance on ${args.offeringName} was overdue, so the place had been released, and it has since been taken by somebody else.`
+        : args.why === "approvalGone"
+          ? `The time Marianne agreed for ${args.offeringName} ran out before this was paid, so the payment arrived after the arrangement had ended.`
+          : args.why === "paidTwice"
+            ? `${args.offeringName} was already paid for, and this is a second payment for the same session. It should never have been taken.`
+            : `${args.offeringName} on ${args.offeringDay} is no longer running, and your payment arrived after it came off the site.`;
+
+  const slots = resolveSlots(
+    "cannotHonour",
+    args.wording ?? {},
+    {
+      subject:
+        args.why === "paidTwice"
+          ? `You were charged twice for ${args.offeringName} — refunded`
+          : `Your payment for ${args.offeringName} — refunded`,
+      opening: "I am sorry.",
+      // No closing note in the app today — see `cancellationEmail`.
+      signOff: "",
+    },
+    {
+      offering: args.offeringName,
+      when: args.offeringDay,
+      amount,
+    },
+  );
+
+  /** The tail that is true only of two of the five reasons. */
+  const tail: string[] = [
+    ...(args.why === "placeReleased" || args.why === "approvalGone"
+      ? [
+          args.why === "approvalGone"
+            ? "If you would still like the session, reply to this email and it reaches Marianne."
+            : "If you would still like a place, reply to this email and it reaches Marianne.",
+        ]
+      : []),
+    ...(args.why === "paidTwice"
+      ? [
+          "Your session is unaffected. It is still paid for and still in the diary — only the duplicate has gone back.",
+        ]
+      : []),
+  ];
+
   return {
     to: args.to,
-    subject:
-      args.why === "paidTwice"
-        ? `You were charged twice for ${args.offeringName} — refunded`
-        : `Your payment for ${args.offeringName} — refunded`,
+    subject: slots.subject,
     text: [
-      "I am sorry.",
+      slots.opening.text,
       "",
-      args.why === "soldOut"
-        ? `Somebody paid for the last place on ${args.offeringName}, ${args.offeringDay}, while you were paying for yours, so there was no place left to give you.`
-        : args.why === "placeReleased"
-          ? `The balance on ${args.offeringName} was overdue, so the place had been released, and it has since been taken by somebody else.`
-          : args.why === "approvalGone"
-            ? `The time Marianne agreed for ${args.offeringName} ran out before this was paid, so the payment arrived after the arrangement had ended.`
-            : args.why === "paidTwice"
-              ? `${args.offeringName} was already paid for, and this is a second payment for the same session. It should never have been taken.`
-              : `${args.offeringName} on ${args.offeringDay} is no longer running, and your payment arrived after it came off the site.`,
+      whatHappened,
       "",
       ...(args.refunded
         ? [
-            `${formatMoney(args.amountPence)} has been sent back to the card you paid with.`,
+            `${amount} has been sent back to the card you paid with.`,
             "Stripe usually takes five to ten working days to show it. You are not",
             "holding a place and you have not been charged for one.",
           ]
         : [
-            `${formatMoney(args.amountPence)} is owed back to you and the automatic refund did not`,
+            `${amount} is owed back to you and the automatic refund did not`,
             "go through. Marianne has been told and will return it by hand today.",
             "Nothing is needed from you.",
           ]),
@@ -680,9 +1185,60 @@ export function cannotHonourEmail(args: {
             "diary — only the duplicate has gone back.",
           ]
         : []),
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
       "",
       SIGN_OFF,
     ].join("\n"),
+
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: args.refunded
+        ? `${amount} has been sent back to the card you paid with. You are not holding a place.`
+        : `${amount} is owed back to you and the automatic refund did not go through. Marianne has been told.`,
+      mastheadLabel: "I am sorry",
+      sections: [
+        {
+          ground: "pool",
+          blocks: [
+            ...openingBlocks(slots.opening),
+            { kind: "paragraph", text: copy(whatHappened) },
+          ],
+        },
+        {
+          ground: "plate",
+          blocks: [
+            {
+              kind: "eyebrow",
+              text: args.refunded ? "On its way back" : "Owed back to you",
+            },
+            { kind: "figure", amount },
+            {
+              kind: "note",
+              text: copyOnPlate(
+                args.refunded
+                  ? "to the card you paid with. Stripe usually takes five to ten working days to show it. You are not holding a place and you have not been charged for one."
+                  : "and the automatic refund did not go through. Marianne has been told and will return it by hand today. Nothing is needed from you.",
+              ),
+            },
+          ],
+        },
+        ...(tail.length || slots.signOff
+          ? [
+              {
+                ground: "pool" as const,
+                blocks: [
+                  ...tail.map((line): Block => ({
+                    kind: "paragraph",
+                    text: copy(line),
+                  })),
+                  ...signOffBlocks(slots.signOff),
+                ],
+              },
+            ]
+          : []),
+      ],
+      why: "You are getting this because a payment of yours could not be honoured. It is the record of it, not a mailing list.",
+    }),
   };
 }
 

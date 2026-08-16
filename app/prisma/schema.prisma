@@ -30,20 +30,20 @@ datasource db {
 /// reset flow without touching hers, and so an assistant could be added later
 /// without a migration.
 model AdminUser {
-  id                 Int      @id @default(autoincrement())
-  username           String   @unique
+  id                 Int     @id @default(autoincrement())
+  username           String  @unique
   /// Optional ON PURPOSE. Password reset sends a link to this address, so an
   /// account with no verified address simply cannot be reset by email —
   /// which is safer than seeding a plausible-looking address that nobody
   /// actually controls. Marianne sets hers in Settings.
-  email              String?  @unique
+  email              String? @unique
   passwordHash       String
   /// Bumped on every credential change. Baked into each session token and
   /// checked on every request, so changing the password instantly invalidates
   /// every session issued before it.
-  credentialVersion  Int      @default(1)
+  credentialVersion  Int     @default(1)
   /// True while the seeded temporary password is still in use.
-  mustChangePassword Boolean  @default(true)
+  mustChangePassword Boolean @default(true)
 
   /// The secret in her calendar subscription address, /api/calendar/<token>.
   ///
@@ -61,10 +61,10 @@ model AdminUser {
   /// reach the portal, change anything, or see a single card detail.
   ///
   /// Null until she asks for one. A feed nobody wanted should not exist.
-  calendarFeedToken  String?  @unique
+  calendarFeedToken String? @unique
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   resetTokens PasswordResetToken[]
 }
@@ -205,13 +205,13 @@ model Workshop {
   /// from this at render by `src/lib/film.ts`, so a change of embed shape
   /// never needs a migration. Nullable because most workshops will not have
   /// one, and a player with nothing behind it is worse than no player.
-  filmUrl String?
+  filmUrl      String?
   /// The still it opens on — a media BASENAME, like `heroImage`, not a path.
   /// NOT HERS TO TYPE: it is fetched from the provider when the link is saved
   /// and put through the same pipeline as everything else, so that opening a
   /// workshop's page contacts Vimeo or YouTube for nothing at all until
   /// somebody presses play. Null when the provider would not give one.
-  filmPoster String?
+  filmPoster   String?
   /// As written, "0:42" — read off the provider, not typed. Vimeo reports a
   /// duration and YouTube does not, so this is null for a YouTube film and
   /// the page simply says less.
@@ -770,7 +770,7 @@ model ServiceRequest {
   /// availability engine, no calendar and no slot, so a datetime here would be
   /// a time nothing had checked. When availability is built this becomes the
   /// prose beside a chosen slot rather than a thing to migrate.
-  agreedTime String?
+  agreedTime    String?
 
   /// The SHA-256 of the token in the /pay/<token> link, never the token itself
   /// — the same rule as `Booking.balanceTokenHash` and for the same reason: the
@@ -809,7 +809,6 @@ model ServiceRequest {
   /// order she works in.
   @@index([status, createdAt])
   @@index([serviceId])
-
   /// Every read of the diary asks "what is claimed between these two instants?"
   /// and this is what answers it. Which of them are LIVE is arithmetic on top
   /// (D-26) rather than another column, for the reason there is no `expired`.
@@ -1155,12 +1154,12 @@ enum StripeEventOutcome {
 /// a few hundred rows.
 model StripeEvent {
   /// Stripe's own id, `evt_…`.
-  id         String   @id
+  id         String              @id
   type       String
   /// Null on the rows written before the column existed, and on nothing since.
   /// An outcome nobody recorded reads as unknown rather than as a guess.
   outcome    StripeEventOutcome?
-  receivedAt DateTime @default(now())
+  receivedAt DateTime            @default(now())
 }
 
 /// A place she has run something in, kept so that the same address does not
@@ -1219,4 +1218,288 @@ model WorkshopImage {
   position Int
 
   @@index([workshopId, position])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// WHAT THE SITE SENDS
+// ---------------------------------------------------------------------------
+// Five models: the wording Marianne owns on the nine messages that reach a
+// visitor, the people who asked for her letter, the letters themselves, what
+// came attached to one, and who each one actually reached.
+//
+// The whole of this section is laid down in ONE migration on purpose. The
+// screen that edits templates and the screens that write newsletters are built
+// in two passes, and a schema that arrived in two pieces would have the second
+// pass altering the first pass's tables while the first pass's screen was live.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// The three parts of one visitor-facing message that Marianne may reword.
+///
+/// ONE ROW PER MESSAGE, and only for the nine that reach a visitor. The six
+/// notices that go to her own inbox are not here: they are read on a phone in a
+/// hurry, plain text is the right shape for them, and branding an alarm is
+/// decoration.
+///
+/// EVERY COLUMN IS NULLABLE, and that is the safety property rather than a
+/// convenience. Null — or blank — means "as the app writes it", and the app's
+/// own wording is branch-aware in a way one stored sentence cannot be: a
+/// workshop confirmation, a course confirmation and a paid session say three
+/// different true things. So a template she has never touched, and one she has
+/// emptied, both send exactly what the app sent before this table existed.
+///
+/// WHAT IS NOT HERE IS THE POINT. There is no column for the amount, the date,
+/// the venue, the deadline, the booking reference, the cancellation link or the
+/// pay link. Those are emitted by code into blocks of their own, and nothing
+/// she types reaches them — see src/lib/email/wording.ts.
+model EmailTemplate {
+  id Int @id @default(autoincrement())
+
+  /// One of the nine keys in src/lib/email/wording.ts::EMAIL_TEMPLATE_KEYS.
+  /// A string rather than an enum: the set is owned by that file, which also
+  /// holds each one's seed wording and its placeholders, and splitting the
+  /// definition across a migration and a module is how the two drift.
+  key String @unique
+
+  /// Her subject line. Newlines and control characters are stripped before it
+  /// is ever handed to a transport — a subject is a header.
+  subject String?
+  /// The first thing the letter says, above every fact the code owns.
+  opening String?
+  /// The last thing it says, under them.
+  signOff String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Somebody who asked for the monthly letter.
+///
+/// CONFIRMED IS A DATE, NOT A FLAG. PECR wants evidence of consent, and "true"
+/// is not evidence — the day it happened is. Same for the leaving: a row is
+/// never deleted when somebody unsubscribes, because deleting it loses the one
+/// fact that proves they were taken off the list rather than never added.
+model Subscriber {
+  id Int @id @default(autoincrement())
+
+  /// Stored lowercase and trimmed. The unique constraint is what stops one
+  /// person appearing twice because they typed a capital.
+  email String  @unique
+  /// If they gave one. The form asks; it does not insist.
+  name  String?
+
+  joinedAt DateTime @default(now())
+
+  /// When they confirmed, by pressing the link in the opt-in email. Null means
+  /// they have not, and nothing is ever sent to a null.
+  confirmedAt    DateTime?
+  /// When they left. Null means they have not.
+  unsubscribedAt DateTime?
+
+  /// The secret in /unsubscribe/<token>.
+  ///
+  /// PER RECIPIENT AND STORED IN THE CLEAR, unlike the reset and cancellation
+  /// tokens, which keep only a SHA-256. It has to be readable here because it
+  /// is minted once and printed into every letter this person ever gets,
+  /// including the `List-Unsubscribe` header Gmail and Apple Mail surface as a
+  /// one-tap control. What it can do is why that is acceptable: a POST that
+  /// stamps one date on one row and can do nothing else at all.
+  unsubscribeToken String @unique
+
+  sends NewsletterSend[]
+
+  @@index([confirmedAt, unsubscribedAt])
+}
+
+enum NewsletterStatus {
+  /// Hers to change, as often as she likes.
+  draft
+  /// Gone. Read-only from the moment the first message left.
+  sent
+}
+
+/// A monthly letter — a draft she composes, or the record of one that went.
+///
+/// ONCE SENT IT IS LOCKED. Not because editing it would be difficult, but
+/// because forty people are holding a copy of what it said, and a record that
+/// can be changed after the fact is not a record. The screen offers to
+/// DUPLICATE a sent letter into a new draft, which is what "edit last month's"
+/// actually means.
+model Newsletter {
+  id Int @id @default(autoincrement())
+
+  /// What it says in an inbox list, and the line under it.
+  subject   String
+  preheader String
+
+  /// The eyebrow over the masthead — "The monthly letter · August".
+  mastheadLabel String @default("The monthly letter")
+
+  status NewsletterStatus @default(draft)
+
+  /// When the send started. Null while it is a draft.
+  sentAt DateTime?
+
+  /// How many people it was addressed to, frozen at send.
+  ///
+  /// Denormalised deliberately: the send rows below are the truth, but the list
+  /// grows and shrinks afterwards and this is the number that was true on the
+  /// day. Counting the rows a year later answers a different question.
+  recipientCount Int @default(0)
+
+  /// The letter this was duplicated from, if it was. Kept so a run of monthly
+  /// letters can be read back as a run rather than as unrelated drafts.
+  duplicatedFromId Int?
+  duplicatedFrom   Newsletter?  @relation("NewsletterLineage", fields: [duplicatedFromId], references: [id], onDelete: SetNull)
+  duplicates       Newsletter[] @relation("NewsletterLineage")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blocks      NewsletterBlock[]
+  attachments NewsletterAttachment[]
+  sends       NewsletterSend[]
+
+  @@index([status, sentAt])
+}
+
+/// The five parts a letter is made of.
+///
+/// Exactly the five the approved editor offers and exactly the five the
+/// renderer can draw (docs/screens/admin/admin-newsletter-edit.html, and the
+/// BLOCK markers in docs/screens/email/_build.mjs). A sixth kind is a change to
+/// all three at once, which is what keeps them in step.
+enum NewsletterBlockKind {
+  heading
+  paragraph
+  image
+  /// Pulls the live dates and prices at SEND time, not at compose time — a
+  /// letter written on the 1st and sent on the 4th must not quote a place that
+  /// went on the 2nd.
+  offerings
+  button
+}
+
+model NewsletterBlock {
+  id           Int        @id @default(autoincrement())
+  newsletterId Int
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+
+  /// Where it sits. The order is content — the letter reads down the page.
+  position Int
+  kind     NewsletterBlockKind
+
+  /// heading: the line. paragraph: the prose. button: the label.
+  text String?
+
+  /// image: the media basename, as everything else in this schema holds a
+  /// picture — the URL is built from it. NOTE that a letter needs the `.jpg`
+  /// derivative: Outlook for Windows renders neither AVIF nor WebP.
+  imageBasename String?
+  /// image: the line under it.
+  caption       String?
+  /// image: what somebody who cannot see it should be told. Never optional in
+  /// the form, for the same reason WorkshopImage.alt is not.
+  alt           String?
+
+  /// button: where it goes. Absolute, or root-relative and made absolute at
+  /// render time — an email has no document base.
+  href String?
+
+  /// offerings: how many to show. Null means everything that is open.
+  count Int?
+
+  @@unique([newsletterId, position])
+  @@index([newsletterId])
+}
+
+/// Whether a file rides in the envelope or is fetched from a link in it.
+enum AttachmentDelivery {
+  /// Small enough to attach. It arrives with the letter.
+  attached
+  /// Too big to attach without hurting delivery. The letter carries a link and
+  /// says what it is and how big.
+  linked
+}
+
+/// A file Marianne put on one letter.
+///
+/// SELF-CONTAINED TO NEWSLETTERS on purpose. There is no Document model and the
+/// documents screen is a stub; inventing a library here would be building the
+/// wrong half of it, and a file uploaded to one letter belongs to that letter.
+///
+/// THE SIZE DECIDES HOW IT TRAVELS, not Marianne. Past a couple of megabytes an
+/// attachment starts costing deliverability — greylisting, spam scoring, and
+/// mailbox providers that refuse the message outright — so anything over the
+/// threshold in src/lib/newsletter/attachments.ts becomes a link in the letter
+/// instead. The screen says which is happening, in words, before she sends.
+model NewsletterAttachment {
+  id           Int        @id @default(autoincrement())
+  newsletterId Int
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+
+  /// What it is called in the letter and in the envelope. Her filename,
+  /// cleaned — never used as a path.
+  filename    String
+  /// What it is called in the store. Prefixed and slugified, so two letters
+  /// can each have a "notes.pdf" without one overwriting the other.
+  storedAs    String @unique
+  /// As sniffed from the bytes, not as the browser claimed.
+  contentType String
+  /// Its size, which is what decides `delivery`.
+  bytes       Int
+
+  delivery AttachmentDelivery
+
+  /// The line under its name in the letter — "Six short exercises, one page
+  /// each. A PDF, four pages."
+  note String?
+
+  createdAt DateTime @default(now())
+
+  @@index([newsletterId])
+}
+
+/// Whether one letter reached one person.
+enum NewsletterSendOutcome {
+  /// Written before the attempt, so a crash mid-send leaves evidence rather
+  /// than a gap.
+  pending
+  /// The provider accepted it. Not the same as "read", and never presented as
+  /// such.
+  delivered
+  /// It did not go. `error` says what the provider said.
+  failed
+}
+
+/// One letter, one person, one outcome.
+///
+/// A LETTER TO FORTY PEOPLE IS FORTY OUTCOMES, NOT ONE. A single "sent" flag on
+/// the newsletter cannot answer the only question that matters the morning
+/// after — did it reach Sarah — and a partial failure under one flag looks
+/// exactly like a complete success.
+model NewsletterSend {
+  id           Int        @id @default(autoincrement())
+  newsletterId Int
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+
+  /// The subscriber, while they still exist. SetNull rather than Cascade: the
+  /// record of what was sent must outlive somebody asking to be removed.
+  subscriberId Int?
+  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+
+  /// The address it actually went to, frozen. Somebody can change theirs, and
+  /// "we sent it to you" has to mean the address of the day.
+  email String
+
+  outcome NewsletterSendOutcome @default(pending)
+  /// What the provider said, when it said no.
+  error   String?
+  /// When the provider accepted it.
+  sentAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  /// One person is written to once per letter, whatever a retry does.
+  @@unique([newsletterId, subscriberId])
+  @@index([newsletterId, outcome])
 }

@@ -466,19 +466,14 @@ try {
             "agreedTime", "declinedAt"
      FROM "ServiceRequest" WHERE id IN (3,4) ORDER BY id`,
   );
+  // Recorded, NOT pinned to a status. These rows are the operator's and he
+  // answers them himself — request 3 was approved and paid during a manual
+  // end-to-end test, which turned a green suite red without a line of code
+  // changing. What this suite has to prove is that IT did not touch them, so
+  // the check is against what they looked like when this run started.
   ok(
-    "the operator's two pending requests are untouched and unanswered",
-    his.length === 2 &&
-      his.every(
-        (r) =>
-          r.status === "pending" &&
-          r.approvedAt === null &&
-          r.approvedPence === null &&
-          r.payTokenHash === null &&
-          r.payBy === null &&
-          r.agreedTime === null &&
-          r.declinedAt === null,
-      ),
+    "the operator's two requests are here to be left alone",
+    his.length === 2,
     JSON.stringify(his),
   );
 
@@ -1053,15 +1048,15 @@ try {
      WHERE id IN (3,4) ORDER BY id`,
   );
   ok(
-    "and his two requests are still pending and unanswered",
+    "and this run changed neither of them",
     hisAfter.length === 2 &&
       hisAfter.every(
-        (r) =>
-          r.status === "pending" &&
-          r.approvedAt === null &&
-          r.payTokenHash === null,
+        (r, i) =>
+          r.status === his[i].status &&
+          String(r.approvedAt) === String(his[i].approvedAt) &&
+          String(r.payTokenHash) === String(his[i].payTokenHash),
       ),
-    JSON.stringify(hisAfter),
+    JSON.stringify({ before: his, after: hisAfter }),
   );
 
   // ── the one that matters most ─────────────────────────────────────────────

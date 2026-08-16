@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { findByEmail } from "@/lib/auth/users";
 import { createResetToken } from "@/lib/auth/reset";
 import { resetEmail, sendMail } from "@/lib/email";
+import { loadWording } from "@/lib/email/templates";
 import { callerKey, checkThrottle, recordFailure } from "@/lib/auth/throttle";
 
 export type ForgotState = { sent: boolean; error: string | null };
@@ -51,7 +52,7 @@ export async function requestReset(
   // is deliberately no separate message for it — see ALWAYS above.
   if (user?.email) {
     const token = await createResetToken(user.id);
-    const mail = resetEmail(token, user.username);
+    const mail = resetEmail(token, user.username, await loadWording());
     const result = await sendMail({ ...mail, to: user.email });
 
     if (!result.delivered) {

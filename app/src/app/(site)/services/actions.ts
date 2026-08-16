@@ -13,6 +13,7 @@ import {
   requestNoticeEmail,
   sendRequestMail,
 } from "@/lib/email/service-requests";
+import { loadWording } from "@/lib/email/templates";
 import { DRAWN_AT_FIELD, HONEYPOT_FIELD } from "@/lib/request-fields";
 import { allowRequest, callerKey, looksAutomated } from "@/lib/request-guard";
 import { getPublishedServiceBySlug } from "@/lib/services";
@@ -295,7 +296,7 @@ export async function requestService(
     `request for ${service.slug}`,
   );
   await sendRequestMail(
-    requestAcknowledgementEmail(service, submitted),
+    requestAcknowledgementEmail(service, submitted, await loadWording()),
     `acknowledgement for ${service.slug}`,
   );
 

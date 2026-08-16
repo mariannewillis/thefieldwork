@@ -23,6 +23,7 @@ import {
   confirmationEmail,
   sendBookingMail,
 } from "@/lib/email/bookings";
+import { loadWording } from "@/lib/email/templates";
 import { confirmServicePayment } from "@/lib/service-requests";
 import {
   paymentsConfigured,
@@ -250,10 +251,14 @@ export async function POST(request: Request): Promise<Response> {
       );
       revalidateFor(own.kind, own.slug);
       await sendBookingMail(
-        confirmationEmail(booking, {
-          cancel: cancelToken,
-          balance: balanceToken,
-        }),
+        confirmationEmail(
+          booking,
+          {
+            cancel: cancelToken,
+            balance: balanceToken,
+          },
+          await loadWording(),
+        ),
         "confirmation",
       );
       await sendBookingMail(
@@ -275,6 +280,7 @@ export async function POST(request: Request): Promise<Response> {
           amountPence,
           why: "soldOut",
           refunded,
+          wording: await loadWording(),
         }),
         "sold-out refund",
       );
@@ -338,6 +344,7 @@ export async function POST(request: Request): Promise<Response> {
             amountPence,
             why: "offeringGone",
             refunded,
+            wording: await loadWording(),
           }),
           "withdrawn-workshop refund",
         );
@@ -414,7 +421,10 @@ async function settleBalance(args: {
       // and every page that counts places is now wrong. Revalidating either
       // way costs one render and is right in both.
       revalidateFor(own.kind, own.slug);
-      await sendBookingMail(balancePaidEmail(booking), "balance receipt");
+      await sendBookingMail(
+        balancePaidEmail(booking, await loadWording()),
+        "balance receipt",
+      );
       await sendBookingMail(balanceNoticeEmail(booking), "balance notice");
       return Response.json({ received: true, acted: true });
     }
@@ -446,6 +456,7 @@ async function settleBalance(args: {
             amountPence,
             why: "placeReleased",
             refunded,
+            wording: await loadWording(),
           }),
           "unwanted-balance refund",
         );
@@ -485,6 +496,7 @@ async function settleBalance(args: {
           amountPence,
           why: "placeReleased",
           refunded,
+          wording: await loadWording(),
         }),
         "unwanted-balance refund",
       );
@@ -567,7 +579,11 @@ async function bookSession(args: {
     revalidatePath("/admin/workshop-bookings");
     await sendBookingMail(
       // A session is paid at once, so there is never a balance link on one.
-      confirmationEmail(booking, { cancel: cancelToken, balance: null }),
+      confirmationEmail(
+        booking,
+        { cancel: cancelToken, balance: null },
+        await loadWording(),
+      ),
       "session confirmation",
     );
     // `left` is unread on a session — there is no room to count — and the
@@ -619,6 +635,7 @@ async function bookSession(args: {
         amountPence,
         why,
         refunded,
+        wording: await loadWording(),
       }),
       "session refund",
     );
