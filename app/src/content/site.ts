@@ -56,12 +56,20 @@ export const siteNav = [
  *
  *  - the three in-page anchors are now root-relative (`/#the-hour`), so they
  *    work from a workshop page rather than silently doing nothing;
- *  - "Ask a question" goes to `/#ask`, the beat that asks for an hour, which
- *    is the thing the label promises;
- *  - "Who she is", "Monthly letter" and "Privacy" have NO destination that
- *    exists, so they carry no href and render as plain text. The wording
- *    stays, so the day /about, /subscribe and /privacy are built, each one
- *    gets its href back and nothing else changes.
+ *  - "Ask a question" went to `/#ask`, the beat that asked for an hour. That
+ *    beat now asks for an email address instead (2026-08-16 — see
+ *    content/home.ts::crown), so the anchor no longer means what the label
+ *    promises. It goes to /services, which is where somebody actually asks
+ *    for an hour: the index names each session, and each session's page
+ *    carries the form. "One-to-one sessions" above points there too, which
+ *    reads as a repetition and is one — but a label that goes where it says
+ *    beats a label that goes somewhere unrelated, and /about does not exist
+ *    to take it instead;
+ *  - "Monthly letter" now goes to /subscribe, which was built on 2026-08-16;
+ *  - "Who she is" and "Privacy" still have NO destination that exists, so
+ *    they carry no href and render as plain text. The wording stays, so the
+ *    day /about and /privacy are built each one gets its href back and
+ *    nothing else changes.
  *
  * "Who she is" could have gone to `/#not` like the About tab does, but that is
  * the same beat "What this is not" already links to one line above it, and two
@@ -92,8 +100,8 @@ export const siteFooter = {
     {
       heading: "Practicalities",
       links: [
-        { label: "Ask a question", href: "/#ask" },
-        { label: "Monthly letter" },
+        { label: "Ask a question", href: "/services" },
+        { label: "Monthly letter", href: "/subscribe" },
         { label: "Privacy" },
       ],
     },

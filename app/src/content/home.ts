@@ -206,13 +206,39 @@ export const home = {
     close: "Nothing was cured. The bracing for it stopped.",
   },
 
+  /*
+   * THE LAST BEAT ASKS FOR AN ADDRESS RATHER THAN FOR AN HOUR (operator,
+   * 2026-08-16).
+   *
+   * It used to read "Ask for an hour" over a link to `#ask` — which was this
+   * section's own id, so the one call to action on the home page scrolled to
+   * itself and did nothing. The page's ask was already made twice above this
+   * beat, on two dates blocks that go straight to the thing being asked for;
+   * asking a third time at the bottom was the weakest of the three and the
+   * only one with nowhere to go.
+   *
+   * WHAT REPLACES IT IS NOT A SMALLER ASK, IT IS A SLOWER ONE. Somebody at the
+   * foot of this page who was going to book has already booked. What is left
+   * is the person who is not ready — six months of reading a contact page is
+   * the character this page has been describing since the Turn — and the thing
+   * to offer them is not another button that costs ninety pounds. It is a way
+   * to stay in the room's company until they are ready, which is what the
+   * letter is.
+   *
+   * The wording follows that: a reason, not an invitation to "sign up for
+   * updates". It names what the letter contains and what it costs her to say
+   * yes to it, which is nothing.
+   */
   crown: {
-    id: "ask",
+    id: "letter",
     hidden: false,
     structural: true,
-    ask: "Ask for an hour in the clearing, where nothing has crossed the edge since the first page you read.",
-    ctaLabel: "Ask for an hour",
-    ctaHref: "#ask",
+    ask: "Not ready to book anything. That is most people, and it is what the letter is for.",
+    /** The lines under the ask, above the form. */
+    lines: [
+      "Once a month, one page: what is open and when, and whatever the room has actually been like — the chair moved nearer the window, what people have been arriving with this autumn.",
+      "It is not a way of asking you again. Nothing is sold to you twice, nothing is passed to anybody else, and every letter carries a link at the bottom that takes you off in one press.",
+    ],
     /*
      * The plate, the link columns and the legal paragraph moved to
      * src/content/site.ts on 2026-08-15. This footer is now the whole site's

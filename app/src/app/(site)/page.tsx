@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
+import SubscribeForm from "@/components/site/SubscribeForm";
 import { home, type LedgerRow, type Plate as PlateT } from "@/content/home";
 import { capitalise, runShape } from "@/lib/course-run";
 import { listPublishedCourses } from "@/lib/courses";
@@ -342,15 +343,29 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 8 · CROWN — the swing rests, centred. The footer that used to
-           be nested here is the whole site's now and follows as a sibling ══ */}
+           be nested here is the whole site's now and follows as a sibling.
+
+           The CTA is now the subscribe form itself rather than a link to one
+           (operator, 2026-08-16 — see the note on `crown` in content/home.ts).
+           A form here and a link to a form somewhere else are different asks:
+           one costs an address, the other costs an address AND a page load,
+           and the person this beat is written for is the one who was already
+           not going to press anything. ══ */}
       <section className="crown beat" id={crown.id}>
         <div className="crown__pool">
           <h2 className="disp crown__ask" data-slot="crown.ask">
             {crown.ask}
           </h2>
-          <a className="cta" href={crown.ctaHref} data-slot="crown.cta">
-            {crown.ctaLabel}
-          </a>
+          {crown.lines.map((line, index) => (
+            <p
+              className="body crown__line"
+              key={line}
+              data-slot={`crown.lines.${index}`}
+            >
+              {line}
+            </p>
+          ))}
+          <SubscribeForm note="No confirmation of anything you have booked comes through this — those are separate, and always were." />
         </div>
       </section>
 

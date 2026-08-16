@@ -2308,6 +2308,7 @@ status line names the chosen date and how many times are under it.
 operator's own acceptance test — ninety minutes finishing by five means the last
 offered time is 15:30 and there is nothing after it — asserted through the new
 picker rather than off the HTML. 107 checks, up from 97.
+
 ## D-28 · Every letter is branded and multipart; she owns three sentences of it and nothing else (2026-08-16)
 
 Six finished HTML designs sat in `docs/screens/email/` and the app sent plain
@@ -2420,3 +2421,143 @@ a script tag, an anchor, an `onerror` and a CRLF subject; a template with no row
 and one with blank fields both rendering byte-identically to the app's own
 wording; and a real send asserted to carry both parts. Proofs at 600px and 375px
 in `e2e/_email-shots/`.
+---
+
+## D-29 · The letter is composed from the same blocks it is rendered from; the send is a frozen list and a loop that can be resumed (2026-08-16)
+
+D-28 laid the schema and the renderer and said the second pass "should not need
+to touch `prisma/schema.prisma`". It did not. What follows is what was built on
+top of it, and the three judgements inside it that were not already made.
+
+### What was built
+
+- **`/admin/newsletters`** — drafts and sent letters as two lists, not one table
+  with a status column: a draft is something to carry on with, a sent letter is
+  a record to read, and they have different verbs.
+- **The editor (`/admin/newsletters/[id]`)** — the OFFERING FORM'S SHEET, built
+  from `OfferingFormParts`: the same regions, hairlines, "Needed" word, picture
+  picker and one-save-at-the-bottom. Blocks are added, removed and reordered in
+  the browser; **the order the fields appear in IS the order they are written
+  down in**, because `FormData.entries()` yields document order. Nothing is
+  written until Save, and then the whole letter is replaced — the same move
+  `WorkshopForm`'s picture rail makes, for the same reason.
+  `PicturePicker` gained an optional controlled mode (`value` / `onChange`) so a
+  choice cannot travel with the wrong row when a block moves; the offering forms
+  are untouched by it.
+- **Attachments** upload the moment she chooses one (bytes cannot wait for a
+  save), sniffed from their first bytes rather than from what the browser
+  claimed; `deliveryFor()` decides attach-or-link THERE, and the screen says
+  which, in words, with the reason. The line she writes about a file saves with
+  the letter, because a sentence is not a file.
+- **`/admin/subscribers`** — three groups: confirmed (the real list, and the
+  count), asked-but-not-confirmed, and gone. There is no "add somebody" and no
+  "mark as confirmed", and that absence is the point: what makes the list lawful
+  to send to is that nobody in this building can manufacture a consent record.
+- **`/subscribe`, `/subscribe/confirm`, `/unsubscribe/[token]`,
+  `/api/unsubscribe/[token]`** and the confirmation email — a tenth message,
+  code-owned, NOT on the templates screen, because the sentence explaining that
+  pressing the link is what joins the list IS the consent record.
+- **The home page's last beat** now asks for an address instead of an hour.
+
+### 1 · One composer, two halves, and the `.jpg` rule enforced
+
+`src/lib/newsletter/compose.ts` maps her five block kinds onto the block
+vocabulary `email/render.ts` already draws, so a newsletter and a booking
+confirmation come out of ONE renderer. Both halves — text and HTML — are built
+side by side from the same rows; neither is derived from the other.
+
+D-28 flagged the `.jpg` requirement as unenforced. `newsletterImageUrl()` is now
+the only way a letter names a picture, and it always builds
+`<origin>/media/<basename>-1200.jpg`. **Outlook for Windows renders through Word
+and decodes neither AVIF nor WebP**, and `<picture>` / `srcset` — how every page
+on the site picks its best derivative — are stripped or ignored there. A letter
+pointing at the AVIF is a letter with a hole in it for a large share of its
+readers, and the hole is invisible to whoever sent it. The height is MEASURED
+off the JPEG with sharp rather than guessed, because several clients reserve the
+box from the attributes and one with no height jolts the letter open when the
+picture lands.
+
+### 2 · Sending, with no job runner and nothing on a schedule (D-23)
+
+The work is split from the RECORD of it, and the record is written first.
+
+1. **`beginSend`** writes one `NewsletterSend` row per chosen recipient, all
+   `pending`, and locks the letter — in ONE transaction. The chosen ids are
+   INTERSECTED with the confirmed list rather than trusted: a form can be posted
+   with anything in it. After it returns, who this letter is going to exists in
+   the database whatever happens next.
+2. **`sendBatch`** takes up to 24 pending rows, sends them at two a second
+   (Resend's default limit), and marks each `delivered` or `failed` AS IT GOES.
+   It stops at that count or at 30 seconds, whichever comes first.
+3. The screen calls it again until nothing is pending, showing the count climb.
+
+**At 500 subscribers**: 500 rows are written in one transaction in well under a
+second, then roughly 21 batches of 24 at two a second — about four and a half
+minutes of the browser looping, with the count climbing throughout. Nothing
+times out, because no single request is ever asked to do more than about twelve
+seconds of sending. If the tab is closed at 300, the letter's own page says "200
+people have not been sent to yet" and offers to carry on; the unique constraint
+on `(newsletterId, subscriberId)` means carrying on cannot reach anybody twice.
+Nothing retries by itself and nothing wakes up — this is not a job runner and
+does not pretend to be one. What it is instead is legible: at every moment the
+answer to "who has this reached" is a query rather than a guess.
+
+`startSending` deliberately does NOT `revalidatePath`. The freeze flips the
+letter to `sent`, and revalidating would redraw the page as the record of a
+letter — unmounting the very component whose next job is to start sending it.
+
+### 3 · A GET may confirm and must not unsubscribe
+
+The asymmetry is the decision, and it is not symmetry for its own sake:
+
+- **Confirmation acts on the GET.** A page with a second "yes, confirm" button
+  loses a fifth of the people who pressed the first one. A mail scanner
+  prefetching the link confirms that a message SENT TO THAT ADDRESS was received
+  at that address — which is exactly the fact the confirmation establishes. The
+  scanner is inside the mailbox; it cannot manufacture consent for anybody else.
+- **Unsubscribe does NOT act on the GET.** The same scanner would remove
+  somebody who never asked, and they would find out by noticing the letter had
+  stopped. So the link opens a page with one button on it — still "one click,
+  nothing to fill in and nothing to explain", as every letter's footer promises.
+- **`List-Unsubscribe` + `List-Unsubscribe-Post` (RFC 8058)** point at
+  `/api/unsubscribe/<token>`, which honours POSTs and redirects GETs. Gmail and
+  Apple Mail draw that as a one-tap control beside the sender's name; Google's
+  bulk-sender rules have required it since February 2024. Making leaving easy is
+  what keeps the BOOKING CONFIRMATIONS out of junk folders.
+
+**The confirmation token is SIGNED, not stored** — an HMAC over the row's id and
+address, keyed on `AUTH_SECRET` — because `Subscriber` carries
+`unsubscribeToken` and no second column, and this pass did not alter the schema.
+It has no expiry and no single use, which is acceptable here and would not be
+for a reset: the worst it can do is confirm a row whose owner already asked to
+be on the list, and the unsubscribe link undoes it in one press. If a
+`confirmToken` column ever lands, `lib/newsletter/subscribers.ts` carries the
+migration note.
+
+### The home page's last beat (an operator change, and a drift from the mockup)
+
+`content/home.ts::crown` read "Ask for an hour" over a link to `#ask` — **which
+was that section's own id, so the one call to action on the home page scrolled
+to itself and did nothing**. It now asks for an email address, with the form
+itself in the beat rather than a link to one. The footer's "Monthly letter"
+gains `/subscribe`; "Ask a question" moves from the dead `/#ask` to `/services`.
+
+`docs/screens/webapp/home.html` still draws the old Crown. That is deliberate
+drift, recorded here rather than fixed silently: the mockups are the approved
+design record (D-1), and the operator asked for this after they were approved.
+
+### Proof
+
+`e2e/newsletter-smoke.mjs` — 69 checks, run against a copy of the app with no
+`.env.local`, so the log adapter runs and no message can leave. It exercises the
+whole arc: three addresses signing up on the public form, two confirming, one
+unsubscribing; the editor writing all five block kinds; a 200 kB file attaching
+and a 3 MB one becoming a link with the screen saying so BEFORE the send; a test
+send that neither locks the letter nor writes a row; a send modal that offers
+neither the unconfirmed nor the departed; the operator's own two seeded
+addresses unticked and provably sent nothing; a sent letter that refuses a
+forged POST; and a duplicate that carries every block into a fresh draft. The
+last checks assert that `marianne@thefieldwork.co.uk` appears NOWHERE in the run
+and that every address written to ends `.invalid`. Proofs of the letter at 600px
+and 375px, the editor, the send modal, the subscribers screen and the sent
+record in `e2e/_newsletter-shots/`.

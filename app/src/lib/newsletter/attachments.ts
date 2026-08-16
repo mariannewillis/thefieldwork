@@ -112,3 +112,93 @@ export async function putAttachment(
 export function getAttachment(key: string): Promise<Buffer | null> {
   return mediaStore().get(key);
 }
+
+/**
+ * What the file ACTUALLY is, read off its first bytes.
+ *
+ * The same rule the picture pipeline follows and for the same reason: what the
+ * browser declares is a claim, and a claim is not a fact. Unlike a picture,
+ * a document CANNOT be re-encoded — a PDF put through a converter is a
+ * different PDF, and Marianne's handout has to arrive as the file she made.
+ * So the bytes are stored as they came, and what protects the recipient is
+ * that the stored file is only ever SERVED as an attachment: the route sets
+ * `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`, so
+ * nothing here is ever rendered as a document by a browser on this origin.
+ *
+ * The list is short on purpose — a handout, a form, a timetable, a picture.
+ * Every entry is a shape whose magic bytes are unambiguous, so "it is what it
+ * says" is decidable rather than inferred from the name.
+ */
+export type DocumentKind = {
+  contentType: string;
+  /** What she would call it, for the refusal message. */
+  words: string;
+};
+
+const MAGIC: { bytes: number[]; kind: DocumentKind }[] = [
+  {
+    bytes: [0x25, 0x50, 0x44, 0x46],
+    kind: { contentType: "application/pdf", words: "a PDF" },
+  },
+  {
+    bytes: [0xff, 0xd8, 0xff],
+    kind: { contentType: "image/jpeg", words: "a JPEG" },
+  },
+  {
+    bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+    kind: { contentType: "image/png", words: "a PNG" },
+  },
+];
+
+/**
+ * The Office formats, which are all Zip archives and share one signature.
+ *
+ * `PK\x03\x04` says "a Zip", not "a Word document", so the extension is what
+ * distinguishes them — and that is honest rather than lax: the thing being
+ * decided is what Content-Type to serve it back with, and serving a .docx as
+ * `application/zip` would make it download as a zip file with her handout
+ * inside. Nothing is executed either way.
+ */
+const ZIP_TYPES: Record<string, DocumentKind> = {
+  docx: {
+    contentType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    words: "a Word document",
+  },
+  xlsx: {
+    contentType:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    words: "an Excel spreadsheet",
+  },
+  pptx: {
+    contentType:
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    words: "a PowerPoint",
+  },
+};
+
+export const ATTACHMENT_KINDS =
+  "PDFs, Word documents, spreadsheets, and JPEG or PNG pictures";
+
+/** What this file is, or null when it is not something a letter may carry. */
+export function sniffDocument(
+  bytes: Buffer,
+  filename: string,
+): DocumentKind | null {
+  for (const entry of MAGIC) {
+    if (
+      bytes.length >= entry.bytes.length &&
+      entry.bytes.every((byte, index) => bytes[index] === byte)
+    ) {
+      return entry.kind;
+    }
+  }
+
+  const zip = bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b;
+  if (zip) {
+    const extension = filename.toLowerCase().split(".").pop() ?? "";
+    return ZIP_TYPES[extension] ?? null;
+  }
+
+  return null;
+}

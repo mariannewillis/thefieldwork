@@ -747,3 +747,28 @@ a.cta {
   color: var(--blush);
   text-decoration: none;
 }
+
+/* crown-subscribe 2026-08-16 — the last beat asks for an address.
+
+   The Crown used to be one display line and one magenta button. It is now that
+   line, two body lines and the subscribe form (see content/home.ts::crown for
+   why). These three rules are all that is added: the beat's centring, its
+   colour, its photograph and its clamp() width are untouched, and the form
+   brings its own stylesheet (components/site/subscribe-form.css) because it
+   also appears on /subscribe, which loads Tailwind and does not load this
+   file. */
+.crown__line {
+  font-family: var(--font-body), sans-serif;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.65;
+  color: var(--plum-900);
+  opacity: 0.82;
+  margin: 0 auto clamp(16px, 1.6vw, 22px);
+  max-width: 56ch;
+}
+/* The form is left-aligned inside a centred beat, because a label above a
+   field reads as a column and a centred one reads as a poster. The block
+   itself is centred; its contents are not. */
+.crown .sub {
+  margin-top: clamp(24px, 3vw, 40px);
+}

@@ -35,6 +35,30 @@ export type Mail = {
   html?: string;
   /** Where replies should land. Defaults to EMAIL_REPLY_TO. */
   replyTo?: string;
+  /**
+   * Files riding in the envelope. The newsletter only (D-29).
+   *
+   * A transactional message never carries one — everything a receipt has to
+   * say is in the message — and the size at which a newsletter's file stops
+   * riding along and becomes a link is decided in
+   * `lib/newsletter/attachments.ts`, not here.
+   */
+  attachments?: { filename: string; content: Buffer }[];
+  /**
+   * Extra headers. Used for exactly one thing: `List-Unsubscribe` and
+   * `List-Unsubscribe-Post` on the newsletter (RFC 8058).
+   *
+   * WHY IT IS WORTH A FIELD. Gmail and Apple Mail both surface those headers
+   * as a native one-tap "unsubscribe" control beside the sender's name, and
+   * Gmail's bulk-sender rules have required them of anyone sending to more
+   * than a handful of Gmail addresses since February 2024. A list without them
+   * gets unsubscribed by people pressing "report spam" instead, which is the
+   * signal that moves a sending domain into the junk folder for everybody.
+   *
+   * A transactional message must NOT carry them — see the note on `footer` in
+   * render.ts. It is the same rule as the unsubscribe line, in the headers.
+   */
+  headers?: Record<string, string>;
 };
 
 export type SendResult = {
@@ -99,6 +123,21 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
         `Reply-To: ${mail.replyTo ?? REPLY_TO}`,
         `Subject:  ${mail.subject}`,
         `Parts:    text${mail.html ? ` + html (${(mail.html.length / 1024).toFixed(1)}kB)` : " only"}`,
+        ...(mail.attachments?.length
+          ? [
+              `Files:    ${mail.attachments
+                .map(
+                  (file) =>
+                    `${file.filename} (${(file.content.length / 1024).toFixed(1)}kB)`,
+                )
+                .join(", ")}`,
+            ]
+          : []),
+        ...(mail.headers
+          ? Object.entries(mail.headers).map(
+              ([name, value]) => `${name}: ${value}`,
+            )
+          : []),
         "",
         mail.text,
         "──────────────────────────────────────────────────────────────",
@@ -120,6 +159,10 @@ export async function sendMail(mail: Mail): Promise<SendResult> {
       // first and the HTML second, which is the order RFC 2046 asks for: a
       // client shows the last part it understands.
       ...(mail.html ? { html: mail.html } : {}),
+      ...(mail.attachments?.length
+        ? { attachments: mail.attachments.map((file) => ({ ...file })) }
+        : {}),
+      ...(mail.headers ? { headers: mail.headers } : {}),
     });
     if (error) return { delivered: false, via: "resend", error: error.message };
     return { delivered: true, via: "resend" };

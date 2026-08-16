@@ -299,6 +299,8 @@ export function PicturePicker({
   library,
   onAdded,
   defaultValue,
+  value,
+  onChange,
   children,
 }: {
   name: string;
@@ -307,9 +309,27 @@ export function PicturePicker({
   library: string[];
   onAdded: (basename: string) => void;
   defaultValue: string;
+  /**
+   * CONTROLLED MODE, for a caller that holds the choice itself.
+   *
+   * The offering forms do not: a picture there is one field on a form the
+   * browser owns, and this component holding it is the whole of the state.
+   * The newsletter editor DOES — its blocks are a list it adds to, removes
+   * from and reorders, and a choice living in a child of a row that can move
+   * is a choice that goes with the wrong row. Passing `value` makes the
+   * caller's copy authoritative; leaving it off keeps the old behaviour
+   * exactly.
+   */
+  value?: string;
+  onChange?: (basename: string) => void;
   children?: ReactNode;
 }) {
-  const [chosen, setChosen] = useState(defaultValue);
+  const [own, setOwn] = useState(defaultValue);
+  const chosen = value ?? own;
+  const setChosen = (next: string) => {
+    setOwn(next);
+    onChange?.(next);
+  };
   const [adding, setAdding] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
 
