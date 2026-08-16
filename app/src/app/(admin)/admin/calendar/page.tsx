@@ -69,6 +69,22 @@ const TONES: Record<BusySpan["kind"], string> = {
   block: "border-l-pool-rule",
 };
 
+/** Monday first, because her week starts on one and a Sunday-first grid puts
+    the weekend either side of the days she actually works. */
+const WEEKDAY_HEADS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+/** How many empty cells the 1st needs in front of it, 0 (Monday) to 6 (Sunday).
+    Asked of the formatter rather than computed from getDay(), so it is her
+    weekday and not the server's. */
+function leadingBlanks(first: Date): number {
+  const short = new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    timeZone: "Europe/London",
+  }).format(first);
+  const index = WEEKDAY_HEADS.indexOf(short);
+  return index < 0 ? 0 : index;
+}
+
 export default async function Page({
   searchParams,
 }: {
@@ -171,6 +187,86 @@ export default async function Page({
           {monthWords(year, monthNumber + 1)} &rarr;
         </Link>
       </nav>
+
+      {/* ── the month, drawn as a month ────────────────────────────────────
+         The list underneath answers "what have I got on?". A grid answers a
+         different question — what does the month LOOK like: where the clear
+         weeks are, whether a workshop and a course have landed on the same
+         Saturday, how much of October is already gone. Both readings come off
+         the same spans, in the same tones, with the same links, so they cannot
+         disagree with each other.
+
+         It scrolls sideways under about 640px rather than reflowing. Seven
+         columns squeezed onto a phone stop being a calendar. */}
+      <div className="pool on-pool mt-9 overflow-x-auto px-4 py-6 sm:px-6">
+        <div className="min-w-[640px]">
+          <ol className="m-0 grid list-none grid-cols-7 p-0">
+            {WEEKDAY_HEADS.map((weekday) => (
+              <li
+                key={weekday}
+                className={`${NOTE} pb-2 text-center uppercase tracking-[0.14em]`}
+              >
+                {weekday}
+              </li>
+            ))}
+          </ol>
+
+          <ol className="m-0 grid list-none grid-cols-7 border-l border-t border-pool-rule p-0">
+            {/* The days of the previous month that share this first week. Drawn
+                as empty cells so the 1st lands under the right weekday. */}
+            {Array.from({ length: leadingBlanks(days[0].startsAt) }).map(
+              (_, i) => (
+                <li
+                  key={`before-${i}`}
+                  aria-hidden="true"
+                  className="min-h-[108px] border-b border-r border-pool-rule"
+                />
+              ),
+            )}
+
+            {days.map((day) => {
+              const spans = byDay.get(day.key) ?? [];
+              const isToday = day.key === today;
+              return (
+                <li
+                  key={day.key}
+                  className="min-h-[108px] border-b border-r border-pool-rule p-2 align-top"
+                >
+                  <p
+                    className={`${NOTE} ${isToday ? "text-action" : ""}`}
+                    aria-label={day.words}
+                  >
+                    {Number(day.key.slice(-2))}
+                    {isToday && <span className="ml-2">today</span>}
+                  </p>
+
+                  <ul className="m-0 mt-1 list-none space-y-1 p-0">
+                    {spans.map((span) => (
+                      <li
+                        key={`${span.kind}-${span.id}`}
+                        className={`border-l-4 pl-2 ${TONES[span.kind]}`}
+                      >
+                        {span.href ? (
+                          <Link
+                            href={span.href}
+                            className="block text-[14px] leading-snug text-ink underline decoration-transparent underline-offset-2 hover:decoration-ink"
+                          >
+                            {span.label}
+                          </Link>
+                        ) : (
+                          <span className="block text-[14px] leading-snug text-ink">
+                            {span.label}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
 
       {/* ── what is in it ──────────────────────────────────────────────── */}
       <div className="pool on-pool mt-9 px-6 py-7 sm:px-8">
