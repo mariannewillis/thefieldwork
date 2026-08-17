@@ -169,6 +169,15 @@ export default function GalleryPicker({
   const [picked, setPicked] = useState<string[]>(chosen ?? []);
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  /**
+   * "You already have this picture…" — a fact, not a refusal, and drawn as one.
+   *
+   * It sits in its own state rather than sharing `refused`, because the two are
+   * different events wearing different colours: one means she has to do
+   * something, the other means she does not. The tile is already ticked by the
+   * time she reads this.
+   */
+  const [held, setHeld] = useState<string | null>(null);
   const [link, setLink] = useState("");
   const sheet = useRef<HTMLDivElement>(null);
 
@@ -187,6 +196,7 @@ export default function GalleryPicker({
     if (open) {
       setPicked(chosen ?? []);
       setRefused(null);
+      setHeld(null);
     }
     // `chosen` is deliberately not a dependency: it is a snapshot taken when the
     // sheet opens, and following it afterwards would fight her ticks.
@@ -220,6 +230,7 @@ export default function GalleryPicker({
 
   const toggle = (ref: string) => {
     setRefused(null);
+    setHeld(null);
     if (!multiple) {
       // One press is the whole interaction where one is wanted. Ticking a tile
       // and then pressing a second button to confirm is two presses for a
@@ -244,6 +255,7 @@ export default function GalleryPicker({
 
     setBusy(true);
     setRefused(null);
+    setHeld(null);
     try {
       for (const file of files) {
         const body = new FormData();
@@ -256,6 +268,9 @@ export default function GalleryPicker({
           setRefused(result.error);
           break;
         }
+        // Already here: the ref that came back names the copy she has, so the
+        // tick below chooses THAT one and this only has to say so.
+        if (result.alreadyHeld) setHeld(result.alreadyHeld);
         onAdded?.(result.ref);
         // An upload is a choice: she went and found this file in order to use
         // it, so it arrives ticked rather than waiting to be found again.
@@ -492,6 +507,18 @@ export default function GalleryPicker({
               className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-pool-error"
             >
               {refused}
+            </p>
+          )}
+
+          {/* Not an alert. Nothing needs recovering from — she asked for this
+              picture and she has it; all that changed is that no seventh copy
+              of it was made. */}
+          {held && (
+            <p
+              role="status"
+              className="mt-4 max-w-[62ch] border-l-2 border-action pl-4 text-[17px] leading-relaxed text-ink"
+            >
+              {held}
             </p>
           )}
         </div>

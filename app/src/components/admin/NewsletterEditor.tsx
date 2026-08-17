@@ -774,6 +774,15 @@ function Attachments({
   const [refused, setRefused] = useState<string | null>(null);
   const [browsing, setBrowsing] = useState(false);
   const [attachError, setAttachError] = useState<string | null>(null);
+  /**
+   * "You already have this file…" — a fact rather than a refusal.
+   *
+   * This is the path that made three copies of one handout: the same PDF
+   * uploaded onto three letters was stored under three keys, because the key
+   * carries the letter's own id. The file is now on the letter either way; all
+   * this says is that it was already here and no fourth copy was made.
+   */
+  const [held, setHeld] = useState<string | null>(null);
 
   /**
    * Documents picked out of the library, put on this letter.
@@ -807,12 +816,14 @@ function Attachments({
 
     setAdding(true);
     setRefused(null);
+    setHeld(null);
     const body = new FormData();
     body.set("newsletterId", String(newsletterId));
     body.set("file", file);
     try {
       const result = await addAttachment(body);
       if (!result.ok) setRefused(result.error);
+      else setHeld(result.alreadyHeld);
     } catch {
       setRefused(
         "The file did not get there. Check the connection and try again.",
@@ -991,6 +1002,16 @@ function Attachments({
           className="mt-3 max-w-[54ch] text-[17px] leading-relaxed text-pool-error"
         >
           {refused}
+        </p>
+      )}
+      {/* Not an alert: the file is on the letter, and the only news is that it
+          was already in her documents so nothing was stored a second time. */}
+      {held && (
+        <p
+          role="status"
+          className="mt-3 max-w-[54ch] border-l-2 border-action pl-4 text-[17px] leading-relaxed text-ink"
+        >
+          {held}
         </p>
       )}
       {removeError && (

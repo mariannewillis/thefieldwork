@@ -401,6 +401,8 @@ function Empty({ what }: { what: string }) {
 export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  /** "You already have this picture…" — a fact rather than a refusal. */
+  const [held, setHeld] = useState<string | null>(null);
   const [link, setLink] = useState("");
 
   async function take(input: HTMLInputElement) {
@@ -409,6 +411,7 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
     input.value = "";
     setBusy(true);
     setRefused(null);
+    setHeld(null);
     try {
       for (const file of files) {
         const body = new FormData();
@@ -421,6 +424,10 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
           setRefused(result.error);
           break;
         }
+        // Said for the LAST one that was already here rather than for each, so
+        // dropping twelve photographs of which three are repeats leaves one
+        // sentence to read instead of three stacked on top of each other.
+        if (result.alreadyHeld) setHeld(result.alreadyHeld);
       }
     } catch {
       setRefused("That did not get there. Check the connection and try again.");
@@ -434,6 +441,7 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
     if (!raw) return;
     setBusy(true);
     setRefused(null);
+    setHeld(null);
     try {
       const body = new FormData();
       body.set("url", raw);
@@ -530,6 +538,17 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
           className="mt-4 max-w-[62ch] text-[17px] leading-relaxed text-pool-error"
         >
           {refused}
+        </p>
+      )}
+
+      {/* Not an alert. Nothing has gone wrong and there is nothing to recover
+          from — the library simply already had it, and made no second copy. */}
+      {held && (
+        <p
+          role="status"
+          className="mt-4 max-w-[62ch] border-l-2 border-action pl-4 text-[17px] leading-relaxed text-ink"
+        >
+          {held}
         </p>
       )}
     </div>

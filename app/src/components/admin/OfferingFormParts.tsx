@@ -344,6 +344,8 @@ export function PicturePicker({
   };
   const [adding, setAdding] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  /** "You already have this picture…" — a fact rather than a refusal. */
+  const [held, setHeld] = useState<string | null>(null);
   const [browsing, setBrowsing] = useState(false);
 
   async function take(input: HTMLInputElement) {
@@ -355,6 +357,7 @@ export function PicturePicker({
 
     setAdding(true);
     setRefused(null);
+    setHeld(null);
     const body = new FormData();
     body.set("file", file);
     try {
@@ -363,6 +366,10 @@ export function PicturePicker({
         setRefused(result.error);
         return;
       }
+      // Already here: the basename that came back is the copy she has, and
+      // `setChosen` below puts THAT one in the field. She wanted this
+      // photograph on this page; she has it.
+      setHeld(result.alreadyHeld);
       onAdded(result.basename);
       setChosen(result.basename);
     } catch {
@@ -444,6 +451,15 @@ export function PicturePicker({
             className="mt-2 max-w-[44ch] text-[15px] leading-relaxed text-pool-error"
           >
             {refused}
+          </p>
+        )}
+        {/* Not an alert: the picture is already in the field beside this. */}
+        {held && (
+          <p
+            role="status"
+            className="mt-2 max-w-[44ch] border-l-2 border-action pl-3 text-[15px] leading-relaxed text-ink"
+          >
+            {held}
           </p>
         )}
         {children}

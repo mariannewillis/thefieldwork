@@ -2698,3 +2698,193 @@ asserting the mark leaves as `cid:` bytes rather than a URL. Proofs at 600px and
 
 One migration, `20260816200000_add_newsletter_background`: one nullable column,
 no default, so every letter already sent keeps the plate it was sent against.
+---
+
+## D-31 · A thing is its bytes, not its name; the library refuses the second copy, and she clears the ones already in it (2026-08-17)
+
+`public/media` held 235 files for 38 photographs, and 18 of those files were
+four photographs stored six, five, five and two times over. The three PDFs on
+newsletters 13, 14 and 30 were one document stored three times. Nothing had gone
+wrong: `ingestImage` names an upload after the file it arrives in and numbers it
+when that name is taken, so the same picture sent up six times becomes
+`whatsapp-image-…`, `-2`, `-3`, `-4`, `-5`, `-6`. That naming is right — the
+second photograph of the garden room genuinely should be `the-garden-room-2`.
+The mistake was treating a NAME as an identity. A name answers "what do I call
+this" and says nothing at all about whether we already have it.
+
+### 1 · Identity is the bytes, and for a picture that means one named derivative
+
+`MediaAsset.hash` — SHA-256 of the bytes actually stored. Two files with
+different names and identical bytes are one asset; two files sharing a name
+whose bytes differ are two, and go on being named apart exactly as they were.
+
+**For a picture, the bytes hashed are `<basename>-2400.jpg`, and the choice is
+forced rather than aesthetic.** No original is kept: §13 and D-6 require every
+upload to be re-encoded into six derivatives and the original discarded, which
+is what makes an upload safe. So there are no arriving bytes left to hash by the
+time a row exists — and worse, the 38 photographs that shipped with the code
+were never uploaded through this app at all, so they have no arriving bytes even
+in principle. A scheme that cannot describe the pictures already on the site
+cannot find the duplicates already on the site. The 2400 JPEG is the file
+`listMediaBasenames` already treats as proof that a basename is complete and the
+one every `<picture>` falls back to, so it is the derivative most certain to
+exist. Checked before it was relied on: hashing the 2400 JPEGs of all 38
+basenames finds exactly the four groups measured by hand — six, five, five, two.
+
+**A document hashes the bytes it was stored with**, which for a document are the
+bytes that arrived: a PDF put through a converter is a different PDF, so it is
+kept as it came.
+
+**A film gets no hash and needs none.** It is a link, and `parseFilm`
+canonicalises the address before anything stores it: `youtu.be/x` and
+`youtube.com/watch?v=x` both parse to one `watchUrl`, and `addLibraryVideo`,
+`saveWorkshop`, `saveCourse` and `saveService` all store `film.watchUrl` rather
+than the string she pasted. So `(kind, ref)` already refuses the second copy.
+This was checked rather than assumed, and it held.
+
+**What this deliberately does not catch:** the same photograph exported twice at
+different qualities. Those are two different sets of pixels and stay two
+pictures. Answering that needs perceptual comparison, which is a judgement
+rather than a fact, and a library that quietly merged two pictures because they
+LOOKED alike is a library she could not trust. Identical is a fact; similar is
+an opinion.
+
+### 2 · The guard is in `ingestImage`, so every path in is covered by construction
+
+The bytes are graded and re-encoded first, the canonical derivative is hashed,
+and only then is anything written. If the library already holds that hash
+NOTHING is written: the basename she already has comes back, and the six files
+that would have been the seventh copy are never created. **She is not shown an
+error, because nothing has gone wrong** — she wanted this picture on this page
+and she has it. One sentence says so: "You already have this picture — it
+arrived Sat 20 Sep, and that is the one now chosen."
+
+It lives in `ingestImage` rather than in the actions because every picture that
+enters the portal enters through that function. A check written in
+`addLibraryPicture` would have covered the library and missed the offering
+forms; one written in both would have missed whatever is added next. The three
+paths that bring bytes in are covered: the library's own upload, the offering
+forms' picture control (`offerings/actions.ts::addPicture`, which is also the
+newsletter editor's), and the letter's document upload.
+
+**A caller-owned basename is exempt.** The film poster is named after its film
+and is replaced when the film changes; handing back somebody else's basename
+because two stills happen to be identical would point one workshop's poster at
+another workshop's film.
+
+**The letter's document upload changed shape.** `attachmentKey` prefixes the
+letter's own id, which is what produced `newsletter-13-…`, `newsletter-14-…` and
+`newsletter-30-…` for one handout. That rule was right when an upload onto a
+letter was the only way a document could exist; it stopped being right the day
+the library landed and `NewsletterAttachment`'s unique key became
+`(newsletterId, storedAs)` precisely so several letters could name one file. The
+bytes are now asked about before a key is minted, and the letter is pointed at
+the file she already has — the same thing `attachFromLibrary` does when she
+picks a document by eye, arrived at from the other direction. The library row is
+written there and then rather than left to adoption, because a row adopted later
+would carry no hash and a hash-less row is invisible to the guard.
+
+### 3 · Clearing what is already there is a SCREEN, not a script
+
+The 18 files are the pictures on live workshops, a live course, a live session
+and live letters. Clearing them moves references on pages that are on the
+internet. That is Marianne's decision, one group at a time, having read what
+will happen — so the Media page grew a panel that finds the groups, shows the
+photograph so she can see for herself that they are the same, lists every place
+each copy is used, says exactly what pressing will do, and does nothing until
+she presses.
+
+**Which copy stays: the one she has had longest.** A null `addedAt` means the
+picture was on the site before the library existed, so it sorts first; then the
+earlier date. **The tie-break is the NAME, shortest first**, and that is the
+interesting half — all four of the real groups are ties, because all 18 were
+adopted off the disk in one pass with no date. Shortest wins because
+`ingestImage` numbers every copy after the first, so the shortest name in a
+group is by construction the one that got there first. Sorting by row id instead
+picks whichever the adoption sweep happened to insert first, which is a fact
+about the sweep and not about her library: on the real data it chose
+`…-45-48-3` over `…-45-48`, which is an answer nobody could defend.
+
+**References move BEFORE anything is deleted, and that order is the whole safety
+property.** A crash between the two leaves an unused duplicate — untidy, and
+nothing broken. The other order leaves a page naming a file that has gone. The
+deletion itself goes through `removeAsset`, which re-checks every reference site
+and takes the six derivative files with it through `mediaStore()`, so the
+deletion half cannot delete something in use even if the repointing half missed
+a site.
+
+**`SITES` gained a fourth reading.** The one table of reference sites was
+already walked by `everyReference`, `adoptEverything` and `usesOf`; it is now
+also walked by `repointEverywhere`. A tenth place a picture can appear is still
+one entry, and adoption, the delete refusal AND the merge all pick it up in the
+same commit.
+
+**It refuses rather than half-doing it.** `src/content/home.ts` is code: no
+database write reaches a TypeScript file, so that site's `repoint` is null. If a
+copy about to be deleted is named there, the merge moves NOTHING and says why —
+that the photograph is written into the site's own code, that clearing it needs
+whoever built the site, and that in the meantime every page is still showing the
+right picture. Half a merge is the failure; a group left alone is a group she
+can still see.
+
+**Afterwards it says what it did**, in words, naming the survivor, the count of
+copies and files removed, and every page that was moved. The panel is drawn even
+when there is nothing left in it, because the group is gone by the time the
+report is written and a panel that vanished would take the account with it.
+
+**Films get no panel and cannot.** The screen says so plainly on that tab
+instead of leaving her looking for one.
+
+### 4 · Nothing to run, and no button to press first
+
+`adoptEverything` backfills the hashes of rows that have none, so the first time
+she opens the library after this ships, the 38 photographs get their hashes and
+the groups appear. After that pass the only rows still lacking a hash are ones
+whose bytes are missing from the store, which is a handful of misses per load
+rather than a re-read.
+
+**Three documents on this database have no hash and will not get one:** the PDFs
+on newsletters 13, 14 and 30 point at bytes that are no longer in `public/media`.
+A row whose file is gone cannot be proved identical to anything, so it keeps its
+null, never joins a group, and is left exactly where it is. That is the honest
+outcome rather than an omission — and it means the document duplication is fixed
+going forward and cannot be cleared retrospectively without the bytes.
+
+### Proof
+
+`e2e/duplicates-smoke.mjs` — **56 checks**, same rules as its siblings: a copy of
+the app with no `.env.local`, its own port, its own throwaway admin, its own
+workshop, letter, photographs and PDF, all named `smoke-dup-*` and all removed at
+the end. It exercises: the same photograph under two names adding no second row
+and no second six files; a DIFFERENT photograph sharing a name still being two
+pictures; the offering form's own upload taking the same guard; `youtu.be` and
+`youtube.com/watch` landing as one film in canonical form; a group in use merged
+with the workshop's hero AND its rail repointed, the copies' twelve files gone
+from disk and the survivor's six still there, and the live workshop page still
+drawing the same photograph and naming no deleted file; a group whose copy is
+named in `home.ts` refused with a reason, no button, and the home page's own
+photograph and six files untouched; one handout on the library and on a letter
+being one file; the tab counts; and no React hydration or nested-form complaint
+anywhere in the run.
+
+**It never presses the operator's own four groups**, and asserts at the end that
+all four are still there for him to clear himself when he looks at the screen.
+Panels before and after in `e2e/_duplicate-shots/`.
+
+One migration, `20260817180000_add_media_hash`: one nullable column and one plain
+index. Nothing is backfilled in SQL, because the hash of a picture is the hash of
+a file in the store and SQL cannot read the store. The index is NOT unique — two
+rows sharing a hash is precisely the state that already exists, and a unique
+index would refuse the migration rather than let the screen clear them.
+
+### Two things that did not change, deliberately
+
+**No nested forms, and no `name` on a button carrying `formAction`.** The panel
+puts a form per group on a page that already carries the library's own per-item
+forms; the Media page is not itself a form, so each is simply a form. Nothing in
+the panel carries `formAction` at all, which is the sturdier version of D-30's
+rule. The suite watches the console for hydration and nested-form complaints on
+every screen it opens.
+
+**No image editing, no tagging and no folders**, and the library still refuses to
+delete anything that is in use.

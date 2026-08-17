@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { SITE_URL } from "@/content/site";
 import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
+import { hashOf, heldWithHash, heldWords } from "@/lib/media/identity";
 import {
   ATTACHMENT_KINDS,
   attachmentKey,
@@ -374,6 +375,11 @@ export type AttachmentAdded =
       bytes: number;
       size: string;
       delivery: "attached" | "linked";
+      /**
+       * Set when the library already held these exact bytes, in which case the
+       * letter was pointed at the copy that exists and nothing was stored.
+       */
+      alreadyHeld: string | null;
     }
   | { ok: false; error: string };
 
@@ -436,16 +442,58 @@ export async function addAttachment(
   });
   const delivery = deliveryFor(bytes.length, riding._sum.bytes ?? 0);
 
-  const storedAs = attachmentKey(id, file.name);
-  try {
-    await putAttachment(storedAs, bytes, kind.contentType);
-  } catch (e) {
-    console.error(`[newsletter] could not store ${storedAs}`, e);
-    return {
-      ok: false,
-      error:
-        "The file could not be saved. Nothing has changed — try again, and if it happens twice something is wrong at our end rather than with the file.",
-    };
+  /**
+   * ── THE SAME DOCUMENT, THREE LETTERS, ONE FILE ────────────────────────────
+   *
+   * `attachmentKey` prefixes the letter's own id, so uploading one handout onto
+   * January, March and August produced `newsletter-13-…`, `newsletter-14-…` and
+   * `newsletter-30-…`: three keys, three copies of identical bytes, three rows
+   * in her library. That was the right rule when an upload onto a letter was
+   * the only way a document could exist and two letters each needed their own
+   * `notes.pdf`. It stopped being right the day the library landed, because a
+   * document is now hers rather than the letter's, and `NewsletterAttachment`'s
+   * unique key became `(newsletterId, storedAs)` precisely so several letters
+   * could name one file.
+   *
+   * So the bytes are asked about before a key is minted. If the library already
+   * has them, this letter is pointed at that key and nothing is written to the
+   * store — which is the same thing `attachFromLibrary` does when she picks a
+   * document by eye, arrived at from the other direction.
+   */
+  const hash = hashOf(bytes);
+  const held = await heldWithHash(MediaKind.document, hash);
+
+  const storedAs = held ? held.ref : attachmentKey(id, file.name);
+  if (!held) {
+    try {
+      await putAttachment(storedAs, bytes, kind.contentType);
+    } catch (e) {
+      console.error(`[newsletter] could not store ${storedAs}`, e);
+      return {
+        ok: false,
+        error:
+          "The file could not be saved. Nothing has changed — try again, and if it happens twice something is wrong at our end rather than with the file.",
+      };
+    }
+
+    // The library row, written HERE rather than left to adoption. Adoption
+    // would find this attachment on the next read of the Media screen and write
+    // a row with no hash, and a hash-less row is invisible to the check above —
+    // so the same file uploaded onto the next letter before she ever opened the
+    // library would have made a second copy after all.
+    await prisma.mediaAsset.upsert({
+      where: { kind_ref: { kind: MediaKind.document, ref: storedAs } },
+      update: { hash },
+      create: {
+        kind: MediaKind.document,
+        ref: storedAs,
+        title: file.name,
+        contentType: kind.contentType,
+        bytes: bytes.length,
+        hash,
+        addedAt: new Date(),
+      },
+    });
   }
 
   // Upsert on `(newsletterId, storedAs)`, so choosing the same filename twice
@@ -486,6 +534,7 @@ export async function addAttachment(
     bytes: row.bytes,
     size: fileSizeWords(row.bytes),
     delivery,
+    alreadyHeld: held ? heldWords(held, "file") : null,
   };
 }
 

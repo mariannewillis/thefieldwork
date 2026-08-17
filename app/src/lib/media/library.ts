@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
 import { POSTER_PREFIX } from "@/lib/film";
 import { listMediaBasenames } from "@/lib/media";
+import { backfillHashes } from "@/lib/media/identity";
 import { mediaStore } from "@/lib/media/store";
 
 /**
@@ -18,12 +19,14 @@ import { mediaStore } from "@/lib/media/store";
  * adds is the ability to answer two questions about any one of those strings:
  * WHAT DO WE KNOW ABOUT IT (a `MediaAsset` row), and WHERE IS IT USED.
  *
- * ONE TABLE OF REFERENCE SITES, READ TWICE. `SITES` below is the only list of
- * places a picture, a film or a file can be named. `everyReference()` walks it;
- * `adoptEverything()` inserts what it finds; `usesOf()` filters what it finds.
- * Adding a tenth place a picture can appear means adding one entry to `SITES`
- * — and both adoption and the deletion refusal pick it up in the same commit,
- * because neither has a list of its own to fall out of step with.
+ * ONE TABLE OF REFERENCE SITES, READ FOUR WAYS. `SITES` below is the only list
+ * of places a picture, a film or a file can be named. `everyReference()` walks
+ * it; `adoptEverything()` inserts what it finds; `usesOf()` filters what it
+ * finds; `repointEverywhere()` REWRITES what it finds, which is how the
+ * duplicate merge moves a page off a copy and onto the survivor. Adding a tenth
+ * place a picture can appear means adding one entry to `SITES` — and adoption,
+ * the deletion refusal and the merge all pick it up in the same commit, because
+ * none of them has a list of its own to fall out of step with.
  *
  * THAT IS THE WHOLE REASON IT IS SHAPED THIS WAY. The failure this design is
  * built against is not a hard one to imagine: somebody adds a new column that
@@ -84,6 +87,17 @@ type Site = {
   column: string;
   kind: MediaKind;
   load: () => Promise<Use[]>;
+  /**
+   * Move every reference here from one ref to another, and say how many moved.
+   *
+   * NULL WHERE NOTHING CAN. The home page's photographs are written into
+   * `src/content/home.ts`, and no database write reaches a TypeScript file. A
+   * site with no `repoint` is a site the duplicate merge must refuse rather
+   * than skip: skipping it would leave the page pointing at a picture the merge
+   * is about to delete, which is the one outcome the whole library exists to
+   * prevent.
+   */
+  repoint: ((from: string, to: string) => Promise<number>) | null;
 };
 
 /** A reference with nothing to say, dropped. Empty strings are how a cleared field reads. */
@@ -117,6 +131,10 @@ const SITES: Site[] = [
           alt: row.heroAlt ?? undefined,
         }));
     },
+    repoint: (from, to) =>
+      prisma.workshop
+        .updateMany({ where: { heroImage: from }, data: { heroImage: to } })
+        .then((result) => result.count),
   },
   {
     column: "Workshop.filmPoster",
@@ -134,6 +152,10 @@ const SITES: Site[] = [
           href: `/admin/offerings/workshops/${row.slug}`,
         }));
     },
+    repoint: (from, to) =>
+      prisma.workshop
+        .updateMany({ where: { filmPoster: from }, data: { filmPoster: to } })
+        .then((result) => result.count),
   },
   {
     column: "Workshop.filmUrl",
@@ -152,6 +174,13 @@ const SITES: Site[] = [
           title: row.name,
         }));
     },
+    // Films are already one row per film, because `parseFilm` canonicalises the
+    // address before anything stores it. This exists so the table has no gap,
+    // not because a film has ever needed moving.
+    repoint: (from, to) =>
+      prisma.workshop
+        .updateMany({ where: { filmUrl: from }, data: { filmUrl: to } })
+        .then((result) => result.count),
   },
   {
     column: "WorkshopImage.url",
@@ -174,6 +203,10 @@ const SITES: Site[] = [
           alt: row.alt,
         }));
     },
+    repoint: (from, to) =>
+      prisma.workshopImage
+        .updateMany({ where: { url: from }, data: { url: to } })
+        .then((result) => result.count),
   },
   {
     column: "Course.heroImage",
@@ -192,6 +225,10 @@ const SITES: Site[] = [
           alt: row.heroAlt ?? undefined,
         }));
     },
+    repoint: (from, to) =>
+      prisma.course
+        .updateMany({ where: { heroImage: from }, data: { heroImage: to } })
+        .then((result) => result.count),
   },
   {
     column: "Course.filmPoster",
@@ -209,6 +246,10 @@ const SITES: Site[] = [
           href: `/admin/offerings/courses/${row.slug}`,
         }));
     },
+    repoint: (from, to) =>
+      prisma.course
+        .updateMany({ where: { filmPoster: from }, data: { filmPoster: to } })
+        .then((result) => result.count),
   },
   {
     column: "Course.filmUrl",
@@ -227,6 +268,10 @@ const SITES: Site[] = [
           title: row.name,
         }));
     },
+    repoint: (from, to) =>
+      prisma.course
+        .updateMany({ where: { filmUrl: from }, data: { filmUrl: to } })
+        .then((result) => result.count),
   },
   {
     column: "CourseImage.url",
@@ -249,6 +294,10 @@ const SITES: Site[] = [
           alt: row.alt,
         }));
     },
+    repoint: (from, to) =>
+      prisma.courseImage
+        .updateMany({ where: { url: from }, data: { url: to } })
+        .then((result) => result.count),
   },
   {
     column: "Service.heroImage",
@@ -267,6 +316,10 @@ const SITES: Site[] = [
           alt: row.heroAlt ?? undefined,
         }));
     },
+    repoint: (from, to) =>
+      prisma.service
+        .updateMany({ where: { heroImage: from }, data: { heroImage: to } })
+        .then((result) => result.count),
   },
   {
     column: "Service.filmPoster",
@@ -284,6 +337,10 @@ const SITES: Site[] = [
           href: `/admin/offerings/services/${row.slug}`,
         }));
     },
+    repoint: (from, to) =>
+      prisma.service
+        .updateMany({ where: { filmPoster: from }, data: { filmPoster: to } })
+        .then((result) => result.count),
   },
   {
     column: "Service.filmUrl",
@@ -302,6 +359,10 @@ const SITES: Site[] = [
           title: row.name,
         }));
     },
+    repoint: (from, to) =>
+      prisma.service
+        .updateMany({ where: { filmUrl: from }, data: { filmUrl: to } })
+        .then((result) => result.count),
   },
   {
     column: "ServiceImage.url",
@@ -324,6 +385,10 @@ const SITES: Site[] = [
           alt: row.alt,
         }));
     },
+    repoint: (from, to) =>
+      prisma.serviceImage
+        .updateMany({ where: { url: from }, data: { url: to } })
+        .then((result) => result.count),
   },
 
   /* ── Letters ───────────────────────────────────────────────────────────── */
@@ -349,6 +414,19 @@ const SITES: Site[] = [
           href: row.status === "sent" ? null : `/admin/newsletters/${row.id}`,
         }));
     },
+    // SENT LETTERS INCLUDED, and that is safe here in a way it would not be
+    // for anything else. A merge only ever moves a reference between files
+    // with IDENTICAL bytes, so the picture a sent letter's masthead resolves
+    // to is the same photograph before and after. Leaving sent letters out
+    // would instead mean the merge deleting a file a sent letter still points
+    // at, which is the hole this refuses to make.
+    repoint: (from, to) =>
+      prisma.newsletter
+        .updateMany({
+          where: { backgroundBasename: from },
+          data: { backgroundBasename: to },
+        })
+        .then((result) => result.count),
   },
   {
     column: "NewsletterBlock.imageBasename",
@@ -374,6 +452,13 @@ const SITES: Site[] = [
           alt: row.alt ?? undefined,
         }));
     },
+    repoint: (from, to) =>
+      prisma.newsletterBlock
+        .updateMany({
+          where: { imageBasename: from },
+          data: { imageBasename: to },
+        })
+        .then((result) => result.count),
   },
   {
     column: "NewsletterAttachment.storedAs",
@@ -402,6 +487,45 @@ const SITES: Site[] = [
         bytes: row.bytes,
         addedAt: row.createdAt,
       }));
+    },
+    /**
+     * ONE UPDATE PER ROW, BECAUSE OF THE INDEX. `(newsletterId, storedAs)` is
+     * unique, so a blanket `updateMany` would throw the moment one letter
+     * carried both copies of the same document — which is exactly the state a
+     * duplicate group describes. Where the letter already holds the survivor,
+     * the loser's row is DELETED rather than updated: two rows for one file on
+     * one letter is the thing that index refuses, and the letter ends up
+     * carrying the file once, which is what she meant both times she attached
+     * it.
+     */
+    repoint: async (from, to) => {
+      const rows = await prisma.newsletterAttachment.findMany({
+        where: { storedAs: from },
+        select: { id: true, newsletterId: true },
+      });
+
+      let moved = 0;
+      for (const row of rows) {
+        const already = await prisma.newsletterAttachment.findUnique({
+          where: {
+            newsletterId_storedAs: {
+              newsletterId: row.newsletterId,
+              storedAs: to,
+            },
+          },
+          select: { id: true },
+        });
+        if (already) {
+          await prisma.newsletterAttachment.delete({ where: { id: row.id } });
+        } else {
+          await prisma.newsletterAttachment.update({
+            where: { id: row.id },
+            data: { storedAs: to },
+          });
+        }
+        moved += 1;
+      }
+      return moved;
     },
   },
 
@@ -439,6 +563,11 @@ const SITES: Site[] = [
           inCode: true,
           alt: plate.alt,
         })),
+    // NOTHING CAN REWRITE THIS FROM A SCREEN. `src/content/home.ts` is code; a
+    // database write does not reach it. The duplicate merge reads this null and
+    // REFUSES the whole group rather than moving the references it can and
+    // deleting a file the home page still names.
+    repoint: null,
   },
 ];
 
@@ -487,6 +616,68 @@ function letterUse(
 export async function everyReference(): Promise<Use[]> {
   const lists = await Promise.all(SITES.map((site) => site.load()));
   return lists.flat();
+}
+
+/** What a repoint did, and what it could not do. */
+export type Repointed = {
+  /** How many references now name the survivor instead of the copy. */
+  moved: number;
+  /**
+   * The uses no database write can reach, in her words. Non-empty means
+   * NOTHING was moved — see below.
+   */
+  refused: string[];
+};
+
+/**
+ * Move every reference off one thing and onto another.
+ *
+ * THE ONLY CALLER IS THE DUPLICATE MERGE, and the only pair it is ever handed
+ * is two rows with identical bytes. That is what makes this safe to do at all:
+ * every page involved goes on showing the same photograph, because the two
+ * files ARE the same photograph. Nothing here should be used to point a page at
+ * a different picture; that is a decision she makes on the page.
+ *
+ * IT CHECKS BEFORE IT WRITES, AND IT IS ALL OR NOTHING. If any reference to
+ * `from` sits at a site with no `repoint` — today that means the home page's
+ * own photographs, which live in code — this moves NOTHING and names them. A
+ * merge that moved eight references and left the ninth would leave the ninth
+ * page pointing at a file the caller is about to delete, and a photograph would
+ * vanish off the front of the site for a reason nobody could reconstruct six
+ * months later.
+ *
+ * THE WRITES ARE NOT IN ONE TRANSACTION, and the caller's ORDER is what makes
+ * that survive a crash. Every reference is moved before anything is deleted, so
+ * the worst a half-finished run can leave is some pages on the survivor, some
+ * on the copy, and both files still on disk — untidy, and nothing broken. The
+ * opposite order would leave a page naming a file that has gone. Sixteen sites
+ * against tables a sole practitioner measures in tens of rows do not need a
+ * transaction; they need the right order, which they have.
+ */
+export async function repointEverywhere(
+  kind: MediaKind,
+  from: string,
+  to: string,
+): Promise<Repointed> {
+  // Asked of the sites that CANNOT be rewritten, rather than inferred from the
+  // `inCode` flag on a use. The two happen to coincide today — the home page is
+  // both the only unwritable site and the only one that sets that flag — and
+  // reading the flag would quietly stop being right the first time somebody
+  // added a site that is unwritable for a different reason.
+  const refused: string[] = [];
+  for (const site of SITES) {
+    if (site.kind !== kind || site.repoint) continue;
+    const uses = await site.load();
+    for (const use of uses) if (use.ref === from) refused.push(use.what);
+  }
+  if (refused.length > 0) return { moved: 0, refused };
+
+  let moved = 0;
+  for (const site of SITES) {
+    if (site.kind !== kind || !site.repoint) continue;
+    moved += await site.repoint(from, to);
+  }
+  return { moved, refused: [] };
 }
 
 /* ── Adoption ────────────────────────────────────────────────────────────── */
@@ -599,6 +790,13 @@ export async function adoptEverything(): Promise<void> {
       }),
     ),
   );
+
+  // LAST, and after the inserts above, so a row created on this very pass gets
+  // its hash on this very pass rather than on the next page load. This is what
+  // makes the duplicate panel true the first time she opens the screen: the
+  // thirty-eight photographs that shipped with the code were never uploaded
+  // through this app, so nothing else would ever have hashed them.
+  await backfillHashes();
 }
 
 /**
@@ -619,12 +817,27 @@ export async function adoptEverything(): Promise<void> {
  * `addedAt` is set here and in the library's own uploads, and nowhere else.
  * Adoption deliberately leaves it null — see the schema for why that null is the
  * honest answer.
+ *
+ * THE HASH COMES FROM THE UPLOAD that just ran, rather than being read back off
+ * the disk: `ingestImage` has the derivative's bytes in hand and hands the hash
+ * over with the basename, so this is one write rather than a write and a
+ * re-read. `update` fills it in on a row that predates the hash — a picture
+ * adopted from disk and then uploaded again would otherwise keep its null and
+ * go on being invisible to the guard.
  */
-export async function recordPicture(basename: string): Promise<void> {
+export async function recordPicture(
+  basename: string,
+  hash: string,
+): Promise<void> {
   await prisma.mediaAsset.upsert({
     where: { kind_ref: { kind: MediaKind.picture, ref: basename } },
-    update: {},
-    create: { kind: MediaKind.picture, ref: basename, addedAt: new Date() },
+    update: { hash },
+    create: {
+      kind: MediaKind.picture,
+      ref: basename,
+      hash,
+      addedAt: new Date(),
+    },
   });
 }
 

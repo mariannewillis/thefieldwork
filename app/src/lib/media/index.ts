@@ -1,12 +1,19 @@
 import "server-only";
 import { POSTER_PREFIX } from "@/lib/film";
 import { slugify } from "@/lib/offering-rules";
+import { MediaKind } from "@prisma/client";
 import {
   ACCEPTED_TYPES,
   encodeDerivatives,
   MAX_UPLOAD_BYTES,
   sniffImage,
 } from "./encode";
+import {
+  canonicalDerivative,
+  hashOf,
+  type Held,
+  heldWithHash,
+} from "./identity";
 import { listOnDisk, mediaStore, readOnDisk } from "./store";
 
 /**
@@ -75,7 +82,22 @@ export async function readMedia(
 }
 
 export type Ingested =
-  { ok: true; basename: string } | { ok: false; error: string };
+  | {
+      ok: true;
+      basename: string;
+      /**
+       * The canonical derivative's hash, for the row the caller writes. Always
+       * present on success, whether or not this upload was a duplicate.
+       */
+      hash: string;
+      /**
+       * Set when the library ALREADY held these bytes, in which case nothing
+       * was written and `basename` names the copy she already has. Null on an
+       * upload that genuinely arrived.
+       */
+      alreadyHeld: Held | null;
+    }
+  | { ok: false; error: string };
 
 /**
  * A name for the picture that is hers, unique, and safe as a file name.
@@ -103,6 +125,30 @@ function nameFor(filename: string, taken: Set<string>): string {
  * `basename` is passed only by callers that own the name already — the film
  * poster, which is named after the film it belongs to and is REPLACED when
  * the film changes rather than accumulating numbered copies.
+ *
+ * ── IT REFUSES TO HOLD THE SAME PICTURE TWICE ────────────────────────────
+ *
+ * The bytes are graded and re-encoded first, then the canonical derivative is
+ * hashed, and only then is anything written. If the library already holds that
+ * hash, NOTHING IS WRITTEN: the basename she already has comes back, `alreadyHeld`
+ * says so, and the six files that would have been the seventh copy are never
+ * created. She ends up with the picture she wanted, chosen, and one sentence
+ * telling her it was already here.
+ *
+ * THE ENCODE STILL RUNS, and it has to. There is nothing to compare until the
+ * derivative exists, because the derivative is what the library is made of —
+ * hashing the arriving file instead would not recognise the same photograph
+ * re-exported, and would have nothing at all to say about the thirty-eight
+ * pictures that shipped with the code. A few seconds of sharp is the price of
+ * an answer that covers everything already on the site as well as everything
+ * that arrives from now on.
+ *
+ * A CALLER-OWNED BASENAME IS EXEMPT. The film poster is named after its film
+ * and belongs to it, so handing back somebody else's basename because the two
+ * stills happen to be identical would point one workshop's poster at another
+ * workshop's film. `posterBasename` already makes these unique per film and
+ * `listMediaBasenames` already keeps them out of her library; the guard has
+ * nothing to add and one thing to break.
  */
 export async function ingestImage(source: {
   bytes: Buffer;
@@ -151,6 +197,35 @@ export async function ingestImage(source: {
     };
   }
 
+  // The one file a picture is identified by. `encodeDerivatives` emits six
+  // files for every basename — that is the guarantee every caller relies on —
+  // so the miss below is unreachable. It is written rather than asserted away
+  // because the consequence of being wrong is silent: a picture stored with
+  // nothing to identify it is a picture the guard can never recognise again,
+  // and it would go on quietly accumulating copies with no symptom.
+  const wanted = canonicalDerivative(basename);
+  const canonical = derivatives.find(
+    (derivative) => derivative.file === wanted,
+  );
+  if (!canonical) {
+    console.error(`[media] ${basename} encoded without ${wanted}`);
+    return {
+      ok: false,
+      error:
+        "The picture could not be saved. Nothing has changed — try again, and if it happens twice something is wrong at our end rather than with the photograph.",
+    };
+  }
+  const hash = hashOf(canonical.bytes);
+
+  if (!source.basename) {
+    const held = await heldWithHash(MediaKind.picture, hash);
+    if (held) {
+      // Nothing written, nothing named, nothing to undo. The basename that
+      // comes back is the one she already has.
+      return { ok: true, basename: held.ref, hash, alreadyHeld: held };
+    }
+  }
+
   const store = mediaStore();
   try {
     // JPEG last, and the whole set in order, because `listMediaBasenames`
@@ -172,7 +247,7 @@ export async function ingestImage(source: {
     };
   }
 
-  return { ok: true, basename };
+  return { ok: true, basename, hash, alreadyHeld: null };
 }
 
 const NOT_A_PICTURE =

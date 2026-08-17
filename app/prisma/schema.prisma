@@ -1614,6 +1614,36 @@ model MediaAsset {
   /// those rather than printing a date that is not true.
   addedAt DateTime?
 
+  /// WHAT THIS THING IS, as opposed to what it is called.
+  ///
+  /// SHA-256, in hexadecimal, of the bytes that are actually stored. Two files
+  /// arriving under different names with identical bytes are ONE picture and
+  /// get one row; two files sharing a name whose bytes differ are two, and are
+  /// named apart as they always were. `(kind, ref)` above still says where a
+  /// thing lives; this says what it IS, and the upload guard asks this one
+  /// before it writes anything (`lib/media/identity.ts`).
+  ///
+  /// WHICH BYTES, PRECISELY, because the answer is not obvious for a picture.
+  /// No original is kept — `encode.ts` re-encodes every upload into six
+  /// derivatives and throws the original away — so there are no arriving bytes
+  /// left to hash by the time a row exists. The canonical derivative is
+  /// `<basename>-2400.jpg`: the one file `listMediaBasenames` already treats as
+  /// proof that a basename is complete, and the one every `<picture>` falls
+  /// back to. A document hashes the bytes it was stored with, which for a
+  /// document are the bytes that arrived.
+  ///
+  /// NULLABLE, and each null means something different and honest. A film has
+  /// no bytes at all — it is a link, and two links to one film are already one
+  /// row because `parseFilm` canonicalises the address before it is stored. A
+  /// picture or document whose file has gone missing from the store cannot be
+  /// hashed either, and a row with no hash simply never joins a duplicate
+  /// group rather than pretending to be unique.
+  hash String?
+
   @@unique([kind, ref])
   @@index([kind])
+  /// The duplicate finder groups by this, and the upload guard looks a single
+  /// value up on it on every upload. Not unique: two rows sharing a hash is
+  /// exactly the state that already exists and that the Media screen clears.
+  @@index([hash])
 }

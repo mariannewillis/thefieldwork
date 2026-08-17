@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/server";
 import { parseFilm, type Film } from "@/lib/film";
 import { ingestImage, MAX_UPLOAD_BYTES } from "@/lib/media";
+import { heldWords } from "@/lib/media/identity";
 import { recordPicture } from "@/lib/media/library";
 import {
   collectImages,
@@ -44,7 +45,16 @@ async function requireSession() {
 }
 
 export type PictureAdded =
-  { ok: true; basename: string } | { ok: false; error: string };
+  | {
+      ok: true;
+      basename: string;
+      /**
+       * Set when the library already held these exact bytes, in which case
+       * nothing was stored and `basename` names the copy she already had.
+       */
+      alreadyHeld: string | null;
+    }
+  | { ok: false; error: string };
 
 /**
  * A picture, off her computer.
@@ -90,9 +100,24 @@ export async function addPicture(formData: FormData): Promise<PictureAdded> {
   // she adds from a workshop appear on the Media screen immediately. The
   // alternative was a sweep that noticed it later, which would mean a window in
   // which the library disagreed with the site about what exists.
-  if (result.ok) await recordPicture(result.basename);
+  //
+  // IT IS ALSO WHY THE GUARD LIVES IN `ingestImage` AND NOT HERE. Every picture
+  // that enters the portal enters through that function; a check written in this
+  // action would cover the offering forms and the newsletter editor and miss
+  // whatever is added next. `result.alreadyHeld` means it recognised the bytes
+  // and wrote nothing, so there is no row to record — the row is already there,
+  // with whatever she has written on it, and an upsert would be a write for no
+  // reason.
+  if (result.ok && !result.alreadyHeld) {
+    await recordPicture(result.basename, result.hash);
+  }
 
-  return result;
+  if (!result.ok) return result;
+  return {
+    ok: true,
+    basename: result.basename,
+    alreadyHeld: result.alreadyHeld ? heldWords(result.alreadyHeld, "picture") : null,
+  };
 }
 
 /** The name this form knows it by. The shape is every offering form's. */

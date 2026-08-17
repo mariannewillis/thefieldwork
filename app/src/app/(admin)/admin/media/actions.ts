@@ -7,6 +7,8 @@ import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
 import { parseFilm } from "@/lib/film";
 import { ingestImage, MAX_UPLOAD_BYTES } from "@/lib/media";
+import { mergeDuplicates } from "@/lib/media/duplicates";
+import { hashOf, heldWithHash, heldWords } from "@/lib/media/identity";
 import { recordPicture, removeAsset } from "@/lib/media/library";
 import {
   ATTACHMENT_KINDS,
@@ -59,16 +61,31 @@ function refresh() {
   revalidatePath("/admin/newsletters");
 }
 
-export type Added = { ok: true; ref: string } | { ok: false; error: string };
+export type Added =
+  | {
+      ok: true;
+      ref: string;
+      /**
+       * Set when these exact bytes were already here, in which case nothing was
+       * stored and `ref` names the copy she already had. A sentence rather than
+       * a flag, because the screen's only job with it is to print it.
+       */
+      alreadyHeld: string | null;
+    }
+  | { ok: false; error: string };
 
 /**
  * A photograph, into the library.
  *
  * The same action the offering forms' own upload takes, with one thing added: a
  * `MediaAsset` row, so the library has somewhere to keep what she says about it.
- * `ingestImage` is idempotent about names rather than about bytes — the same
- * photograph uploaded twice becomes two basenames — so the row is an upsert on
- * the basename it returns rather than a blind insert.
+ *
+ * THE SECOND COPY IS NOT MADE. `ingestImage` hashes the re-encoded picture
+ * before it writes anything and hands back the basename she already has if the
+ * library already holds those bytes (`lib/media/identity.ts`). This action then
+ * skips the row — it exists — and says so in one sentence. She is not shown an
+ * error, because nothing has gone wrong: she wanted this picture, and she has
+ * it.
  */
 export async function addLibraryPicture(formData: FormData): Promise<Added> {
   await requireSession();
@@ -94,9 +111,19 @@ export async function addLibraryPicture(formData: FormData): Promise<Added> {
   });
   if (!result.ok) return result;
 
-  await recordPicture(result.basename);
+  if (result.alreadyHeld) {
+    // Nothing was written and nothing needs revalidating: the library is
+    // exactly as it was, and the picture she wanted is in it.
+    return {
+      ok: true,
+      ref: result.basename,
+      alreadyHeld: heldWords(result.alreadyHeld, "picture"),
+    };
+  }
+
+  await recordPicture(result.basename, result.hash);
   refresh();
-  return { ok: true, ref: result.basename };
+  return { ok: true, ref: result.basename, alreadyHeld: null };
 }
 
 /**
@@ -138,6 +165,15 @@ export async function addLibraryDocument(formData: FormData): Promise<Added> {
     };
   }
 
+  // Before it is stored, not after. A document is kept exactly as it arrived —
+  // a PDF put through a converter is a different PDF — so the bytes in hand are
+  // the bytes that would be written, and this is the whole of the question.
+  const hash = hashOf(bytes);
+  const held = await heldWithHash(MediaKind.document, hash);
+  if (held) {
+    return { ok: true, ref: held.ref, alreadyHeld: heldWords(held, "file") };
+  }
+
   const taken = new Set(
     (
       await prisma.mediaAsset.findMany({
@@ -166,12 +202,13 @@ export async function addLibraryDocument(formData: FormData): Promise<Added> {
       title: file.name,
       contentType: kind.contentType,
       bytes: bytes.length,
+      hash,
       addedAt: new Date(),
     },
   });
 
   refresh();
-  return { ok: true, ref: storedAs };
+  return { ok: true, ref: storedAs, alreadyHeld: null };
 }
 
 /**
@@ -222,7 +259,11 @@ export async function addLibraryVideo(formData: FormData): Promise<Added> {
   });
 
   refresh();
-  return { ok: true, ref: film.watchUrl };
+  // Never "already held", even though the upsert above means it may well have
+  // been. A film has no bytes and no upload: pasting the same address twice
+  // costs nothing and creates nothing, so there is no second copy to report and
+  // no sentence worth interrupting her with.
+  return { ok: true, ref: film.watchUrl, alreadyHeld: null };
 }
 
 /** One film in the library, as a picker needs it. */
@@ -316,4 +357,39 @@ export async function deleteAsset(
 /** A posted string is anything at all until this says otherwise. */
 function isKind(value: string): value is MediaKind {
   return (Object.values(MediaKind) as string[]).includes(value);
+}
+
+/** What the duplicates panel shows after she has pressed something. */
+export type MergeState = { report: string | null; error: string | null };
+
+/**
+ * Clearing one group of duplicates, because she asked for that group.
+ *
+ * ONE GROUP PER PRESS, never all of them at once. Each group is a different
+ * decision with a different consequence — one moves two references on live
+ * workshops, one moves none — and a single "clear everything" button would be
+ * asking her to agree to a list she has not read. The panel says what each one
+ * will do; this does that one.
+ *
+ * THE WORK IS ALL IN `lib/media/duplicates.ts`, including the refusal, because
+ * the order (move every reference, then delete) is the safety property and it
+ * belongs next to the reference table it walks rather than in a form handler.
+ */
+export async function mergeDuplicateGroup(
+  _prev: MergeState,
+  formData: FormData,
+): Promise<MergeState> {
+  await requireSession();
+
+  const kind = String(formData.get("kind") ?? "");
+  const hash = String(formData.get("hash") ?? "");
+  if (!isKind(kind) || !hash) {
+    return { report: null, error: "That is not a group in the library." };
+  }
+
+  const result = await mergeDuplicates(kind, hash);
+  if (!result.ok) return { report: null, error: result.error };
+
+  refresh();
+  return { report: result.report, error: null };
 }

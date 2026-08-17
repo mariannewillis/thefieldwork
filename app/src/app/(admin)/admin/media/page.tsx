@@ -1,6 +1,9 @@
 import { MediaKind } from "@prisma/client";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Duplicates, {
+  type DuplicateGroupRow,
+} from "@/components/admin/Duplicates";
 import {
   AddToLibrary,
   Documents,
@@ -9,6 +12,7 @@ import {
   Videos,
 } from "@/components/admin/MediaLibrary";
 import { formatDayShort } from "@/lib/format";
+import { findDuplicates } from "@/lib/media/duplicates";
 import { documentHref, libraryCounts, readLibrary } from "@/lib/media/library";
 
 /**
@@ -65,6 +69,26 @@ const KIND_OF: Record<TabKey, MediaKind> = {
   documents: MediaKind.document,
 };
 
+/**
+ * One copy in a duplicate group, ready to cross into a client component.
+ *
+ * The date is formatted here, on the server, for the reason the whole page
+ * formats dates here: a `Date` re-parsed in the browser would be printed in the
+ * reader's own timezone, so a picture added at 23:40 in London could read as the
+ * previous day.
+ */
+function forPanel(member: {
+  ref: string;
+  addedAt: Date | null;
+  uses: { what: string }[];
+}): DuplicateGroupRow["survivor"] {
+  return {
+    ref: member.ref,
+    addedAt: member.addedAt ? formatDayShort(member.addedAt) : null,
+    uses: member.uses.map((use) => use.what),
+  };
+}
+
 export default async function Page({
   searchParams,
 }: {
@@ -79,6 +103,34 @@ export default async function Page({
   // library they are counting.
   const rows = await readLibrary(kind);
   const counts = await libraryCounts();
+
+  /**
+   * The duplicate groups, read AFTER adoption for the same reason the counts
+   * are: adoption is what fills in the hashes the grouping is done on, so
+   * asking first would show her an empty panel on the one page load where the
+   * answer was being computed.
+   *
+   * FILMS HAVE NO PANEL, and cannot. A film is a link, `parseFilm`
+   * canonicalises the address before anything stores it, and `(kind, ref)`
+   * already refuses the second copy — so a `youtu.be` link and its
+   * `youtube.com/watch` twin are one row rather than two, and there is nothing
+   * for a panel to find.
+   */
+  const duplicateKind =
+    kind === MediaKind.picture
+      ? ("picture" as const)
+      : kind === MediaKind.document
+        ? ("document" as const)
+        : null;
+  const duplicates: DuplicateGroupRow[] = duplicateKind
+    ? (await findDuplicates(kind)).map((group) => ({
+        hash: group.hash,
+        kind: duplicateKind,
+        survivor: forPanel(group.survivor),
+        losers: group.losers.map(forPanel),
+        refusal: group.refusal,
+      }))
+    : [];
 
   /**
    * Dates are formatted HERE, on the server, and handed over as strings.
@@ -165,6 +217,30 @@ export default async function Page({
       {/* The panel the tabs open onto. `pool` is the working surface every other
           admin screen writes on; the plate above it is the heading. */}
       <div className="pool on-pool mt-8 px-7 py-8 sm:px-9">
+        {/* ── A pointer, not the panel ─────────────────────────────────────
+            The duplicates panel lives at the BOTTOM of this pool, next to the
+            other thing that changes the library, and it stays in one place
+            whether or not it has anything in it — because the account of what
+            a merge just did is written there, and a panel that moved when the
+            last group went would take that account with it.
+
+            So the top of the screen gets a line instead, and only when there
+            is something to say. Forty cards is a long way to scroll past
+            something she does not know is there. */}
+        {duplicates.length > 0 && (
+          <p className="mb-2 max-w-[64ch] text-[17px] leading-relaxed text-ink">
+            {duplicates.length === 1
+              ? "One thing here is stored more than once."
+              : `${duplicates.length} things here are stored more than once.`}{" "}
+            <a
+              href="#duplicates-h"
+              className="t font-medium underline decoration-pool-rule underline-offset-4 hover:text-action"
+            >
+              Keep one of each
+            </a>{" "}
+            &mdash; at the bottom of this page.
+          </p>
+        )}
         {which === "pictures" && <Pictures rows={forScreen} />}
         {which === "videos" && <Videos rows={forScreen} />}
         {which === "documents" && <Documents rows={forScreen} />}
@@ -178,6 +254,12 @@ export default async function Page({
                 : "picture"
           }
         />
+
+        {/* Drawn even with nothing in it, so the account of what a merge just
+            did outlives the group it describes. */}
+        {duplicateKind && (
+          <Duplicates groups={duplicates} kind={duplicateKind} />
+        )}
 
         {/* Said once, at the bottom, rather than on every card: the rule that
             makes this screen safe to use is that it refuses to break a page. */}
