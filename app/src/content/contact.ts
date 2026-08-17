@@ -119,11 +119,19 @@ export const contact = {
     sending: "Sending…",
 
     /**
-     * §14 in one sentence, on the page rather than behind a link, because
-     * /privacy does not exist yet — see `siteFooter` in content/site.ts. When it
-     * is built this sentence gets a link and nothing else changes.
+     * §14 in one sentence, and now with the link it was always going to get.
+     *
+     * The sentence stood alone for the fortnight in which /privacy did not
+     * exist — the note here said it would get a link the day the page was
+     * built and that nothing else would change, and that is what happened
+     * (2026-08-17). THE SENTENCE ITSELF IS UNCHANGED and stays on the page
+     * rather than being replaced by the link: somebody about to press Send
+     * should not have to open a second page to find out where their message
+     * goes. The link is for the rest of it.
      */
     foot: "Your message and your address go to Marianne's own mailbox so that she can answer. They are not added to the letter, and they are not passed to anybody else.",
+    footLinkLabel: "What is kept, and why",
+    footLinkHref: "/privacy",
 
     sentTitle: "Sent.",
     sentBody:

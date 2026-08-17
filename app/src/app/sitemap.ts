@@ -69,11 +69,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
 
     /**
-     * The two pages with no records behind them. They are last rather than
-     * beside the indexes because they sell nothing — somebody arriving from a
-     * search for aura healing wants a date, and these are what they read once
-     * they have found one. /privacy is deliberately absent: it does not exist,
-     * and a sitemap is a list of pages rather than a list of intentions.
+     * The pages with no records behind them. They are last rather than beside
+     * the indexes because they sell nothing — somebody arriving from a search
+     * for aura healing wants a date, and these are what they read once they
+     * have found one.
+     *
+     * /privacy JOINS THEM (2026-08-17). It was deliberately absent while it did
+     * not exist, on the note that a sitemap is a list of pages rather than a
+     * list of intentions; it is a page now. Lowest priority of the three and
+     * for the plainest reason — nobody searches for it, and everybody who wants
+     * it arrives from the footer or from the contact form.
      */
     {
       url: `${SITE_URL}/about`,
@@ -86,6 +91,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/privacy`,
+      lastModified: new Date(),
+      // It changes when what the site DOES with people's details changes, which
+      // is a code change rather than a content edit. Yearly is the honest guess.
+      changeFrequency: "yearly",
+      priority: 0.3,
     },
   ];
 }

@@ -78,11 +78,16 @@ export function SiteNav({
  * The footer: the altar photograph, the mark, three columns and the compliance
  * paragraph. This was the home page's ending and is now every page's.
  *
- * ONE column entry carries no href — "Privacy", whose page has never been
- * built; it renders as plain text rather than as a link to a 404. There were
- * three until /subscribe (2026-08-16) and /about (2026-08-17) landed and took
- * their hrefs back. The reasoning, and what to do the day the last page exists,
- * is on `siteFooter` in src/content/site.ts.
+ * EVERY ENTRY NOW CARRIES AN HREF. There were four without one when this
+ * footer became the whole site's; /subscribe (2026-08-16), /about and then
+ * /privacy (both 2026-08-17) took theirs back as their pages were built.
+ *
+ * The href-less branch below is KEPT rather than deleted, and so is
+ * `.site-foot__soon` in site-chrome.css. `href` is still optional on the type
+ * in content/site.ts, so the next entry added before its page exists renders as
+ * the honest dimmed word instead of as a link to a 404 — which is the whole
+ * behaviour this branch exists for and the reason all four of them landed
+ * safely. Idle, not dead.
  */
 export function SiteFooter() {
   return (

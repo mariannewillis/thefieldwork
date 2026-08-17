@@ -75,13 +75,19 @@ export const siteNav = [
  *    fortnight in which /about did not exist and rendered as plain text, which
  *    is what the note here said would happen and what would be undone the day
  *    the page was built. It has been;
- *  - "Privacy" STILL HAS NO DESTINATION THAT EXISTS, so it alone carries no
- *    href and renders as plain text. It is a §14 obligation and it wants a
- *    real page rather than an empty route to satisfy a link — shipping /privacy
- *    with nothing on it would be worse than the honest dimmed word. The wording
- *    stays, so the day it is written the entry gets its href back and nothing
- *    else changes. `.site-foot__soon` in site-chrome.css still has exactly one
- *    entry to style.
+ *  - "Privacy" NOW GOES TO /privacy (2026-08-17), and it is the last of the
+ *    four to get its href back. It was the one entry left rendering as plain
+ *    text, on the standing note that a §14 obligation wants a real page rather
+ *    than an empty route to satisfy a link. The page is written — from what
+ *    this app actually does with people's details, see content/privacy.ts —
+ *    so the entry is a link, the wording is unchanged exactly as the note
+ *    promised, and nothing else changes.
+ *
+ * EVERY ENTRY NOW CARRIES AN HREF, and `.site-foot__soon` in site-chrome.css
+ * consequently has nothing left to style. Both it and the href-less branch in
+ * `SiteFooter` are KEPT rather than deleted: `href` stays optional on the type
+ * below, so the next entry added before its page exists renders as the honest
+ * dimmed word instead of a link to a 404. The mechanism is idle, not dead.
  */
 export const siteFooter = {
   /** The altar in low light, behind the whole band at 38% brightness. */
@@ -110,7 +116,7 @@ export const siteFooter = {
       links: [
         { label: "Ask a question", href: "/contact" },
         { label: "Monthly letter", href: "/subscribe" },
-        { label: "Privacy" },
+        { label: "Privacy", href: "/privacy" },
       ],
     },
   ] as readonly {

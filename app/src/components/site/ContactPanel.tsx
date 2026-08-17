@@ -191,8 +191,19 @@ export default function ContactPanel() {
           </p>
         )}
 
+        {/* The one-sentence §14 statement, and the link to the whole of it.
+            The sentence stays in front of the Send button — see the note on
+            `foot` in content/contact.ts — and the link is what somebody who
+            wants the detail follows. Magenta, because this is inside a pool. */}
         <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">
-          {form.foot}
+          {form.foot}{" "}
+          <a
+            href={form.footLinkHref}
+            className="t text-action underline hover:text-ink"
+          >
+            {form.footLinkLabel}
+          </a>
+          .
         </p>
       </form>
     </div>
