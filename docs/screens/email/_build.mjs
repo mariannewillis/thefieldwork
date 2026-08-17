@@ -477,10 +477,9 @@ const confirmation = {
       masthead("Your place is booked"),
 
       pool(
-        display(
-          "Thank you. Two places on Reading the Field are booked.",
-          { pad: "0 0 28px" },
-        ) +
+        display("Thank you. Two places on Reading the Field are booked.", {
+          pad: "0 0 28px",
+        }) +
           `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="stack"><tr>
             <td width="50%" valign="top" style="width:50%;padding:0 20px 0 0;">${fact("When", ["Saturday 20 September", "10:00–16:30"])}</td>
             <td width="50%" valign="top" class="gap" style="width:50%;padding:0;">${fact("Where", ["The Garden Room", "Fromefield", "Frome BA11"])}</td>
@@ -505,7 +504,7 @@ const confirmation = {
           bareLink(CANCEL_LINK) +
           rule({ pad: "26px 0 22px" }) +
           para(
-            "Cancel by <strong style=\"font-weight:600;\">Saturday 6 September</strong> and you are refunded in full. After that the place is held for you and cannot be refunded, though you are still welcome to use the link to say you are not coming.",
+            'Cancel by <strong style="font-weight:600;">Saturday 6 September</strong> and you are refunded in full. After that the place is held for you and cannot be refunded, though you are still welcome to use the link to say you are not coming.',
           ) +
           note(
             "Keep this email. That link is the only one, and you do not need to ask anyone to use it.",
@@ -569,7 +568,7 @@ const acknowledgement = {
             pad: "0 0 16px",
           }) +
           para(
-            "It is <strong style=\"font-weight:600;color:#FBF3F1;\">not</strong> booked and nothing has been charged — she may still write back and suggest another time — but it is not going anywhere in the meantime.",
+            'It is <strong style="font-weight:600;color:#FBF3F1;">not</strong> booked and nothing has been charged — she may still write back and suggest another time — but it is not going anywhere in the meantime.',
             { on: "plate", pad: "0" },
           ),
         { pad: "34px 44px 36px" },
@@ -642,7 +641,7 @@ const approval = {
         eyebrow("To pay", { on: "plate", pad: "0 0 14px" }) +
           figure("£95.00") +
           note(
-            "by <strong style=\"font-weight:600;color:#FBF3F1;\">Saturday 16 August, 5:12pm</strong>.",
+            'by <strong style="font-weight:600;color:#FBF3F1;">Saturday 16 August, 5:12pm</strong>.',
             { on: "plate", pad: "12px 0 0" },
           ),
         { pad: "34px 44px 32px" },
@@ -656,7 +655,7 @@ const approval = {
             "The link opens a page on The Field Work and payment is taken by Stripe. Your card details are typed on their page and never reach this site.",
           ) +
           para(
-            "<strong style=\"font-weight:600;\">If it is not paid by then</strong> the time goes back to Marianne and this link stops working. Nothing will have been charged, and nothing else happens — write to her and she will sort out another time.",
+            '<strong style="font-weight:600;">If it is not paid by then</strong> the time goes back to Marianne and this link stops working. Nothing will have been charged, and nothing else happens — write to her and she will sort out another time.',
           ) +
           note(
             "If anything above is wrong, reply to this email before you pay. It reaches her.",
@@ -720,7 +719,7 @@ const balance = {
         eyebrow("Still to pay", { on: "plate", pad: "0 0 12px" }) +
           figure("£330.00") +
           note(
-            "by <strong style=\"font-weight:600;color:#FBF3F1;\">Monday 8 September</strong>.",
+            'by <strong style="font-weight:600;color:#FBF3F1;">Monday 8 September</strong>.',
             { on: "plate", pad: "12px 0 20px" },
           ) +
           rule({ on: "plate", pad: "0 0 18px" }) +
@@ -737,7 +736,7 @@ const balance = {
           bareLink(BALANCE_LINK) +
           rule({ pad: "26px 0 22px" }) +
           para(
-            "£330.00 is due by <strong style=\"font-weight:600;\">Monday 8 September</strong>. The link works from today — pay it whenever you like, and it will tell you if it has already been paid. Your place is held until then.",
+            '£330.00 is due by <strong style="font-weight:600;">Monday 8 September</strong>. The link works from today — pay it whenever you like, and it will tell you if it has already been paid. Your place is held until then.',
           ) +
           para(
             "If the balance is not paid by that date the place is released, and somebody else can take it.",

@@ -394,6 +394,185 @@ try {
     fullPage: false,
   });
 
+  // ══ 1b · THE GRID IS PICTURES, AND NOTHING ELSE ════════════════════════════
+  //
+  // The tiles carried a name, a date and the list of pages each picture was on.
+  // They carry the picture now. Both controls keep an accessible name — a
+  // photograph she cannot see needs one and a photograph she can see does not —
+  // so this checks for text that is DRAWN, by walking the tile for any text node
+  // that is not inside a visually-hidden span.
+  console.log("\n— the grid is pictures, and nothing else —");
+  {
+    const drawn = await page.evaluate(() => {
+      const tile = document.querySelector("ul li button img")?.closest("li");
+      if (!tile) return null;
+      const walker = document.createTreeWalker(tile, NodeFilter.SHOW_TEXT);
+      const leaked = [];
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const said = node.textContent.trim();
+        if (!said) continue;
+        if (node.parentElement.closest(".sr-only")) continue;
+        leaked.push(said);
+      }
+      return leaked;
+    });
+    ok(
+      "a tile draws no name, no date and no list of uses",
+      Array.isArray(drawn) && drawn.length === 0,
+      JSON.stringify(drawn),
+    );
+
+    const tiles = await page.locator("ul li button img").count();
+    ok("and there is a picture on every tile", tiles > 20, String(tiles));
+
+    ok(
+      "the library no longer asks her what a picture is called",
+      !/save this line|what is in it|what to call it/i.test(
+        await page.locator("body").innerText(),
+      ),
+    );
+  }
+
+  // ══ 1c · THE VIEWER STEPS WITHOUT NAVIGATING ═══════════════════════════════
+  //
+  // THE CLAIM THE OPERATOR REJECTED ONCE. On the public gallery, stepping wrote
+  // a new hash, which was a navigation, which destroyed and rebuilt the overlay
+  // and flashed the page behind it between every photograph. So this asserts the
+  // mechanism rather than the appearance: the address bar is byte-identical
+  // before and after, the main frame navigates zero times, and a value put on
+  // `window` survives the whole walk — a reload would have wiped it.
+  console.log("\n— the viewer steps without navigating —");
+  {
+    let navigations = 0;
+    const count = (frame) => {
+      if (frame === page.mainFrame()) navigations++;
+    };
+    page.on("framenavigated", count);
+
+    const before = page.url();
+    await page.evaluate(() => {
+      window.__smokeStillHere = "yes";
+    });
+
+    // NOT the first tile — a viewer that always opened on picture 1 would pass
+    // every other check here and still be wrong.
+    const third = page.locator("ul li button").nth(4);
+    const openedRef = await third
+      .locator("img")
+      .getAttribute("src")
+      .then((src) =>
+        src.replace(/^.*\/media\//, "").replace(/-1200\.jpg$/, ""),
+      );
+    await third.scrollIntoViewIfNeeded();
+    await third.click();
+
+    const viewer = page.getByRole("dialog");
+    await viewer.waitFor();
+    ok("pressing a picture opens the viewer", await viewer.isVisible());
+    ok(
+      "on the picture that was pressed, not on the first",
+      /\b3 of \d+\b/.test(await viewer.innerText()),
+      (await viewer.innerText()).slice(0, 60),
+    );
+    ok(
+      "showing that picture's own file",
+      (await viewer.locator("img").getAttribute("src")) ===
+        `/media/${openedRef}-2400.jpg`,
+      await viewer.locator("img").getAttribute("src"),
+    );
+    await page.screenshot({
+      path: join(SHOTS, "viewer-third.png"),
+      caret: "initial",
+    });
+
+    const shown = () => viewer.locator("img").getAttribute("src");
+    const atThree = await shown();
+
+    await viewer.getByRole("button", { name: /^next/i }).click();
+    const atFour = await shown();
+    ok("Next moves to the next picture", atFour !== atThree, atFour);
+    ok(
+      "and says where she is",
+      /\b4 of \d+\b/.test(await viewer.innerText()),
+      (await viewer.innerText()).slice(0, 60),
+    );
+
+    await viewer.getByRole("button", { name: /^previous/i }).click();
+    ok("Previous comes back to the one before", (await shown()) === atThree);
+
+    // The arrow keys reach the same two controls.
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    ok(
+      "the arrow keys walk the set too",
+      /\b5 of \d+\b/.test(await viewer.innerText()),
+      (await viewer.innerText()).slice(0, 60),
+    );
+    await page.keyboard.press("ArrowLeft");
+    ok("in both directions", (await shown()) === atFour);
+
+    ok("the address bar never changed", page.url() === before, page.url());
+    ok(
+      "nothing navigated, so nothing was rebuilt underneath it",
+      navigations === 0,
+      String(navigations),
+    );
+    ok(
+      "and the page behind was never reloaded",
+      (await page.evaluate(() => window.__smokeStillHere)) === "yes",
+    );
+
+    await page.keyboard.press("Escape");
+    await viewer.waitFor({ state: "hidden", timeout: 30_000 });
+    ok("Escape closes it", true);
+    ok(
+      "and closing it did not navigate either",
+      navigations === 0 && page.url() === before,
+      `${navigations} / ${page.url()}`,
+    );
+    ok(
+      "and focus comes back to the picture that opened it",
+      await third.evaluate((node) => node === document.activeElement),
+    );
+
+    // Keyboard alone, from the grid: focus a tile, press it, walk, come out.
+    await third.focus();
+    await page.keyboard.press("Enter");
+    await viewer.waitFor();
+    ok("a tile opens from the keyboard alone", await viewer.isVisible());
+    await page.keyboard.press("ArrowRight");
+    ok(
+      "and the set walks from the keyboard alone",
+      /\b4 of \d+\b/.test(await viewer.innerText()),
+      (await viewer.innerText()).slice(0, 60),
+    );
+    await page.keyboard.press("Escape");
+    await viewer.waitFor({ state: "hidden", timeout: 30_000 });
+
+    // The two ends. First stops going back, last stops going forward.
+    await page.locator("ul li button").first().click();
+    await viewer.waitFor();
+    ok(
+      "at the first picture there is nowhere back to go",
+      await viewer.getByRole("button", { name: /^previous/i }).isDisabled(),
+    );
+    await page.keyboard.press("ArrowLeft");
+    ok(
+      "and pressing back anyway leaves her where she is",
+      /\b1 of \d+\b/.test(await viewer.innerText()),
+      (await viewer.innerText()).slice(0, 60),
+    );
+    await page.keyboard.press("Escape");
+    await viewer.waitFor({ state: "hidden", timeout: 30_000 });
+
+    ok(
+      "and none of that was a navigation",
+      navigations === 0 && page.url() === before,
+      `${navigations} / ${page.url()}`,
+    );
+    page.off("framenavigated", count);
+  }
+
   // ══ 2 · THE REFUSAL NAMES THE PAGE ═════════════════════════════════════════
   console.log("\n— what is in use cannot be deleted —");
 
@@ -427,24 +606,32 @@ try {
   await page.getByRole("heading", { level: 1 }).waitFor();
 
   {
-    // The card for our picture, found by the name printed on it.
-    const card = page
-      .locator("li")
-      .filter({ hasText: smokeHero.replace(/-/g, " ") })
-      .first();
-    await card.scrollIntoViewIfNeeded();
+    // The tile for our picture, found by the only name it carries — the one on
+    // its remove control, which is said to a screen reader and drawn nowhere.
+    // The tile draws no text at all now, which is the point of §1b.
+    const bin = page.getByRole("button", {
+      name: new RegExp(
+        `remove ${smokeHero.replace(/-/g, " ")} from the library`,
+        "i",
+      ),
+    });
+    await bin.scrollIntoViewIfNeeded();
+    await bin.click();
+
+    // THE QUESTION IS ASKED IN FRONT OF THE PHOTOGRAPH. The bin on the tile
+    // opens the viewer on that picture with the confirmation already showing,
+    // rather than asking her to destroy something she is looking at four
+    // centimetres wide — and it is the only place the refusal below has room.
+    const viewer = page.getByRole("dialog");
+    await viewer.waitFor();
     ok(
-      "the library says where it is used, by name",
-      (await card.innerText()).includes("Smoke Media Workshop"),
-      (await card.innerText()).slice(0, 200),
+      "the tile's bin opens the picture with the question already asked",
+      await viewer.getByRole("button", { name: /yes, remove it/i }).isVisible(),
     );
 
-    await card
-      .getByRole("button", { name: /remove from the library/i })
-      .click();
-    await card.getByRole("button", { name: /yes, remove it/i }).click();
+    await viewer.getByRole("button", { name: /yes, remove it/i }).click();
 
-    const refusal = card.getByRole("alert");
+    const refusal = viewer.getByRole("alert");
     await refusal.waitFor({ timeout: 60_000 });
     const said = await refusal.innerText();
     ok("deleting it is refused", said.length > 0);
@@ -481,26 +668,44 @@ try {
   await page.goto(`${BASE}/admin/media?tab=pictures`);
   await page.getByRole("heading", { level: 1 }).waitFor();
   {
-    const card = page
-      .locator("li")
-      .filter({ hasText: smokeHero.replace(/-/g, " ") })
-      .first();
-    await card.scrollIntoViewIfNeeded();
-    ok(
-      "with the use cleared it says so",
-      /not used anywhere/i.test(await card.innerText()),
-    );
-    await card
-      .getByRole("button", { name: /remove from the library/i })
-      .click();
-    await card.getByRole("button", { name: /yes, remove it/i }).click();
+    const bin = page.getByRole("button", {
+      name: new RegExp(
+        `remove ${smokeHero.replace(/-/g, " ")} from the library`,
+        "i",
+      ),
+    });
+    await bin.scrollIntoViewIfNeeded();
+    await bin.click();
+
+    // The same two presses as the refused attempt, on the same control, in the
+    // same place — the only thing that changed is that nothing points at it now.
+    const viewer = page.getByRole("dialog");
+    await viewer.waitFor();
+    await viewer.getByRole("button", { name: /yes, remove it/i }).click();
     await page.waitForTimeout(2500);
+
+    ok(
+      "with the use cleared the refusal does not come",
+      (await viewer.getByRole("alert").count()) === 0,
+    );
+    ok(
+      "and the viewer shuts on the picture it has just removed",
+      !(await viewer.isVisible().catch(() => false)),
+    );
 
     const gone = await db.query(
       `SELECT 1 FROM "MediaAsset" WHERE kind = 'picture' AND ref = $1`,
       [smokeHero],
     );
     ok("and now it goes", gone.rows.length === 0);
+
+    await page.goto(`${BASE}/admin/media?tab=pictures`);
+    await page.getByRole("heading", { level: 1 }).waitFor();
+    ok(
+      "and the grid no longer offers it",
+      (await bin.count()) === 0,
+      String(await bin.count()),
+    );
   }
 
   // ══ 4 · THE PICKER — ONE WHERE ONE IS WANTED, SEVERAL WHERE SEVERAL ARE ════
@@ -661,6 +866,24 @@ try {
     "the screen says only she can open it",
     /only you can open this/i.test(await page.locator("body").innerText()),
   );
+
+  // WHICH ROUTE, AND IT IS NOT A GUESS. A document not yet on a letter is
+  // served from the session-gated route; one that has gone out is served from
+  // the file route the inboxes hold. The screen prints whichever is true, so
+  // "open it and check" and "this is the link they got" are the same press.
+  {
+    const link = page.getByRole("link", { name: /smoke-media-handout/i });
+    ok(
+      "and the private one opens through the gated route",
+      (await link.getAttribute("href")) === `/admin/media/file/${key}`,
+      await link.getAttribute("href"),
+    );
+    ok(
+      "in a new tab, because it arrives as a download rather than a page",
+      (await link.getAttribute("target")) === "_blank",
+      await link.getAttribute("target"),
+    );
+  }
   await page.screenshot({
     path: join(SHOTS, "library-documents.png"),
     caret: "initial",
@@ -789,6 +1012,14 @@ try {
       await page.locator("body").innerText(),
     ),
   );
+  {
+    const link = page.getByRole("link", { name: /smoke-media-handout/i });
+    ok(
+      "and the SAME document now opens through the public file route instead",
+      (await link.getAttribute("href")) === `/newsletter-files/${key}`,
+      await link.getAttribute("href"),
+    );
+  }
 
   // The newsletter screen says it too, where she is deciding it.
   await page.goto(`${BASE}/admin/newsletters/${letterId}`);

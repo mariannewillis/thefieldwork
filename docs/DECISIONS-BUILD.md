@@ -2888,3 +2888,138 @@ every screen it opens.
 
 **No image editing, no tagging and no folders**, and the library still refuses to
 delete anything that is in use.
+
+## D-32 · The library keeps pictures, not opinions about pictures; and one dialog holds the whole set (2026-08-17)
+
+The Media screen asked her two questions about every photograph — "what is in
+it" and "what to call it" — and then printed the answers, the date, and the list
+of pages the picture was on, on a card beside every thumbnail. Forty cards. Both
+questions have gone, the cards have gone, and what is left is the pictures.
+
+### 1 · The description belongs to the USE, and the schema already said so
+
+`WorkshopImage.alt`, `CourseImage.alt` and `ServiceImage.alt` are REQUIRED
+columns. `NewsletterBlock.alt` is validated in the letter's own form. Every one
+of them beats `MediaAsset.alt` wherever both exist, and they have to: the same
+photograph is the garden room on a workshop and the room she works in on a
+session, and a description written once for the file is a description that is
+wrong in one of those places. So the library was asking her for a sentence she
+had to write again anyway on the page that uses the picture, and then keeping an
+answer nothing read.
+
+**`MediaAsset.alt` is DROPPED** — `20260817203000_drop_media_asset_alt`, one
+`ALTER TABLE … DROP COLUMN`. It was read in exactly two places: the `<img alt>`
+on this screen's own cards, and `GalleryPicker`'s tiles, where all five callers
+passed null and always had. Nothing fell back to it. The twenty values in it were
+not lost either, because every one had been COPIED IN by adoption from the
+per-use alt on the page that already held it, and that page still holds it. The
+field went with the form that wrote it, rather than being left alive as a column
+somebody would eventually mistake for the answer.
+
+**`MediaAsset.title` STAYS, and it is not the same case.** It is a FACT carried
+in from where the thing came from rather than an opinion she typed: the filename
+a document arrived under, the offering a film was pasted on. Four things read it
+every day — the documents list, the films list, the document picker, and the
+filename a letter's attachment goes out under (`NewsletterAttachment.filename`
+falls back to it at the moment of attaching). Nothing on the Media screen writes
+it any more; `addLibraryDocument`, the newsletter's own upload and adoption all
+still do. A column with four readers and three writers is not dead because one
+form stopped touching it.
+
+`Use.alt` went with the column, and with it the `heroAlt` and `alt` selects in
+five of the sixteen reference loaders in `lib/media/library.ts`. `describeAsset`
+is gone from the actions file, which is down from five things she can do to four.
+
+### 2 · The pictures are a grid of pictures
+
+No name, no date, no list of pages under each one. She recognises a photograph by
+looking at it, which is the only thing a wall of forty thumbnails is good for,
+and the card next to each thumbnail was three lines of chrome per picture for
+information she was not looking for at that moment.
+
+Nothing was lost from the guard. Where a picture is used is still known, still
+walked, and still enforced — it is simply SAID at the moment it matters, which is
+when she tries to remove one. `removeAsset` is untouched: it checks every
+reference site and hands back a sentence naming each page.
+
+Each tile carries two controls and no words: the picture, which opens the viewer,
+and a bin in the corner, which opens the SAME viewer on the SAME picture with the
+removal already being asked. They are siblings rather than one inside the other,
+because a button inside a button is not a thing HTML has. Both keep an accessible
+name — "open the garden room, larger", "remove the garden room from the library"
+— said to a screen reader and drawn nowhere.
+
+**Why the confirmation is asked in the viewer rather than on the tile.** A corner
+button on a small tile asks her to destroy something she is looking at four
+centimetres wide. And the refusal names every page the picture is on, which is a
+sentence that does not fit in a grid cell: it would either be truncated, or it
+would push the whole grid down under her hand as she read it. In front of the
+photograph there is room for both, and she can see what she is about to lose.
+
+### 3 · One dialog for the whole set, and the URL never changes
+
+**This is the part that had already been got wrong once, on the public workshop
+gallery, and rejected in these words:** "this still isnt a modal … I can see url
+change and this causes a page reload meaning the appearance of the modal
+dissapears on next and previous showing the workshop page beneath between each
+screen - its not a good user experience".
+
+That gallery was a `:target` lightbox. Every step wrote a new hash; a new hash is
+a navigation; the navigation destroyed and rebuilt the overlay; the page flashed
+through the scrim between every photograph; and the back button then walked out
+through every picture that had been looked at. No CSS fixes that — the MECHANISM
+was the fault. `components/site/PhotoRail.tsx` already holds the fix: ONE
+`<dialog>` opened with `showModal()`, and Next and Previous swap the picture in
+place.
+
+`components/admin/PictureViewer.tsx` is that fix PORTED, not reinvented. A second
+answer to a solved question is a second thing to get wrong. Nothing in it writes
+to the address bar, pushes a history entry or changes a route. Escape closes it,
+focus is held inside and returns to the tile that opened it, the page behind is
+inert — all of which `showModal()` gives rather than this file describing it. The
+arrow keys are bound as a NATIVE listener on the dialog element, for the reason
+`PhotoRail` gives: the browser moves a modal dialog into the top layer, and
+nothing here should rest on how React delegates events to it. It does not wrap;
+at either end the corresponding button is disabled and drawn as an end, which is
+what the public gallery does, so the two behave alike.
+
+One thing was learned porting it. The index is adjusted DURING RENDER when the
+caller's `at` prop changes, rather than in an effect — an effect runs after the
+paint, so opening on picture 12 would draw picture 1 for one frame and correct
+itself. That flash is the same complaint arrived at from the other direction.
+
+The suite asserts the mechanism rather than the appearance: `page.url()` is
+byte-identical before and after a walk of five pictures in both directions with
+both the mouse and the keyboard, the main frame navigates ZERO times, and a value
+put on `window` before opening is still there afterwards — a reload would have
+wiped it.
+
+### 4 · A document opens in a new tab, through whichever route is its own
+
+Pressing a document's name opens it. In a NEW TAB, because the file is a download
+rather than a page: all three routes serve it with `Content-Disposition:
+attachment` — a PDF served inline runs its own JavaScript inside the browser's
+viewer on this origin, and this origin is the admin portal — so following it in
+this tab would leave her staring at the screen she was already on.
+
+**Which route is not a guess.** `documentHref` picks, and D-31's
+private-until-attached rule is what it picks on: a document not yet on a letter
+is served from `/admin/media/file/…`, which requires a session; one that has gone
+out is served from `/newsletter-files/…`, which is the address sitting in
+people's inboxes. So "open it and check" and "this is the link they got" are the
+same press for a public file, and a private one is never handed a link that would
+404 for its recipient. The suite asserts both hrefs on the same document, before
+and after it goes on a letter.
+
+### Two things that did not change, deliberately
+
+**No nested forms, and no `name` on a button carrying `formAction`.** The viewer
+is rendered through a portal into `document.body`, as `GalleryPicker` is and for
+the same reason (D-30): it opens from a screen that carries the per-item removal
+forms and the duplicates panel's own. Its removal calls its server action
+DIRECTLY rather than through a `<form action=>`, so nothing in it carries
+`formAction` at all — the sturdier version of the rule. The suite watches the
+console for hydration and nested-form complaints on every screen it opens.
+
+**The duplicates panel, the upload guard and the refusal are untouched.** D-31
+stands entire.

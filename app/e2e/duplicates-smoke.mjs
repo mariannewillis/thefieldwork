@@ -186,6 +186,23 @@ async function startServer() {
 
 await db.connect();
 
+/**
+ * How many duplicate groups of HIS are here before this run touches anything.
+ *
+ * Read once, at the top, and compared at the bottom. Not a fixed number: he
+ * clears his own duplicates whenever he likes, and a suite that hardcodes what
+ * his library looked like on one afternoon goes red the day he tidies it.
+ */
+const hisGroupsAtStart = (
+  await db.query(`
+    SELECT count(*)::int AS n FROM (
+      SELECT hash FROM "MediaAsset"
+      WHERE kind = 'picture' AND hash IS NOT NULL AND ref NOT LIKE 'smoke-dup%'
+      GROUP BY hash HAVING count(*) > 1
+    ) groups
+  `)
+).rows[0].n;
+
 // The throwaway admin, written straight in with the EXACT scrypt shape
 // `lib/auth/password.ts` parses, so nothing here has to reach the real
 // credential.
@@ -348,9 +365,10 @@ try {
   // The panel as the operator will first see it: his own four groups, unmerged.
   // The panel alone rather than the whole page — the library above it is forty
   // cards long and the panel is what this is a proof of.
-  await page
-    .locator('section[aria-labelledby="duplicates-h"]')
-    .screenshot({ path: join(SHOTS, "duplicates-before.png"), caret: "initial" });
+  await page.locator('section[aria-labelledby="duplicates-h"]').screenshot({
+    path: join(SHOTS, "duplicates-before.png"),
+    caret: "initial",
+  });
 
   // ══ 1 · THE SAME PICTURE UNDER TWO NAMES IS ONE PICTURE ════════════════════
   console.log("\n— identity is the bytes, not the name —");
@@ -449,14 +467,11 @@ try {
   await page.goto(`${BASE}/admin/offerings/workshops/smoke-dup-workshop`);
   await page.getByRole("heading", { level: 1 }).waitFor();
   {
-    await page
-      .locator('input[type="file"]')
-      .first()
-      .setInputFiles({
-        name: "smoke-dup-gamma.jpg",
-        mimeType: "image/jpeg",
-        buffer: alpha,
-      });
+    await page.locator('input[type="file"]').first().setInputFiles({
+      name: "smoke-dup-gamma.jpg",
+      mimeType: "image/jpeg",
+      buffer: alpha,
+    });
     await page.waitForTimeout(9000);
 
     const said = await page.locator("body").innerText();
@@ -572,7 +587,9 @@ try {
     caret: "initial",
   });
 
-  await group.getByRole("button", { name: /keep one, remove the rest/i }).click();
+  await group
+    .getByRole("button", { name: /keep one, remove the rest/i })
+    .click();
   await page.waitForTimeout(9000);
 
   {
@@ -637,9 +654,10 @@ try {
   // And the panel on its own, because the account of what just happened is the
   // point of the "after" and it is one paragraph at the bottom of a very long
   // page.
-  await page
-    .locator('section[aria-labelledby="duplicates-h"]')
-    .screenshot({ path: join(SHOTS, "duplicates-report.png"), caret: "initial" });
+  await page.locator('section[aria-labelledby="duplicates-h"]').screenshot({
+    path: join(SHOTS, "duplicates-report.png"),
+    caret: "initial",
+  });
 
   // THE PAGE ITSELF, which is the only thing that actually matters.
   {
@@ -649,9 +667,14 @@ try {
     const visitor = await stranger.newPage();
     await visitor.goto(`${BASE}/workshops/smoke-dup-workshop`);
     await visitor.getByRole("heading", { level: 1 }).waitFor();
-    const sources = await visitor.locator("img, source").evaluateAll((nodes) =>
-      nodes.map((node) => node.getAttribute("src") ?? node.getAttribute("srcset") ?? ""),
-    );
+    const sources = await visitor
+      .locator("img, source")
+      .evaluateAll((nodes) =>
+        nodes.map(
+          (node) =>
+            node.getAttribute("src") ?? node.getAttribute("srcset") ?? "",
+        ),
+      );
     ok(
       "the live workshop page still shows the same photograph",
       sources.some((value) => value.includes("smoke-dup-alpha")),
@@ -725,7 +748,10 @@ try {
       `SELECT ref FROM "MediaAsset" WHERE kind = 'picture' AND ref = $1`,
       [plate],
     );
-    ok("and the home page's own photograph is untouched", plateRow.rows.length === 1);
+    ok(
+      "and the home page's own photograph is untouched",
+      plateRow.rows.length === 1,
+    );
     ok(
       "with all six of its files still on disk",
       filesOnDisk(plate) === 6,
@@ -739,14 +765,11 @@ try {
   const handout = pdf(5000);
   await page.goto(`${BASE}/admin/media?tab=documents`);
   await page.getByRole("heading", { level: 1 }).waitFor();
-  await page
-    .locator('input[type="file"]')
-    .first()
-    .setInputFiles({
-      name: "smoke-dup-handout.pdf",
-      mimeType: "application/pdf",
-      buffer: handout,
-    });
+  await page.locator('input[type="file"]').first().setInputFiles({
+    name: "smoke-dup-handout.pdf",
+    mimeType: "application/pdf",
+    buffer: handout,
+  });
   await page.waitForTimeout(6000);
 
   const documentKey = "document-smoke-dup-handout.pdf";
@@ -767,14 +790,11 @@ try {
     // The same PDF again, into the library.
     await page.goto(`${BASE}/admin/media?tab=documents`);
     await page.getByRole("heading", { level: 1 }).waitFor();
-    await page
-      .locator('input[type="file"]')
-      .first()
-      .setInputFiles({
-        name: "a-different-name.pdf",
-        mimeType: "application/pdf",
-        buffer: handout,
-      });
+    await page.locator('input[type="file"]').first().setInputFiles({
+      name: "a-different-name.pdf",
+      mimeType: "application/pdf",
+      buffer: handout,
+    });
     await page.waitForTimeout(6000);
     const rows = await db.query(
       `SELECT ref FROM "MediaAsset" WHERE kind = 'document' AND ref LIKE '%smoke-dup%' OR ref LIKE '%a-different-name%'`,
@@ -786,7 +806,9 @@ try {
     );
     ok(
       "and says she already has it",
-      /you already have this file/i.test(await page.locator("body").innerText()),
+      /you already have this file/i.test(
+        await page.locator("body").innerText(),
+      ),
     );
   }
 
@@ -839,7 +861,9 @@ try {
     const actual = await db.query(
       `SELECT kind, count(*)::int AS n FROM "MediaAsset" GROUP BY kind`,
     );
-    const nav = await page.locator('nav[aria-label="What kind of thing"]').innerText();
+    const nav = await page
+      .locator('nav[aria-label="What kind of thing"]')
+      .innerText();
     for (const row of actual.rows) {
       const label =
         row.kind === "video"
@@ -892,7 +916,10 @@ try {
     const letters = await db.query(
       `SELECT count(*)::int AS n FROM "Newsletter" WHERE id IN (12,13,14,26,30)`,
     );
-    ok("newsletters 12/13/14/26/30 are all still there", letters.rows[0].n === 5);
+    ok(
+      "newsletters 12/13/14/26/30 are all still there",
+      letters.rows[0].n === 5,
+    );
     const bookings = await db.query(
       `SELECT count(*)::int AS n FROM "Booking" WHERE id IN (25,368)`,
     );
@@ -912,20 +939,33 @@ try {
     );
   }
 
-  // HIS OWN DUPLICATES ARE STILL HIS TO CLEAR. This suite drove the panel they
-  // are drawn on and pressed nothing but its own group.
+  // THIS SUITE MERGES NOTHING BUT ITS OWN GROUP.
+  //
+  // It used to assert the operator's four groups were still sitting there at
+  // exactly four, as a guard on an agent that had been told to leave them for
+  // him. He then cleared them himself — which was the point — and the guard
+  // started failing for having worked: a red suite reporting a success.
+  //
+  // So it no longer counts his groups, it compares them. Whatever he has when
+  // this run starts, he has when it ends. That holds whether he has four groups
+  // or none, and it is the thing actually worth protecting: this suite drives
+  // the panel his pictures are drawn on, and must never press a button on one.
   {
-    const his = await db.query(`
-      SELECT count(*)::int AS n FROM (
-        SELECT hash FROM "MediaAsset"
-        WHERE kind = 'picture' AND hash IS NOT NULL AND ref NOT LIKE 'smoke-dup%'
-        GROUP BY hash HAVING count(*) > 1
-      ) groups
-    `);
+    const countHis = async () =>
+      (
+        await db.query(`
+          SELECT count(*)::int AS n FROM (
+            SELECT hash FROM "MediaAsset"
+            WHERE kind = 'picture' AND hash IS NOT NULL AND ref NOT LIKE 'smoke-dup%'
+            GROUP BY hash HAVING count(*) > 1
+          ) groups
+        `)
+      ).rows[0].n;
+
     ok(
-      "the operator's own four duplicate groups are untouched, for him to clear",
-      his.rows[0].n === 4,
-      String(his.rows[0].n),
+      "whatever duplicates of his own were here at the start are here at the end",
+      (await countHis()) === hisGroupsAtStart,
+      `started ${hisGroupsAtStart}, ended ${await countHis()}`,
     );
   }
 

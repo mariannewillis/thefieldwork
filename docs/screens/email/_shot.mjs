@@ -37,12 +37,18 @@ const FILES = [
 
 /** https://thefieldwork.co.uk/<path> → a file in this repo. */
 function localFor(urlPath) {
-  if (urlPath.startsWith("/brand/")) return join(HERE, "assets", urlPath.slice(7));
-  if (urlPath.startsWith("/media/")) return join(ROOT, "app", "public", urlPath);
+  if (urlPath.startsWith("/brand/"))
+    return join(HERE, "assets", urlPath.slice(7));
+  if (urlPath.startsWith("/media/"))
+    return join(ROOT, "app", "public", urlPath);
   return null;
 }
 
-const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg" };
+const MIME = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+};
 
 const browser = await chromium.launch();
 
@@ -65,7 +71,8 @@ for (const name of FILES) {
           if (!p) throw new Error("no mapping");
           await route.fulfill({
             status: 200,
-            contentType: MIME[extname(p).toLowerCase()] ?? "application/octet-stream",
+            contentType:
+              MIME[extname(p).toLowerCase()] ?? "application/octet-stream",
             body: readFileSync(p),
           });
         } catch {
@@ -73,7 +80,9 @@ for (const name of FILES) {
         }
       });
     } else {
-      await page.route("https://thefieldwork.co.uk/**", (route) => route.abort());
+      await page.route("https://thefieldwork.co.uk/**", (route) =>
+        route.abort(),
+      );
     }
     await page.goto(url, { waitUntil: "load" });
     await page.waitForTimeout(250);
@@ -88,7 +97,9 @@ for (const name of FILES) {
 
 // The contact sheet, for the record.
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-await page.goto(pathToFileURL(join(HERE, "index.html")).href, { waitUntil: "load" });
+await page.goto(pathToFileURL(join(HERE, "index.html")).href, {
+  waitUntil: "load",
+});
 await page.screenshot({ path: join(SHOTS, "index-1440.png"), fullPage: true });
 console.log("index-1440.png");
 await page.close();

@@ -1,0 +1,15 @@
+-- The library stops asking what is in a picture, so it stops keeping the answer.
+--
+-- `MediaAsset.alt` existed so the description could be given ONCE for a
+-- photograph used in four places. In practice it was never the description any
+-- page used: `WorkshopImage.alt`, `CourseImage.alt` and `ServiceImage.alt` are
+-- REQUIRED columns, `NewsletterBlock.alt` is validated in the letter's own form,
+-- and each of those beats this one wherever both existed. Nothing fell back to
+-- it. With the form that wrote it gone, nothing wrote it and nothing read it,
+-- and a column alive only because dropping it is work is a column that will
+-- eventually be mistaken for the answer.
+--
+-- The twenty values in it are not lost: every one of them was COPIED IN by
+-- adoption from the per-use alt on the page that already held it, and that page
+-- still holds it.
+ALTER TABLE "MediaAsset" DROP COLUMN "alt";

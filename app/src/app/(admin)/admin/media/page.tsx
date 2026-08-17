@@ -145,7 +145,6 @@ export default async function Page({
     kind: row.kind as LibraryRow["kind"],
     ref: row.ref,
     title: row.title,
-    alt: row.alt,
     contentType: row.contentType,
     bytes: row.bytes,
     addedAt: row.addedAt ? formatDayShort(row.addedAt) : null,
@@ -262,12 +261,20 @@ export default async function Page({
         )}
 
         {/* Said once, at the bottom, rather than on every card: the rule that
-            makes this screen safe to use is that it refuses to break a page. */}
+            makes this screen safe to use is that it refuses to break a page.
+
+            IT NO LONGER SAYS "listed under it", because for pictures it is not.
+            The tiles carried the list of pages under every thumbnail and now
+            carry nothing; the answer is given when she tries to remove one,
+            which is the moment she needs it. Saying where a thing is used is
+            the same promise either way — the sentence had to say WHERE it is
+            kept now rather than quietly go on describing a card that has
+            gone. */}
         <p className="mt-9 max-w-[64ch] border-t border-pool-rule/40 pt-6 text-[15px] leading-relaxed text-ink-soft">
-          Nothing that is in use can be removed. Where something is used is
-          listed under it, so you can clear those first &mdash; the point is
-          that no page on the site can lose a picture without you deciding to
-          take it off that page yourself.
+          Nothing that is in use can be removed. Try to, and this names every
+          page the thing is on, so you can go and clear those first &mdash; the
+          point is that no page on the site can lose a picture without you
+          deciding to take it off that page yourself.
         </p>
       </div>
     </section>

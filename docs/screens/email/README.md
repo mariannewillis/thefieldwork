@@ -35,14 +35,14 @@ and re-run `node docs/screens/email/_build.mjs`. `_shot.mjs` takes the proofs.
 
 ## Which template goes with which trigger
 
-| Template                       | Kind              | Sent when                                                                                                                                                     | Source of the wording                                     |
-| ------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `newsletter.html`              | **Marketing**     | By hand, from Admin → Newsletter. Once a month, usually the first week.                                                                                       | New copy, in her register (see below)                     |
-| `booking-confirmation.html`    | **Transactional** | Stripe `payment_intent.succeeded` for a workshop or course place.                                                                                             | `bookings.ts::confirmationEmail`                          |
-| `session-request-received.html`| **Transactional** | The moment the request form is submitted.                                                                                                                     | `service-requests.ts::requestAcknowledgementEmail`        |
-| `session-approved.html`        | **Transactional** | Marianne approves a request in Admin → Requests.                                                                                                              | `service-requests.ts::approvalEmail`                      |
-| `balance-due.html`             | **Transactional** | **No automatic trigger — sent by hand.** See the note below.                                                                                                  | `bookings.ts::confirmationEmail`, the PAYING THE REST part |
-| `cancelled-refunded.html`      | **Transactional** | The cancellation link is used and the Stripe refund goes through.                                                                                             | `bookings.ts::cancellationEmail`                          |
+| Template                        | Kind              | Sent when                                                               | Source of the wording                                      |
+| ------------------------------- | ----------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `newsletter.html`               | **Marketing**     | By hand, from Admin → Newsletter. Once a month, usually the first week. | New copy, in her register (see below)                      |
+| `booking-confirmation.html`     | **Transactional** | Stripe `payment_intent.succeeded` for a workshop or course place.       | `bookings.ts::confirmationEmail`                           |
+| `session-request-received.html` | **Transactional** | The moment the request form is submitted.                               | `service-requests.ts::requestAcknowledgementEmail`         |
+| `session-approved.html`         | **Transactional** | Marianne approves a request in Admin → Requests.                        | `service-requests.ts::approvalEmail`                       |
+| `balance-due.html`              | **Transactional** | **No automatic trigger — sent by hand.** See the note below.            | `bookings.ts::confirmationEmail`, the PAYING THE REST part |
+| `cancelled-refunded.html`       | **Transactional** | The cancellation link is used and the Stripe refund goes through.       | `bookings.ts::cancellationEmail`                           |
 
 Both source files live under `app/src/lib/email/`. Their plain-text wording is
 already carefully written — the deadlines, the amounts, what is and is not
@@ -130,7 +130,7 @@ somebody wants them.
 
 5. **DONE.** `Mail` has `html`, `sendMail` sends both parts, and the plain
    text is unchanged. **The app currently sends plain text.** `sendMail` takes `{to, subject,
-   text}`. Adding HTML means adding an `html` field and sending
+text}`. Adding HTML means adding an `html` field and sending
    **multipart/alternative with both parts** — never HTML alone. The existing
    plain text is the alternative part, unchanged; these templates are the HTML
    one. That also keeps the messages readable in a client that refuses HTML, and
