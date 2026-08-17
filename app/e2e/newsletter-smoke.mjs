@@ -46,7 +46,7 @@
 
 import { spawn } from "node:child_process";
 import { randomBytes, scrypt as scryptCb } from "node:crypto";
-import { cpSync, mkdirSync, readdirSync, rmSync, symlinkSync } from "node:fs";
+import { cpSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
@@ -213,34 +213,62 @@ const lastEmailTo = (log, address) => emailsTo(log, address).at(-1) ?? "";
 async function cleanUp() {
   await db.query(`DELETE FROM "AdminUser" WHERE username = $1`, [USER]);
   await db.query(`DELETE FROM "Subscriber" WHERE email = ANY($1)`, [MINE]);
+
+  /**
+   * The files this run's letters carried — and ONLY this run's.
+   *
+   * The APP deliberately leaves stored bytes behind when an attachment row is
+   * deleted: a letter that had lost its download would cost more than a few
+   * orphaned kilobytes (see `removeAttachment`). That is right in production
+   * and wrong here, because on a development machine the store IS
+   * `public/media`, and a smoke run that left its test PDFs there would be a
+   * smoke run that committed litter to the repository.
+   *
+   * THE KEYS ARE READ OFF THIS RUN'S OWN LETTERS FIRST, before those letters
+   * are deleted. It used to sweep everything matching `newsletter-*` instead,
+   * on the reasoning that only `attachmentKey` mints that prefix — which is
+   * true and was still wrong: `attachmentKey` mints it for the OPERATOR'S
+   * letters too. That sweep deleted the three real PDFs attached to sent
+   * newsletters 13, 14 and 30, whose download links are in people's inboxes.
+   * The rows survived and the bytes did not, so `/newsletter-files/<key>` now
+   * 404s for anybody who follows one. Scoping the sweep to this run's own
+   * letters is what stops a test tidying up somebody's real attachments.
+   */
+  const mine = await db.query(
+    `SELECT a."storedAs"
+       FROM "NewsletterAttachment" a
+       JOIN "Newsletter" n ON n.id = a."newsletterId"
+      WHERE n.subject LIKE 'SMOKE %'`,
+  );
+
   // Every letter this run wrote. The subject prefix is unique to it, and
   // nothing else in the database carries one.
   await db.query(`DELETE FROM "Newsletter" WHERE subject LIKE 'SMOKE %'`);
 
-  /**
-   * The files those letters carried.
-   *
-   * The APP deliberately leaves stored bytes behind when an attachment row is
-   * deleted — a letter that had lost its download would cost more than a few
-   * orphaned kilobytes (see `removeAttachment`). That is right in production
-   * and wrong here: on a development machine the store IS `public/media`, and
-   * a smoke run that left its test PDFs there would be a smoke run that
-   * committed litter to the repository.
-   *
-   * Anything matching `newsletter-*` goes. Nothing else in that directory can
-   * match — `attachmentKey` is the only thing that mints the prefix, and the
-   * photographs are named `<slug>-<width>.<ext>`.
-   */
   const store = resolve("public", "media");
-  try {
-    for (const file of readdirSync(store)) {
-      if (file.startsWith("newsletter-")) {
-        rmSync(join(store, file), { force: true });
-      }
+  for (const row of mine.rows) {
+    try {
+      rmSync(join(store, row.storedAs), { force: true });
+    } catch {
+      /* already gone */
     }
-  } catch {
-    /* no store on this machine — nothing to tidy */
   }
+
+  /**
+   * And the library rows those attachments were adopted into.
+   *
+   * The media library adopts every attachment it finds, so a letter this run
+   * created and deleted leaves a `MediaAsset` behind pointing at bytes that
+   * have just been swept. Only ORPHANS go — a row whose attachment still
+   * exists belongs to one of the operator's real letters and is not this run's
+   * to touch.
+   */
+  await db.query(`
+    DELETE FROM "MediaAsset"
+     WHERE kind = 'document'
+       AND ref NOT IN (SELECT "storedAs" FROM "NewsletterAttachment")
+       AND ref LIKE 'newsletter-%'
+  `);
 }
 
 // ── the run ──────────────────────────────────────────────────────────────────

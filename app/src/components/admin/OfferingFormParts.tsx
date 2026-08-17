@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { addPicture } from "@/app/(admin)/admin/offerings/actions";
+import GalleryPicker from "@/components/admin/GalleryPicker";
 import { clockOfMinutes, minutesOfClock } from "@/lib/london";
 
 /**
@@ -281,7 +282,8 @@ function whole(value: string): number {
 }
 
 /**
- * A picture — off her computer, or one already on the site.
+ * A picture — off her computer, one picked out of the library by eye, or one
+ * chosen from the list by name.
  *
  * The file goes up the moment she chooses it, so the picture appears here
  * before she writes the line saying what is in it, and a save that bounces
@@ -289,9 +291,19 @@ function whole(value: string): number {
  * that is what the field posts: the path her file had on her own machine is
  * never sent anywhere and never becomes part of an address.
  *
- * Two ways in and one value between them. Choosing a file sets the same field
- * the list does, so uploading a picture selects it — there is no second step
- * where she has to find what she just added.
+ * THREE WAYS IN AND ONE VALUE BETWEEN THEM. Choosing a file, picking from the
+ * gallery and choosing from the list all set the same field, so uploading a
+ * picture selects it — there is no second step where she has to find what she
+ * just added.
+ *
+ * THE GALLERY IS THE ONE TO REACH FOR AND THE LIST IS KEPT ANYWAY. A dropdown
+ * of basenames is a list of file names pretending to be a list of pictures, and
+ * choosing a photograph by reading
+ * `whatsapp image 2026 08 07 at 16 45 48 3` is not choosing it at all — which is
+ * the whole reason `GalleryPicker` exists. The `<select>` stays beside it
+ * because it is a real keyboard and screen-reader path to the same value, and
+ * because a name she has just typed is sometimes genuinely the fastest route
+ * back to it. Two controls, one field, no order of precedence.
  */
 export function PicturePicker({
   name,
@@ -332,6 +344,7 @@ export function PicturePicker({
   };
   const [adding, setAdding] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  const [browsing, setBrowsing] = useState(false);
 
   async function take(input: HTMLInputElement) {
     const file = input.files?.[0];
@@ -400,6 +413,16 @@ export function PicturePicker({
             {adding ? "Adding…" : "Choose a picture"}
           </label>
 
+          {/* The by-eye route. `type="button"` because this control is used
+              inside three forms and a bare button inside a form submits it. */}
+          <button
+            type="button"
+            onClick={() => setBrowsing(true)}
+            className={QUIET_BUTTON}
+          >
+            Pick from your pictures
+          </button>
+
           <select
             name={name}
             aria-labelledby={`${name}-label`}
@@ -425,6 +448,29 @@ export function PicturePicker({
         )}
         {children}
       </div>
+
+      {/* SINGLE, because every caller of this component wants exactly one
+          picture: a hero, a masthead background, or one row of a rail that
+          holds its own several. The rails offer their own multiple picker
+          alongside their "add more pictures" control. */}
+      <GalleryPicker
+        kind="picture"
+        assets={library.map((basename) => ({
+          kind: "picture" as const,
+          ref: basename,
+          title: null,
+          alt: null,
+          contentType: null,
+          bytes: null,
+        }))}
+        open={browsing}
+        chosen={chosen ? [chosen] : []}
+        onClose={() => setBrowsing(false)}
+        onPick={(refs) => {
+          if (refs[0]) setChosen(refs[0]);
+        }}
+        onAdded={onAdded}
+      />
     </div>
   );
 }

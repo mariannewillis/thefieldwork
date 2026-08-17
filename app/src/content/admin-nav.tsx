@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
 
 /**
- * The admin rail — thirteen sections, in the order the approved screens declare
+ * The admin rail — twelve sections, in the order the approved screens declare
  * them, plus Email templates, which the approved set had no screen for.
+ *
+ * TWELVE AND NOT THIRTEEN: the approved set drew Pictures and Documents as two
+ * entries, and they are one screen now (Media, with three tabs — videos,
+ * pictures, documents). That is a drift from the approved rail, recorded here
+ * rather than made silently, and it is the operator's: two doors onto one
+ * library would have meant two answers to "where is this picture used".
  *
  * The order is a claim about Marianne's day, not alphabetical filing:
  * what needs her attention first (Today, Calendar, Requests, Bookings) sits
- * above what she edits occasionally (the page, offerings, pictures) above what
+ * above what she edits occasionally (the page, offerings, media) above what
  * she configures once (availability, settings).
  *
  * Requests and Bookings are two entries because they are two jobs (D-18).
@@ -94,8 +100,15 @@ export const ADMIN_NAV: NavItem[] = [
     ),
   },
   {
+    /* ONE ENTRY WHERE THERE WERE TWO. This was "Pictures" and there was a
+       separate "Documents" below Subscribers; both are this screen's tabs now,
+       with Videos beside them, because they are one job — find the thing, know
+       what it is, know where it is used. The icon is the Pictures glyph
+       unchanged: it is the one of the three she opens most, and redrawing it as
+       a compromise between a photograph, a film and a sheet of paper would have
+       produced a shape that reads as none of them. */
     href: "/admin/media",
-    label: "Pictures",
+    label: "Media",
     icon: (
       <>
         <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -137,17 +150,6 @@ export const ADMIN_NAV: NavItem[] = [
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-      </>
-    ),
-  },
-  {
-    href: "/admin/documents",
-    label: "Documents",
-    icon: (
-      <>
-        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
-        <path d="M14 3v5h5" />
-        <path d="M9 13h6M9 17h4" />
       </>
     ),
   },

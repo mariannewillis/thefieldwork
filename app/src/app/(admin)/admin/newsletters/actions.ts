@@ -1,5 +1,6 @@
 "use server";
 
+import { MediaKind } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { SITE_URL } from "@/content/site";
@@ -447,12 +448,20 @@ export async function addAttachment(
     };
   }
 
-  // Upsert on `storedAs`, so choosing the same filename twice REPLACES it
-  // rather than failing on the unique constraint. The bytes in the store were
-  // already overwritten a line above; a second row pointing at the same key
-  // would be two rows for one file.
+  // Upsert on `(newsletterId, storedAs)`, so choosing the same filename twice
+  // REPLACES it rather than failing on the unique constraint. The bytes in the
+  // store were already overwritten a line above; a second row pointing at the
+  // same key would be two rows for one file.
+  //
+  // THE PAIR RATHER THAN `storedAs` ALONE, since the media library landed.
+  // `storedAs` is no longer globally unique: one document may go out on the
+  // January letter and again on the March one, which is the whole point of a
+  // library. It makes no difference on THIS path — `attachmentKey` already
+  // prefixes the letter's own id, so a key uploaded here belongs to one letter
+  // by construction — but the key this matches on has to be the key the index
+  // actually enforces, or the "choose it twice" case starts throwing.
   const row = await prisma.newsletterAttachment.upsert({
-    where: { storedAs },
+    where: { newsletterId_storedAs: { newsletterId: id, storedAs } },
     update: {
       filename: file.name,
       contentType: kind.contentType,
@@ -505,6 +514,87 @@ export async function removeAttachment(
   await prisma.newsletterAttachment.delete({ where: { id } });
   refresh(row.newsletterId);
   return { error: null };
+}
+
+/**
+ * Putting documents from the library onto this letter.
+ *
+ * THE SAME FILE, NOT A COPY OF IT. The attachment row it writes points at the
+ * library's own `storedAs` key, so the bytes in the store are the bytes the
+ * library holds — attaching a handout to January's letter and again to March's
+ * writes two rows against one file. That is what the compound
+ * `(newsletterId, storedAs)` index replaced the old unique-on-`storedAs` with.
+ *
+ * AND IT IS THE MOMENT A DOCUMENT BECOMES PUBLIC. Before this runs the file is
+ * admin-only; afterwards `/newsletter-files/[file]` will serve it to anybody
+ * with the address, because the link is going into inboxes that have no session.
+ * Nothing in here sets a flag to make that happen — the attachment row IS the
+ * permission, which is why the two can never disagree.
+ *
+ * `deliveryFor` is asked per file in the order she picked them, against a
+ * running total, so the answer is the same one she would have got uploading them
+ * one at a time — and the screen can say which of them became links before she
+ * sends rather than after.
+ */
+export async function attachFromLibrary(
+  formData: FormData,
+): Promise<{ ok: boolean; error: string | null }> {
+  await requireSession();
+
+  const newsletterId = Number(formData.get("newsletterId"));
+  if (!Number.isInteger(newsletterId)) {
+    return { ok: false, error: "That letter is gone." };
+  }
+
+  const letter = await requireDraft(newsletterId);
+  if (!letter) {
+    return {
+      ok: false,
+      error: "This letter has been sent, so what came with it cannot change.",
+    };
+  }
+
+  const refs = formData.getAll("ref").map(String).filter(Boolean);
+  if (refs.length === 0) return { ok: true, error: null };
+
+  const documents = await prisma.mediaAsset.findMany({
+    where: { kind: MediaKind.document, ref: { in: refs } },
+  });
+  if (documents.length === 0) {
+    return { ok: false, error: "Those are not in your documents." };
+  }
+
+  const riding = await prisma.newsletterAttachment.aggregate({
+    where: { newsletterId, delivery: "attached" },
+    _sum: { bytes: true },
+  });
+  let attachedBytes = riding._sum.bytes ?? 0;
+
+  for (const document of documents) {
+    const bytes = document.bytes ?? 0;
+    const delivery = deliveryFor(bytes, attachedBytes);
+    if (delivery === "attached") attachedBytes += bytes;
+
+    // Upsert, so picking a document already on this letter is a no-op rather
+    // than a unique-constraint error she has to read.
+    await prisma.newsletterAttachment.upsert({
+      where: {
+        newsletterId_storedAs: { newsletterId, storedAs: document.ref },
+      },
+      update: {},
+      create: {
+        newsletterId,
+        filename: document.title ?? document.ref,
+        storedAs: document.ref,
+        contentType: document.contentType ?? "application/octet-stream",
+        bytes,
+        delivery,
+      },
+    });
+  }
+
+  refresh(newsletterId);
+  return { ok: true, error: null };
 }
 
 // ── sending ──────────────────────────────────────────────────────────────────

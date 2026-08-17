@@ -1434,9 +1434,15 @@ enum AttachmentDelivery {
 
 /// A file Marianne put on one letter.
 ///
-/// SELF-CONTAINED TO NEWSLETTERS on purpose. There is no Document model and the
-/// documents screen is a stub; inventing a library here would be building the
-/// wrong half of it, and a file uploaded to one letter belongs to that letter.
+/// NO LONGER SELF-CONTAINED, and the change is deliberate. This model was
+/// written when there was no library, and it said so: "a file uploaded to one
+/// letter belongs to that letter". `MediaAsset` is that library, and a document
+/// now belongs to HER — a row here says which letters it went out on. `storedAs`
+/// is the same store key `MediaAsset.ref` holds, so a document in the library
+/// and a document on a letter are ONE file. That is also the whole mechanism
+/// behind private-until-attached: a row here existing IS what makes the file
+/// reachable without a session, because /newsletter-files/[file] serves nothing
+/// that is not one.
 ///
 /// THE SIZE DECIDES HOW IT TRAVELS, not Marianne. Past a couple of megabytes an
 /// attachment starts costing deliverability — greylisting, spam scoring, and
@@ -1453,7 +1459,16 @@ model NewsletterAttachment {
   filename    String
   /// What it is called in the store. Prefixed and slugified, so two letters
   /// can each have a "notes.pdf" without one overwriting the other.
-  storedAs    String @unique
+  ///
+  /// NOT UNIQUE ANY MORE. It was, when an upload to one letter was the only way
+  /// a document could exist. Now one file in the library may go out on the
+  /// January letter and again on the March one, and the unique index made that
+  /// the one thing she could not do — the library would have had to keep a
+  /// second copy of the same bytes under a second key, which is precisely the
+  /// duplication a library exists to prevent. The pair below replaces it: the
+  /// same file cannot be attached to the SAME letter twice, which is the
+  /// mistake worth refusing.
+  storedAs    String
   /// As sniffed from the bytes, not as the browser claimed.
   contentType String
   /// Its size, which is what decides `delivery`.
@@ -1467,7 +1482,11 @@ model NewsletterAttachment {
 
   createdAt DateTime @default(now())
 
+  @@unique([newsletterId, storedAs])
   @@index([newsletterId])
+  /// The lookup /newsletter-files/[file] does on every request, and the one the
+  /// library does to decide whether a document is reachable yet.
+  @@index([storedAs])
 }
 
 /// Whether one letter reached one person.
@@ -1513,4 +1532,88 @@ model NewsletterSend {
   /// One person is written to once per letter, whatever a retry does.
   @@unique([newsletterId, subscriberId])
   @@index([newsletterId, outcome])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THE MEDIA LIBRARY
+// ---------------------------------------------------------------------------
+// One model, and it is a RECORD rather than an owner. Every page on this site
+// already stores a picture as a media basename, a film as the address she
+// pasted, and a letter's file as its key in the store — and none of them are
+// changed by this. What the library holds is what is KNOWN ABOUT each of those
+// strings: what kind of thing it is, what she calls it, what is in it, when it
+// arrived and, for a document, what it actually is and how big.
+//
+// WHY NOT FOREIGN KEYS. The alternative was `Workshop.heroImageId` and a
+// migration across nine columns. It was rejected: the basename is already a
+// stable, human-readable identifier that the media route resolves on its own,
+// and every one of those pages works today. Turning nine working references
+// into nine joins buys referential integrity the library does not need — it
+// needs to be able to ANSWER "where is this used", which is a query either way
+// — and costs a rewrite of every offering form, the newsletter composer and
+// the email renderer. See `src/lib/media/library.ts`, which is where the
+// answer to that question is actually computed.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// The three kinds, and they are three because she does three different things
+/// with them.
+enum MediaKind {
+  /// A photograph. `ref` is the media basename — `marianne-room-aglow` — from
+  /// which every page builds the six derivative addresses.
+  picture
+
+  /// A film, as a LINK. `ref` is the address she pasted, canonicalised by
+  /// `lib/film.ts::parseFilm`, and is byte-identical to what sits on
+  /// `Workshop.filmUrl`. Nothing is ever uploaded: her own source file is
+  /// 604 MB and a site that accepted that would need an encoding queue.
+  video
+
+  /// A file. `ref` is its key in the store — the same string
+  /// `NewsletterAttachment.storedAs` holds, which is what makes a document in
+  /// this library and a document on a letter ONE file rather than two copies.
+  document
+}
+
+/// One thing in the library.
+///
+/// THE UNIQUE KEY IS `(kind, ref)` AND THAT IS THE WHOLE DESIGN. `ref` is the
+/// string the rest of the site already stores, so a row here is a note pinned
+/// to an existing reference rather than a new owner of it. It also means
+/// adoption is an insert-if-absent: everything already referenced anywhere, and
+/// every file already on disk, becomes a row the first time the library is
+/// read, without Marianne importing anything. See `adoptEverything`.
+model MediaAsset {
+  id   Int       @id @default(autoincrement())
+  kind MediaKind
+
+  /// The basename, the address, or the store key. Never a path, never built
+  /// into one here — the routes that serve these do that, and they check the
+  /// shape themselves.
+  ref String
+
+  /// What she calls it. For a document, the filename it arrived with; for a
+  /// film, the offering it was pasted on, or nothing.
+  title String?
+
+  /// What is in a picture, for anybody who cannot see it. Held here so the
+  /// answer can be given ONCE for a photograph used in four places — the
+  /// per-use alt on `WorkshopImage` and friends still wins where it is set,
+  /// because a caption is about the use and not about the file.
+  alt String?
+
+  /// Documents only, and both are read off the bytes rather than from what the
+  /// browser claimed. Null on a picture (the route derives it from the
+  /// derivative's extension) and on a film (there are no bytes).
+  contentType String?
+  bytes       Int?
+
+  /// NULLABLE, AND THE NULL IS THE HONEST ANSWER. A row written by an upload
+  /// knows when it happened. A row written by ADOPTION does not: the file was
+  /// on the site before the library existed, and stamping it with today's date
+  /// would be inventing a fact. The screen says "already on the site" for
+  /// those rather than printing a date that is not true.
+  addedAt DateTime?
+
+  @@unique([kind, ref])
+  @@index([kind])
 }

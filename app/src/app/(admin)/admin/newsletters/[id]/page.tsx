@@ -1,3 +1,4 @@
+import { MediaKind } from "@prisma/client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +7,7 @@ import { DraftGuard, PreviewLink } from "@/components/admin/DraftGuard";
 import NewsletterEditor, {
   type EditableAttachment,
   type EditableBlock,
+  type LibraryDocument,
 } from "@/components/admin/NewsletterEditor";
 import NewsletterSend, {
   type Recipient,
@@ -14,6 +16,7 @@ import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
 import { formatDayShort, formatInstant } from "@/lib/format";
 import { listMediaBasenames } from "@/lib/media";
+import { readLibrary } from "@/lib/media/library";
 import { fileSizeWords } from "@/lib/newsletter/attachments";
 import { confirmedRecipients } from "@/lib/newsletter/subscribers";
 import { duplicateNewsletter } from "../actions";
@@ -75,8 +78,12 @@ export default async function Page({
 
   const session = await getSession();
 
-  const [media, people, sends] = await Promise.all([
+  const [media, library, people, sends] = await Promise.all([
     listMediaBasenames(),
+    // Her whole document library, for the "pick from your documents" modal.
+    // Read even on a sent letter, which costs one small query and keeps the
+    // shape of this page's data the same in both branches.
+    readLibrary(MediaKind.document),
     letter.status === "draft" ? confirmedRecipients() : Promise.resolve([]),
     letter.status === "sent"
       ? prisma.newsletterSend.findMany({
@@ -85,6 +92,21 @@ export default async function Page({
         })
       : Promise.resolve([]),
   ]);
+
+  /**
+   * Her documents, as the picker needs them.
+   *
+   * `onALetter` is what the picker prints as "anybody with the link" — it is
+   * derived from whether anything already references the file, never stored, so
+   * it cannot drift from what /newsletter-files actually serves.
+   */
+  const documents: LibraryDocument[] = library.map((document) => ({
+    ref: document.ref,
+    title: document.title,
+    contentType: document.contentType,
+    bytes: document.bytes,
+    onALetter: document.reachableWithoutASession,
+  }));
 
   const blocks: EditableBlock[] = letter.blocks.map((block) => ({
     kind: block.kind,
@@ -162,6 +184,7 @@ export default async function Page({
             }}
             blocks={blocks}
             attachments={attachments}
+            documents={documents}
             media={media}
           />
 

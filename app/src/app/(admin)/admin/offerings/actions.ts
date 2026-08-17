@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth/server";
 import { parseFilm, type Film } from "@/lib/film";
 import { ingestImage, MAX_UPLOAD_BYTES } from "@/lib/media";
+import { recordPicture } from "@/lib/media/library";
 import {
   collectImages,
   collectValues,
@@ -77,11 +78,21 @@ export async function addPicture(formData: FormData): Promise<PictureAdded> {
     };
   }
 
-  return ingestImage({
+  const result = await ingestImage({
     bytes: Buffer.from(await file.arrayBuffer()),
     filename: file.name,
     declaredType: file.type,
   });
+
+  // ONE LIBRARY, NOT A SECOND COPY. This action is the upload behind every
+  // picture control in the portal — both offering forms, the sessions form and
+  // the newsletter editor — so recording the row here is what makes a photograph
+  // she adds from a workshop appear on the Media screen immediately. The
+  // alternative was a sweep that noticed it later, which would mean a window in
+  // which the library disagreed with the site about what exists.
+  if (result.ok) await recordPicture(result.basename);
+
+  return result;
 }
 
 /** The name this form knows it by. The shape is every offering form's. */

@@ -1,5 +1,5 @@
 import "server-only";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /**
@@ -33,6 +33,18 @@ export type MediaStore = {
   /** Null when this store has never heard of the file. */
   get(file: string): Promise<Buffer | null>;
   list(): Promise<string[]>;
+  /**
+   * Take one out. A file that was never here is a success, not an error.
+   *
+   * Called only by the media library, and only AFTER the row that pointed at
+   * the file has gone and after the check that nothing on the site still names
+   * it. Deleting six derivatives is six of these, and any one of them may
+   * legitimately find nothing — a picture uploaded before a format was added,
+   * or a write that failed partway — so "it is not there" has to be the same
+   * outcome as "it is not there any more". A refusal here would leave her with
+   * a library row she cannot delete because of a file that does not exist.
+   */
+  remove(file: string): Promise<void>;
 };
 
 /**
@@ -68,6 +80,10 @@ const diskStore: MediaStore = {
   },
   get: readOnDisk,
   list: listOnDisk,
+  async remove(file) {
+    // `force` makes a missing file a success, which is what the port promises.
+    await rm(path.join(DISK_DIR, file), { force: true });
+  },
 };
 
 /**
@@ -128,6 +144,19 @@ function bucketStore(bucketId: string): MediaStore {
         return [];
       }
       return result.value.map((object) => object.name);
+    },
+    async remove(file) {
+      // Reported and not thrown, for the same reason the disk's is forced: the
+      // row has already gone by the time this runs, and a bucket having a bad
+      // morning must not be able to un-delete something from her library.
+      const result = await (
+        await client()
+      ).delete(file, { ignoreNotFound: true });
+      if (!result.ok) {
+        console.error(
+          `[media] could not remove ${file}: ${result.error.message}`,
+        );
+      }
     },
   };
 }

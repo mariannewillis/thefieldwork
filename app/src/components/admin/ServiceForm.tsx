@@ -20,6 +20,8 @@ import {
   Section,
   type VenueChoice,
 } from "./OfferingFormParts";
+import FilmField from "@/components/admin/FilmField";
+import GalleryPicker from "@/components/admin/GalleryPicker";
 
 /**
  * The form that writes a service.
@@ -260,6 +262,9 @@ export default function ServiceForm({
   const removeImageRow = (key: number) =>
     setImageRows((rows) => rows.filter((row) => row.key !== key));
   const atMaxImages = imageRows.length >= MAX_IMAGES;
+  const [browsingRail, setBrowsingRail] = useState(false);
+  /** How many of a batch would not fit. Said, never silently dropped. */
+  const [railOverflow, setRailOverflow] = useState(0);
 
   // How far through a batch we are, while one is running. Null the rest of the
   // time — there is no such thing here as a picture of what uploading looks
@@ -1017,17 +1022,19 @@ export default function ServiceForm({
             {/* One field where there were three. The still it opens on and how
                 long it runs belong to the film, and Vimeo and YouTube both
                 already know them. */}
-            <label className="block">
-              <span className={LABEL}>The link to the film</span>
-              <input
+            {/* The field plus a way into the library. `FilmField` owns the
+                input itself so a film she has used before can be put into it;
+                the name, the value and the server-side parse are unchanged. */}
+            <p className={LABEL} id="film-url-label">
+              The link to the film
+            </p>
+            <div className="mt-2" aria-labelledby="film-url-label">
+              <FilmField
                 name="filmUrl"
-                type="text"
-                inputMode="url"
-                placeholder="https://vimeo.com/76979871"
                 defaultValue={kept("filmUrl", service?.filmUrl ?? "")}
-                className={FIELD}
+                placeholder="https://vimeo.com/76979871"
               />
-            </label>
+            </div>
             <p className={HELP}>
               Optional. Put the film on Vimeo or YouTube and paste the link —
               Vimeo for preference, because YouTube records who watched. Nothing
@@ -1110,6 +1117,56 @@ export default function ServiceForm({
                         : "Choose pictures"}
                   </label>
                 )}
+
+                {/* THE SEVERAL-AT-ONCE ROUTE. A rail takes many pictures, so
+                    its picker takes many: each one she ticks becomes a row,
+                    in the order she pressed them, up to the ceiling. The
+                    single picker on each row is still there for swapping one
+                    out. */}
+                <button
+                  type="button"
+                  onClick={() => setBrowsingRail(true)}
+                  className={QUIET_BUTTON}
+                >
+                  Pick from your pictures
+                </button>
+
+                {/* Multiple, and capped at whatever room is left — she is told
+                  what was dropped rather than silently given fewer. */}
+                <GalleryPicker
+                  kind="picture"
+                  assets={library.map((basename) => ({
+                    kind: "picture" as const,
+                    ref: basename,
+                    title: null,
+                    alt: null,
+                    contentType: null,
+                    bytes: null,
+                  }))}
+                  multiple
+                  open={browsingRail}
+                  onClose={() => setBrowsingRail(false)}
+                  onPick={(refs) => {
+                    const room = Math.max(MAX_IMAGES - imageRows.length, 0);
+                    for (const ref of refs.slice(0, room)) appendPicture(ref);
+                    setRailOverflow(
+                      refs.length > room ? refs.length - room : 0,
+                    );
+                  }}
+                  onAdded={rememberPicture}
+                />
+                {railOverflow > 0 && (
+                  <p
+                    role="status"
+                    className="mt-3 max-w-[54ch] text-[15px] leading-relaxed text-ink-soft"
+                  >
+                    {railOverflow === 1
+                      ? "One of those was left out — "
+                      : `${railOverflow} of those were left out — `}
+                    {MAX_IMAGES} is as many as a page carries well.
+                  </p>
+                )}
+
                 {/* The ceiling says nothing until it is nearly in the way. */}
                 {imageRows.length >= MAX_IMAGES - 3 && !atMaxImages && (
                   <p className="fig font-mono text-[15px] text-ink-soft">

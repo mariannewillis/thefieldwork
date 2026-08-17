@@ -99,6 +99,43 @@ export function attachmentKey(newsletterId: number, filename: string): string {
   return `newsletter-${newsletterId}-${name}${suffix ? `.${suffix}` : ""}`;
 }
 
+/**
+ * What a file uploaded into the LIBRARY is called in the store.
+ *
+ * `document-` rather than `newsletter-<id>-`, and the difference in the prefix is
+ * the difference in what owns it: a file uploaded onto a letter belongs to that
+ * letter, and one uploaded into the library belongs to her and may go out on
+ * several. Both shapes are served by the same route and both are refused by it
+ * until an attachment row exists.
+ *
+ * Numbered rather than hashed on a clash, exactly as `lib/media/index.ts` names
+ * a second photograph of the garden room — she reads these, and the second copy
+ * of her intake form should be `document-intake-form-2.pdf` and not hexadecimal.
+ * `taken` is every key already in the library.
+ */
+export function documentKey(filename: string, taken: Set<string>): string {
+  const dot = filename.lastIndexOf(".");
+  const stem = dot > 0 ? filename.slice(0, dot) : filename;
+  const extension = dot > 0 ? filename.slice(dot + 1) : "";
+
+  const clean = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const name = clean(stem) || "file";
+  const suffix = clean(extension);
+  const tail = suffix ? `.${suffix}` : "";
+
+  const first = `document-${name}${tail}`;
+  if (!taken.has(first)) return first;
+  for (let n = 2; ; n += 1) {
+    const candidate = `document-${name}-${n}${tail}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+}
+
 /** Put one away. The same store the photographs use — disk, or the bucket. */
 export async function putAttachment(
   key: string,

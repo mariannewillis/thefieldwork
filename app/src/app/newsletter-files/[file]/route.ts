@@ -24,8 +24,21 @@ import { getAttachment } from "@/lib/newsletter/attachments";
  * thefieldwork.co.uk.
  */
 
-/** What an upload's key can look like. `attachmentKey` mints exactly this. */
-const KEY = /^newsletter-\d+-[a-z0-9-]+(\.[a-z0-9]+)?$/;
+/**
+ * What an upload's key can look like. `attachmentKey` and `documentKey` mint
+ * exactly these two shapes and nothing else does.
+ *
+ * TWO PREFIXES, because there are now two ways a document can arrive: uploaded
+ * onto one letter (`newsletter-<id>-…`, which is every file that existed before
+ * the media library) or uploaded into the library and picked afterwards
+ * (`document-…`, which belongs to her rather than to a letter).
+ *
+ * This is a SHAPE check and never the security property. What actually decides
+ * whether these bytes may leave the building is the row lookup below: a key of
+ * either shape with no attachment row behind it is a 404, which is what makes a
+ * library document private until she puts it on a letter.
+ */
+const KEY = /^(?:newsletter-\d+|document)-[a-z0-9-]+(\.[a-z0-9]+)?$/;
 
 export async function GET(
   _request: Request,
@@ -40,7 +53,22 @@ export async function GET(
 
   if (!KEY.test(file)) return missing;
 
-  const row = await prisma.newsletterAttachment.findUnique({
+  // `findFirst`, not `findUnique`, since the media library landed — and the
+  // "first" is not a guess about which letter.
+  //
+  // `storedAs` IS the file. It is the key in the store, so every row carrying it
+  // names the same bytes, the same sniffed content type and the same filename;
+  // what differs between two rows is only WHICH LETTER carried it. This route
+  // serves a file, not a letter, so any row will do.
+  //
+  // And the existence of a row is exactly the property being checked. A
+  // document is admin-only until it goes on a letter and reachable from that
+  // moment on, because a link in somebody's inbox has no session behind it. So
+  // "is there at least one attachment row for this key" is the whole public/
+  // private rule, asked here as a query rather than read off a column that could
+  // drift out of step with it. See lib/media/library.ts::documentIsPublic, which
+  // asks the SAME question for the screen that has to say which state it is in.
+  const row = await prisma.newsletterAttachment.findFirst({
     where: { storedAs: file },
   });
   if (!row) return missing;

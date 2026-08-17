@@ -3,10 +3,12 @@
 import { useActionState, useEffect, useState } from "react";
 import {
   addAttachment,
+  attachFromLibrary,
   removeAttachment,
   saveNewsletter,
 } from "@/app/(admin)/admin/newsletters/actions";
 import { useDraftGuard } from "@/components/admin/DraftGuard";
+import GalleryPicker from "@/components/admin/GalleryPicker";
 import {
   FIELD,
   FIELD_BIG,
@@ -92,6 +94,16 @@ export type EditableAttachment = {
   note: string;
 };
 
+/** One document in her library, as the picker needs it. */
+export type LibraryDocument = {
+  ref: string;
+  title: string | null;
+  contentType: string | null;
+  bytes: number | null;
+  /** Already on some letter, so already reachable without a session. */
+  onALetter: boolean;
+};
+
 const KIND_WORDS: Record<Kind, string> = {
   heading: "Heading",
   paragraph: "Paragraph",
@@ -107,6 +119,7 @@ export default function NewsletterEditor({
   newsletter,
   blocks,
   attachments,
+  documents,
   media,
 }: {
   newsletter: {
@@ -118,6 +131,8 @@ export default function NewsletterEditor({
   };
   blocks: EditableBlock[];
   attachments: EditableAttachment[];
+  /** Every document in her library, for the picker. */
+  documents: LibraryDocument[];
   /** Every picture on the site, growing as she adds to it. */
   media: string[];
 }) {
@@ -648,6 +663,7 @@ export default function NewsletterEditor({
         <Attachments
           newsletterId={newsletter.id}
           attachments={attachments}
+          documents={documents}
           removeError={removeState.error}
         />
 
@@ -743,16 +759,44 @@ function Arrow({ up }: { up?: boolean }) {
 function Attachments({
   newsletterId,
   attachments,
+  documents,
   removeError,
 }: {
   newsletterId: number;
   attachments: EditableAttachment[];
+  /** Everything in her library, for the picker. */
+  documents: LibraryDocument[];
   /** Owned by the sheet, because the forms these buttons drive live out there
       alongside it rather than in here. */
   removeError: string | null;
 }) {
   const [adding, setAdding] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
+  const [browsing, setBrowsing] = useState(false);
+  const [attachError, setAttachError] = useState<string | null>(null);
+
+  /**
+   * Documents picked out of the library, put on this letter.
+   *
+   * Called directly rather than through a form, exactly as the upload above is
+   * and for the same reason: this panel is inside the letter's own form, and a
+   * second form here would be a nested one (D-30).
+   */
+  async function attach(refs: string[]) {
+    if (refs.length === 0) return;
+    setAttachError(null);
+    const body = new FormData();
+    body.set("newsletterId", String(newsletterId));
+    for (const ref of refs) body.append("ref", ref);
+    try {
+      const result = await attachFromLibrary(body);
+      if (!result.ok) setAttachError(result.error);
+    } catch {
+      setAttachError(
+        "That did not get there. Check the connection and try again.",
+      );
+    }
+  }
 
   async function take(input: HTMLInputElement) {
     const file = input.files?.[0];
@@ -880,10 +924,66 @@ function Attachments({
           />
           {adding ? "Attaching…" : "Attach a document"}
         </label>
+
+        {/* The library route. `type="button"` because this panel sits inside the
+            letter's own form and a bare button in a form submits it. */}
+        <button
+          type="button"
+          onClick={() => setBrowsing(true)}
+          className={QUIET_BUTTON}
+        >
+          Pick from your documents
+        </button>
+
         <p className="max-w-[40ch] text-[15px] leading-relaxed text-ink-soft">
           It goes up straight away, so saving the draft cannot lose it.
         </p>
       </div>
+
+      {/* ── WHO CAN OPEN AN ATTACHED FILE ────────────────────────────────────
+          Said here because it is the consequence of attaching something and she
+          is deciding it at this moment. A file on a letter has to be reachable
+          without a session — the link is going into inboxes, and an inbox cannot
+          sign in — so attaching it is what makes it public. That is not a
+          setting to find; it is what "send this to a mailing list" means. */}
+      <p className="mt-7 max-w-[62ch] text-[17px] leading-relaxed text-ink">
+        <strong className="font-semibold">
+          Anybody with the address can open a file once it is on a letter.
+        </strong>{" "}
+        The link goes to people&rsquo;s inboxes, and a link in an inbox cannot
+        ask anybody to sign in &mdash; so there is no password on it and no way
+        to tell who followed it. Anyone you send it to can pass it on. Documents
+        you have not put on a letter stay private to you.
+      </p>
+
+      {/* MULTIPLE, because a letter takes several. Rendered inside this panel
+          and portalled out of the form by `GalleryPicker` itself — see the note
+          at the top of that file for why the DOM position is load-bearing. */}
+      <GalleryPicker
+        kind="document"
+        assets={documents.map((document) => ({
+          kind: "document" as const,
+          ref: document.ref,
+          title: document.title,
+          alt: null,
+          contentType: document.contentType,
+          bytes: document.bytes,
+          reachableWithoutASession: document.onALetter,
+        }))}
+        multiple
+        open={browsing}
+        onClose={() => setBrowsing(false)}
+        onPick={(refs) => void attach(refs)}
+      />
+
+      {attachError && (
+        <p
+          role="alert"
+          className="mt-3 max-w-[54ch] text-[17px] leading-relaxed text-pool-error"
+        >
+          {attachError}
+        </p>
+      )}
 
       {refused && (
         <p
