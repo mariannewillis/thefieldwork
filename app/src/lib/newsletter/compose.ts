@@ -70,10 +70,25 @@ export const NEWSLETTER_WHY =
  * with room to spare, and the 2400 would add roughly a megabyte to a message
  * that is already carrying attachments.
  *
- * ABSOLUTE, and against the CANONICAL origin rather than SITE_URL. An email has
- * no document base, and a picture has to still resolve from somebody's inbox in
- * a year's time, so it cannot point at whichever deployment happened to compose
- * the letter.
+ * ABSOLUTE, and against SITE_URL — the deployment that HAS the file — rather
+ * than the canonical origin.
+ *
+ * This was the other way round, on the reasoning that a picture must still
+ * resolve from somebody's inbox in a year and so should not point at whichever
+ * deployment composed the letter. Sound in principle, wrong in fact: the
+ * canonical domain answers but is not this app, so `/media/…` was a 404 and
+ * every photograph and masthead in every letter arrived as a hole. The operator
+ * saw exactly that.
+ *
+ * The distinction it was missing is between bytes and destinations. **Bytes
+ * come from wherever they exist; links go to where the site lives.** A picture
+ * is bytes: only a deployment holding `/media/` can serve it, and on the
+ * canonical domain nothing does. A link to a workshop is a destination and
+ * stays canonical, below.
+ *
+ * The day the canonical domain IS this app, set `NEXT_PUBLIC_SITE_URL` to it
+ * and the two coincide — which is the correct way to get the year-from-now
+ * behaviour, rather than naming a host and hoping.
  *
  * ── AND IT IS FETCHED BY THE MAIL CLIENT, NOT BY THE READER ──────────────────
  *
@@ -101,7 +116,7 @@ export const NEWSLETTER_WHY =
  * image whose absence makes the letter look broken rather than plain.
  */
 export function newsletterImageUrl(basename: string): string {
-  return `${CANONICAL_SITE_URL}/media/${basename}-1200.jpg`;
+  return `${SITE_URL}/media/${basename}-1200.jpg`;
 }
 
 /**
@@ -228,10 +243,16 @@ export type ComposableAttachment = {
 /**
  * Where a file put on a letter is fetched from.
  *
- * CANONICAL, for the same reason a picture is: the link outlives the send.
- * `SITE_URL` is used only when a preview needs to reach this deployment.
+ * SITE_URL, for the same reason a picture is: this is BYTES, and only a
+ * deployment holding `/newsletter-files/` can hand them over. Pointing a
+ * download at a host that does not serve the file gives a subscriber a 404
+ * with the practice's name on it.
+ *
+ * The unsubscribe link below stays canonical, and that is the line between
+ * them: it is a DESTINATION — a place on the site — and it must keep working
+ * from an old letter no matter which deployment sent it.
  */
-export function attachmentUrl(storedAs: string, origin = CANONICAL_SITE_URL) {
+export function attachmentUrl(storedAs: string, origin = SITE_URL) {
   return `${origin}/newsletter-files/${storedAs}`;
 }
 
