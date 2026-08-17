@@ -119,9 +119,15 @@ export default function Page() {
           widest pool; the form belongs in the same one rather than in a third
           beat, because reading the three things and then writing is one action
           and splitting it across two viewports would break it in half. */}
+      {/* CENTRED, not held to the right edge as the mockup had it. The approved
+          screen alternated left-right-left down the page, which is a good rhythm
+          for panels that are read; this one is a panel that is USED, and the
+          operator asked for it centred. A form pushed against one edge reads as
+          an aside to whatever is beside it — and here there is nothing beside
+          it, only the plate. */}
       <section
         id="write"
-        className="clearing relative flex min-h-[100svh] items-center justify-end overflow-hidden py-16 sm:py-24"
+        className="clearing relative flex min-h-[100svh] items-center justify-center overflow-hidden py-16 sm:py-24"
       >
         <ClearingPlate plate={before.plate} />
 
