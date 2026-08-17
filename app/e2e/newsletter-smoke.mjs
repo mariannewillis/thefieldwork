@@ -295,6 +295,20 @@ try {
   context.setDefaultNavigationTimeout(180_000);
   const page = await context.newPage();
 
+  // Every React complaint the editor makes, collected for the check at the end
+  // of §3. A nested <form> shipped here and this suite stayed green through it:
+  // Playwright submits the sheet directly, so the save it drives worked while
+  // the operator's own browser — which has to hydrate first — did not. A
+  // hydration error is not cosmetic; it can leave the page's buttons inert.
+  const reactComplaints = [];
+  page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const text = message.text();
+    if (/hydrat|cannot be a descendant|<form>/i.test(text)) {
+      reactComplaints.push(text);
+    }
+  });
+
   // ══ 1 · PUBLIC SIGNUP ═════════════════════════════════════════════════════
   console.log("\n— public signup —");
 
@@ -621,6 +635,12 @@ try {
   // attachment with no words round it. Three checks in each direction: the
   // screen refuses, the screen SAYS why, and the server refuses even when the
   // screen is made to allow it.
+  ok(
+    "the editor hydrated without React objecting to its own markup",
+    reactComplaints.length === 0,
+    reactComplaints.join(" · "),
+  );
+
   console.log("\n— saved, or not —");
 
   const sendButton = page.getByRole("button", { name: /^send this letter$/i });

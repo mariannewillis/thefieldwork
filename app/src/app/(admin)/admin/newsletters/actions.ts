@@ -486,7 +486,12 @@ export async function removeAttachment(
 ): Promise<{ error: string | null }> {
   await requireSession();
 
-  const id = Number(formData.get("id"));
+  // `attachmentId`, NOT `id`. Remove is a button inside the letter's own form
+  // — a form cannot contain another one — so this arrives carrying every field
+  // of the sheet, including the letter's own hidden `id`. Reading `id` here
+  // would delete whichever attachment happened to share the newsletter's
+  // number.
+  const id = Number(formData.get("attachmentId"));
   if (!Number.isInteger(id)) return { error: "That file is already gone." };
 
   const row = await prisma.newsletterAttachment.findUnique({ where: { id } });

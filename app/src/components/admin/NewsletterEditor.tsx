@@ -771,15 +771,28 @@ function Attachments({
                 <p className="font-display text-[24px] leading-tight text-ink">
                   {file.filename}
                 </p>
-                <form action={removeAction}>
-                  <input type="hidden" name="id" value={file.id} />
-                  <button
-                    type="submit"
-                    className="t min-h-[44px] text-[15px] font-medium text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
-                  >
-                    Remove
-                  </button>
-                </form>
+                {/* A BUTTON, not a form. This panel sits inside the letter's
+                    own form, and HTML has no nested forms — the browser drops
+                    the inner one and React refuses to hydrate it, which is
+                    what stopped Save working at all.
+
+                    So Remove submits the sheet's form to its own action
+                    instead. It carries `attachmentId` rather than `id`,
+                    because the sheet already posts the letter's `id` and the
+                    action would otherwise delete whichever file happened to
+                    share that number. `formNoValidate` because removing a
+                    document is not the moment to be told a button needs
+                    words on it. */}
+                <button
+                  type="submit"
+                  formAction={removeAction}
+                  formNoValidate
+                  name="attachmentId"
+                  value={file.id}
+                  className="t min-h-[44px] text-[15px] font-medium text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
+                >
+                  Remove
+                </button>
               </div>
               <label className="mt-4 block">
                 <span className={LABEL}>What it is</span>
