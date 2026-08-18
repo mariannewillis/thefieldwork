@@ -22,7 +22,9 @@ import {
   setItem,
   setPicture,
   setSectionPicture,
+  setItemSize,
   setText,
+  setTextSize,
   type Outcome,
 } from "@/lib/pages/write";
 
@@ -121,6 +123,14 @@ async function dispatch(
       );
     case "reset-picture":
       return settled(await clearPicture(page, str(form, "key")));
+    case "size-text":
+      return settled(
+        await setTextSize(page, str(form, "key"), Number(str(form, "step"))),
+      );
+    case "size-item":
+      return settled(
+        await setItemSize(page, num(form, "item"), Number(str(form, "step"))),
+      );
 
     // ── sections ──────────────────────────────────────────────────────────
     case "hide":
@@ -200,7 +210,10 @@ async function dispatch(
       return settled(
         await setItem(page, num(form, "item"), {
           text: str(form, "value"),
-          href: form.get("href") === null ? null : str(form, "href"),
+          // ABSENT means leave the target alone — which is what typing a
+          // button's label on the page sends, because the target is not on the
+          // page to be typed. Present-and-empty is her clearing it.
+          ...(form.get("href") === null ? {} : { href: str(form, "href") }),
         }),
       );
     case "delete-item":

@@ -5,10 +5,11 @@ import PageEditor, {
   type EditorItem,
   type EditorSection,
 } from "@/components/admin/PageEditor";
-import { sitePage } from "@/content/pages";
+import { SITE_PAGES, sitePage } from "@/content/pages";
 import { listMediaBasenames } from "@/lib/media";
+import { documentHref, readLibrary } from "@/lib/media/library";
 import { pendingChanges } from "@/lib/pages/publish";
-import { pictureOf, readPage, textOf } from "@/lib/pages/read";
+import { pictureOf, readPage, sizeOf, textOf } from "@/lib/pages/read";
 import { BEATS, PICTURE_SLOTS, TEXT_SLOTS } from "@/lib/pages/slots";
 import { ensureDraft } from "@/lib/pages/write";
 
@@ -54,14 +55,16 @@ export default async function PageEditorScreen({
   // have no ids, and every control on this screen addresses a section by one.
   await ensureDraft(key);
 
-  const [draft, pending, library] = await Promise.all([
+  const [draft, pending, library, documents] = await Promise.all([
     readPage(key, "draft"),
     pendingChanges(key),
     listMediaBasenames(),
+    readLibrary("document"),
   ]);
 
   // ── what the toolbox needs to prefill its fields ───────────────────────
   const text: Record<string, string> = {};
+  const sizes: Record<string, number> = {};
   const pictures: Record<string, { ref: string; alt: string }> = {};
   const sections: EditorSection[] = [];
   const blocks: Record<number, EditorBlock> = {};
@@ -82,6 +85,7 @@ export default async function PageEditorScreen({
       for (const slot of TEXT_SLOTS) {
         if (slot.beat !== section.beatKey) continue;
         text[slot.key] = textOf(section, slot.key);
+        sizes[slot.key] = sizeOf(section, slot.key);
       }
       for (const slot of PICTURE_SLOTS) {
         if (slot.beat !== section.beatKey) continue;
@@ -118,6 +122,7 @@ export default async function PageEditorScreen({
           kind: item.kind,
           text: item.text,
           href: item.href,
+          size: item.size,
         };
       }
     }
@@ -133,11 +138,25 @@ export default async function PageEditorScreen({
       slots={TEXT_SLOTS}
       pictureSlots={PICTURE_SLOTS}
       text={text}
+      sizes={sizes}
       pictures={pictures}
       sections={sections}
       blocks={blocks}
       items={items}
       library={library}
+      documents={documents.map((one) => ({
+        ref: one.ref,
+        title: one.title,
+        // The PUBLIC address, because that is where the link on the page has to
+        // point. The file becomes reachable at it when the page is published —
+        // the same rule that makes a document on a letter reachable, applied to
+        // a second surface (`documentIsPublic`).
+        href: documentHref(one.ref, true),
+      }))}
+      destinations={SITE_PAGES.map((one) => ({
+        href: one.href,
+        label: one.label,
+      }))}
     />
   );
 }

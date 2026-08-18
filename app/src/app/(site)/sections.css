@@ -12,9 +12,10 @@
    home.css stays the verbatim port of the approved mockup, which is why this
    is a separate file rather than an appendix to it.
 
-   NO SIZES, NO COLOURS, NO RADII. She chooses WHAT a line is and WHERE a box
-   goes; everything else is decided here (brief §12). That is what keeps a
-   section she added in December looking like the page it was added to.
+   NO COLOURS AND NO RADII. She chooses WHAT a line is, WHERE a box goes and —
+   since D-35 — how much bigger or smaller than the designed size it is, in
+   bounded steps. Everything else is decided here (brief §12), which is what
+   keeps a section she added in December looking like the page it was added to.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .beat--free {
@@ -140,4 +141,46 @@
     align-items: flex-start;
     text-align: left;
   }
+}
+
+/* ── the size steps (D-35) ────────────────────────────────────────────────
+   She asked for font sizes in the toolbox, which reverses the answer she gave
+   on styling controls the same day. This is the version that cannot produce a
+   broken page: SIX STEPS, each a multiplier on the authored size rather than a
+   number of pixels replacing it.
+
+   Multiplying is what keeps both of the things an absolute size would lose —
+   the responsive behaviour (every size on this page is a clamp) and the ramp's
+   relationships (a heading stays bigger than the paragraph under it at every
+   step). And the range is bounded at both ends, so nothing can be set to
+   4px or to a size that pushes the composition off the screen. */
+[data-size="-2"] {
+  --k: 0.74;
+}
+[data-size="-1"] {
+  --k: 0.87;
+}
+[data-size="1"] {
+  --k: 1.15;
+}
+[data-size="2"] {
+  --k: 1.35;
+}
+[data-size="3"] {
+  --k: 1.6;
+}
+
+/* The free sections' own type reads the same multiplier, so a step means the
+   same thing on a band she made as on one of the seven. */
+.free__heading {
+  font-size: calc(clamp(24px, 3vw, 40px) * var(--k, 1));
+}
+.free__lines span {
+  font-size: calc(clamp(19px, 1.8vw, 24px) * var(--k, 1));
+}
+.free__cell .body {
+  font-size: calc(18px * var(--k, 1));
+}
+.free__button {
+  font-size: calc(17px * var(--k, 1));
 }

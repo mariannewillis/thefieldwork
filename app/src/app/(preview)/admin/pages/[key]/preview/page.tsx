@@ -5,6 +5,7 @@ import { home } from "@/content/home";
 import { sitePage } from "@/content/pages";
 import { homeLedger } from "@/lib/pages/home-ledger";
 import { readPage } from "@/lib/pages/read";
+import { TEXT_SLOTS } from "@/lib/pages/slots";
 import { ensureDraft } from "@/lib/pages/write";
 import "../../../../../(site)/home.css";
 import "../../../../../(site)/sections.css";
@@ -44,7 +45,15 @@ export default async function PagePreview({
 
   return (
     <>
-      <PreviewBridge />
+      {/* HOW EACH SLOT'S WORDS ARE SHAPED, so the frame knows whether Enter
+          means a new line or means done, and how to read a value back off the
+          page. Sent as data rather than looked up in the frame, because the
+          catalogue is the server's and a second copy would drift. */}
+      <PreviewBridge
+        shapes={Object.fromEntries(
+          TEXT_SLOTS.map((slot) => [slot.key, slot.shape]),
+        )}
+      />
       <HomeBody
         page={page}
         rowsByLabel={rowsByLabel}

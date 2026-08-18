@@ -101,6 +101,13 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  /* NEVER WRAPS. Absolutely positioned with `left: 0` and no width, a tab
+     shrink-wraps to its containing block — so in a narrow box the label
+     "Words on the picture" folded onto three lines, grew to 64px tall, and
+     covered the only line in the box. Clicking those words selected the box
+     instead of the words, which is exactly what "words on a picture doesn't
+     let me type" was. */
+  white-space: nowrap;
 }
 .edit__handle:hover,
 .edit__handle:focus-visible {
@@ -132,4 +139,32 @@
   color: var(--gold);
   font-style: italic;
   opacity: 0.75;
+}
+
+/* The box's own tab. Smaller and quieter than the section's, and it sits on
+   the box rather than on the band, so the two are never confused.
+
+   THE GAP ABOVE THE BOX IS WHAT MAKES IT WORK. The first version hung the tab
+   over the top of the box, which put it on top of the first line in every one
+   of them — so clicking that line selected the box instead, and "words on the
+   picture doesn't let me type" was a tab quietly eating the click. The box gets
+   a margin here, in the editing stylesheet only, so the tab has somewhere of
+   its own to sit and the live page is not moved by a pixel. */
+.free__block {
+  position: relative;
+  margin-top: 30px;
+}
+.edit__handle--block {
+  top: -26px;
+  left: 0;
+  padding: 4px 10px;
+  background: var(--blush);
+  color: var(--plum-900);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--gold);
+}
+.edit__handle--block:hover,
+.edit__handle--block:focus-visible {
+  background: var(--gold);
 }

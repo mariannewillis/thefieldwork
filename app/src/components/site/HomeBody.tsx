@@ -7,6 +7,7 @@ import {
   linesOf,
   linkOf,
   pictureOf,
+  sizeOf,
   type Picture,
   type ResolvedBeat,
   type ResolvedBlock,
@@ -106,6 +107,22 @@ function marks(editing: boolean, attrs: Record<string, string | number>) {
   );
 }
 
+/**
+ * What goes on one of the seven beats' editable text elements.
+ *
+ * `data-slot` is what the editor selects it by and has been on every one of
+ * them since the page was ported. `data-size` is the step she has moved it to,
+ * and it is DROPPED AT ZERO rather than written as "0" — the default is the
+ * composition, and an attribute on every paragraph saying "unchanged" is noise
+ * in the markup and one more thing that has to be right.
+ */
+function slotProps(beat: ResolvedBeat, key: string) {
+  const step = sizeOf(beat, key);
+  return step === 0
+    ? { "data-slot": key }
+    : { "data-slot": key, "data-size": String(step) };
+}
+
 // ── the seven ────────────────────────────────────────────────────────────────
 
 function Root({
@@ -124,7 +141,7 @@ function Root({
       <Plate picture={pictureOf(beat, "root.plate")} slot="root.plate" />
       {head}
       <div className="pool hero__pool ink">
-        <p className="eyebrow" data-slot="root.eyebrow">
+        <p className="eyebrow" {...slotProps(beat, "root.eyebrow")}>
           {eyebrow.map((part, index) => (
             <span key={part}>
               {index > 0 && <> &middot; </>}
@@ -134,15 +151,15 @@ function Root({
             </span>
           ))}
         </p>
-        <h1 className="disp hero__lines" data-slot="root.lines">
+        <h1 className="disp hero__lines" {...slotProps(beat, "root.lines")}>
           {linesOf(beat, "root.lines").map((line) => (
             <span key={line}>{line}</span>
           ))}
         </h1>
-        <p className="note" data-slot="root.note">
+        <p className="note" {...slotProps(beat, "root.note")}>
           {textOf(beat, "root.note")}
         </p>
-        <a className="link" href={link.href} data-slot="root.link">
+        <a className="link" href={link.href} {...slotProps(beat, "root.link")}>
           {link.label}
         </a>
       </div>
@@ -156,24 +173,32 @@ function Sacral({ beat }: { beat: ResolvedBeat }) {
     <>
       <Plate picture={pictureOf(beat, "sacral.plate")} slot="sacral.plate" />
       <div className="onplate onplate-primary sacral__onplate">
-        <p className="eyebrow" data-slot="sacral.eyebrow">
+        <p className="eyebrow" {...slotProps(beat, "sacral.eyebrow")}>
           {textOf(beat, "sacral.eyebrow")}
         </p>
-        <p className="disp lead" data-slot="sacral.lead">
+        <p className="disp lead" {...slotProps(beat, "sacral.lead")}>
           {textOf(beat, "sacral.lead")}
         </p>
-        <p className="obody" data-slot="sacral.onPlateBody">
+        <p className="obody" {...slotProps(beat, "sacral.onPlateBody")}>
           {textOf(beat, "sacral.onPlateBody")}
         </p>
       </div>
       <div className="pool sacral__pool ink">
-        <p className="disp" data-slot="sacral.poolBody">
+        <p className="disp" {...slotProps(beat, "sacral.poolBody")}>
           {textOf(beat, "sacral.poolBody")}
         </p>
-        <p className="note" style={{ marginTop: 16 }} data-slot="sacral.note">
+        <p
+          className="note"
+          style={{ marginTop: 16 }}
+          {...slotProps(beat, "sacral.note")}
+        >
           {textOf(beat, "sacral.note")}
         </p>
-        <a className="link" href={link.href} data-slot="sacral.link">
+        <a
+          className="link"
+          href={link.href}
+          {...slotProps(beat, "sacral.link")}
+        >
           {link.label}
         </a>
       </div>
@@ -186,7 +211,11 @@ function Method({ beat }: { beat: ResolvedBeat }) {
     <>
       <Plate picture={pictureOf(beat, "method.plate")} slot="method.plate" />
       <div className="pool method__pool ink">
-        <p className="disp" style={{ margin: 0 }} data-slot="method.verbs">
+        <p
+          className="disp"
+          style={{ margin: 0 }}
+          {...slotProps(beat, "method.verbs")}
+        >
           {linesOf(beat, "method.verbs").map((verb) => (
             <span key={verb}>{verb}</span>
           ))}
@@ -202,10 +231,10 @@ function Throat({ beat }: { beat: ResolvedBeat }) {
     <>
       <Plate picture={pictureOf(beat, "throat.plate")} slot="throat.plate" />
       <div className="throat__intro onplate">
-        <p className="eyebrow" data-slot="throat.eyebrow">
+        <p className="eyebrow" {...slotProps(beat, "throat.eyebrow")}>
           {textOf(beat, "throat.eyebrow")}
         </p>
-        <p className="disp" data-slot="throat.negations">
+        <p className="disp" {...slotProps(beat, "throat.negations")}>
           {linesOf(beat, "throat.negations").map((line) => (
             <span key={line}>{line}</span>
           ))}
@@ -233,16 +262,19 @@ function Throat({ beat }: { beat: ResolvedBeat }) {
             loading="lazy"
           />
         </picture>
-        <p className="eyebrow" data-slot="throat.portraitEyebrow">
+        <p className="eyebrow" {...slotProps(beat, "throat.portraitEyebrow")}>
           {textOf(beat, "throat.portraitEyebrow")}
         </p>
-        <p className="disp heart__lead" data-slot="throat.portraitLead">
+        <p
+          className="disp heart__lead"
+          {...slotProps(beat, "throat.portraitLead")}
+        >
           {textOf(beat, "throat.portraitLead")}
         </p>
-        <p className="body" data-slot="throat.portraitBody">
+        <p className="body" {...slotProps(beat, "throat.portraitBody")}>
           {textOf(beat, "throat.portraitBody")}
         </p>
-        <p className="heart__cred" data-slot="throat.credential">
+        <p className="heart__cred" {...slotProps(beat, "throat.credential")}>
           {textOf(beat, "throat.credential")}
         </p>
       </div>
@@ -266,13 +298,16 @@ function Schedule({
         slot="schedule.plate"
       />
       <div className="schedule__head onplate">
-        <p className="eyebrow" data-slot="schedule.eyebrow">
+        <p className="eyebrow" {...slotProps(beat, "schedule.eyebrow")}>
           {textOf(beat, "schedule.eyebrow")}
         </p>
-        <p className="disp schedule__lead" data-slot="schedule.lead">
+        <p
+          className="disp schedule__lead"
+          {...slotProps(beat, "schedule.lead")}
+        >
           {textOf(beat, "schedule.lead")}
         </p>
-        <p className="schedule__intro" data-slot="schedule.intro">
+        <p className="schedule__intro" {...slotProps(beat, "schedule.intro")}>
           {textOf(beat, "schedule.intro")}
         </p>
       </div>
@@ -323,15 +358,15 @@ function Turn({ beat }: { beat: ResolvedBeat }) {
     <>
       <Plate picture={pictureOf(beat, "turn.plate")} slot="turn.plate" />
       <div className="turn__col onplate">
-        <p className="eyebrow" data-slot="turn.eyebrow">
+        <p className="eyebrow" {...slotProps(beat, "turn.eyebrow")}>
           {textOf(beat, "turn.eyebrow")}
         </p>
-        <p className="body body--dark" data-slot="turn.body">
+        <p className="body body--dark" {...slotProps(beat, "turn.body")}>
           {textOf(beat, "turn.body")}
         </p>
       </div>
       <div className="pool turn__pool ink">
-        <p className="disp turn__close" data-slot="turn.close">
+        <p className="disp turn__close" {...slotProps(beat, "turn.close")}>
           {textOf(beat, "turn.close")}
         </p>
       </div>
@@ -342,10 +377,10 @@ function Turn({ beat }: { beat: ResolvedBeat }) {
 function Crown({ beat }: { beat: ResolvedBeat }) {
   return (
     <div className="crown__pool">
-      <h2 className="disp crown__ask" data-slot="crown.ask">
+      <h2 className="disp crown__ask" {...slotProps(beat, "crown.ask")}>
         {textOf(beat, "crown.ask")}
       </h2>
-      <div data-slot="crown.lines">
+      <div {...slotProps(beat, "crown.lines")}>
         {linesOf(beat, "crown.lines").map((line) => (
           <p className="body crown__line" key={line}>
             {line}
@@ -400,7 +435,7 @@ function Item({
   if (!item.text.trim()) {
     if (!editing) return null;
     return (
-      <p className="body edit__empty">
+      <p className="body edit__empty" data-placeholder="true">
         {item.kind === "bullets"
           ? "Write the lines here"
           : item.kind === "link" || item.kind === "button"
@@ -480,8 +515,26 @@ function FreeSection({
               {cells[placement].map((block) => (
                 <div
                   key={block.id}
+                  className="free__block"
                   {...marks(editing, { block: block.id, kind: block.kind })}
                 >
+                  {/* The same problem the sections had, one level down: once a
+                      box has a line in it, a click anywhere on the box lands on
+                      the line, and there is no way back to the box to add a
+                      second one. The tab is the way back. */}
+                  {editing && (
+                    <button
+                      type="button"
+                      className="edit__handle edit__handle--block"
+                      data-handle="block"
+                    >
+                      {block.kind === "pool"
+                        ? "Box of words"
+                        : block.kind === "onplate"
+                          ? "Words on the picture"
+                          : "Picture"}
+                    </button>
+                  )}
                   {block.kind === "picture" ? (
                     block.picture ? (
                       <Plate
@@ -498,7 +551,9 @@ function FreeSection({
                       // Same reason as an empty line: a picture with nothing in
                       // it has no height, and a thing she cannot click is a
                       // thing she cannot fill in.
-                      <p className="body edit__empty">Choose a picture</p>
+                      <p className="body edit__empty" data-placeholder="true">
+                        Choose a picture
+                      </p>
                     ) : null
                   ) : (
                     <div
@@ -511,6 +566,7 @@ function FreeSection({
                       {block.items.map((item) => (
                         <div
                           key={item.id}
+                          data-size={item.size === 0 ? undefined : item.size}
                           {...marks(editing, {
                             item: item.id,
                             kind: item.kind,

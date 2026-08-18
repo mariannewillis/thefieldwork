@@ -131,11 +131,11 @@ async function renumberItems(tx: Prisma.TransactionClient, blockId: number) {
 export async function setText(
   page: string,
   key: string,
-  value: string,
+  words: string,
 ): Promise<Outcome> {
   if (!textSlot(key)) return { ok: false, reason: GONE };
 
-  const next = value.replace(/\r\n/g, "\n").trim();
+  const next = words.replace(/\r\n/g, "\n").trim();
   if (!next) {
     return {
       ok: false,
@@ -144,15 +144,33 @@ export async function setText(
     };
   }
 
-  if (next === seededText(key).trim()) {
+  // A LINK SLOT TYPED ON THE PAGE ARRIVES AS ITS LABEL ALONE, because the label
+  // is the only part of it that is ON the page — where it goes is a fact about
+  // it, not words in front of anybody. Storing that as the whole value would
+  // throw the target away every time she corrected a typo in the label, so the
+  // second line is carried over from what is already there.
+  const slot = textSlot(key);
+  let value = next;
+  if (slot?.shape === "link" && !next.includes("\n")) {
+    const existing =
+      (
+        await prisma.pageText.findUnique({
+          where: { page_state_key: { page, state: "draft", key } },
+        })
+      )?.value ?? seededText(key);
+    const href = existing.split("\n")[1] ?? "";
+    value = href ? `${next}\n${href}` : next;
+  }
+
+  if (value === seededText(key).trim()) {
     await prisma.pageText.deleteMany({ where: { page, state: "draft", key } });
     return OK;
   }
 
   await prisma.pageText.upsert({
     where: { page_state_key: { page, state: "draft", key } },
-    create: { page, state: "draft", key, value: next },
-    update: { value: next },
+    create: { page, state: "draft", key, value },
+    update: { value },
   });
   return OK;
 }
@@ -187,13 +205,6 @@ export async function setPicture(
   const ref = input.ref.trim();
   const alt = input.alt.trim();
   if (!ref) return { ok: false, reason: "Choose a picture first." };
-  if (!alt) {
-    return {
-      ok: false,
-      reason:
-        "Say what is in the picture. It is read aloud to somebody who cannot see it, and it is what shows if the picture ever fails to load.",
-    };
-  }
 
   const data = {
     ref,
@@ -216,6 +227,71 @@ export async function clearPicture(
   key: string,
 ): Promise<Outcome> {
   await prisma.pagePicture.deleteMany({ where: { page, state: "draft", key } });
+  return OK;
+}
+
+/**
+ * Bigger or smaller, in steps.
+ *
+ * BOUNDED AT BOTH ENDS, and clamped here rather than trusted from the browser:
+ * this is the one control in the panel that can make the page unreadable, and
+ * the range is what stops it. Six steps is enough to change a heading's weight
+ * on the page and not enough to set anything to four pixels or to a size that
+ * runs off the side.
+ *
+ * A step of 0 is the composition, so it DELETES the row when the words are
+ * unchanged too — the override table goes on meaning "these are the things she
+ * changed", which is what keeps the pending list honest.
+ */
+export const SIZE_STEPS = [-2, -1, 0, 1, 2, 3] as const;
+
+function clampStep(step: number): number {
+  if (!Number.isFinite(step)) return 0;
+  return Math.max(-2, Math.min(3, Math.round(step)));
+}
+
+export async function setTextSize(
+  page: string,
+  key: string,
+  step: number,
+): Promise<Outcome> {
+  const slot = textSlot(key);
+  if (!slot) return { ok: false, reason: GONE };
+  const size = clampStep(step);
+
+  const row = await prisma.pageText.findUnique({
+    where: { page_state_key: { page, state: "draft", key } },
+  });
+
+  if (size === 0 && (!row || row.value === seededText(key).trim())) {
+    await prisma.pageText.deleteMany({ where: { page, state: "draft", key } });
+    return OK;
+  }
+
+  await prisma.pageText.upsert({
+    where: { page_state_key: { page, state: "draft", key } },
+    // A slot she has resized but not rewritten still needs a row, and the words
+    // on it are the authored ones — copied in here because a row with an empty
+    // value would render an empty paragraph.
+    create: { page, state: "draft", key, value: seededText(key).trim(), size },
+    update: { size },
+  });
+  return OK;
+}
+
+export async function setItemSize(
+  page: string,
+  itemId: number,
+  step: number,
+): Promise<Outcome> {
+  const item = await prisma.pageItem.findFirst({
+    where: { id: itemId, block: { section: { page, state: "draft" } } },
+  });
+  if (!item) return { ok: false, reason: GONE };
+  await prisma.pageItem.update({
+    where: { id: itemId },
+    data: { size: clampStep(step) },
+  });
   return OK;
 }
 
@@ -379,14 +455,6 @@ export async function setSectionPicture(
         "The photograph on one of the page's original sections is swapped by selecting the photograph itself.",
     };
   }
-  if (input && !input.alt.trim()) {
-    return {
-      ok: false,
-      reason:
-        "Say what is in the picture. It is read aloud to somebody who cannot see it.",
-    };
-  }
-
   await prisma.pageSection.update({
     where: { id: sectionId },
     data: {
@@ -474,13 +542,6 @@ export async function setBlockPicture(
   }
   if (!input.ref.trim())
     return { ok: false, reason: "Choose a picture first." };
-  if (!input.alt.trim()) {
-    return {
-      ok: false,
-      reason:
-        "Say what is in the picture. It is read aloud to somebody who cannot see it.",
-    };
-  }
   await prisma.pageBlock.update({
     where: { id: blockId },
     data: { imageRef: input.ref.trim(), imageAlt: input.alt.trim() },
@@ -565,8 +626,14 @@ export async function setItem(
     };
   }
 
+  // AN ABSENT TARGET MEANS LEAVE IT ALONE; an empty one means she cleared it.
+  // Typing a button's label on the page sends the label and nothing else — the
+  // target is not on the page to be typed — and treating "not sent" as "set it
+  // to nothing" refused every rename with "say where it goes".
   const wantsHref = item.kind === "link" || item.kind === "button";
-  const href = (input.href ?? "").trim();
+  // `== null` on purpose: absent and null both mean "she did not send one".
+  const given = input.href == null ? null : input.href.trim();
+  const href = given === null ? (item.href ?? "") : given;
   if (wantsHref && !href) {
     return {
       ok: false,

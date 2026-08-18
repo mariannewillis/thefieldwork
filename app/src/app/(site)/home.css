@@ -4,6 +4,14 @@
  * composition. Do not restyle here: this file IS the approved design, and the
  * screens are the reference it must keep matching (docs/DECISIONS-BUILD.md D-1).
  *
+ * ONE MECHANICAL CHANGE SINCE (D-35): every `font-size` is now the authored
+ * value multiplied by `var(--k, 1)`. At the default of 1 every computed size is
+ * byte-identical to what shipped, so this is not a restyle — it is the hook the
+ * pages panel's size control turns. It multiplies rather than replaces because
+ * every size here is a `clamp()` that already answers "how big on a phone, how
+ * big on a television"; an absolute value would throw that away and be wrong on
+ * one of them.
+ *
  * The only edit on extraction was image urls: the mockup referenced
  * ../../../assets/images/new/*.png (6.7MB masters); the app serves optimised
  * derivatives from /media/ (D-6).
@@ -141,7 +149,7 @@ img {
 }
 .eyebrow,
 .small {
-  font-size: 17px;
+  font-size: calc((17px) * var(--k, 1));
   line-height: 1.5;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -166,7 +174,7 @@ p {
   margin: 0;
 }
 .body {
-  font-size: 18px;
+  font-size: calc((18px) * var(--k, 1));
   line-height: 1.62;
   max-width: 66ch;
   color: var(
@@ -177,7 +185,7 @@ p {
   color: var(--blush);
 }
 .note {
-  font-size: 17px;
+  font-size: calc((17px) * var(--k, 1));
   line-height: 1.6;
   max-width: 56ch;
 }
@@ -185,7 +193,7 @@ p {
   color: var(--plum-800);
 }
 .plate-note {
-  font-size: 17px;
+  font-size: calc((17px) * var(--k, 1));
   line-height: 1.55;
   color: var(--gold);
   max-width: 46ch;
@@ -200,7 +208,7 @@ p {
 .link {
   display: inline-block;
   margin-top: 16px;
-  font-size: 17px;
+  font-size: calc((17px) * var(--k, 1));
   color: var(--magenta-deep);
   text-decoration: none;
   border-bottom: 1px solid var(--magenta-deep);
@@ -226,13 +234,13 @@ p {
 .onplate-primary .lead {
   font-family: var(--font-display), Georgia, serif;
   color: var(--blush);
-  font-size: clamp(26px, 3vw, 42px);
+  font-size: calc((clamp(26px, 3vw, 42px)) * var(--k, 1));
   line-height: 1.16;
   margin: 0 0 clamp(14px, 1.6vw, 22px);
 }
 .onplate-primary .obody {
   color: var(--blush);
-  font-size: clamp(18px, 1.3vw, 20px);
+  font-size: calc((clamp(18px, 1.3vw, 20px)) * var(--k, 1));
   line-height: 1.6;
 }
 
@@ -266,7 +274,7 @@ p {
 .hero__lines span {
   display: block;
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(23px, 3.2vw, 32px);
+  font-size: calc((clamp(23px, 3.2vw, 32px)) * var(--k, 1));
   line-height: 1.15;
   color: var(--plum-900);
   hyphens: none;
@@ -291,7 +299,7 @@ p {
   max-width: var(--pw);
 }
 .sacral__pool .disp {
-  font-size: clamp(19px, 1.7vw, 23px);
+  font-size: calc((clamp(19px, 1.7vw, 23px)) * var(--k, 1));
   line-height: 1.3;
   color: var(--plum-900);
   margin: 0 0 clamp(12px, 1.2vw, 16px);
@@ -316,7 +324,7 @@ p {
 .method__pool span {
   display: block;
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(36px, 6vw, 80px);
+  font-size: calc((clamp(36px, 6vw, 80px)) * var(--k, 1));
   line-height: 1.03;
   color: var(--plum-900);
 }
@@ -348,13 +356,13 @@ p {
 }
 .heart__lead {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(21px, 1.8vw, 27px);
+  font-size: calc((clamp(21px, 1.8vw, 27px)) * var(--k, 1));
   line-height: 1.18;
   color: var(--plum-900);
   margin: 0 0 clamp(12px, 1.2vw, 18px);
 }
 .heart__cred {
-  font-size: 17px;
+  font-size: calc((17px) * var(--k, 1));
   line-height: 1.55;
   color: var(--magenta-deep);
   margin-top: clamp(16px, 1.8vw, 24px);
@@ -388,7 +396,7 @@ p {
 }
 .throat__intro .disp {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(30px, 4.2vw, 60px);
+  font-size: calc((clamp(30px, 4.2vw, 60px)) * var(--k, 1));
   line-height: 1.05;
   color: var(--blush);
   hyphens: none;
@@ -421,7 +429,7 @@ p {
 }
 .turn__close {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(26px, 2.9vw, 42px);
+  font-size: calc((clamp(26px, 2.9vw, 42px)) * var(--k, 1));
   line-height: 1.12;
   color: var(--magenta-deep);
   margin: 0;
@@ -479,14 +487,14 @@ p {
 }
 .schedule__lead {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(26px, 2.9vw, 42px);
+  font-size: calc((clamp(26px, 2.9vw, 42px)) * var(--k, 1));
   line-height: 1.1;
   color: var(--plum-900);
   margin: 0 0 clamp(12px, 1.2vw, 18px);
   max-width: 30ch;
 }
 .schedule__intro {
-  font-size: 18px;
+  font-size: calc((18px) * var(--k, 1));
   line-height: 1.6;
   color: var(--plum-800);
   max-width: 70ch;
@@ -494,7 +502,7 @@ p {
 
 .schedule-group__label {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(26px, 3vw, 42px);
+  font-size: calc((clamp(26px, 3vw, 42px)) * var(--k, 1));
   line-height: 1;
   color: var(--plum-900);
   margin: 0 0 clamp(6px, 0.8vw, 10px);
@@ -533,7 +541,7 @@ a.ledger-row:hover .ledger-row__title {
   white-space: nowrap;
 }
 .ledger-row__title {
-  font-size: clamp(19px, 1.5vw, 24px);
+  font-size: calc((clamp(19px, 1.5vw, 24px)) * var(--k, 1));
   line-height: 1.2;
   color: var(--plum-900);
   margin: 0 0 4px;
@@ -553,7 +561,7 @@ a.ledger-row:hover .ledger-row__title {
 .ledger-row__price .amt {
   font-family: var(--font-display), Georgia, serif;
   display: inline;
-  font-size: clamp(20px, 1.7vw, 26px);
+  font-size: calc((clamp(20px, 1.7vw, 26px)) * var(--k, 1));
   line-height: 1;
   color: var(--plum-900);
   margin: 0 0 3px;
@@ -598,7 +606,7 @@ a.ledger-row:hover .ledger-row__title {
 }
 .crown__ask {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(34px, 6vw, 80px);
+  font-size: calc((clamp(34px, 6vw, 80px)) * var(--k, 1));
   line-height: 1.05;
   color: var(--plum-900);
   margin: 0 auto clamp(24px, 2.8vw, 40px);
@@ -609,7 +617,7 @@ a.ledger-row:hover .ledger-row__title {
   background: var(--magenta-deep);
   color: var(--blush);
   font-family: var(--font-body), sans-serif;
-  font-size: 19px;
+  font-size: calc((19px) * var(--k, 1));
   font-weight: 600;
   letter-spacing: 0.02em;
   padding: 19px 40px;
@@ -698,10 +706,10 @@ button:focus-visible {
 }
 @media (max-width: 480px) {
   .hero__lines span {
-    font-size: clamp(22px, 7.2vw, 27px);
+    font-size: calc((clamp(22px, 7.2vw, 27px)) * var(--k, 1));
   }
   .method__pool span {
-    font-size: clamp(32px, 12vw, 46px);
+    font-size: calc((clamp(32px, 12vw, 46px)) * var(--k, 1));
   }
 }
 
@@ -759,7 +767,7 @@ a.cta {
    file. */
 .crown__line {
   font-family: var(--font-body), sans-serif;
-  font-size: clamp(17px, 1.35vw, 20px);
+  font-size: calc((clamp(17px, 1.35vw, 20px)) * var(--k, 1));
   line-height: 1.65;
   color: var(--plum-900);
   opacity: 0.82;

@@ -1170,11 +1170,26 @@ export async function libraryCounts(): Promise<Record<MediaKind, number>> {
  * document is in, not a second gate in front of the first.
  */
 export async function documentIsPublic(storedAs: string): Promise<boolean> {
-  const row = await prisma.newsletterAttachment.findFirst({
+  const onALetter = await prisma.newsletterAttachment.findFirst({
     where: { storedAs },
     select: { id: true },
   });
-  return row !== null;
+  if (onALetter) return true;
+
+  // OR LINKED FROM A PAGE THAT IS LIVE (D-35). The rule did not change when
+  // pages could carry links — it is the same rule reaching a second surface: a
+  // document is public exactly when something public points at it. LIVE and not
+  // draft, deliberately: a link she has written and not published points at
+  // nothing anybody can reach, so the file is not public yet either, and it
+  // becomes public at the same moment the link does.
+  const onALivePage = await prisma.pageItem.findFirst({
+    where: {
+      href: documentHref(storedAs, true),
+      block: { section: { state: "live" } },
+    },
+    select: { id: true },
+  });
+  return onALivePage !== null;
 }
 
 /**

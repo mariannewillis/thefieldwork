@@ -1834,8 +1834,13 @@ model PageItem {
   /// the newline. link / button: the label.
   text String?
 
-  /// link / button: where it goes. Root-relative, or an anchor on this page.
+  /// link / button: where it goes. Root-relative, an anchor on this page, or a
+  /// document from the library (`/newsletter-files/<stored-as>`).
   href String?
+
+  /// Steps bigger or smaller than the size this kind of line is set at. Same
+  /// meaning and same reasons as `PageText.size`.
+  size Int @default(0)
 
   @@index([blockId, position])
 }
@@ -1864,6 +1869,22 @@ model PageText {
   state PageState
   key   String
   value String
+
+  /// HOW MUCH BIGGER OR SMALLER THAN THE COMPOSITION SET IT, in steps.
+  ///
+  /// 0 is the size the page was designed at, and it is what every slot is until
+  /// she moves one. A STEP RATHER THAN A NUMBER OF PIXELS, and it multiplies the
+  /// authored size rather than replacing it: every size on this page is a
+  /// `clamp()` that already answers "how big on a phone, how big on a
+  /// television", and an absolute value typed into a box would throw that away
+  /// and be wrong on one of them. Multiplying keeps the responsive behaviour and
+  /// keeps the type ramp's relationships — a heading stays bigger than the
+  /// paragraph under it at every step.
+  ///
+  /// Added at the operator's direction on 2026-08-18 ("the tool box should allow
+  /// me to configure fontsizes etc"), which reverses the answer he gave the same
+  /// day on styling controls. See D-35.
+  size Int @default(0)
 
   @@unique([page, state, key])
 }

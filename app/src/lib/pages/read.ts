@@ -42,6 +42,8 @@ export type Picture = {
 export type ResolvedItem = {
   id: number;
   kind: PageItemKind;
+  /** Steps bigger or smaller than this kind of line is set at. 0 is authored. */
+  size: number;
   /** heading / paragraph / eyebrow / button / link: the words. */
   text: string;
   /** bullets: the same words, already split. */
@@ -67,6 +69,8 @@ export type ResolvedBeat = {
   text: Record<string, string>;
   /** Every picture slot on this beat, keyed by its dotted path. */
   pictures: Record<string, Picture>;
+  /** Steps bigger or smaller, per text slot. Absent means 0, which is authored. */
+  sizes: Record<string, number>;
 };
 
 /** One she made. */
@@ -111,9 +115,11 @@ function resolveBeat(
   hidden: boolean,
   texts: Map<string, string>,
   pictures: Map<string, Picture>,
+  sizes: Map<string, number>,
 ): ResolvedBeat {
   const text: Record<string, string> = {};
   const pics: Record<string, Picture> = {};
+  const steps: Record<string, number> = {};
 
   for (const [key, value] of texts) {
     if (key.startsWith(`${beatKey}.`)) text[key] = value;
@@ -121,8 +127,19 @@ function resolveBeat(
   for (const [key, value] of pictures) {
     if (key.startsWith(`${beatKey}.`)) pics[key] = value;
   }
+  for (const [key, value] of sizes) {
+    if (key.startsWith(`${beatKey}.`)) steps[key] = value;
+  }
 
-  return { id, kind: "beat", beatKey, hidden, text, pictures: pics };
+  return {
+    id,
+    kind: "beat",
+    beatKey,
+    hidden,
+    text,
+    pictures: pics,
+    sizes: steps,
+  };
 }
 
 /**
@@ -152,6 +169,7 @@ export async function readPage(
   ]);
 
   const texts = new Map(textRows.map((row) => [row.key, row.value]));
+  const sizes = new Map(textRows.map((row) => [row.key, row.size]));
   const pictures = new Map<string, Picture>(
     pictureRows.map((row) => [
       row.key,
@@ -172,7 +190,7 @@ export async function readPage(
       page,
       state,
       sections: BEATS.map((beat, index) =>
-        resolveBeat(beat.key, -(index + 1), false, texts, pictures),
+        resolveBeat(beat.key, -(index + 1), false, texts, pictures, sizes),
       ),
     };
   }
@@ -186,7 +204,7 @@ export async function readPage(
       // survives a rename, and the orphan row is cleared by the next publish.
       if (!row.beatKey || !isBeatKey(row.beatKey)) continue;
       sections.push(
-        resolveBeat(row.beatKey, row.id, row.hidden, texts, pictures),
+        resolveBeat(row.beatKey, row.id, row.hidden, texts, pictures, sizes),
       );
       continue;
     }
@@ -210,6 +228,7 @@ export async function readPage(
         items: block.items.map((item) => ({
           id: item.id,
           kind: item.kind,
+          size: item.size,
           text: item.text ?? "",
           lines: splitLines(item.text ?? ""),
           href: item.href,
@@ -227,7 +246,7 @@ export async function readPage(
   );
   for (const beat of BEATS) {
     if (present.has(beat.key)) continue;
-    sections.push(resolveBeat(beat.key, -1, false, texts, pictures));
+    sections.push(resolveBeat(beat.key, -1, false, texts, pictures, sizes));
   }
 
   return { page, state, sections };
@@ -261,6 +280,11 @@ export function linkOf(beat: ResolvedBeat, key: string) {
  * a photograph without saying how bright it should be leaves the composition's
  * own dimming in place, which is nearly always what she meant.
  */
+/** Steps bigger or smaller than the composition set this slot at. */
+export function sizeOf(beat: ResolvedBeat, key: string): number {
+  return beat.sizes[key] ?? 0;
+}
+
 export function pictureOf(beat: ResolvedBeat, key: string): Picture {
   const seed = seededPicture(key);
   const saved = beat.pictures[key];

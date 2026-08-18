@@ -255,7 +255,7 @@ async function select(page, selector, expect) {
 async function selectSection(page, beat, expect) {
   const frame = await preview(page);
   const tab = frame.locator(
-    `[data-section][data-beat="${beat}"] [data-handle]`,
+    `[data-section][data-beat="${beat}"] [data-handle="true"]`,
   );
   await tab.scrollIntoViewIfNeeded();
   await tab.click({ force: true });
@@ -266,7 +266,7 @@ async function selectSection(page, beat, expect) {
 
 async function selectMade(page, id, expect) {
   const frame = await preview(page);
-  const made = frame.locator(`[data-section="${id}"] [data-handle]`);
+  const made = frame.locator(`[data-section="${id}"] [data-handle="true"]`);
   await made.scrollIntoViewIfNeeded();
   await made.click({ force: true });
   await page
@@ -638,6 +638,211 @@ try {
     ),
   );
 
+  // ── typing ON THE PAGE, which is the whole point of editing in place ──────
+  //
+  // The first build put the words in a field beside the page and the operator
+  // reported the page as broken: he clicked a paragraph, typed, and nothing
+  // happened, because nothing was listening. These are the assertions that stop
+  // that coming back.
+  await page.goto(EDITOR);
+  await preview(page);
+
+  const spoken = await preview(page);
+  const note = spoken.locator('[data-slot="turn.close"]');
+  await note.scrollIntoViewIfNeeded();
+  await note.click({ force: true });
+  await page.waitForTimeout(700);
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("The bracing for it stopped, and stayed stopped.");
+  // Clicking away is what saves it — the same gesture as putting a pen down.
+  await spoken.locator('[data-slot="turn.eyebrow"]').click({ force: true });
+  await page.waitForTimeout(2200);
+  await preview(page);
+
+  ok(
+    "a sentence typed ON THE PAGE is saved when she clicks away from it",
+    (await textRow("draft", "turn.close")) ===
+      "The bracing for it stopped, and stayed stopped.",
+    String(await textRow("draft", "turn.close")),
+  );
+
+  // The line she added earlier, typed into on the page rather than in a field.
+  const onPage = await preview(page);
+  const line = onPage.locator(`[data-item="${items[0].id}"]`);
+  await line.scrollIntoViewIfNeeded();
+  await line.click({ force: true });
+  await page.waitForTimeout(700);
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("Typed into the page, not into a box beside it.");
+  await onPage
+    .locator(`[data-section="${madeId}"] [data-handle="true"]`)
+    .click({ force: true });
+  await page.waitForTimeout(2200);
+  await preview(page);
+  ok(
+    "and so is a line in a section she made",
+    (
+      await rowsOf(`SELECT text FROM "PageItem" WHERE id = $1`, [items[0].id])
+    )[0].text === "Typed into the page, not into a box beside it.",
+    JSON.stringify(
+      await rowsOf(`SELECT text FROM "PageItem" WHERE id = $1`, [items[0].id]),
+    ),
+  );
+
+  // ── a photograph is chosen by eye and described afterwards ────────────────
+  //
+  // Demanding the description AT THE MOMENT OF CHOOSING refused every picture
+  // put on a section that had none — she picked one and nothing appeared, twice,
+  // and the operator reported the page as broken. It was. Asking is not the
+  // same as blocking, and this is the assertion that keeps them apart.
+  await selectMade(page, madeId, /A section you added/);
+  await page.getByRole("button", { name: /Choose a photograph/ }).click();
+  await page.locator('[role="dialog"]').waitFor({ timeout: 30_000 });
+  await page.locator('[role="dialog"] img').first().click({ force: true });
+  await page.waitForTimeout(2400);
+  await preview(page);
+
+  const chosen = (
+    await rowsOf(
+      `SELECT "imageRef", "imageAlt" FROM "PageSection" WHERE id = $1`,
+      [madeId],
+    )
+  )[0];
+  ok(
+    "a photograph is accepted with no description written yet",
+    typeof chosen.imageRef === "string" && chosen.imageRef.length > 0,
+    JSON.stringify(chosen),
+  );
+  await selectMade(page, madeId, /A section you added/);
+  ok(
+    "and the panel asks for one rather than having refused the picture",
+    /no description yet/i.test(
+      await page.locator('aside[aria-label="The toolbox"]').innerText(),
+    ),
+    oneLine(await page.locator('aside[aria-label="The toolbox"]').innerText()),
+  );
+
+  // ── a tab must never sit on top of what it labels ─────────────────────────
+  //
+  // Both of the editor's tabs are absolutely positioned INSIDE the thing they
+  // select, and both have covered it: the block tab shrink-wrapped to a narrow
+  // box, folded its label onto three lines, grew to 64px and swallowed the only
+  // line in the box — so clicking those words selected the box instead, which
+  // is what "words on a picture doesn't let me type" was. The geometry is the
+  // assertion, because the symptom was invisible: everything looked right.
+  await selectMade(page, madeId, /A section you added/);
+  await page
+    .locator('[data-add-kind="onplate"]')
+    .getByRole("button", { name: "Centre" })
+    .click();
+  await page.waitForTimeout(2200);
+  const framed = await preview(page);
+
+  const clear = await framed
+    .locator("[data-block]")
+    .last()
+    .evaluate((block) => {
+      const tab = block.querySelector("[data-handle]");
+      const line = block.querySelector("[data-item]");
+      if (!tab || !line) return "missing";
+      const t = tab.getBoundingClientRect();
+      const l = line.getBoundingClientRect();
+      const hit = document.elementFromPoint(
+        l.x + l.width / 2,
+        l.y + l.height / 2,
+      );
+      return JSON.stringify({
+        overlaps: t.bottom > l.top,
+        tabHeight: Math.round(t.height),
+        hitIsTheTab: hit?.closest("[data-handle]") !== null,
+      });
+    });
+  ok(
+    "the tab on a box sits clear of the box, and the words in it take the click",
+    clear ===
+      JSON.stringify({
+        overlaps: false,
+        tabHeight: 28,
+        hitIsTheTab: false,
+      }),
+    String(clear),
+  );
+
+  const onplateItem = (
+    await rowsOf(
+      `SELECT i.id FROM "PageItem" i JOIN "PageBlock" b ON b.id = i."blockId"
+       WHERE b."sectionId" = $1 AND b.kind = 'onplate' ORDER BY i.id DESC LIMIT 1`,
+      [madeId],
+    )
+  )[0];
+  const words = framed.locator(`[data-item="${onplateItem.id}"]`);
+  await words.scrollIntoViewIfNeeded();
+  await words.click({ force: true });
+  await page.waitForTimeout(700);
+  await page.keyboard.type("Words set on the photograph itself.");
+  await framed
+    .locator(`[data-section="${madeId}"] [data-handle="true"]`)
+    .click({ force: true });
+  await page.waitForTimeout(2200);
+  await preview(page);
+  ok(
+    "so words on the picture can be typed, which they could not be",
+    (
+      await rowsOf(`SELECT text FROM "PageItem" WHERE id = $1`, [
+        onplateItem.id,
+      ])
+    )[0].text === "Words set on the photograph itself.",
+    JSON.stringify(
+      await rowsOf(`SELECT text FROM "PageItem" WHERE id = $1`, [
+        onplateItem.id,
+      ]),
+    ),
+  );
+
+  // ── bigger and smaller, in bounded steps ──────────────────────────────────
+  await select(page, '[data-slot="crown.ask"]', /The heading/);
+  await press(page, /^Bigger$/);
+  await press(page, /^Bigger$/);
+  const bigger = await rowsOf(
+    `SELECT size, value FROM "PageText" WHERE page='home' AND state='draft' AND key='crown.ask'`,
+  );
+  ok(
+    "two steps bigger is stored as two steps, not as a number of pixels",
+    bigger[0]?.size === 2,
+    JSON.stringify(bigger),
+  );
+  ok(
+    "and the page carries it, so what she sees is the size it will be",
+    (await (
+      await preview(page)
+    )
+      .locator('[data-slot="crown.ask"]')
+      .getAttribute("data-size")) === "2",
+  );
+  await press(page, /Back to the designed size/);
+  ok(
+    "putting it back to the designed size clears the row entirely",
+    (await textRow("draft", "crown.ask")) === null,
+  );
+
+  // ── a link keeps its target when only its label is retyped ────────────────
+  const linkFrame = await preview(page);
+  const linkEl = linkFrame.locator('[data-slot="sacral.link"]');
+  await linkEl.scrollIntoViewIfNeeded();
+  await linkEl.click({ force: true });
+  await page.waitForTimeout(700);
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("See the dates for this month");
+  await linkFrame.locator('[data-slot="sacral.note"]').click({ force: true });
+  await page.waitForTimeout(2200);
+  await preview(page);
+  ok(
+    "retyping a link's label on the page keeps where it goes",
+    (await textRow("draft", "sacral.link")) ===
+      "See the dates for this month" + "\n" + "#dates",
+    String(await textRow("draft", "sacral.link")),
+  );
+
   // ── out it goes ───────────────────────────────────────────────────────────
   await page.goto(EDITOR);
   await preview(page);
@@ -660,7 +865,7 @@ try {
   const after = await publicHome();
   ok(
     "publishing puts the section she made in front of a visitor",
-    after.includes("the stairs are steep"),
+    after.includes("Typed into the page, not into a box beside it."),
     oneLine(after.slice(0, 200)),
   );
   ok(

@@ -3269,3 +3269,128 @@ fails if a column that names a picture is missing from the table).
   goes.
 - **Undo across publishes** was offered and not taken. It is a third `PageState`
   per publish rather than a change to any of this.
+
+---
+
+## D-35 · She types ON the page; sizes are hers; and four tabs-and-guards bugs that made the editor look broken (2026-08-18)
+
+**Operator, after clicking through D-34's editor:** _"I added a section and choose
+a photograph and nothing appeared. I added a paragraph and no text appears when
+i type, same with button link, small gold line, words on a picture doesnt let me
+type and picture doesnt let me choose a picture… I should be able to write
+directly on the home screen shown - the tool box should allow me to configure
+fontsizes etc"_
+
+Six reports, and they were not six bugs. They were **two design mistakes and
+three bugs**, and every one of them is now under test.
+
+### 1 · The words go ON the page. The panel was the wrong call.
+
+D-2 said it plainly in the first place — _"click the sentence you want to change
+and type over it"_ — and D-34 built a textarea in the panel beside the page
+instead, reasoning that `contentEditable` is a swamp. The operator clicked a
+paragraph, typed, and nothing happened, because nothing was listening. Four of
+the six reports are that one decision.
+
+**Click a sentence and the caret is in it. Type. Click away and it is saved.**
+The gesture that saves is putting the pen down, which is the gesture everybody
+already has.
+
+`contentEditable` is set **from `PreviewBridge`, on the DOM**, and React never
+knows the node is being typed into — which is what avoids the swamp entirely
+rather than braving it. React only ever sees the server-rendered result after a
+save. Escape puts a line back; Enter finishes a single-line value instead of
+folding a second line into something that only has one.
+
+Two shapes need care and get it: a `lines` slot (the hero's three lines, the four
+verbs) reads back on the newline, because its spans are `display: block`; the
+hero's eyebrow is three phrases on ONE line divided by a middot, so it reads back
+on the middot. She edits what she sees.
+
+**A link's label is the only part of it that is on the page**, so typing it sends
+the label alone — and `setText` carries the target over from what is already
+there rather than throwing it away on every corrected typo. `setItem` does the
+same for a button: an absent target means leave it alone, an empty one means she
+cleared it. Treating "not sent" as "set to nothing" refused every rename with
+"say where it goes".
+
+### 2 · Sizes, which reverses the answer he gave the same morning
+
+Asked on 2026-08-18 whether the toolbox should offer shapes, sizes and colours,
+the operator said **"No styling controls — the design decides"**, and D-34 took
+that line. Hours later, having used it: _"the tool box should allow me to
+configure fontsizes etc"_. That is his call to reverse and he has reversed it.
+
+What is built is the version that **cannot produce a broken page**:
+
+- **Six steps**, −2 to +3, clamped on the server rather than trusted from the
+  browser. This is the one control in the panel that could make the page
+  unreadable, and the range is what stops it.
+- **A step MULTIPLIES the authored size** rather than replacing it. Every size on
+  this page is a `clamp()` that already answers "how big on a phone, how big on a
+  television"; an absolute value typed into a box throws that away and is wrong
+  on one of them. Multiplying also keeps the ramp's relationships — a heading
+  stays bigger than the paragraph under it at every step.
+- **`home.css` gained one mechanical change**: every `font-size` is now
+  `calc((authored) * var(--k, 1))`. At the default of 1 every computed size is
+  identical, verified in a browser at 1440 — hero line 32px, verb 80px, body
+  18px, eyebrow / note / link 17px, exactly the authored clamps. It is a hook,
+  not a restyle.
+- **Colours and radii are still not hers.** §12 stands for everything else.
+
+### 3 · The three bugs, and what each of them looked like
+
+| What he saw | What it was |
+| --- | --- |
+| "choose a photograph and nothing appeared" | The server demanded the description AT THE MOMENT OF CHOOSING. Every picture put on a section that had none was refused — she picked, and the picture it had just refused to store was described as needing a description. |
+| "words on a picture doesn't let me type" | The box's tab is absolutely positioned inside the box it labels. With `left: 0` and no width it shrink-wrapped to a 99px box, folded "Words on the picture" onto three lines, grew to **64px tall** and covered the only line in the box. Clicking those words selected the box. |
+| "clicking an existing button I cannot edit the text" | Once a box had a line in it, every click on the box landed on the line and there was no way back to the box to add a second one. |
+
+The fixes: **choosing a picture never requires its description first** — she
+picks by eye and describes afterwards, and the panel says a description is
+wanted until she has (asking is not the same as blocking). **Tabs never wrap and
+sit in a margin of their own**, in the editing stylesheet only, so the live page
+is not moved by a pixel. **A box has a tab of its own**, the same way a section
+does, for the same reason.
+
+**The tab bug is the one worth remembering.** Both of this editor's affordances
+are absolutely positioned inside the thing they select, and both have now covered
+it — the section tab needed the hero's plate under it, the block tab needed a
+margin. Nothing looked wrong in either case; the click simply went somewhere
+else. `pages-smoke` asserts the GEOMETRY now (the tab's bottom edge is above the
+line's top, and `elementFromPoint` at the line's centre is not the tab), because
+the symptom is invisible and the screenshot is no help.
+
+### 4 · A document can be linked from a page, and becomes reachable with it
+
+The operator asked for it by name — "add links or documents". A link or button's
+target is now chosen three ways: a page on this site from a list, a document from
+her library, or an address she writes.
+
+`documentIsPublic` did not change its rule, it reached a second surface: **a
+document is public exactly when something public points at it.** A letter did;
+now a LIVE page does too. Draft deliberately does not — a link she has written
+and not published points at nothing anybody can reach, so the file becomes public
+at the same moment the link does.
+
+### What it is verified by
+
+`e2e/pages-smoke.mjs`, **54 passing** (was 44). The eleven new ones are the six
+reports plus what they exposed: a sentence typed on the page saves when she
+clicks away; so does a line in a section she made; a photograph is accepted with
+no description and the panel then asks for one; the tab on a box sits clear of it
+and the words take the click; words on the picture can be typed; two steps bigger
+is stored as two steps and the page carries it; back to the designed size clears
+the row entirely; and retyping a link's label keeps where it goes.
+
+`media-smoke` 101, `newsletter-smoke` 84, `service-bookings-smoke` 63 — all green.
+
+### The lesson that cost the most
+
+The first build shipped with 44 passing tests and was, in the operator's hands,
+unusable. Every one of those tests drove the panel, because the panel was what I
+built — so the suite proved the thing I had made worked, and said nothing about
+whether it was the thing that had been asked for. **A test written from the
+build's shape can only ever confirm the build's shape.** The reports that
+mattered were all of the form "I did the obvious thing and nothing happened",
+which is exactly what a suite written from the outside would have caught.

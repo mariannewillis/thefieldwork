@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "PageItem" ADD COLUMN     "size" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "PageText" ADD COLUMN     "size" INTEGER NOT NULL DEFAULT 0;

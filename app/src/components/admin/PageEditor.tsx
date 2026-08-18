@@ -10,6 +10,7 @@ import {
 import GalleryPicker from "@/components/admin/GalleryPicker";
 import {
   PREVIEW_MESSAGE,
+  type Edit,
   type Selection,
 } from "@/components/admin/PreviewBridge";
 import type { PendingChange } from "@/lib/pages/publish";
@@ -77,6 +78,8 @@ export type EditorItem = {
   kind: string;
   text: string;
   href: string | null;
+  /** Steps bigger or smaller than this kind of line is set at. */
+  size: number;
 };
 
 type Props = {
@@ -88,11 +91,17 @@ type Props = {
   slots: TextSlot[];
   pictureSlots: PictureSlot[];
   text: Record<string, string>;
+  /** Steps bigger or smaller, per text slot on the seven beats. */
+  sizes: Record<string, number>;
   pictures: Record<string, { ref: string; alt: string }>;
   sections: EditorSection[];
   blocks: Record<number, EditorBlock>;
   items: Record<number, EditorItem>;
   library: string[];
+  /** Documents she can point a link at, from the media library. */
+  documents: { ref: string; title: string | null; href: string }[];
+  /** Somewhere on this site a link can go, so the common case is not typing. */
+  destinations: { href: string; label: string }[];
 };
 
 // ── the portal's own type, borrowed from the screens beside this one ─────────
@@ -151,6 +160,186 @@ const ITEM_KINDS = [
   { value: "button", label: "Button" },
 ] as const;
 
+/**
+ * BIGGER AND SMALLER, in steps, on whatever is selected.
+ *
+ * Added at the operator's direction (2026-08-18), reversing the answer he gave
+ * the same day on styling controls. It is the version that cannot break the
+ * page: each step MULTIPLIES the size the composition set rather than replacing
+ * it, so the responsive behaviour survives and a heading stays bigger than the
+ * paragraph under it — and the range is bounded at both ends, so there is no
+ * step that makes anything unreadable.
+ */
+function SizeRow({
+  step,
+  busy,
+  onStep,
+}: {
+  step: number;
+  busy: boolean;
+  onStep: (next: number) => void;
+}) {
+  return (
+    <div className="mt-5">
+      <span className={LABEL}>Size</span>
+      <span className={HINT}>
+        {step === 0
+          ? "As the page was designed."
+          : `${step > 0 ? "Bigger" : "Smaller"} than the page was designed, by ${Math.abs(step)}.`}
+      </span>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={busy || step <= -2}
+          className={CHIP}
+          onClick={() => onStep(step - 1)}
+          aria-label="Smaller"
+        >
+          &minus; Smaller
+        </button>
+        <button
+          type="button"
+          disabled={busy || step >= 3}
+          className={CHIP}
+          onClick={() => onStep(step + 1)}
+          aria-label="Bigger"
+        >
+          + Bigger
+        </button>
+        {step !== 0 && (
+          <button type="button" className={GHOST} onClick={() => onStep(0)}>
+            Back to the designed size
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * WHERE A LINK OR A BUTTON GOES, without her having to know what a URL is.
+ *
+ * Three ways in, and typing one out is the last of them: a page on this site
+ * from a list, a document from her library, or an address she writes. The
+ * operator asked for documents by name — "add links or documents" — and a
+ * document linked from a page becomes reachable the moment that page is
+ * published, by the same rule that makes one on a letter reachable.
+ */
+function TargetField({
+  href,
+  setHref,
+  destinations,
+  documents,
+}: {
+  href: string;
+  setHref: (value: string) => void;
+  destinations: Props["destinations"];
+  documents: Props["documents"];
+}) {
+  const [showing, setShowing] = useState<null | "pages" | "documents">(null);
+  const named =
+    destinations.find((one) => one.href === href)?.label ??
+    documents.find((one) => one.href === href)?.title ??
+    null;
+
+  return (
+    <div className="mt-4">
+      <span className={LABEL}>Where it goes</span>
+      {named && (
+        <span className={HINT}>
+          {named} &mdash; press one of the two below to change it.
+        </span>
+      )}
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={showing === "pages" ? CHIP_ON : CHIP}
+          onClick={() => setShowing(showing === "pages" ? null : "pages")}
+        >
+          A page on this site
+        </button>
+        <button
+          type="button"
+          className={showing === "documents" ? CHIP_ON : CHIP}
+          onClick={() =>
+            setShowing(showing === "documents" ? null : "documents")
+          }
+        >
+          A document
+        </button>
+      </div>
+
+      {showing === "pages" && (
+        <ul className="mt-3 flex flex-col border-t border-pool-rule">
+          {destinations.map((one) => (
+            <li key={one.href} className="border-b border-pool-rule">
+              <button
+                type="button"
+                className="w-full py-2.5 text-left text-[16px] text-ink hover:underline"
+                onClick={() => {
+                  setHref(one.href);
+                  setShowing(null);
+                }}
+              >
+                {one.label}{" "}
+                <span className="fig font-mono text-[14px] text-ink-soft">
+                  {one.href}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {showing === "documents" && (
+        <div className="mt-3">
+          {documents.length === 0 ? (
+            <p className="text-[16px] leading-relaxed text-ink-soft">
+              There are no documents in your library yet. They are added on the
+              Media screen.
+            </p>
+          ) : (
+            <>
+              <p className="text-[15px] leading-relaxed text-ink-soft">
+                Anybody who can see the page can open the document once it is
+                published, the same as one on a letter.
+              </p>
+              <ul className="mt-2 flex flex-col border-t border-pool-rule">
+                {documents.map((one) => (
+                  <li key={one.ref} className="border-b border-pool-rule">
+                    <button
+                      type="button"
+                      className="w-full py-2.5 text-left text-[16px] text-ink hover:underline"
+                      onClick={() => {
+                        setHref(one.href);
+                        setShowing(null);
+                      }}
+                    >
+                      {one.title ?? one.ref}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+
+      <input
+        type="text"
+        value={href}
+        onChange={(event) => setHref(event.target.value)}
+        className={FIELD}
+        aria-label="Where it goes"
+      />
+      <span className={HINT}>
+        Or write it: a page on this site like <code>/services</code>, or a place
+        further down this one like <code>#dates</code>.
+      </span>
+    </div>
+  );
+}
+
 export default function PageEditor(props: Props) {
   const router = useRouter();
   const frame = useRef<HTMLIFrameElement>(null);
@@ -205,41 +394,6 @@ export default function PageEditor(props: Props) {
     props.pictureSlots.map((slot) => [slot.key, slot]),
   );
 
-  // ── talking to the frame ────────────────────────────────────────────────
-  useEffect(() => {
-    const origin = window.location.origin;
-    function onMessage(event: MessageEvent) {
-      if (event.origin !== origin) return;
-      const data = event.data as {
-        type?: string;
-        selection?: Selection;
-        ready?: boolean;
-      } | null;
-      if (!data || data.type !== PREVIEW_MESSAGE) return;
-
-      if (data.ready) {
-        // A redraw has finished. Put the outline back where she left it, so
-        // saving a sentence does not also lose her place on a long page.
-        frame.current?.contentWindow?.postMessage(
-          { type: PREVIEW_MESSAGE, select: selection },
-          origin,
-        );
-        return;
-      }
-      if (data.selection) setSelection(data.selection);
-    }
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [selection]);
-
-  /**
-   * Do one thing, then redraw both halves.
-   *
-   * `router.refresh()` re-renders this screen from the server — which is what
-   * re-reads the pending list and the values in these fields — and the frame is
-   * reloaded separately because it is a document of its own and Next's refresh
-   * does not reach inside it.
-   */
   const run = useCallback(
     async (intent: string, extra: Record<string, string> = {}) => {
       setBusy(true);
@@ -263,6 +417,52 @@ export default function PageEditor(props: Props) {
     [props.page, router],
   );
 
+  // ── talking to the frame ────────────────────────────────────────────────
+  useEffect(() => {
+    const origin = window.location.origin;
+    function onMessage(event: MessageEvent) {
+      if (event.origin !== origin) return;
+      const data = event.data as {
+        type?: string;
+        selection?: Selection;
+        ready?: boolean;
+        edit?: Edit;
+      } | null;
+      if (!data || data.type !== PREVIEW_MESSAGE) return;
+
+      // SHE TYPED ON THE PAGE AND CLICKED AWAY. The frame has read the words
+      // back off the element; this is the only thing that writes them down.
+      if (data.edit) {
+        const edit = data.edit;
+        void (edit.kind === "slot"
+          ? run("set-text", { key: edit.slot, value: edit.value })
+          : run("set-item", { item: String(edit.item), value: edit.value }));
+        return;
+      }
+
+      if (data.ready) {
+        // A redraw has finished. Put the outline back where she left it, so
+        // saving a sentence does not also lose her place on a long page.
+        frame.current?.contentWindow?.postMessage(
+          { type: PREVIEW_MESSAGE, select: selection },
+          origin,
+        );
+        return;
+      }
+      if (data.selection) setSelection(data.selection);
+    }
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [selection, run]);
+
+  /**
+   * Do one thing, then redraw both halves.
+   *
+   * `router.refresh()` re-renders this screen from the server — which is what
+   * re-reads the pending list and the values in these fields — and the frame is
+   * reloaded separately because it is a document of its own and Next's refresh
+   * does not reach inside it.
+   */
   return (
     <div className="flex min-h-[calc(100vh-120px)] flex-col gap-6 lg:flex-row">
       {/* ── the page itself ────────────────────────────────────────────── */}
@@ -644,20 +844,21 @@ function TextSlotPanel(props: ToolboxProps & { slot: TextSlot }) {
       </div>
 
       {isLink && (
-        <div className="mt-4">
-          <span className={LABEL}>Where it goes</span>
-          <span className={HINT}>
-            A page on this site, like <code>/services</code>, or a place further
-            down this one, like <code>#dates</code>.
-          </span>
-          <input
-            type="text"
-            value={href}
-            onChange={(event) => setHref(event.target.value)}
-            className={FIELD}
-          />
-        </div>
+        <TargetField
+          href={href}
+          setHref={setHref}
+          destinations={props.destinations}
+          documents={props.documents}
+        />
       )}
+
+      <SizeRow
+        step={props.sizes[slot.key] ?? 0}
+        busy={props.busy}
+        onStep={(next) =>
+          void props.run("size-text", { key: slot.key, step: String(next) })
+        }
+      />
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <button
@@ -701,6 +902,18 @@ function PictureSlotPanel(props: ToolboxProps & { slot: PictureSlot }) {
       <p className="mt-4 fig font-mono text-[15px] text-ink-soft">
         {current.ref || "None"}
       </p>
+
+      {/* ASKED FOR, NOT DEMANDED. Choosing a picture used to be refused until a
+          description existed, which meant every picture chosen for a section
+          that had none was refused at the moment of choosing — she picked, and
+          nothing appeared. She picks by eye and describes afterwards; this says
+          so until she has. */}
+      {!current.alt.trim() && (
+        <p className="mt-4 text-[16px] leading-relaxed text-pool-error">
+          This picture has no description yet. Please write one before you
+          publish &mdash; it is read aloud to anybody who cannot see it.
+        </p>
+      )}
 
       <div className="mt-4">
         <span className={LABEL}>What is in it</span>
@@ -846,6 +1059,11 @@ function SectionPanel(props: ToolboxProps & { section: EditorSection }) {
                 ? section.pictureRef
                 : "None — the band is plum, like the page behind every other photograph."}
             </span>
+            {section.hasPicture && !alt.trim() && (
+              <p className="mt-2 text-[16px] leading-relaxed text-pool-error">
+                No description yet. Please write one before you publish.
+              </p>
+            )}
             {section.hasPicture && (
               <textarea
                 value={alt}
@@ -869,6 +1087,22 @@ function SectionPanel(props: ToolboxProps & { section: EditorSection }) {
               >
                 {section.hasPicture ? "Choose another" : "Choose a photograph"}
               </button>
+              {section.hasPicture && (
+                <button
+                  type="button"
+                  disabled={props.busy}
+                  className={PRIMARY}
+                  onClick={() =>
+                    void props.run("set-section-picture", {
+                      section: String(section.id),
+                      ref: section.pictureRef ?? "",
+                      alt,
+                    })
+                  }
+                >
+                  Save the description
+                </button>
+              )}
               {section.hasPicture && (
                 <button
                   type="button"
@@ -1014,6 +1248,11 @@ function BlockPanel(props: ToolboxProps & { block: EditorBlock }) {
         <div className="mt-6">
           <span className={LABEL}>The picture</span>
           <span className={HINT}>{block.pictureRef ?? "None chosen yet."}</span>
+          {block.pictureRef && !alt.trim() && (
+            <p className="mt-2 text-[16px] leading-relaxed text-pool-error">
+              No description yet. Please write one before you publish.
+            </p>
+          )}
           <textarea
             value={alt}
             rows={2}
@@ -1141,20 +1380,24 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
       </div>
 
       {wantsHref && (
-        <div className="mt-4">
-          <span className={LABEL}>Where it goes</span>
-          <span className={HINT}>
-            A page on this site, like <code>/services</code>, or a place further
-            down this one, like <code>#dates</code>.
-          </span>
-          <input
-            type="text"
-            value={href}
-            onChange={(event) => setHref(event.target.value)}
-            className={FIELD}
-          />
-        </div>
+        <TargetField
+          href={href}
+          setHref={setHref}
+          destinations={props.destinations}
+          documents={props.documents}
+        />
       )}
+
+      <SizeRow
+        step={item.size}
+        busy={props.busy}
+        onStep={(next) =>
+          void props.run("size-item", {
+            item: String(item.id),
+            step: String(next),
+          })
+        }
+      />
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <button
