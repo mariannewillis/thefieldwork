@@ -634,3 +634,89 @@ export async function confirmServicePayment(input: {
     throw error;
   }
 }
+
+// ── taking one away ──────────────────────────────────────────────────────────
+
+export type DeleteResult =
+  | { outcome: "deleted" }
+  | { outcome: "refused"; reason: string };
+
+/**
+ * Remove a request from the portal for good.
+ *
+ * THIS EXISTS BECAUSE SOMEBODY CAN ASK TO BE FORGOTTEN. A subscriber can be
+ * taken off the list and a cancelled booking can be deleted; until now a
+ * session request could not be removed from anywhere in this app, which made an
+ * erasure request one she could not honour. The privacy page promises she can.
+ *
+ * NO EMAIL, for the reason `deletePlace` sends none: deleting changes nothing
+ * for the person. Either they were already told the answer, or — on a pending
+ * one — they asked for their message to be taken away and a note confirming the
+ * filing would be the opposite of the thing they asked for.
+ *
+ * DELETABLE ON THREE OF THE FIVE STATES, and the two refusals are the two where
+ * something is still live between her and them:
+ *
+ *   pending          YES. This is the erasure case, and it is why deleting must
+ *                    not require declining first — declining SENDS a message,
+ *                    and mailing somebody who asked to be forgotten to tell
+ *                    them they have been is precisely the wrong move.
+ *   declined         YES. It is finished and they were told.
+ *   lapsed           YES. Nobody paid, the window closed, the link is dead.
+ *   awaitingPayment  NO. A working payment link is in somebody's inbox and the
+ *                    deadline is running. Deleting the row takes the page out
+ *                    from under a person who may be part-way through paying.
+ *   paid             NO. It is a booking, and the booking is the record of
+ *                    money that moved. `Booking.serviceRequestId` is
+ *                    `onDelete: Restrict`, so the database refuses this even if
+ *                    this function were ever wrong about it.
+ *
+ * DELETING A PENDING REQUEST RELEASES ITS SLOT, which is right and is why it is
+ * not done another way: a live request holds an hour in the diary (D-26), and
+ * an hour held for a message that no longer exists is an hour lost for nothing.
+ * The release falls out of the row going, with nothing to remember to run.
+ *
+ * Locked and re-read like every other decision here, because the row on her
+ * screen may be minutes old: an approval can arrive from her phone, or a
+ * payment from theirs, between the page drawing and the button being pressed.
+ */
+export async function deleteRequest(input: {
+  id: number;
+  now?: Date;
+}): Promise<DeleteResult> {
+  const now = input.now ?? new Date();
+
+  return prisma.$transaction(async (tx) => {
+    const locked = await tx.$queryRaw<
+      { id: number }[]
+    >`SELECT id FROM "ServiceRequest" WHERE id = ${input.id} FOR UPDATE`;
+    // Pressing it twice means the same thing as pressing it once.
+    if (!locked[0]) return { outcome: "deleted" as const };
+
+    const before = await tx.serviceRequest.findUniqueOrThrow({
+      where: { id: input.id },
+      include: { booking: { select: { id: true } } },
+    });
+
+    const state = approvalState(factsOf(before), now);
+
+    if (state === "awaitingPayment") {
+      return {
+        outcome: "refused" as const,
+        reason:
+          "There is a payment link with them and it has not run out yet, so deleting this now would break a page somebody may be part-way through. Decline it first if the answer has changed — or leave it, and once the 48 hours are up it can go.",
+      };
+    }
+
+    if (state === "paid") {
+      return {
+        outcome: "refused" as const,
+        reason:
+          "This one was paid for, so it is a booking now and the booking is the record of the money. Cancel and delete it on the bookings page; this row goes with it.",
+      };
+    }
+
+    await tx.serviceRequest.delete({ where: { id: input.id } });
+    return { outcome: "deleted" as const };
+  });
+}

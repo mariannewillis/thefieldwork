@@ -11,7 +11,11 @@ import {
 } from "@/lib/email/service-requests";
 import { loadWording } from "@/lib/email/templates";
 import { parsePence } from "@/lib/offering-form";
-import { approveRequest, declineRequest } from "@/lib/service-requests";
+import {
+  approveRequest,
+  declineRequest,
+  deleteRequest,
+} from "@/lib/service-requests";
 
 /**
  * The two answers Marianne gives a request.
@@ -174,5 +178,45 @@ export async function declineSession(
   );
 
   revalidateEverywhere();
+  return { error: null, done: Date.now() };
+}
+
+// ── delete ───────────────────────────────────────────────────────────────────
+
+/**
+ * Take a request away for good.
+ *
+ * THE THIRD THING SHE CAN DO TO ONE, and the only one that sends nothing. The
+ * rule about which states allow it lives in `deleteRequest`, with the other two
+ * decisions, and is applied there against the row as it is at that moment — not
+ * against the state this page drew, which may be older than the last thing that
+ * happened to it.
+ *
+ * Revalidating the calendar as well as the queue, because deleting a PENDING
+ * request gives an hour back to the diary: a live request holds its slot, and
+ * the slot is released by the row going rather than by anything being run.
+ */
+export async function removeSession(
+  _prev: RequestActionState,
+  formData: FormData,
+): Promise<RequestActionState> {
+  await requireSession();
+
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) {
+    return { error: "That request is no longer here.", done: 0 };
+  }
+
+  const result = await deleteRequest({ id });
+  if (result.outcome === "refused") {
+    return { error: result.reason, done: 0 };
+  }
+
+  revalidateEverywhere();
+  // An hour that was being held is free again — on her calendar and on the
+  // public slot grid the request was taken from.
+  revalidatePath("/admin/calendar");
+  revalidatePath("/admin/availability");
+  revalidatePath("/services");
   return { error: null, done: Date.now() };
 }

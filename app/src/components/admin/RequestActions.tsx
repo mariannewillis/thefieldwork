@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import {
   approveSession,
   declineSession,
+  removeSession,
   type RequestActionState,
 } from "@/app/(admin)/admin/bookings/actions";
 import { formatMoment, formatMoney } from "@/lib/format";
@@ -24,6 +25,14 @@ import { formatMoment, formatMoney } from "@/lib/format";
  *   paid             neither. It is a booking now, and cancelling or refunding
  *                    it is the bookings page's job, where the money is.
  *   declined         neither. She said no and they were told.
+ *
+ * AND DELETE, WHICH IS NOT ONE OF THE FIVE. Approving and declining are answers
+ * to a person; deleting is filing, and it is here because somebody can ask for
+ * their message to be taken away and she must be able to do it (the privacy
+ * page says so). It is offered on the three states where nothing is live
+ * between her and them — pending, declined, lapsed — and refused on the two
+ * where something is: a payment link still working, or money that has moved.
+ * It sends nothing, which on a pending request is the entire point.
  *
  * A DISABLED CONTROL EXPLAINS ITSELF, exactly as on the bookings page: nothing
  * is greyed into silence, each keeps its focus and says why when it is pressed.
@@ -131,7 +140,9 @@ function poundsValue(pence: number): string {
 }
 
 export default function RequestActions({ request }: { request: RequestRow }) {
-  const [open, setOpen] = useState<"approve" | "decline" | null>(null);
+  const [open, setOpen] = useState<"approve" | "decline" | "delete" | null>(
+    null,
+  );
   const [refusal, setRefusal] = useState<string | null>(null);
 
   const [approveState, approveAction, approving] = useActionState(
@@ -142,6 +153,10 @@ export default function RequestActions({ request }: { request: RequestRow }) {
     declineSession,
     NOTHING,
   );
+  const [deleteState, deleteAction, deleting] = useActionState(
+    removeSession,
+    NOTHING,
+  );
 
   useEffect(() => {
     if (approveState.done) setOpen(null);
@@ -149,11 +164,19 @@ export default function RequestActions({ request }: { request: RequestRow }) {
   useEffect(() => {
     if (declineState.done) setOpen(null);
   }, [declineState.done]);
+  useEffect(() => {
+    if (deleteState.done) setOpen(null);
+  }, [deleteState.done]);
 
   const { state } = request;
   const canApprove = state === "pending" || state === "lapsed";
   const canDecline = state === "pending" || state === "lapsed";
   const again = state === "lapsed";
+  // The two refusals are the two states with something still live between her
+  // and them. The server decides this again; a control drawn spent is a
+  // courtesy rather than the rule.
+  const canDelete =
+    state === "pending" || state === "declined" || state === "lapsed";
 
   const approveWhyNot =
     state === "awaitingPayment"
@@ -169,7 +192,12 @@ export default function RequestActions({ request }: { request: RequestRow }) {
         ? "This one is paid for. Declining it would leave their money with you and tell them nothing about it — cancel it on the bookings page instead, where the refund is part of the same decision."
         : "You have already declined this one, and they were told.";
 
-  function ask(which: "approve" | "decline") {
+  const deleteWhyNot =
+    state === "awaitingPayment"
+      ? "There is a payment link with them and it has not run out yet, so deleting this now would break a page somebody may be part-way through paying on. Let it run out — or decline it if the answer has changed — and then it can go."
+      : "This one was paid for, so it is a booking now and the booking is the record of the money. Cancel and delete it on the bookings page; this row goes with it.";
+
+  function ask(which: "approve" | "decline" | "delete") {
     setRefusal(null);
     setOpen(which);
   }
@@ -222,6 +250,30 @@ export default function RequestActions({ request }: { request: RequestRow }) {
             aria-label={declineWhyNot}
           >
             Decline
+          </button>
+        )}
+
+        {/* Apart from the other two, and quieter than both. It is not an answer
+            to them — nothing is sent — so it does not read like one. */}
+        {canDelete ? (
+          <button
+            type="button"
+            onClick={() => ask("delete")}
+            className={GHOST}
+            aria-label={`Delete ${request.name}'s request for ${request.serviceName} — this cannot be undone`}
+          >
+            Delete
+          </button>
+        ) : (
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={() => setRefusal(deleteWhyNot)}
+            className={`${GHOST} no-underline`}
+            title={deleteWhyNot}
+            aria-label={deleteWhyNot}
+          >
+            Delete
           </button>
         )}
       </div>
@@ -372,6 +424,60 @@ export default function RequestActions({ request }: { request: RequestRow }) {
               className={GHOST}
             >
               Leave it as it is
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* ── delete ─────────────────────────────────────────────────────────
+          No field. There is nothing to decide and nothing to write to them —
+          the only question is whether she means it, and the modal is the
+          question. What it says is what actually happens, including the part
+          she cannot get back. */}
+      <Modal
+        open={open === "delete"}
+        onClose={() => setOpen(null)}
+        labelledBy={`delete-title-${request.id}`}
+      >
+        <p className={EYEBROW}>Delete</p>
+        <h2
+          id={`delete-title-${request.id}`}
+          className="mt-2 font-display text-[26px] leading-tight text-ink"
+        >
+          Take {request.name}&rsquo;s request away?
+        </h2>
+        <p className={BODY}>
+          {state === "pending"
+            ? "Their message, their name and their email go, and this is the one to use if they have asked you to remove what they sent. Nothing is sent to them — you are taking their words away, and a note saying so would be the opposite of what they asked for."
+            : state === "declined"
+              ? "Their message goes, along with the line you wrote back. They were told your answer at the time and nothing else is sent now."
+              : "Their message goes. The approval ran out unpaid, so nothing was charged and the link in their email already does nothing."}
+        </p>
+        <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
+          {request.chosen && state === "pending"
+            ? `It cannot be undone, and ${request.wanted} comes back into your diary.`
+            : "It cannot be undone."}
+        </p>
+
+        <form action={deleteAction} className="mt-6">
+          <input type="hidden" name="id" value={request.id} />
+
+          <Failure error={deleteState.error} />
+
+          <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <button
+              type="submit"
+              disabled={deleting}
+              className={`${OUTLINE} disabled:opacity-60`}
+            >
+              {deleting ? "Deleting…" : "Delete it for good"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(null)}
+              className={GHOST}
+            >
+              Keep it
             </button>
           </div>
         </form>

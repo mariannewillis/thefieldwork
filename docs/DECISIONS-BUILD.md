@@ -96,7 +96,8 @@ Set up by the operator, in Marianne's name:
 | ----------------------------------- | ------------------------------------------ |
 | Hosting + Postgres + object storage | **Replit**                                 |
 | Email (transactional + broadcast)   | **Resend**                                 |
-| Domain + mailbox                    | **GoDaddy**                                |
+| Domain + DNS                        | **GoDaddy**                                |
+| Mailbox (`marianne@`)               | **Microsoft 365**                          |
 | Payments                            | **Stripe**                                 |
 | Code                                | **GitHub** — `mariannewillis/thefieldwork` |
 
@@ -104,10 +105,26 @@ Set up by the operator, in Marianne's name:
 per-instance; on Autoscale a published change appears on some requests and not
 others, and the cache resets on scale events.
 
-**SPF collision warning.** GoDaddy already publishes an SPF record for the
+**SPF collision warning.** There is already an SPF record on the apex for the
 mailbox. A domain may have only ONE SPF record — adding Resend's as a second
 makes BOTH fail. Send from a subdomain (`mail.thefieldwork.co.uk`) with
-`Reply-To:` her GoDaddy address, so the apex record is never touched.
+`Reply-To:` her own address, so the apex record is never touched.
+
+**THE MAILBOX IS MICROSOFT 365, NOT GOOGLE WORKSPACE** (operator, 2026-08-18).
+The row above used to read "Domain + mailbox · GoDaddy", which conflated two
+things and left the question open for a fortnight: GoDaddy is the registrar and
+where DNS is edited; the mailbox behind `marianne@thefieldwork.co.uk` is
+Microsoft 365. `src/lib/email/index.ts` said so already; this table did not.
+
+Two things follow, neither of them built:
+
+- **Reading her diary back is Microsoft Graph**, not Google Calendar. Availability
+  is outbound-only today — she sees the site's dates through the `.ics` feed, and
+  the site cannot see her own appointments. Closing that means Graph's
+  `/me/calendarView` under a delegated permission, and it is the fifth thing that
+  would make an hour unavailable rather than a new kind of thing.
+- **`hello@` as an alias on the 365 mailbox** is what would let `REPLY_TO` be
+  dropped. Until then a reply to `hello@` bounces (see that file).
 
 ---
 
@@ -3023,3 +3040,68 @@ console for hydration and nested-form complaints on every screen it opens.
 
 **The duplicates panel, the upload guard and the refusal are untouched.** D-31
 stands entire.
+
+---
+
+## D-33 · A request can be taken away, and the erasure case is the one that sends nothing (2026-08-18)
+
+**Operator, verbatim:** _"Give `ServiceRequest` a deletion path"_ — a subscriber
+could be removed and a cancelled booking could be deleted, but a session request
+could not be removed from anywhere in the portal. That made an erasure request
+one she could not honour, on the same site whose privacy page says she can.
+
+### Three states allow it, two refuse, and the refusals are the live ones
+
+The rule lives in `deleteRequest` (`src/lib/service-requests.ts`), beside
+approving and declining, and is applied against the row re-read under a lock —
+not against the state the queue drew, which may be older than the last thing
+that happened to the request.
+
+| State             | Deletable | Why                                                              |
+| ----------------- | --------- | ---------------------------------------------------------------- |
+| `pending`         | **yes**   | The erasure case. Nothing has been promised.                     |
+| `declined`        | **yes**   | Finished, and they were told at the time.                        |
+| `lapsed`          | **yes**   | Nobody paid, the window closed, the link in their email is dead. |
+| `awaitingPayment` | no        | A working payment link is in somebody's inbox.                   |
+| `paid`            | no        | It is a booking; the booking is the record of the money.         |
+
+`Booking.serviceRequestId` is already `onDelete: Restrict`, so the database
+refuses the `paid` case even if this function were ever wrong about it. The
+other four are decided here.
+
+### Deleting a PENDING request must not require declining it first
+
+This is the part that decides the shape. Declining **sends a message**. Somebody
+who has written in and then asked for their message to be taken away must not
+receive an email telling them it has been — that is the opposite of the thing
+they asked for, and a decline-then-delete path would send one every time.
+
+So deleting sends nothing, on any of the three states, for the reason
+`deletePlace` sends nothing (D-18): deleting changes nothing for the person.
+Either they already have their answer, or they asked for their words to go.
+
+### The slot comes back on its own
+
+A live request holds an hour in the diary (D-26), so deleting a pending one
+releases it — and it falls out of the row going rather than out of anything
+being remembered or run, which is the same way lapsing works. The action
+revalidates the calendar, the availability screen and the public services page
+because all three read that hour.
+
+### On the screen
+
+A third control on the request, quieter than both answers and set apart from
+them, because it is not an answer — nothing is sent. Refused states draw it
+spent and it says why when pressed, the same courtesy the approve and decline
+controls give (`RequestActions.tsx`). The confirmation says what actually goes
+and reads differently per state: the pending one names the erasure case out
+loud, the declined one says the line she wrote goes with it, the lapsed one says
+nothing was charged. Where the request holds a real slot, the confirmation says
+which hour comes back.
+
+### What it is verified by
+
+`e2e/service-bookings-smoke.mjs`, 63 passing (was 54). Nine new: both refusals
+draw their reason and open nothing; a pending request is deleted and the email
+count over the whole run is **unchanged**; the row leaves the queue rather than
+sitting struck through; a declined one goes the same way and says its own thing.

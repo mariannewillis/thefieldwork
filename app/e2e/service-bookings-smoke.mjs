@@ -9,8 +9,9 @@
 // Everything else here is a thing that had to be true on the way: one Booking
 // and one Payment per completed session, the same event delivered twice making
 // one of each, a SECOND payment for the same session refunded rather than
-// silently kept, a decline closing the request with her own words, a stale page
-// failing to approve twice, and the operator's own data — Booking 25, requests
+// silently kept, a decline closing the request with her own words, a request
+// DELETED without a word being sent and refused while a payment link is live, a
+// stale page failing to approve twice, and the operator's own data — Booking 25, requests
 // 3 and 4, the workshops, the course — coming out exactly as it went in.
 //
 // It is a sibling of course-bookings-smoke.mjs and runs the same way, on the
@@ -326,6 +327,14 @@ function emailTo(log, address, which = -1) {
   return block ?? "";
 }
 
+/** How many messages in the log are addressed to somebody. */
+function emailCount(log, address) {
+  return log
+    .split("──────────── EMAIL (not sent — no RESEND_API_KEY) ────────────")
+    .slice(1)
+    .filter((block) => block.includes(`To:       ${address}`)).length;
+}
+
 /** The /pay link out of an email block. */
 function payLinkIn(block) {
   const found = block.match(new RegExp(`${BASE}/pay/[A-Za-z0-9_-]+`));
@@ -424,6 +433,14 @@ const asked = {
     serviceId,
     name: "Colin Webb",
     preferredTime: "Monday or Tuesday, early",
+  }),
+  // The erasure case: somebody who wrote in, has not been answered, and has
+  // asked for their message to be taken away again.
+  forgotten: await makeRequest({
+    serviceId,
+    name: "Helen Vaughn",
+    preferredTime: "Any weekday after three",
+    message: "Please take this off your system, I have changed my mind.",
   }),
 };
 
@@ -999,6 +1016,101 @@ try {
       twice.payTokenHash === once.payTokenHash &&
       twice.agreedTime === once.agreedTime,
     JSON.stringify({ once, twice }),
+  );
+
+  // ── deleting one ──────────────────────────────────────────────────────────
+  //
+  // The third thing she can do to a request, and the only one that sends
+  // nothing. It exists because somebody can ask for their message to be taken
+  // away and the privacy page says she can do it — so the case that matters
+  // most here is the PENDING one, deleted without a word going anywhere.
+  await page.goto(`${BASE}/admin/bookings`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
+
+  // Refused where something is still live between her and them. Colin was
+  // approved a moment ago and his link is working; Ruth has paid.
+  const colinRow = page.locator("tr", { hasText: "Colin Webb" });
+  // `force` because the control is `aria-disabled`, which Playwright reads as
+  // not-enabled — the same reason the ledger suite forces its spent controls.
+  // Pressing it is the whole test: a spent control here explains itself rather
+  // than going quiet.
+  await colinRow.locator('button:has-text("Delete")').click({ force: true });
+  ok(
+    "deleting is refused while a payment link is still working, and says why",
+    /has not run out yet/.test(await colinRow.innerText()),
+    oneLine(await colinRow.innerText()),
+  );
+
+  const ruthRow = page.locator("tr", { hasText: "Ruth Bailey" });
+  await ruthRow.locator('button:has-text("Delete")').click({ force: true });
+  ok(
+    "and refused on one that was paid for, which is the booking's to delete",
+    /it is a booking now/.test(await ruthRow.innerText()),
+    oneLine(await ruthRow.innerText()),
+  );
+  ok(
+    "neither refusal opened anything, and neither row moved",
+    (await page.locator("dialog[open]").count()) === 0 &&
+      (await requestRow(asked.stale)) !== null &&
+      (await requestRow(asked.paid)) !== null,
+  );
+
+  // The one that was asked for. Nothing has been answered, so nothing is owed
+  // to them but the removal itself.
+  const beforeDelete = emailCount(server.out(), CLIENT);
+  const helen = page.locator("tr", { hasText: "Helen Vaughn" });
+  await helen.locator('button:has-text("Delete")').click();
+  const deleteModal = page.locator("dialog[open]");
+  await deleteModal.waitFor({ timeout: 10_000 });
+  const deleteAsks = await deleteModal.innerText();
+  ok(
+    "the confirmation says it is the one to use when they asked to be removed",
+    /asked you to remove what they sent/.test(deleteAsks) &&
+      /cannot be undone/.test(deleteAsks),
+    oneLine(deleteAsks),
+  );
+  await deleteModal.getByRole("button", { name: /Delete it for good/ }).click();
+  await page.waitForFunction(
+    () => !document.querySelector("dialog[open]"),
+    undefined,
+    { timeout: 20_000 },
+  );
+
+  ok(
+    "a pending request is deleted — the message, the name and the address go",
+    (await requestRow(asked.forgotten)) === null,
+  );
+  ok(
+    "and NOTHING is sent, which is the whole point of the one they asked for",
+    emailCount(server.out(), CLIENT) === beforeDelete,
+    `${beforeDelete} before, ${emailCount(server.out(), CLIENT)} after`,
+  );
+  ok(
+    "the row is gone from the queue rather than sitting there struck through",
+    (await page.locator("tr", { hasText: "Helen Vaughn" }).count()) === 0,
+  );
+
+  // A declined one goes the same way. They were told the answer at the time,
+  // so there is nothing outstanding to send now either.
+  const peterAgain = page.locator("tr", { hasText: "Peter Nash" });
+  await peterAgain.locator('button:has-text("Delete")').click();
+  const peterModal = page.locator("dialog[open]");
+  await peterModal.waitFor({ timeout: 10_000 });
+  ok(
+    "a declined one says its own thing — the line she wrote goes with it",
+    /along with the line you wrote back/.test(await peterModal.innerText()),
+    oneLine(await peterModal.innerText()),
+  );
+  await peterModal.getByRole("button", { name: /Delete it for good/ }).click();
+  await page.waitForFunction(
+    () => !document.querySelector("dialog[open]"),
+    undefined,
+    { timeout: 20_000 },
+  );
+  ok(
+    "and it is gone, with nothing further sent",
+    (await requestRow(asked.declined)) === null &&
+      emailCount(server.out(), CLIENT) === beforeDelete,
   );
 
   // ── the ledger, with all three kinds in it ────────────────────────────────
