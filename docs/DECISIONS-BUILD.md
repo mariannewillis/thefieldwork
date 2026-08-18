@@ -3105,3 +3105,167 @@ which hour comes back.
 draw their reason and open nothing; a pending request is deleted and the email
 count over the whole run is **unchanged**; the row leaves the queue rather than
 sitting struck through; a declined one goes the same way and says its own thing.
+
+---
+
+## D-34 · The admin IS a CMS now; she composes, the stylesheet still decides how it looks (2026-08-18)
+
+**This supersedes the constraint half of D-2 and leaves its shape intact.**
+
+D-2 (2026-08-10) settled two things at once, and only one of them survives.
+
+- **The editing surface** — "she edits the home page ON the home page; click a
+  heading, change it; click an image, swap it", against a form of named boxes.
+  **Kept, entire.** It is what this is.
+- **The constraint** — "the seven beats are FIXED. No add, no delete, no
+  reorder. §5 the admin is not a CMS." **Superseded**, at the operator's
+  direction: _"lets build the cms in the admin portal … she can also add new
+  sections (adding background image, image, text, box and text)"_.
+
+### What the operator was asked and what he said
+
+The collision was put to him in as many words before anything was built, because
+D-2 was his own decision and the seven beats have 774 lines of hand-tuned CSS
+behind them. Four answers, 2026-08-18:
+
+| Question                                | Answer                                                                  |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| Fixed beats, hybrid, or a free builder? | **The free builder.** Add sections, place things left / centre / right.  |
+| Draft and publish, or live on save?     | **Draft and publish**, with the pending set itemised.                    |
+| What do the other six pages do?         | **Listed, and honest** about not being editable yet.                     |
+| Circles, font sizes, colours?           | **No styling controls. The design decides.**                             |
+
+The first and last read as a contradiction — the option he picked for the first
+was illustrated with a toolbox carrying shape buttons and a size slider. The
+fourth is the specific ruling on exactly those controls and is the later of the
+two, so the line taken is: **she controls COMPOSITION; the stylesheet controls
+APPEARANCE.** Add a section, place a box, choose what a line IS. No sizes, no
+colours, no circles. That keeps §12 — "her branding is the template, not an
+option" — which is the thing that makes a band she adds in December look like
+the page it was added to.
+
+### The design's own primitives are the builder
+
+The reason a free-form builder does not read as a foreign object on this page:
+what was asked for already exists in `home.css` under different names.
+
+| What he called it     | What the page has already                       |
+| --------------------- | ----------------------------------------------- |
+| background image      | `.plate` — the photograph behind a band          |
+| "white text box"      | `.pool` — the blush clearing, hard edge          |
+| "clear text box"      | `.onplate` — words directly on the photograph    |
+| left / right          | `.anchor-left` / `.anchor-right`                 |
+| centre                | **the one genuinely new thing**                  |
+
+So `sections.css` composes existing primitives and adds a third placement. It is
+a separate file from `home.css` so that the latter stays the verbatim port of
+the approved mockup.
+
+### The seven beats keep their own renderer
+
+They are not expressible as "a box with some words in it". The hero's three
+lines are an `h1` of spans; the method beat is four verbs standing in light; the
+schedule beat is a three-column ledger read from the database; the throat beat
+is a diptych with her portrait in the only true circle in the system. Flattening
+them into the generic model would have thrown away the composition that was
+signed off on.
+
+So the page has two kinds of section in ONE ordering space — which is the whole
+point, because a section she adds goes BETWEEN two beats:
+
+- `PageSection.kind = beat` — one of the seven. Not created, not deleted;
+  **hidden** instead, and hiding is now allowed on all seven rather than on
+  2–6 (with sections of her own allowed anywhere, "structural" stopped meaning
+  anything the code could check).
+- `PageSection.kind = free` — hers. Blocks (`pool` / `onplate` / `picture`),
+  each placed left, centre or right; lines inside a block (`eyebrow`, `heading`,
+  `paragraph`, `bullets`, `link`, `button`).
+
+### THE SEED IS THE DEFAULT; THE DATABASE HOLDS ONLY OVERRIDES
+
+`src/content/home.ts` stays the page as authored. `PageText` and `PagePicture`
+carry a row only where she has CHANGED something. Three things follow, and they
+are why it is not built by copying every string into the database at install:
+
+- **An empty database renders the composition that was signed off on.** There is
+  no state in which the home page is blank because a seeder did not run. The
+  smoke asserts this first, before it does anything else.
+- **A field added in code appears with its authored default**, no migration.
+- **"Put it back to how it was" is a DELETE**, so it is always available and
+  always correct. `setText` also deletes when she types back the original, which
+  is what keeps the pending list from crying wolf.
+
+### The editor is an iframe, and that is D-8
+
+Tailwind is scoped to the portal and the public site stays bespoke (D-8). This
+is the one screen that has to show both at once, and `home.css` carries `:root`
+variables and bare-element rules (`p { margin: 0 }`) that would land underneath
+every admin screen in the app. So the page renders in its own document under
+`app/(preview)/` — behind the same middleware gate, with a bare layout — and the
+editor embeds it. `PreviewBridge` turns a click into a selection and posts it up;
+the toolbox posts the selection back after a redraw so she does not lose her
+place.
+
+It is also the more honest preview: **the frame is drawn at 1440px and scaled to
+fit**, not at the width of the column. The column is about 875px, which is under
+the page's own 900px breakpoint — she would have been editing the tablet
+composition while thinking she was looking at the site. A phone width (390) sits
+beside it, because about a third of the people reading this page are on one.
+
+### Three things the build got wrong first, kept here because they will recur
+
+1. **A section had no id until she changed something.** Rows were materialised on
+   the first mutation, so the editor drew controls addressing synthetic ids and
+   hiding a beat silently did nothing. **Opening the editor is what starts a
+   draft** now (`ensureDraft`). Only the draft — the live copy is still empty and
+   a visitor still gets the composition as authored.
+2. **"Add a section below this one" landed one too low.** The new row was given
+   `anchor.position + 1`, which collides with the row it is meant to precede, and
+   the tie is settled by id — which the newest row always loses. The whole order
+   is decided as a list and then numbered.
+3. **A newly added line was invisible AND unclickable.** No words means no
+   height, so the only way to fill it in was the one thing she could not do. An
+   unwritten line now draws a dashed target IN THE EDITOR ONLY; the public page
+   renders it as nothing at all, so no placeholder wording can ever reach a
+   visitor. Same for a picture block with nothing chosen yet.
+
+### The media library learned about it in the same commit
+
+`SITES` in `lib/media/library.ts` gained `PagePicture.ref`,
+`PageSection.imageRef` and `PageBlock.imageRef` — so adoption, the deletion
+refusal and the duplicate merge all cover page pictures. **Both copies count:** a
+picture named only by the DRAFT is still in use, and deleting it would empty a
+band she is composing and has not published, which is a worse surprise than the
+live case because nothing public would show her it happened.
+
+The authored plates stay in `content/home.ts::Plate.src` with `inCode: true` and
+no `repoint`, because an unswapped plate is still named only in code.
+
+### What it is verified by
+
+`e2e/pages-smoke.mjs`, 44 passing. The load-bearing ones: an empty database
+renders the authored page; a saved sentence reaches the draft and NOT the live
+copy, and a visitor still sees the old one; typing the original back deletes the
+row; hiding writes the seven down in composed order and greys one; the seven
+have no delete and say why; a section lands exactly where she asked; a box of
+words on the right is on the right; publishing puts it in front of a visitor and
+takes the hidden beat off; publishing again with nothing pending is refused;
+discarding restores what is live; the public page carries none of the editor's
+marks; and **the browser complains about nothing on either document all run** —
+which is what caught `data-sectionKind`, camelCase, lowercased by the browser so
+`dataset.sectionKind` never found it while the page went on looking right.
+
+`e2e/media-smoke.mjs` 101 passing covers the `SITES` additions (its schema sweep
+fails if a column that names a picture is missing from the table).
+
+### Still open
+
+- **The other six pages.** Listed and honest; not wired. Each has its own content
+  module and its own approved composition, so each is its own piece of work.
+- **Reordering the seven** is allowed by the schema and offered by the toolbox.
+  It is worth watching: the beats' anchors alternate by composition rather than
+  by position (the sacral beat's words are bounded in CSS against its clearing),
+  so two same-anchored beats can end up adjacent. Nothing breaks; the rhythm
+  goes.
+- **Undo across publishes** was offered and not taken. It is a third `PageState`
+  per publish rather than a change to any of this.

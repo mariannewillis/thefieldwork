@@ -638,8 +638,7 @@ export async function confirmServicePayment(input: {
 // ── taking one away ──────────────────────────────────────────────────────────
 
 export type DeleteResult =
-  | { outcome: "deleted" }
-  | { outcome: "refused"; reason: string };
+  { outcome: "deleted" } | { outcome: "refused"; reason: string };
 
 /**
  * Remove a request from the portal for good.

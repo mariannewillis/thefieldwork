@@ -1649,3 +1649,248 @@ model MediaAsset {
   /// exactly the state that already exists and that the Media screen clears.
   @@index([hash])
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PAGE CONTENT — the pages panel (D-34, superseding D-2's fixed-design law)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Which copy of a page this row belongs to.
+///
+/// D-2's shape, kept when the rest of it was superseded: she edits the DRAFT,
+/// and nothing she does reaches a visitor until she publishes. Publishing
+/// deletes the live rows and copies the draft over them, in one transaction, so
+/// there is never a moment at which half a page is new.
+///
+/// Two states and no history. An undo across publishes was offered and not
+/// chosen (operator, 2026-08-18); if it is ever wanted it is a third state per
+/// publish rather than a change to any of this.
+enum PageState {
+  /// Hers. What the editor reads and writes, and what the preview shows.
+  draft
+  /// What a visitor gets.
+  live
+}
+
+/// WHAT A SECTION IS MADE OF — one of the seven original beats, or one she made.
+///
+/// The distinction is not decoration. The seven beats are BESPOKE compositions:
+/// the hero's three lines are an h1 of spans, the method beat is four verbs
+/// standing in light, the schedule beat is a three-column ledger read from the
+/// database, and the throat beat is a diptych with her portrait in the only
+/// true circle in the system. None of them is expressible as "a box with some
+/// words in it", and flattening them into one would have thrown away the
+/// composition the page was signed off on.
+///
+/// So the seven keep their own renderer and their own editable slots
+/// (PageText / PagePicture, keyed by the data-slot paths already planted
+/// through app/(site)/page.tsx), and a section she ADDS is built out of the
+/// same page's primitives — a photograph behind, clearings and plain words in
+/// front, anchored left, centre or right.
+enum PageSectionKind {
+  /// One of the original seven. Not created and not deleted; hidden instead.
+  beat
+  /// One she made. Hers to add, fill, move and delete.
+  free
+}
+
+/// Where a thing sits across the band.
+///
+/// The page has had two of these since it was drawn — anchor-left and
+/// anchor-right, the alternating rhythm the composition is built on. Centre is
+/// the third and is new with the pages panel.
+///
+/// SPELLED AS SHE SPELLS IT. The CSS word is "center"; every other word in this
+/// app is British, and this one is read by a person rather than by a browser.
+/// src/lib/pages/render.ts holds the one mapping.
+enum PageAnchor {
+  left
+  centre
+  right
+}
+
+/// The three things she can put in a section, and they are the page's own
+/// three — the names are the CSS's, so that what she places is what the
+/// stylesheet already knows how to draw.
+enum PageBlockKind {
+  /// .pool — a clearing: the blush box with a hard edge, no radius and no
+  /// shadow. What the toolbox calls "a box of words".
+  pool
+  /// .onplate — words set directly on the photograph, with nothing behind
+  /// them. What the toolbox calls "words on the picture".
+  onplate
+  /// A photograph placed in the band rather than behind it.
+  picture
+}
+
+/// The kinds of line that go inside a clearing or on a plate.
+///
+/// The same kinds the newsletter editor offers, plus the eyebrow the page uses
+/// above every beat, and minus the one that is a letter's rather than a page's
+/// (a letter pulls live offerings; here that is the schedule beat's job, and it
+/// is derived).
+///
+/// THERE IS NO SIZE, NO COLOUR AND NO ALIGNMENT ON ANY OF THEM. She chooses
+/// WHAT a line is; the stylesheet decides how it looks (brief §12 — "her
+/// branding is the template, not an option", upheld by the operator on
+/// 2026-08-18 when the rest of D-2 was superseded). A heading is bigger than a
+/// paragraph because it is a heading.
+enum PageItemKind {
+  /// The small gold line above a beat. .eyebrow
+  eyebrow
+  /// .disp — the display serif the page speaks in.
+  heading
+  /// .body — prose.
+  paragraph
+  /// One line per line typed, set as a run of spans — the shape the hero's
+  /// three lines and the method beat's four verbs already use.
+  bullets
+  /// .link — the underlined magenta link the page uses everywhere.
+  link
+  /// The one solid control. Same target rules as a link.
+  button
+}
+
+/// One full-width band of the page, in one of its two copies.
+///
+/// ORDER IS A PLAIN INTEGER AND IS RENORMALISED ON EVERY CHANGE. A page has
+/// about ten of these, so rewriting 0,1,2,3 across the whole page inside the
+/// same transaction costs nothing and removes every gap-exhaustion and
+/// unique-collision problem that sparse or unique positions bring with them.
+/// Read back ordered by position then id.
+///
+/// THE SEVEN BEATS ARE ROWS HERE TOO, holding only their place and whether they
+/// are hidden — their words and pictures are in PageText and PagePicture,
+/// because each of the seven has a different shape. One ordering space is the
+/// whole point: a section she adds goes BETWEEN two beats, which is impossible
+/// if beats and her own sections are ordered separately.
+model PageSection {
+  id Int @id @default(autoincrement())
+
+  /// Which page. "home" is the only one wired; the panel lists the rest and
+  /// says plainly that they are not editable yet (D-9 — the portal shows no
+  /// state it cannot read).
+  page  String
+  state PageState
+
+  position Int
+  kind     PageSectionKind
+
+  /// beat only: which of the seven — root, sacral, method, throat, schedule,
+  /// turn, crown. Null on one she made.
+  beatKey String?
+
+  /// Taken off the page without being destroyed. D-2 allowed this for beats
+  /// 2-6 and it is now allowed on all of them: a hidden section is one she is
+  /// not using this month rather than one she has lost.
+  hidden Boolean @default(false)
+
+  /// free only: the photograph behind the band, and what somebody who cannot
+  /// see it is told. A basename under /media, exactly as everywhere else in
+  /// this schema holds a picture — never a path. Null means the band is plum,
+  /// which is what every beat is behind its own plate.
+  imageRef String?
+  imageAlt String?
+
+  blocks PageBlock[]
+
+  @@unique([page, state, beatKey])
+  @@index([page, state, position])
+}
+
+/// A thing placed in a band: a clearing, words on the picture, or a picture.
+///
+/// PLACEMENT IS ON THE BLOCK, NOT THE SECTION, which is the shape she described:
+/// "add clear text box left, centre or right". A band is drawn as three columns
+/// and each block lands in its own, so two blocks can sit side by side without
+/// anything new.
+model PageBlock {
+  id        Int         @id @default(autoincrement())
+  sectionId Int
+  section   PageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  position  Int
+  kind      PageBlockKind
+  placement PageAnchor    @default(left)
+
+  /// picture only. Basename and alt, as above.
+  imageRef String?
+  imageAlt String?
+
+  items PageItem[]
+
+  @@index([sectionId, position])
+}
+
+/// One line inside a clearing or on a plate.
+model PageItem {
+  id      Int       @id @default(autoincrement())
+  blockId Int
+  block   PageBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+
+  position Int
+  kind     PageItemKind
+
+  /// heading / paragraph / eyebrow: the words. bullets: one per line, split on
+  /// the newline. link / button: the label.
+  text String?
+
+  /// link / button: where it goes. Root-relative, or an anchor on this page.
+  href String?
+
+  @@index([blockId, position])
+}
+
+/// ONE EDITED STRING ON ONE OF THE SEVEN BEATS.
+///
+/// THE SEED MODULE IS STILL THE DEFAULT AND THIS TABLE HOLDS ONLY OVERRIDES.
+/// src/content/home.ts remains the page's content as authored, and a beat field
+/// reads from here only when she has changed it. Three things follow, and they
+/// are why it is built this way rather than by copying every string into the
+/// database at install time:
+///
+///   - An empty database renders exactly the page that was signed off on. There
+///     is no state in which the home page is blank because a seeder did not run.
+///   - A field ADDED in code appears with its authored default immediately,
+///     with no migration and no backfill.
+///   - "Put it back to how it was" is a DELETE, and is therefore always
+///     available and always correct.
+///
+/// key is the dotted path the page component already marks with data-slot —
+/// sacral.poolBody, throat.credential, crown.lines. The 26 of them were planted
+/// when the page was ported, for this.
+model PageText {
+  id    Int       @id @default(autoincrement())
+  page  String
+  state PageState
+  key   String
+  value String
+
+  @@unique([page, state, key])
+}
+
+/// ONE SWAPPED PHOTOGRAPH ON ONE OF THE SEVEN BEATS, and the same override rule.
+///
+/// The three numbers beside the basename are the ones the composition was tuned
+/// at: how far the plate is dimmed so the words on it stay readable, and where
+/// the subject sits once it is cropped to the band. They are carried because a
+/// DIFFERENT photograph needs different ones — swapping a wide room for a close
+/// portrait at the old focal point puts somebody's chin at the edge of the
+/// frame — and they fall back to the authored value when null, so an unswapped
+/// plate is unchanged.
+model PagePicture {
+  id    Int       @id @default(autoincrement())
+  page  String
+  state PageState
+  key   String
+
+  ref String
+  alt String
+
+  /// Brightness multiplier, focal x and focal y — --b, --ox and --oy on the
+  /// plate.
+  brightness Float?
+  focalX     String?
+  focalY     String?
+
+  @@unique([page, state, key])
+}

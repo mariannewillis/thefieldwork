@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   EDITING MODE — the only things on this page that are not the page.
+
+   Three rules and no more. Everything else she sees in the frame is home.css
+   and sections.css drawing the real thing, which is the whole point of the
+   frame existing: a preview that styles itself is a preview that lies.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Everything is clickable, so nothing gets a text cursor — a caret in a
+   sentence she cannot type into is a promise the page does not keep. The
+   words are edited in the toolbox beside the frame. */
+[data-section],
+[data-slot],
+[data-block],
+[data-item] {
+  cursor: pointer;
+}
+
+/* WHAT IS SELECTED, drawn in the site's own gold rather than a browser blue.
+   An outline rather than a border: it is painted outside the box, so nothing
+   on the page moves by a pixel when she selects it. */
+[data-chosen] {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Hovering says what CAN be selected without committing to it. Hairline, so a
+   page full of selectable things does not read as a wireframe. */
+[data-section]:hover,
+[data-slot]:hover,
+[data-block]:hover,
+[data-item]:hover {
+  outline: 1px solid rgb(233 200 126 / 0.55);
+  outline-offset: 3px;
+}
+[data-chosen]:hover {
+  outline: 2px solid var(--gold);
+}
+
+/* A HIDDEN SECTION IS STILL DRAWN, and drawn as absent. It is off the public
+   page and it is still hers — greyed and set back, with a line across the top
+   saying so, because a section that vanished from the editor when she hid it
+   would be a section she could not get back without remembering it existed. */
+.beat.is-hidden {
+  filter: grayscale(1);
+  opacity: 0.34;
+}
+.beat.is-hidden::before {
+  content: "Not on the site";
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px var(--gut);
+  background: var(--plum-900);
+  color: var(--gold);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The derived block says what it is rather than looking editable. The rows in
+   it come from Offerings, so there is nothing here to click and type over. */
+[data-derived] {
+  position: relative;
+}
+[data-derived]::after {
+  content: "These come from Offerings";
+  position: absolute;
+  top: -26px;
+  right: 0;
+  color: var(--gold);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ── the section tab ──────────────────────────────────────────────────────
+   The only thing on this page that is not the page, and the reason it has to
+   be here: every beat's photograph covers its whole band, so there is no bare
+   section left to click. Without a tab, "hide this" and "move this" would be
+   actions with nothing to reach them. */
+.edit__handle {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 0;
+  background: var(--gold);
+  color: var(--plum-900);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.edit__handle:hover,
+.edit__handle:focus-visible {
+  background: var(--coral);
+}
+.edit__handle-off {
+  color: var(--plum-800);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  font-style: italic;
+}
+
+/* A hidden section already carries its own line across the top, so the tab
+   moves below it rather than sitting on top of the words. */
+.beat.is-hidden .edit__handle {
+  top: 40px;
+}
+
+/* ── something she has added and not yet written ──────────────────────────
+   Drawn ONLY here. The public page renders an unwritten line as nothing at
+   all, so no placeholder wording can reach a visitor however long it sits
+   there — but in the editor it needs a height and a target, because a line
+   with no words has neither, and the one thing she cannot do to an invisible
+   line is click it to write in it. */
+.edit__empty {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px dashed var(--gold);
+  color: var(--gold);
+  font-style: italic;
+  opacity: 0.75;
+}

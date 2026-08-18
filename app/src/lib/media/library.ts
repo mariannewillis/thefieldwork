@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth/server";
 import { prisma } from "@/lib/db";
 import { POSTER_PREFIX } from "@/lib/film";
 import { listMediaBasenames } from "@/lib/media";
+import { BEATS, pictureSlot } from "@/lib/pages/slots";
 import { backfillHashes } from "@/lib/media/identity";
 import { mediaStore } from "@/lib/media/store";
 
@@ -530,10 +531,14 @@ const SITES: Site[] = [
     /**
      * NOT A COLUMN, AND IT IS IN THIS LIST ANYWAY.
      *
-     * The home page's seven photographs live in `src/content/home.ts` as code,
-     * because `/admin/page` is not built yet. They are on the live front page of
+     * The home page's seven photographs are AUTHORED in `src/content/home.ts`
+     * and stay there. The pages panel (D-34) did not move them into the
+     * database: it holds only what she has CHANGED, so an unswapped plate is
+     * still named in code and only in code. They are on the live front page of
      * the site all the same, so leaving them out would mean the delete guard
      * cheerfully removing the photograph behind the first thing anybody sees.
+     * The three `Page*` entries below cover the ones she HAS swapped or added,
+     * and those she can clear from a screen.
      * The rule this list enforces is "nothing may silently break a live page",
      * not "nothing may break a database row".
      *
@@ -563,7 +568,125 @@ const SITES: Site[] = [
     // deleting a file the home page still names.
     repoint: null,
   },
+
+  /* ── The pages panel (D-34) ────────────────────────────────────────────── */
+  //
+  // Three entries because a picture can reach a page three ways once she can
+  // edit it: swapped into one of the seven beats' slots, put behind a band she
+  // added, or placed inside one. All three are hers to clear from a screen, so
+  // unlike the authored plates above none of them carries `inCode` — the
+  // refusal names the page and hands her the link.
+  //
+  // BOTH COPIES COUNT. A picture named only by the DRAFT is still in use:
+  // deleting it would empty a band she is in the middle of composing and has
+  // not published yet, which is a worse surprise than the live case because
+  // nothing on the public site would show her it had happened.
+  {
+    column: "PagePicture.ref",
+    kind: MediaKind.picture,
+    load: async () => {
+      const rows = await prisma.pagePicture.findMany({
+        select: { page: true, state: true, key: true, ref: true },
+      });
+      return rows
+        .filter((row) => present(row.ref))
+        .map((row) => ({
+          kind: MediaKind.picture,
+          ref: row.ref,
+          what: pageSlotUse(row.key, row.state),
+          href: `/admin/pages/${row.page}`,
+        }));
+    },
+    repoint: (from, to) =>
+      prisma.pagePicture
+        .updateMany({ where: { ref: from }, data: { ref: to } })
+        .then((result) => result.count),
+  },
+  {
+    column: "PageSection.imageRef",
+    kind: MediaKind.picture,
+    load: async () => {
+      const rows = await prisma.pageSection.findMany({
+        where: { imageRef: { not: null } },
+        select: { page: true, state: true, position: true, imageRef: true },
+      });
+      return rows
+        .filter((row) => present(row.imageRef))
+        .map((row) => ({
+          kind: MediaKind.picture,
+          ref: row.imageRef as string,
+          what: `the photograph behind the ${ordinal(row.position + 1)} section of the ${row.page} page${row.state === "draft" ? ", in the copy you are editing" : ""}`,
+          href: `/admin/pages/${row.page}`,
+        }));
+    },
+    repoint: (from, to) =>
+      prisma.pageSection
+        .updateMany({ where: { imageRef: from }, data: { imageRef: to } })
+        .then((result) => result.count),
+  },
+  {
+    column: "PageBlock.imageRef",
+    kind: MediaKind.picture,
+    load: async () => {
+      const rows = await prisma.pageBlock.findMany({
+        where: { imageRef: { not: null } },
+        select: {
+          imageRef: true,
+          section: { select: { page: true, state: true, position: true } },
+        },
+      });
+      return rows
+        .filter((row) => present(row.imageRef))
+        .map((row) => ({
+          kind: MediaKind.picture,
+          ref: row.imageRef as string,
+          what: `a picture in the ${ordinal(row.section.position + 1)} section of the ${row.section.page} page${row.section.state === "draft" ? ", in the copy you are editing" : ""}`,
+          href: `/admin/pages/${row.section.page}`,
+        }));
+    },
+    repoint: (from, to) =>
+      prisma.pageBlock
+        .updateMany({ where: { imageRef: from }, data: { imageRef: to } })
+        .then((result) => result.count),
+  },
 ];
+
+/** "first", "second" — she counts sections by eye, not from zero. */
+function ordinal(n: number): string {
+  const words = [
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eighth",
+    "ninth",
+    "tenth",
+  ];
+  return words[n - 1] ?? `${n}th`;
+}
+
+/**
+ * Which slot on one of the seven beats this is, said so she can go and find it.
+ *
+ * The slot catalogue already carries a phrase she would use for every editable
+ * picture on the page — "the opening photograph", "your portrait" — so this
+ * reads it rather than keeping a second list that could fall out of step.
+ */
+function pageSlotUse(key: string, state: string): string {
+  const slot = pictureSlot(key);
+  const named = slot ? slot.label.toLowerCase() : `the picture at ${key}`;
+  const beat = BEAT_LABELS.get(key.split(".")[0]);
+  const where = beat ? ` on “${beat}”` : "";
+  const copy = state === "draft" ? ", in the copy you are editing" : "";
+  return `${named}${where}, on the home page${copy}`;
+}
+
+const BEAT_LABELS = new Map(
+  BEATS.map((beat) => [beat.key as string, beat.label]),
+);
 
 /** As much of a beat as this needs: whatever names it to her. */
 type HomeBeat = { eyebrow?: string; eyebrowLead?: string; id?: string };

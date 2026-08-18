@@ -1,0 +1,143 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTIONS SHE MADE — the free-form bands added in the pages panel (D-34).
+
+   NOT A SECOND VISUAL LANGUAGE. Every rule here composes the primitives
+   home.css already defines rather than introducing anything of its own: the
+   band is a .beat, the photograph behind it is a .plate, a box of words is a
+   .pool, words on the picture are .onplate, and the type is the same .disp /
+   .body / .eyebrow / .link ramp. What is genuinely new is exactly one thing —
+   a THIRD placement. The page has had .anchor-left and .anchor-right since it
+   was drawn; centre did not exist because none of the seven beats needed it.
+
+   home.css stays the verbatim port of the approved mockup, which is why this
+   is a separate file rather than an appendix to it.
+
+   NO SIZES, NO COLOURS, NO RADII. She chooses WHAT a line is and WHERE a box
+   goes; everything else is decided here (brief §12). That is what keeps a
+   section she added in December looking like the page it was added to.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.beat--free {
+  align-items: center;
+  padding-top: clamp(64px, 9vh, 120px);
+  padding-bottom: clamp(64px, 9vh, 120px);
+}
+
+/* Three columns, because there are three placements. A block lands in its own
+   and blocks with different placements therefore sit side by side without
+   anything having to be arranged. */
+.free__grid {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+}
+
+.free__cell {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.4vw, 18px);
+  min-width: 0;
+}
+.free__cell--left {
+  grid-column: 1;
+  align-items: flex-start;
+}
+.free__cell--centre {
+  grid-column: 2;
+  align-items: center;
+  text-align: center;
+}
+.free__cell--right {
+  grid-column: 3;
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* A box of words is the page's own clearing, at the width the beats' pools
+   settle at. */
+.free__cell .pool {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.2vw, 16px);
+}
+
+/* Words with nothing behind them sit on the photograph and take the light
+   half of the ramp — the same pairing .turn__col uses. */
+.free__plain {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.2vw, 16px);
+}
+.free__plain .disp,
+.free__plain .body {
+  color: var(--blush);
+}
+.free__plain .eyebrow {
+  color: var(--gold);
+}
+
+/* The display ramp for a section she made. One step below the hero's, because
+   nothing added later should be able to out-shout the opening. */
+.free__heading {
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1.16;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Bullets are the page's run-of-spans shape, not a list with markers — the
+   same thing the hero's three lines and the method beat's four verbs do. */
+.free__lines span {
+  display: block;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(19px, 1.8vw, 24px);
+  line-height: 1.3;
+}
+
+/* The one solid control on the site. Hard edge, like everything else. */
+.free__button {
+  display: inline-block;
+  align-self: inherit;
+  margin-top: 4px;
+  padding: 14px 26px;
+  background: var(--magenta-deep);
+  color: var(--blush);
+  font-size: 17px;
+  text-decoration: none;
+  border: 0;
+}
+.free__button:hover,
+.free__button:focus-visible {
+  background: var(--plum-900);
+}
+
+/* A photograph placed IN the band rather than behind it. No radius and no
+   shadow, which is the shape law; the one curve on this site is her portrait
+   and it stays the only one. */
+.free__picture {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ── narrow ────────────────────────────────────────────────────────────────
+   One column, everything left. Three columns of a third each is unreadable
+   below about 900px, and a centred line in a 100px-wide column is worse than
+   a left-aligned one. */
+@media (max-width: 900px) {
+  .free__grid {
+    grid-template-columns: 1fr;
+  }
+  .free__cell--left,
+  .free__cell--centre,
+  .free__cell--right {
+    grid-column: 1;
+    align-items: flex-start;
+    text-align: left;
+  }
+}

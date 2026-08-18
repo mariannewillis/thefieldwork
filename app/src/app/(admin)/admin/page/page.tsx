@@ -1,16 +1,13 @@
-import SectionStub from "@/components/admin/SectionStub";
+import { permanentRedirect } from "next/navigation";
 
-export default function Page() {
-  return (
-    <SectionStub
-      eyebrow="Your words"
-      title="Home page"
-      lede="Your home page, editable in place. You change the words on the page itself — click the sentence you want to change and type over it — rather than filling in a form of named boxes somewhere else."
-      next={[
-        "Rewrite any heading or paragraph by clicking it on the page",
-        "Swap a photograph for another from your pictures",
-        "See exactly how it will look before anyone else does, then publish",
-      ]}
-    />
-  );
+/**
+ * The home page's editor moved when the pages panel landed (D-34).
+ *
+ * A redirect rather than a deletion: this is where the rail pointed for two
+ * weeks, so it is in her history and possibly in a bookmark. Permanent, because
+ * it is not coming back — `/admin/pages` lists every page on the site and the
+ * home page is one entry in it.
+ */
+export default function RetiredHomePageEditor() {
+  permanentRedirect("/admin/pages");
 }

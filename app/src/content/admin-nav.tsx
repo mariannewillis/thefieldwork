@@ -78,8 +78,12 @@ export const ADMIN_NAV: NavItem[] = [
     ),
   },
   {
-    href: "/admin/page",
-    label: "Home page",
+    /* WAS "Home page", AND IT IS "Pages" NOW (D-34). One entry that opens onto
+       the list of every page on the site, because the home page stopped being
+       the only one worth naming the moment the panel could show the other six
+       and say plainly which of them are not editable yet. */
+    href: "/admin/pages",
+    label: "Pages",
     icon: (
       <>
         <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
