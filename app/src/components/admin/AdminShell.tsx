@@ -25,8 +25,10 @@ import { signOut } from "@/app/(admin)/actions";
  */
 
 function isActive(pathname: string, href: string): boolean {
-  // "/admin" is the Today page, not a prefix for the whole portal — without
-  // the exact check every section would light up Today as well as itself.
+  // The exact check is kept even though "/admin" left the rail with the Today
+  // page (2026-08-19): it is still a live path that redirects, and a bare
+  // `startsWith` on any future root-level entry would light every section up
+  // with it.
   if (href === "/admin") return pathname === "/admin";
   return pathname === href || pathname.startsWith(`${href}/`);
 }

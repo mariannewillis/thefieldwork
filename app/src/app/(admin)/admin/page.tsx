@@ -1,17 +1,24 @@
-import DayGreeting from "@/components/admin/DayGreeting";
-import SectionStub from "@/components/admin/SectionStub";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return (
-    <SectionStub
-      eyebrow={<DayGreeting />}
-      title="What needs you today"
-      lede="Everything waiting on a decision from you, in one place, so you can start the day here and know nothing has been missed."
-      next={[
-        "See who is booked in today, at a glance",
-        "Answer the requests that are waiting on your yes or no",
-        "Pick up anything that came in overnight",
-      ]}
-    />
-  );
+/**
+ * `/admin` — no longer a screen of its own (operator, 2026-08-19).
+ *
+ * It was Today: a `SectionStub` promising "everything waiting on a decision
+ * from you, in one place". It was never built, and the things it promised now
+ * exist on their own screens — Requests holds what is waiting on her yes or no,
+ * Calendar holds who is booked in.
+ *
+ * A REDIRECT RATHER THAN A DELETION, because this path is not optional. Signing
+ * in lands here (`login/actions.ts` defaults `next` to it), changing a password
+ * lands here, resetting one lands here, and the mark at the top of every admin
+ * screen links here. Removing the route would 404 all four; removing the route
+ * AND changing all four to point at Calendar would leave any bookmark she has
+ * pointing at nothing.
+ *
+ * Calendar, because it is the top of the rail now, so signing in lands her on
+ * the first thing in the list — which is what a rail with no dashboard should
+ * do. `replace` rather than a push, so Back does not bounce her through here.
+ */
+export default function AdminHome() {
+  redirect("/admin/calendar");
 }

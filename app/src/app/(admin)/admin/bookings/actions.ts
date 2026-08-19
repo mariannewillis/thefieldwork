@@ -64,8 +64,9 @@ async function requireSession() {
 
 function revalidateEverywhere() {
   revalidatePath("/admin/bookings");
-  // The dashboard counts what is waiting on her, and one fewer is.
-  revalidatePath("/admin");
+  // "/admin" was the Today page, which counted what was waiting on her. It is a
+  // redirect now (2026-08-19) and there is nothing on it to rebuild — the count
+  // lives on the queue itself, which the line above already redraws.
 }
 
 // ── approve ──────────────────────────────────────────────────────────────────
