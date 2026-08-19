@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BookingLine from "@/components/admin/BookingLine";
-import Pager, {
-  currentPage,
-  pageSlice,
-} from "@/components/admin/Pager";
+import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
 import BookingActions, {
   type LedgerRow,
 } from "@/components/admin/BookingActions";
@@ -277,7 +274,9 @@ function Headers() {
         </th>
         <th scope="col" className={`${HEAD} pr-0`}>
           Actions
-          <span className={CAPTION}>cancel &middot; refund &middot; delete</span>
+          <span className={CAPTION}>
+            cancel &middot; refund &middot; delete
+          </span>
         </th>
       </tr>
     </thead>
@@ -497,7 +496,6 @@ export default async function Page({
           those are yours to decide.
         </p>
       )}
-
 
       {/* TWO TABS, where two stacked tables were (operator, 2026-08-19). The
           split is unchanged — a booking is upcoming until its day has been, or

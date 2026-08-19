@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OfferingRowActions from "@/components/admin/OfferingRowActions";
 import { listAllCourses } from "@/lib/courses";
 import {
   formatDayShort,
@@ -121,6 +122,17 @@ function WorkshopRow({ workshop }: { workshop: Workshop }) {
           <LiveMark published={workshop.published} />
         </div>
       </Link>
+
+      {/* OUTSIDE THE LINK, and it has to be: a button inside an anchor is
+          invalid HTML, and every press would navigate before it did anything.
+          The row stays a link to the form; these two are the things she should
+          not have to open the form for. */}
+      <OfferingRowActions
+        kind="workshop"
+        id={workshop.id}
+        name={workshop.name}
+        published={workshop.published}
+      />
     </article>
   );
 }
@@ -191,6 +203,17 @@ function CourseRow({ course }: { course: Course }) {
           <LiveMark published={course.published} />
         </div>
       </Link>
+
+      {/* OUTSIDE THE LINK, and it has to be: a button inside an anchor is
+          invalid HTML, and every press would navigate before it did anything.
+          The row stays a link to the form; these two are the things she should
+          not have to open the form for. */}
+      <OfferingRowActions
+        kind="course"
+        id={course.id}
+        name={course.name}
+        published={course.published}
+      />
     </article>
   );
 }
@@ -245,6 +268,17 @@ function ServiceRow({ service }: { service: Service }) {
           <LiveMark published={service.published} />
         </div>
       </Link>
+
+      {/* OUTSIDE THE LINK, and it has to be: a button inside an anchor is
+          invalid HTML, and every press would navigate before it did anything.
+          The row stays a link to the form; these two are the things she should
+          not have to open the form for. */}
+      <OfferingRowActions
+        kind="service"
+        id={service.id}
+        name={service.name}
+        published={service.published}
+      />
     </article>
   );
 }

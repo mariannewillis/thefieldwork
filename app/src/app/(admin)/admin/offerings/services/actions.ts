@@ -423,3 +423,53 @@ function revalidateService(slug: string, previousSlug?: string) {
     revalidatePath(`/services/${previousSlug}`);
   }
 }
+
+/* ── Showing and hiding, from the list ────────────────────────────────────── */
+
+export type VisibilityState = { error: string | null; done: number };
+
+/**
+ * TAKE A SESSION OFF THE SITE, OR PUT IT BACK — without opening the form.
+ *
+ * Hiding is always allowed; publishing applies the same two conditions
+ * `saveService` applies — a picture behind the title and something written on
+ * it — so the list cannot become a quieter way of putting a page on the site
+ * that the form would have refused.
+ *
+ * TAKING A SESSION OFF THE SITE DOES NOT CANCEL WHAT IS ALREADY ASKED FOR. A
+ * request that is waiting on her answer stays waiting, and an approval already
+ * sent stays payable: the link is against the request, not the page. Hiding
+ * stops NEW requests arriving, which is what she means by it.
+ */
+export async function setServiceVisibility(
+  _prev: VisibilityState,
+  formData: FormData,
+): Promise<VisibilityState> {
+  await requireSession();
+
+  const id = Number(formData.get("id"));
+  const publish = formData.get("publish") === "on";
+  if (!Number.isInteger(id))
+    return { error: "That session no longer exists.", done: 0 };
+
+  const service = await prisma.service.findUnique({ where: { id } });
+  if (!service) return { error: "That session no longer exists.", done: 0 };
+
+  if (publish) {
+    const missing = !service.heroImage
+      ? "it has no picture behind its title"
+      : !service.bodyHtml
+        ? "nothing is written on it yet"
+        : null;
+    if (missing) {
+      return {
+        error: `This one cannot go on the site while ${missing}. Open it and finish that first.`,
+        done: 0,
+      };
+    }
+  }
+
+  await prisma.service.update({ where: { id }, data: { published: publish } });
+  revalidateService(service.slug);
+  return { error: null, done: Date.now() };
+}

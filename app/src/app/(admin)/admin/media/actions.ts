@@ -1,7 +1,7 @@
 "use server";
 
 import { MediaKind } from "@prisma/client";
-import { SHARP_ENOUGH_WIDTH } from "@/lib/media/encode";
+import { SHARP_ENOUGH_WIDTH } from "@/lib/media/sizes";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/server";

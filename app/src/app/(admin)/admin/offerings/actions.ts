@@ -418,3 +418,62 @@ function revalidateWorkshop(slug: string, previousSlug?: string) {
   }
   revalidatePath("/admin/offerings");
 }
+
+/* ── Showing and hiding, from the list ────────────────────────────────────── */
+
+export type VisibilityState = { error: string | null; done: number };
+
+/**
+ * TAKE ONE OFF THE SITE, OR PUT IT BACK — without opening the form.
+ *
+ * HIDING IS ALWAYS ALLOWED. Nothing about a page can make it wrong to stop
+ * showing it, and the one thing an operator wants at speed is the ability to
+ * pull something down.
+ *
+ * PUBLISHING IS NOT, and that asymmetry is the whole of this action. The forms
+ * refuse to publish a workshop with no picture behind its title or nothing
+ * written on it (`saveWorkshop`), because the page would be a name, a date and
+ * a price with nothing between them. A toggle on the list that skipped those
+ * checks would be a second, quieter way to put a broken page on the site — so
+ * it applies the same two and says which one is missing, naming the screen that
+ * can fix it.
+ *
+ * A booking is NOT a reason to refuse either direction. Somebody who has paid
+ * holds a place whether or not the page is showing, and hiding a sold-out day
+ * is an ordinary thing to want.
+ */
+export async function setWorkshopVisibility(
+  _prev: VisibilityState,
+  formData: FormData,
+): Promise<VisibilityState> {
+  await requireSession();
+
+  const id = Number(formData.get("id"));
+  const publish = formData.get("publish") === "on";
+  if (!Number.isInteger(id))
+    return { error: "That workshop no longer exists.", done: 0 };
+
+  const workshop = await prisma.workshop.findUnique({ where: { id } });
+  if (!workshop) return { error: "That workshop no longer exists.", done: 0 };
+
+  if (publish) {
+    const missing = !workshop.heroImage
+      ? "it has no picture behind its title"
+      : !workshop.bodyHtml
+        ? "nothing is written on it yet"
+        : null;
+    if (missing) {
+      return {
+        error: `This one cannot go on the site while ${missing}. Open it and finish that first — the page would otherwise be a name, a date and a price with nothing between them.`,
+        done: 0,
+      };
+    }
+  }
+
+  await prisma.workshop.update({
+    where: { id },
+    data: { published: publish },
+  });
+  revalidateWorkshop(workshop.slug);
+  return { error: null, done: Date.now() };
+}

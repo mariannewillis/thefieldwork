@@ -496,3 +496,60 @@ function revalidateCourse(slug: string, previousSlug?: string) {
     revalidatePath(`/admin/offerings/courses/${previousSlug}`);
   }
 }
+
+/* ── Showing and hiding, from the list ────────────────────────────────────── */
+
+export type VisibilityState = { error: string | null; done: number };
+
+/**
+ * TAKE A COURSE OFF THE SITE, OR PUT IT BACK — without opening the form.
+ *
+ * Hiding is always allowed; publishing is not, and applies the same conditions
+ * `saveCourse` applies. A course has FOUR rather than the workshop's two,
+ * because a course is an arrangement rather than a day: it needs its picture
+ * and its words, it needs dates (a course with nothing in the diary is a draft),
+ * and a deposit needs a day the rest is due by, or nothing ever asks for it.
+ *
+ * A toggle that skipped these would be a second, quieter way to put a broken
+ * page on the site — or worse, to open a checkout that takes half the money and
+ * never asks for the other half.
+ */
+export async function setCourseVisibility(
+  _prev: VisibilityState,
+  formData: FormData,
+): Promise<VisibilityState> {
+  await requireSession();
+
+  const id = Number(formData.get("id"));
+  const publish = formData.get("publish") === "on";
+  if (!Number.isInteger(id))
+    return { error: "That course no longer exists.", done: 0 };
+
+  const course = await prisma.course.findUnique({
+    where: { id },
+    include: { sessions: true },
+  });
+  if (!course) return { error: "That course no longer exists.", done: 0 };
+
+  if (publish) {
+    const missing = !course.heroImage
+      ? "it has no picture behind its title"
+      : !course.bodyHtml
+        ? "nothing is written on it yet"
+        : course.sessions.length === 0
+          ? "it has no dates — a course with nothing in the diary is a draft"
+          : course.depositGBP && !course.balanceDueAt
+            ? "it takes a deposit with no day the rest is due by, so nothing would ever ask for the rest"
+            : null;
+    if (missing) {
+      return {
+        error: `This one cannot go on the site while ${missing}. Open it and finish that first.`,
+        done: 0,
+      };
+    }
+  }
+
+  await prisma.course.update({ where: { id }, data: { published: publish } });
+  revalidateCourse(course.slug);
+  return { error: null, done: Date.now() };
+}
