@@ -331,16 +331,51 @@ function Schedule({
                 ) : (
                   rows.map((row) => (
                     <a className="ledger-row" href={row.href} key={row.href}>
-                      <p className="ledger-row__top">
-                        <span className="small ledger-row__date">
-                          <span className="num">{row.date}</span>
+                      {/* HER OWN PICTURE FOR IT, the one the Offerings screen
+                          shows (`heroImage`) — so what she sets in the portal
+                          is what appears here. An offering without one gets no
+                          picture rather than a placeholder: "no picture yet" is
+                          an instruction to her and belongs in the portal, not
+                          an apology to a visitor on the front page. */}
+                      {row.image && (
+                        <picture>
+                          <source
+                            type="image/avif"
+                            srcSet={`/media/${row.image}-1200.avif`}
+                          />
+                          <source
+                            type="image/webp"
+                            srcSet={`/media/${row.image}-1200.webp`}
+                          />
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            className="ledger-row__plate"
+                            src={`/media/${row.image}-1200.jpg`}
+                            alt={row.imageAlt}
+                            loading="lazy"
+                          />
+                        </picture>
+                      )}
+                      {/* The words, gathered so they can sit BESIDE the
+                          picture rather than under it (operator, 2026-08-19).
+                          The wrapper is what makes the row two columns; without
+                          it the four elements would each wrap in turn. */}
+                      <span className="ledger-row__words">
+                        <span className="ledger-row__top">
+                          <span className="small ledger-row__date">
+                            <span className="num">{row.date}</span>
+                          </span>
+                          <span className="ledger-row__price">
+                            <span className="disp amt num">{row.price}</span>
+                          </span>
                         </span>
-                        <span className="ledger-row__price">
-                          <span className="disp amt num">{row.price}</span>
+                        <span className="disp ledger-row__title">
+                          {row.title}
                         </span>
-                      </p>
-                      <p className="disp ledger-row__title">{row.title}</p>
-                      <p className="small ledger-row__meta">{row.meta}</p>
+                        <span className="small ledger-row__meta">
+                          {row.meta}
+                        </span>
+                      </span>
                     </a>
                   ))
                 )}

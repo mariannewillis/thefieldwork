@@ -36,7 +36,33 @@ export type LedgerRow = {
   price: string;
   title: string;
   meta: string;
+  /**
+   * The offering's own picture — the SAME one the Offerings screen shows for it
+   * (`heroImage`), so what she puts on a workshop is what appears here, and
+   * there is no second image to keep in step.
+   *
+   * Null on an offering with no picture yet, and the row simply has none: a
+   * placeholder saying "no picture" belongs in the portal, where it is an
+   * instruction to her, and not on the site, where it is an apology to a
+   * visitor.
+   */
+  image: string | null;
+  imageAlt: string;
 };
+
+/**
+ * HOW MANY OF EACH KIND THE HOME PAGE SHOWS (operator, 2026-08-19).
+ *
+ * This block is a SAMPLE, and its own copy has always said so — every column
+ * carries a link to the index it is a sample of. Before this it showed
+ * everything, which on a busy month made the beat the longest on the page and
+ * the three columns different lengths.
+ *
+ * Three each, and the columns each keep their own ordering: workshops by date,
+ * courses by when the run starts, services by name. So this is the next three,
+ * not a favourite three.
+ */
+export const HOME_LEDGER_LIMIT = 3;
 
 /**
  * One of the three columns in the products block.

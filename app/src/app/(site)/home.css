@@ -541,6 +541,7 @@ a.ledger-row:hover .ledger-row__title {
   white-space: nowrap;
 }
 .ledger-row__title {
+  display: block;
   font-size: calc((clamp(19px, 1.5vw, 24px)) * var(--k, 1));
   line-height: 1.2;
   color: var(--plum-900);
@@ -551,6 +552,7 @@ a.ledger-row:hover .ledger-row__title {
   color: var(--magenta-deep);
 }
 .ledger-row__meta {
+  display: block;
   color: var(--plum-800);
   line-height: 1.45;
 }
@@ -796,4 +798,44 @@ a.cta {
 }
 .crown .sub__label {
   text-align: center;
+}
+
+/* ── the picture on a ledger row (operator, 2026-08-19) ───────────────────
+   Her own picture for the offering — the same `heroImage` the Offerings screen
+   shows — SMALL, and to the LEFT of the words rather than above them
+   (operator, same day). Above and full-width made each row a poster and put
+   the third one off the bottom of the beat; a thumbnail keeps the row a row,
+   which is what a ledger is.
+
+   THE SHAPE IS THE PAGE'S, not the portal's. The admin draws these at 4:5,
+   because there the picture is being identified. Here it is a mark beside a
+   line, so it is square: at this size a portrait crop is a sliver and a
+   letterbox is a smear, and a square is the one shape that survives both a
+   room and a face. */
+.ledger-row {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(11px, 1.1vw, 15px);
+}
+.ledger-row__plate {
+  flex: 0 0 auto;
+  width: clamp(52px, 5vw, 68px);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  /* The same dimming the beats' own plates carry, so a picture arriving from
+     the portal cannot be brighter than the composition it lands in. */
+  filter: brightness(0.94) saturate(1.06);
+}
+/* The words take the rest, and must be allowed to shrink: a flex child's
+   default `min-width: auto` refuses to go below its longest word, which in a
+   third-of-a-band column pushes the price off the right-hand edge. */
+.ledger-row__words {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+a.ledger-row:hover .ledger-row__plate,
+a.ledger-row:focus-visible .ledger-row__plate {
+  filter: brightness(1) saturate(1.1);
 }
