@@ -141,15 +141,24 @@ export default async function Page({
 
   return (
     <section className="pt-8" aria-labelledby="letter-h">
-      <p className={EYEBROW}>
+      {/* A WAY BACK, and it lands on the tab this letter is on (operator,
+          2026-08-19). A breadcrumb that always returned to Drafts would send
+          her to the wrong half of the screen every time she came out of a sent
+          one — which reads as the page having lost her place. */}
+      <p className="flex flex-wrap items-baseline gap-x-4">
         <Link
-          href="/admin/newsletters"
-          className="t underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+          href={
+            letter.status === "draft"
+              ? "/admin/newsletters"
+              : "/admin/newsletters?show=sent"
+          }
+          className="t fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
         >
-          Newsletter
+          &larr; All letters
         </Link>
-        {" · "}
-        {letter.status === "draft" ? "draft" : "sent"}
+        <span className={EYEBROW}>
+          {letter.status === "draft" ? "Draft" : "Sent"}
+        </span>
       </p>
 
       <h1

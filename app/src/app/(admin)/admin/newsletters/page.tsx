@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import DeleteDraft from "@/components/admin/DeleteDraft";
 import { formatInstant } from "@/lib/format";
 import { createNewsletter } from "./actions";
 
@@ -25,7 +26,43 @@ export const dynamic = "force-dynamic";
 const EYEBROW =
   "fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold";
 
-export default async function Page() {
+/** One of the two tabs, drawn as a link so the choice survives a reload. */
+function Tab({
+  href,
+  label,
+  count,
+  current,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  current: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className={
+        current
+          ? "t border-b-2 border-gold pb-2 text-[19px] font-semibold text-plate-text"
+          : "t border-b-2 border-transparent pb-2 text-[19px] text-plate-soft hover:text-plate-text"
+      }
+    >
+      {label}{" "}
+      <span className="fig font-mono text-[16px] tabular-nums">{count}</span>
+    </Link>
+  );
+}
+
+const HEAD =
+  "pb-3 pr-5 text-left align-bottom fig font-mono text-[15px] font-medium uppercase tracking-[0.14em] text-ink-soft";
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ show?: string }>;
+}) {
+  const { show } = await searchParams;
   const letters = await prisma.newsletter.findMany({
     orderBy: [{ sentAt: "desc" }, { updatedAt: "desc" }],
     include: {
@@ -36,6 +73,11 @@ export default async function Page() {
 
   const drafts = letters.filter((letter) => letter.status === "draft");
   const sent = letters.filter((letter) => letter.status === "sent");
+
+  // Drafts is the default, because a draft is the one with something left to
+  // do. A sent letter is a record, and she goes looking for those.
+  const showingSent = show === "sent";
+  const rows = showingSent ? sent : drafts;
 
   return (
     <section className="pt-8" aria-labelledby="letters-h">
@@ -87,71 +129,138 @@ export default async function Page() {
         </button>
       </form>
 
-      {/* ── drafts ───────────────────────────────────────────────────────── */}
-      {drafts.length > 0 && (
-        <div className="mt-11">
-          <p className="fig font-mono text-[15px] font-semibold uppercase tracking-[0.14em] text-plate-text">
-            Drafts
-          </p>
-          <ul className="mt-5 grid list-none gap-px border border-plate-rule/40 bg-plate-rule/40 p-0 lg:grid-cols-2">
-            {drafts.map((letter) => (
-              <li key={letter.id} className="pool on-pool p-6">
-                <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-action">
-                  Draft &middot; last touched {formatInstant(letter.updatedAt)}
-                </p>
-                <h2 className="mt-3 font-display text-[26px] leading-tight text-ink">
-                  <Link
-                    href={`/admin/newsletters/${letter.id}`}
-                    className="t underline decoration-pool-rule/60 underline-offset-[6px] hover:decoration-ink"
-                  >
-                    {letter.subject}
-                  </Link>
-                </h2>
-                <p className="mt-3 max-w-[46ch] text-[17px] leading-relaxed text-ink-soft">
-                  {letter._count.blocks === 0
-                    ? "Nothing written into it yet."
-                    : `${letter._count.blocks} ${letter._count.blocks === 1 ? "block" : "blocks"} written`}
-                  {letter._count.attachments > 0 &&
-                    `, ${letter._count.attachments} ${letter._count.attachments === 1 ? "file" : "files"} attached`}
-                  . Nobody has seen this &mdash; not even a test has gone out
-                  unless you sent one.
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* TWO TABS AND A TABLE, where two grids of cards were (operator,
+          2026-08-19). A letter is four facts — what it is called, what state it
+          is in, how big it is and when it moved — and a card gave each of them
+          a paragraph. Drafts is the default, because a draft is the one with
+          something left to do. */}
+      <nav
+        aria-label="Which letters"
+        className="mt-9 flex flex-wrap items-baseline gap-x-8 gap-y-3 border-b border-plate-rule/40"
+      >
+        <Tab
+          href="/admin/newsletters"
+          label="Drafts"
+          count={drafts.length}
+          current={!showingSent}
+        />
+        <Tab
+          href="/admin/newsletters?show=sent"
+          label="Sent"
+          count={sent.length}
+          current={showingSent}
+        />
+      </nav>
 
-      {/* ── sent ─────────────────────────────────────────────────────────── */}
-      {sent.length > 0 && (
-        <div className="mt-11">
-          <p className="fig font-mono text-[15px] font-semibold uppercase tracking-[0.14em] text-plate-text">
-            Sent &middot; newest first &middot; none of them can be changed now
+      {rows.length === 0 ? (
+        <div className="pool on-pool mt-7 max-w-[62ch] px-7 py-7">
+          <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
+            {showingSent ? "Nothing sent" : "No draft"}
           </p>
-          <ul className="mt-5 grid list-none gap-px border border-plate-rule/40 bg-plate-rule/40 p-0 lg:grid-cols-2">
-            {sent.map((letter) => (
-              <li key={letter.id} className="pool on-pool p-6">
-                <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
-                  Sent {letter.sentAt ? formatInstant(letter.sentAt) : ""}
-                </p>
-                <h2 className="mt-3 font-display text-[26px] leading-tight text-ink">
-                  <Link
-                    href={`/admin/newsletters/${letter.id}`}
-                    className="t underline decoration-pool-rule/60 underline-offset-[6px] hover:decoration-ink"
+          <p className="mt-2 font-display text-[26px] leading-tight text-ink">
+            {showingSent
+              ? "Nothing has gone out yet."
+              : "There is no letter waiting to be written."}
+          </p>
+          <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
+            {showingSent
+              ? "A letter appears here the moment you send it, with who it went to and what happened to each one."
+              : "Press “Write a new letter” above and it saves as a draft from the first word."}
+          </p>
+        </div>
+      ) : (
+        <div className="pool on-pool mt-7 px-6 py-2 sm:px-8">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] border-collapse text-left">
+              <caption className="sr-only">
+                {showingSent
+                  ? "Letters that have gone out, newest first. Pressing one opens the letter as it arrived and who it was sent to."
+                  : "Letters still being written, most recently touched first. Pressing one opens the editor."}
+              </caption>
+              <thead>
+                <tr className="border-b-2 border-ink">
+                  <th scope="col" className={HEAD}>
+                    Subject
+                  </th>
+                  <th scope="col" className={HEAD}>
+                    {showingSent ? "Sent to" : "What is in it"}
+                  </th>
+                  <th scope="col" className={HEAD}>
+                    {showingSent ? "Sent" : "Last touched"}
+                  </th>
+                  <th scope="col" className={`${HEAD} pr-0`}>
+                    &nbsp;
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((letter) => (
+                  <tr
+                    key={letter.id}
+                    className="border-t border-pool-rule hover:bg-gold/10"
                   >
-                    {letter.subject}
-                  </Link>
-                </h2>
-                <p className="mt-3 max-w-[46ch] text-[17px] leading-relaxed text-ink-soft">
-                  Sent to {letter.recipientCount}{" "}
-                  {letter.recipientCount === 1 ? "person" : "people"}
-                  {letter.sends.length > 0 &&
-                    ` · ${letter.sends.length} still waiting to go`}
-                  .
-                </p>
-              </li>
-            ))}
-          </ul>
+                    <th
+                      scope="row"
+                      className="py-4 pr-5 text-left align-middle"
+                    >
+                      {/* THE WHOLE ROW IS NOT A BUTTON HERE, unlike the two
+                          ledgers: a letter has a PAGE rather than a sheet — the
+                          editor, or the record of who it went to — so the
+                          subject is a link and the row is a row. */}
+                      <Link
+                        href={`/admin/newsletters/${letter.id}`}
+                        className="t font-display text-[21px] leading-tight text-ink underline decoration-pool-rule/60 underline-offset-4 hover:decoration-ink"
+                      >
+                        {letter.subject}
+                      </Link>
+                    </th>
+
+                    <td className="py-4 pr-5 align-middle text-[17px] text-ink-soft">
+                      {showingSent ? (
+                        <>
+                          {letter.recipientCount}{" "}
+                          {letter.recipientCount === 1 ? "person" : "people"}
+                          {letter.sends.length > 0 &&
+                            ` · ${letter.sends.length} still to go`}
+                        </>
+                      ) : letter._count.blocks === 0 ? (
+                        "Nothing written into it yet"
+                      ) : (
+                        <>
+                          {letter._count.blocks}{" "}
+                          {letter._count.blocks === 1 ? "block" : "blocks"}
+                          {letter._count.attachments > 0 &&
+                            ` · ${letter._count.attachments} ${letter._count.attachments === 1 ? "file" : "files"}`}
+                        </>
+                      )}
+                    </td>
+
+                    <td className="py-4 pr-5 align-middle fig font-mono text-[15px] tabular-nums text-ink-soft">
+                      {showingSent
+                        ? letter.sentAt
+                          ? formatInstant(letter.sentAt)
+                          : ""
+                        : formatInstant(letter.updatedAt)}
+                    </td>
+
+                    <td className="py-4 align-middle">
+                      {/* DELETE ON A DRAFT ONLY, and the rule is the server's:
+                          a letter that has gone out stays, because forty people
+                          are holding a copy of what it said and a record that
+                          can be removed after the fact is not a record. */}
+                      {letter.status === "draft" ? (
+                        <DeleteDraft id={letter.id} subject={letter.subject} />
+                      ) : (
+                        <span className="fig font-mono text-[15px] text-ink-soft">
+                          kept
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

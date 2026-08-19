@@ -130,9 +130,7 @@ function RailBody({
             item={item}
             pathname={pathname}
             unseen={
-              UNSEEN_BY_HREF[item.href]
-                ? unseen[UNSEEN_BY_HREF[item.href]]
-                : 0
+              UNSEEN_BY_HREF[item.href] ? unseen[UNSEEN_BY_HREF[item.href]] : 0
             }
             onNavigate={onNavigate}
           />

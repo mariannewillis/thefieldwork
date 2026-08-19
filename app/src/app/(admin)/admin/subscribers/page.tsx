@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { markAllSubscribersSeen } from "@/app/(admin)/admin/subscribers/actions";
 import MarkAllSeen from "@/components/admin/MarkAllSeen";
-import Pager, {
-  currentPage,
-  pageSlice,
-} from "@/components/admin/Pager";
+import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
 import SubscriberActions from "@/components/admin/SubscriberActions";
 import { formatDayShort } from "@/lib/format";
 import { allSubscribers } from "@/lib/newsletter/subscribers";

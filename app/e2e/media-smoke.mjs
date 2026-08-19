@@ -312,12 +312,24 @@ try {
   console.log("\n— everything already on the site is already here —");
 
   // What the site references BEFORE the library is ever opened.
+  //
+  // ANY WORKSHOP WITH A HERO, not a named one. This used to read
+  // `slug = 'the-long-attention'` and broke the day that row stopped existing —
+  // which is a brittleness worth removing rather than repairing, because what
+  // the assertion is actually about is "a picture the site already references",
+  // and which workshop happens to carry it is not the claim.
   const heroBefore = await db.query(
-    `SELECT "heroImage" FROM "Workshop" WHERE slug = 'the-long-attention'`,
+    `SELECT "heroImage" FROM "Workshop" WHERE "heroImage" IS NOT NULL ORDER BY id LIMIT 1`,
   );
   const adoptedHero = heroBefore.rows[0]?.heroImage;
+  // Kept for the untouchables check at the end: what was here before this run.
+  const workshopsBefore = (
+    await db.query(
+      `SELECT slug FROM "Workshop" WHERE "heroImage" IS NOT NULL ORDER BY id`,
+    )
+  ).rows;
   ok(
-    "the operator's workshop still has its hero picture",
+    "a workshop on the site has a hero picture for the library to adopt",
     Boolean(adoptedHero),
     String(adoptedHero),
   );
@@ -862,10 +874,25 @@ try {
     );
   }
 
+  // THE WORDING IS IN THE SHEET NOW (2026-08-19). The documents tab is a table;
+  // the row says "Only you" in three words and the paragraph that explains why
+  // opens with it.
   ok(
-    "the screen says only she can open it",
-    /only you can open this/i.test(await page.locator("body").innerText()),
+    "the row says at a glance that only she can open it",
+    /only you/i.test(await page.locator("tbody").innerText()),
+    (await page.locator("tbody").innerText()).replace(/\s+/g, " ").slice(0, 160),
   );
+  await page.locator("tbody tr").first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  ok(
+    "and pressing it says why, in words",
+    /only you/i.test(await page.locator("dialog[open]").innerText()),
+    (await page.locator("dialog[open]").innerText())
+      .replace(/\s+/g, " ")
+      .slice(0, 200),
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
 
   // WHICH ROUTE, AND IT IS NOT A GUESS. A document not yet on a letter is
   // served from the session-gated route; one that has gone out is served from
@@ -1006,12 +1033,29 @@ try {
 
   await page.goto(`${BASE}/admin/media?tab=documents`);
   await page.getByRole("heading", { level: 1 }).waitFor();
+  // ALSO IN THE SHEET NOW. The row says "Anyone with the link"; pressing it
+  // says why, and that a link in an inbox cannot ask anybody to sign in.
   ok(
-    "and the library says so, in words",
-    /anybody with the address can open/i.test(
-      await page.locator("body").innerText(),
-    ),
+    "and the library says so at a glance",
+    /anyone with the link/i.test(await page.locator("tbody").innerText()),
+    (await page.locator("tbody").innerText()).replace(/\s+/g, " ").slice(0, 200),
   );
+  await page
+    .locator("tbody tr", { hasText: /smoke-media-handout/i })
+    .first()
+    .click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  ok(
+    "and pressing it says why, in words",
+    /anybody with the address/i.test(
+      await page.locator("dialog[open]").innerText(),
+    ),
+    (await page.locator("dialog[open]").innerText())
+      .replace(/\s+/g, " ")
+      .slice(0, 200),
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
   {
     const link = page.getByRole("link", { name: /smoke-media-handout/i });
     ok(
@@ -1043,8 +1087,10 @@ try {
   await page.goto(`${BASE}/admin/media?tab=documents`);
   await page.getByRole("heading", { level: 1 }).waitFor();
   {
+    // A ROW, NOT A CARD. The documents tab is a table now (2026-08-19), and
+    // Remove is the last cell of it.
     const card = page
-      .locator("li")
+      .locator("tbody tr")
       .filter({ hasText: /smoke-media-handout/i })
       .first();
     await card.scrollIntoViewIfNeeded();
@@ -1120,14 +1166,22 @@ try {
   // ══ 10 · THE OPERATOR'S OWN DATA CAME THROUGH UNCHANGED ════════════════════
   console.log("\n— the untouchables —");
   {
+    // WHAT THIS RUN TOOK IN, AND THAT IT PUT IT BACK — rather than two named
+    // slugs. The check is that the library did not touch the operator's
+    // workshops; naming them made it fail the day one of them stopped
+    // existing, which tested the fixture rather than the claim.
     const rows = await db.query(
-      `SELECT slug, "heroImage" FROM "Workshop" WHERE slug IN ('the-long-attention','lorem-ipsum') ORDER BY slug`,
+      `SELECT slug, "heroImage" FROM "Workshop" WHERE "heroImage" IS NOT NULL ORDER BY id`,
     );
-    ok("both operator workshops are still there", rows.rows.length === 2);
     ok(
-      "and the-long-attention still has the hero it started with",
-      rows.rows.find((r) => r.slug === "the-long-attention")?.heroImage ===
-        adoptedHero,
+      "the operator's workshops are still there, with their pictures",
+      rows.rows.length === workshopsBefore.length,
+      `${rows.rows.length} now, ${workshopsBefore.length} before`,
+    );
+    ok(
+      "and the one the library adopted from still has the hero it started with",
+      rows.rows.some((r) => r.heroImage === adoptedHero),
+      JSON.stringify(rows.rows.map((r) => r.heroImage)),
     );
     const templates = await db.query(
       `SELECT count(*)::int AS n FROM "EmailTemplate"`,

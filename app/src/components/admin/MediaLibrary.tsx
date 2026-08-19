@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import DocumentLine from "@/components/admin/DocumentLine";
 import {
   addLibraryDocument,
   addLibraryPicture,
@@ -337,86 +338,65 @@ export function Videos({ rows }: { rows: LibraryRow[] }) {
   );
 }
 
+/** The column heads, in the same voice the other two ledgers use. */
+const HEAD =
+  "pb-3 pr-5 text-left align-bottom fig font-mono text-[15px] font-medium uppercase tracking-[0.14em] text-ink-soft";
+
 export function Documents({ rows }: { rows: LibraryRow[] }) {
   if (rows.length === 0) return <Empty what="documents" />;
 
   return (
-    <>
-      <ul className="mt-8 flex list-none flex-col gap-0 p-0">
-        {rows.map((row) => (
-          <li key={row.id} className="border-t border-pool-rule/40 py-7">
-            {/* ── PRESSING IT OPENS IT, IN A NEW TAB ───────────────────────────
-              A NEW TAB BECAUSE THE FILE IS A DOWNLOAD, not a page. Both routes
-              serve it with `Content-Disposition: attachment` — a PDF served
-              inline runs its own JavaScript inside the browser's viewer on this
-              origin, and this origin is the admin portal — so following it in
-              this tab would leave her staring at the screen she was already on,
-              wondering whether anything had happened.
-
-              WHICH ROUTE IS NOT A GUESS. `href` is `documentHref`, and it
-              picks: a document not yet on a letter is served from
-              `/admin/media/file/…`, which requires a session; one that has gone
-              out is served from `/newsletter-files/…`, which is the address in
-              people's inboxes. So "open it and check" and "this is the link
-              they got" are the same press for a public file, and the private
-              one is never handed a link that would 404 for its recipient. */}
-            <p className="font-display text-[26px] leading-tight text-ink">
-              {row.href ? (
-                <a
-                  href={row.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="t underline decoration-pool-rule underline-offset-4 hover:text-action"
-                >
-                  {row.title ?? row.ref}
-                </a>
-              ) : (
-                (row.title ?? row.ref)
-              )}
-            </p>
-            <p className="fig font-mono mt-2 text-[13px] text-ink-soft">
-              {kindWords(row.contentType)}
-              {row.bytes ? ` · ${sizeWords(row.bytes)}` : ""} &middot;{" "}
-              <Arrived addedAt={row.addedAt} />
-            </p>
-
-            {/* ── WHO CAN OPEN IT, in words rather than a padlock ───────────
-              A document is admin-only until it goes on a letter, and reachable
-              from that moment on — because a link in somebody's inbox has no
-              session behind it. Both halves are said plainly, because "private"
-              and "public" are the two states she is actually deciding between
-              when she attaches something. */}
-            {row.reachableWithoutASession ? (
-              <p className="mt-3 max-w-[62ch] text-[17px] leading-relaxed text-ink">
-                <strong className="font-semibold">
-                  Anybody with the address can open this.
-                </strong>{" "}
-                It has gone out on a letter, so the link is in people&rsquo;s
-                inboxes and cannot ask them to sign in. Nothing stops one of
-                them forwarding it on.
-              </p>
-            ) : (
-              <p className="mt-3 max-w-[62ch] text-[17px] leading-relaxed text-ink">
-                <strong className="font-semibold">
-                  Only you can open this.
-                </strong>{" "}
-                It is not on any letter yet, so it needs your sign-in. Put it on
-                a letter and it becomes readable by anybody with the address
-                &mdash; which is what has to happen for the link to work in
-                somebody&rsquo;s inbox.
-              </p>
-            )}
-
-            <Uses uses={row.uses} />
-            <Remove row={row} />
-          </li>
-        ))}
-      </ul>
+    <div className="pool on-pool mt-8 px-6 py-2 sm:px-8">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[820px] border-collapse text-left">
+          <caption className="sr-only">
+            Every document in the library, newest first. Columns: what it is
+            called, what kind of file and how big, who can open it, and how many
+            places it is used. Everything else about a document — the full
+            wording on who can open it, and each place it appears — opens by
+            pressing the row. Pressing its NAME opens the file itself in a new
+            tab.
+          </caption>
+          <thead>
+            <tr className="border-b-2 border-ink">
+              <th scope="col" className={HEAD}>
+                What it is called
+              </th>
+              <th scope="col" className={HEAD}>
+                What it is
+              </th>
+              <th scope="col" className={HEAD}>
+                Who can open it
+              </th>
+              <th scope="col" className={HEAD}>
+                Used
+              </th>
+              <th scope="col" className={`${HEAD} pr-0`}>
+                &nbsp;
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <DocumentLine
+                key={row.id}
+                row={row}
+                kindWords={kindWords(row.contentType)}
+                sizeWords={row.bytes ? sizeWords(row.bytes) : null}
+                arrived={row.addedAt ? `added ${row.addedAt}` : "already on the site"}
+              >
+                <Remove row={row} />
+              </DocumentLine>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p className={HELP}>
-        Press a name to open the file in a new tab. What it is called is the
-        filename it arrived under; a letter sends it out under that name.
+        Press a name to open the file in a new tab; press the row for everything
+        else. What it is called is the filename it arrived under, and a letter
+        sends it out under that name.
       </p>
-    </>
+    </div>
   );
 }
 
