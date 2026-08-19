@@ -1157,7 +1157,7 @@ try {
   ok("the October calendar draws", october.ok());
   ok(
     "and shows the whole Sunday as all day rather than as a time range",
-    /all day/.test(octoberText),
+    /all day/i.test(octoberText),
     oneLine(octoberText),
   );
   ok(
@@ -1352,20 +1352,47 @@ try {
     /\d{2}:\d{2}–\d{2}:\d{2}/.test(queue),
     oneLine(queue),
   );
-  ok(
-    "and marked as held for them",
-    /Held for them/.test(queue),
-    oneLine(queue),
-  );
+  // BOTH OF THE OPERATOR'S OWN REQUESTS ARE ANSWERED, so they are on the
+  // Answered tab (2026-08-19) rather than in the queue read above. And their
+  // own words are in the sheet: the queue is one line a row, and a message
+  // somebody typed is what opens when she presses it.
+  await page.goto(`${BASE}/admin/bookings?show=archived`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
+  const answered = await page.locator("main").innerText();
+  await page.locator("tbody tr", { hasText: "monday morning" }).first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  const sheet4 = await page.locator("dialog[open]").innerText();
   ok(
     "the operator's own request 4 still prints the words he typed",
-    queue.includes("monday morning"),
-    oneLine(queue),
+    sheet4.includes("monday morning"),
+    oneLine(sheet4),
   );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
+
+  // ON THE WAITING TAB, because "held for them" is only true while the request
+  // is live — the archive holds declined ones, whose hour has gone back into
+  // her diary, and the sheet says so instead.
+  await page.goto(`${BASE}/admin/bookings`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
+  await page
+    .locator("tbody tr", { hasText: /\d{2}:\d{2}–\d{2}:\d{2}/ })
+    .first()
+    .click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  const chosenSheet = await page.locator("dialog[open]").innerText();
   ok(
-    "and request 3 does too",
-    queue.includes("Weekday mornings"),
-    oneLine(queue),
+    "and a chosen slot is marked as held for them",
+    /Held for them/.test(chosenSheet),
+    oneLine(chosenSheet),
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
+
+  ok(
+    "and request 3's own words are on its line, which has no slot to print",
+    answered.includes("Weekday mornings"),
+    oneLine(answered),
   );
 
   // ── the operator's own data, again, at the end ───────────────────────────

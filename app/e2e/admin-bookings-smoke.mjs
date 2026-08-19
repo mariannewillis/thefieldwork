@@ -560,11 +560,7 @@ try {
   await page.goto(`${BASE}/admin/workshop-bookings`);
   await page.waitForSelector("#ledger-h", { timeout: 30_000 });
   const onPage = await page.locator("#upcoming-table tbody tr").count();
-  ok(
-    "a page never holds more than twelve rows",
-    onPage <= 12,
-    String(onPage),
-  );
+  ok("a page never holds more than twelve rows", onPage <= 12, String(onPage));
   ok(
     "and a table that fits on one page draws no pager",
     (await page.locator('nav[aria-label*="Pages of"]').count()) === 0,

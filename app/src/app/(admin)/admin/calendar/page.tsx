@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { formatDuration } from "@/lib/format";
 import Link from "next/link";
-import { BlockForm, UnblockButton } from "@/components/admin/BlockForm";
+import { BlockForm } from "@/components/admin/BlockForm";
+import CalendarEntry, {
+  type CalendarEntryData,
+} from "@/components/admin/CalendarEntry";
 import { SITE_URL } from "@/content/site";
 import { getSession } from "@/lib/auth/server";
 import { busyBetween } from "@/lib/availability";
@@ -136,6 +140,52 @@ export default async function Page({
   const today = londonDayKey(now);
   const busyDays = days.filter((day) => byDay.has(day.key));
 
+  /**
+   * ONE SPAN, TURNED INTO AN ENTRY.
+   *
+   * Every conversion is the SERVER's: an instant into her clock, a kind into
+   * words. `CalendarEntry` receives strings and draws them, so the grid and the
+   * list cannot format the same span two ways — which they already had, the
+   * list showing times and the grid showing none.
+   *
+   * ALL DAY IS A COMPARISON, NOT A FLAG. A span covers the day when it starts
+   * at or before the day's first instant and ends at or after its last, which
+   * is how a whole-day workshop and a week in Wales both arrive here without
+   * either of them carrying a boolean that could disagree with its own dates.
+   */
+  const entryOf = (
+    span: BusySpan,
+    day: { key: string; words: string; startsAt: Date; endsAt: Date },
+  ): CalendarEntryData => {
+    const allDay =
+      span.startsAt.getTime() <= day.startsAt.getTime() &&
+      span.endsAt.getTime() >= day.endsAt.getTime();
+    return {
+      key: `${span.kind}-${span.id}`,
+      kind: span.kind,
+      label: span.label,
+      clock: allDay
+        ? "All day"
+        : `${londonClock(span.startsAt)}–${londonClock(span.endsAt)}`,
+      clockShort: allDay ? "All day" : londonClock(span.startsAt),
+      // HOW LONG IT TAKES, which is the second thing a diary is asked. Derived
+      // from the two instants rather than read off the offering, because a
+      // course date and a session already carry their own length in these and
+      // reading it twice is how the two start disagreeing.
+      howLong: allDay
+        ? null
+        : formatDuration(
+            Math.round(
+              (span.endsAt.getTime() - span.startsAt.getTime()) / 60000,
+            ),
+          ),
+      kindWords: KINDS[span.kind],
+      dayWords: day.words,
+      href: span.href,
+      blockId: span.kind === "block" ? span.id : undefined,
+    };
+  };
+
   const feedUrl = owner?.calendarFeedToken
     ? `${SITE_URL}/api/calendar/${owner.calendarFeedToken}.ics`
     : null;
@@ -241,25 +291,17 @@ export default async function Page({
                   </p>
 
                   <ul className="m-0 mt-1 list-none space-y-1 p-0">
-                    {spans.map((span) => (
-                      <li
-                        key={`${span.kind}-${span.id}`}
-                        className={`border-l-4 pl-2 ${TONES[span.kind]}`}
-                      >
-                        {span.href ? (
-                          <Link
-                            href={span.href}
-                            className="block text-[14px] leading-snug text-ink underline decoration-transparent underline-offset-2 hover:decoration-ink"
-                          >
-                            {span.label}
-                          </Link>
-                        ) : (
-                          <span className="block text-[14px] leading-snug text-ink">
-                            {span.label}
-                          </span>
-                        )}
-                      </li>
-                    ))}
+                    {spans.map((span) => {
+                      const entry = entryOf(span, day);
+                      return (
+                        <CalendarEntry
+                          key={entry.key}
+                          entry={entry}
+                          tone={TONES[span.kind]}
+                          variant="grid"
+                        />
+                      );
+                    })}
                   </ul>
                 </li>
               );
@@ -304,39 +346,17 @@ export default async function Page({
                 </p>
 
                 <ul className="m-0 mt-3 list-none space-y-2 p-0">
-                  {(byDay.get(day.key) ?? []).map((span) => (
-                    <li
-                      key={`${span.kind}-${span.id}`}
-                      className={`border-l-4 pl-4 ${TONES[span.kind]}`}
-                    >
-                      <span className={NOTE}>
-                        {span.startsAt.getTime() <= day.startsAt.getTime() &&
-                        span.endsAt.getTime() >= day.endsAt.getTime()
-                          ? "all day"
-                          : `${londonClock(span.startsAt)}–${londonClock(span.endsAt)}`}
-                        {" · "}
-                        {KINDS[span.kind]}
-                      </span>
-                      <span className="block text-[19px] leading-snug text-ink">
-                        {span.href ? (
-                          <Link
-                            href={span.href}
-                            className="t underline decoration-pool-rule/50 underline-offset-4 hover:decoration-ink"
-                          >
-                            {span.label}
-                          </Link>
-                        ) : (
-                          span.label
-                        )}
-                        {span.kind === "block" && (
-                          <>
-                            {" "}
-                            <UnblockButton id={span.id} reason={span.label} />
-                          </>
-                        )}
-                      </span>
-                    </li>
-                  ))}
+                  {(byDay.get(day.key) ?? []).map((span) => {
+                    const entry = entryOf(span, day);
+                    return (
+                      <CalendarEntry
+                        key={entry.key}
+                        entry={entry}
+                        tone={TONES[span.kind]}
+                        variant="list"
+                      />
+                    );
+                  })}
                 </ul>
               </li>
             ))}
