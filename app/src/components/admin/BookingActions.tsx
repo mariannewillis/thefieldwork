@@ -24,10 +24,12 @@ import {
  *            Inside the offering's own refund period it ASKS whether to send
  *            the money back; past it, it says plainly that nothing goes back
  *            and names what cancelling does achieve instead.
- *   Refund   whenever money has not already gone back. On a cancelled booking
- *            that is the goodwill decision she can make later; on a live one it
- *            means she has decided not to charge somebody who is still coming,
- *            and the place stays held.
+ *   Refund   while money has not already gone back AND the offering's own
+ *            refund period has not run out (operator, 2026-08-19 — it used to
+ *            stay open indefinitely). On a live booking it means she has
+ *            decided not to charge somebody who is still coming, and the place
+ *            stays held. A SESSION HAS NO REFUND PERIOD, so nothing has run out
+ *            on one and refunding it is hers to decide, as it always was.
  *   Delete   ONLY once the booking has been cancelled. Never on a live place,
  *            and therefore never on a workshop that has already run — a day
  *            that has been cannot be cancelled, so its record stays (D-18).
@@ -277,8 +279,25 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
     ? `Cancel is spent — this booking was already cancelled${booking.cancelledAt ? ` on ${formatInstant(booking.cancelledAt)}` : ""}.`
     : `Cancel is spent — that ${booking.kind === "course" ? "run" : booking.kind === "service" ? "session" : "day"} has already been, so there is no place left to release. You can still send the money back.`;
 
-  const canRefund = !booking.refunded;
-  const refundWhyNot = `Refund is spent — the money already went back${booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}. There is nothing left to send.`;
+  /**
+   * REFUND CLOSES WITH THE REFUND PERIOD (operator, 2026-08-19).
+   *
+   * It used to stay open indefinitely as a goodwill decision she could make
+   * later. It does not any more: past the offering's own refund date the
+   * control is spent, and says which date it was.
+   *
+   * THE TEST IS "THE PERIOD HAS PASSED", NOT "WE ARE INSIDE ONE", and the
+   * difference is the session. A session has no refund period at all
+   * (`refundDeadline` is null), which is not the same as being outside one —
+   * refunding one has always been hers to decide and still is. Gating on
+   * `insidePeriod` alone would have quietly taken the control off every
+   * session on the screen.
+   */
+  const periodHasPassed = booking.refundDeadline !== null && !booking.insidePeriod;
+  const canRefund = !booking.refunded && !periodHasPassed;
+  const refundWhyNot = booking.refunded
+    ? `Refund is spent — the money already went back${booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}. There is nothing left to send.`
+    : `The refund period ran out${booking.refundDeadline ? ` on ${formatDayLong(booking.refundDeadline)}` : ""}, so this cannot be refunded from here. If you have decided to send the money back anyway, it has to be done in Stripe.`;
 
   const canDelete = !live;
   const deleteWhyNot = booking.dayHasBeen

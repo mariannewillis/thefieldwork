@@ -514,32 +514,59 @@ try {
 
   // ── the shape of the screen ───────────────────────────────────────────────
   const body = await page.locator("main").innerText();
+  // THE EXPLAINING PROSE IS GONE (operator, 2026-08-19) and the two stacked
+  // tables are two TABS. What is asserted is the shape she is left with: one
+  // table at a time, the counts on the tabs, and none of the four paragraphs.
   ok(
-    "the headline answers the one question with real figures",
-    /live bookings are for things that haven/.test(body) &&
-      body.includes("you are holding"),
-    body.split("\n").slice(0, 6).join(" | "),
+    "the four paragraphs that explained the screen are gone",
+    !/live bookings are for things that haven/.test(body) &&
+      !body.includes("A booking sits in the first table") &&
+      !body.includes("Cancel is the everyday one") &&
+      !body.includes("Deposit is empty on a workshop") &&
+      !body.includes("Type never reads Service"),
+    oneLine(body),
   );
   ok(
-    "there are two tables, and the archive is the second",
+    "there are two tabs and ONE table — the other tab holds the other one",
     (await page.locator("#upcoming-table").count()) === 1 &&
-      (await page.locator("#archive-table").count()) === 1,
+      (await page.locator("#archive-table").count()) === 0 &&
+      (await page.locator('nav[aria-label="Which bookings"] a').count()) === 2,
   );
   ok(
-    "a day still to come is in the first table",
+    "a day still to come is on Upcoming, which is the tab she lands on",
     (await page
       .locator("#upcoming-table tr", { hasText: "Anna Keeling" })
-      .count()) === 1,
+      .count()) === 1 &&
+      (await page.locator("tr", { hasText: "Gwilym Hart" }).count()) === 0,
   );
+
+  // ── the past tab ──────────────────────────────────────────────────────────
+  await page.goto(`${BASE}/admin/workshop-bookings?show=past`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
   ok(
-    "a day that has been fell into the archive by itself",
+    "a day that has been fell onto the Past tab by itself",
     (await page
       .locator("#archive-table tr", { hasText: "Gwilym Hart" })
       .count()) === 1 &&
-      (await page
-        .locator("#upcoming-table tr", { hasText: "Gwilym Hart" })
-        .count()) === 0,
+      (await page.locator("#upcoming-table").count()) === 0,
   );
+
+  // ── filtering by kind ─────────────────────────────────────────────────────
+  await page.goto(`${BASE}/admin/workshop-bookings?kind=course`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
+  ok(
+    "filtering to Courses leaves no workshop row on the screen",
+    (await page.locator("tr", { hasText: "Anna Keeling" }).count()) === 0,
+  );
+  await page.goto(`${BASE}/admin/workshop-bookings?kind=workshop`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
+  ok(
+    "and filtering to Workshops brings it back",
+    (await page.locator("tr", { hasText: "Anna Keeling" }).count()) === 1,
+  );
+
+  await page.goto(`${BASE}/admin/workshop-bookings`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
   ok(
     "the columns are in the approved order",
     (await page.locator("#upcoming-table thead").innerText())
@@ -554,11 +581,8 @@ try {
   // The Type cell is set in uppercase by the stylesheet, so innerText gives it
   // back as WORKSHOP — the assertion has to ask for what is drawn.
   ok(
-    "Type says Workshop on every row, and the page says once why Deposit is empty",
-    body.includes("WORKSHOP") &&
-      !body.includes("SERVICE") &&
-      body.includes("Deposit is empty on a workshop") &&
-      body.includes("Type never reads Service"),
+    "Type says Workshop on every row",
+    body.includes("WORKSHOP") && !body.includes("SERVICE"),
   );
   ok(
     "each row states its own workshop's refund period",
@@ -566,7 +590,34 @@ try {
       (await rowText(page, "Ffion Oakes")).includes("closed"),
   );
 
+  // ── refund closes with the refund period ──────────────────────────────────
+  //
+  // It used to stay open indefinitely as a goodwill decision she could make
+  // later; the operator closed it (2026-08-19). Ffion's period has passed and
+  // Anna's has not, so the two rows say the whole rule between them.
+  await control(page, "Ffion Oakes", 1).click({ force: true });
+  ok(
+    "refund is spent once the refund period has run out, and names the date",
+    (await rowText(page, "Ffion Oakes")).includes("The refund period ran out"),
+    await rowText(page, "Ffion Oakes"),
+  );
+  ok(
+    "and it says where the money can still be sent from, rather than just no",
+    (await rowText(page, "Ffion Oakes")).includes("Stripe"),
+  );
+  ok(
+    "while a booking still inside its period keeps its refund",
+    (await control(page, "Anna Keeling", 1).getAttribute("aria-disabled")) !==
+      "true",
+  );
+
   // ── a disabled control explains itself ────────────────────────────────────
+  //
+  // Gwilym's day has been, so he is on the Past tab now (2026-08-19). Hester's
+  // is refunded and still to come, so she stays on Upcoming — the two halves of
+  // this block are on the two tabs and each goes to its own.
+  await page.goto(`${BASE}/admin/workshop-bookings?show=past`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
   await control(page, "Gwilym Hart", 0).click({ force: true });
   ok(
     "cancel on a day that has been says why it cannot be used",
@@ -582,6 +633,8 @@ try {
       "a day that has been cannot be cancelled, so this record stays",
     ),
   );
+  await page.goto(`${BASE}/admin/workshop-bookings`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
   await control(page, "Hester Nye", 1).click({ force: true });
   ok(
     "refund on an already-refunded booking says the money has gone",
@@ -1023,25 +1076,33 @@ try {
     `DELETE FROM "Booking" WHERE "workshopId" IN
        (SELECT id FROM "Workshop" WHERE slug LIKE 'smoke-ledger-%')`,
   );
-  await page.reload();
+  // ON THE PAST TAB, which is where what used to be the archive lives
+  // (2026-08-19). Upcoming still holds the operator's own rows, so reading the
+  // empty state off the default tab would be reading the wrong table.
+  await page.goto(`${BASE}/admin/workshop-bookings?show=past`);
   // loading.tsx is a real state and gets in the way of reading the real one.
   await page.waitForFunction(
     () => !document.querySelector('[aria-busy="true"]'),
   );
   const emptied = await page.locator("main").innerText();
   ok(
-    "with nothing in it, the archive draws its own empty state",
+    "with nothing in it, the Past tab draws its own empty state",
     emptied.includes("Nothing has happened yet."),
     oneLine(emptied),
   );
   ok(
     "which says it fills itself, so nothing looks like it needs filing",
-    emptied.includes("The archive fills itself"),
+    emptied.includes("fills itself"),
   );
+  await page.goto(`${BASE}/admin/workshop-bookings`);
+  await page.waitForFunction(
+    () => !document.querySelector('[aria-busy="true"]'),
+  );
+  const stillThere = await page.locator("main").innerText();
   ok(
     "and the operator's own booking is still there, untouched, with its figures",
-    emptied.includes("Lorem Ipsum") && emptied.includes("£0.40"),
-    oneLine(emptied),
+    stillThere.includes("Lorem Ipsum") && stillThere.includes("£0.40"),
+    oneLine(stillThere),
   );
 } finally {
   await browser.close();

@@ -1486,6 +1486,24 @@ export async function refundBookingFromPortal(
     };
   }
 
+  // PAST THE REFUND PERIOD IT IS REFUSED HERE TOO (operator, 2026-08-19). The
+  // portal draws the control spent, and this is the rule rather than the
+  // drawing of it: a stale page, a second tab, or a form posted directly all
+  // arrive here, and the screen having greyed a button is not a guarantee.
+  //
+  // THE TEST IS "THE PERIOD HAS PASSED", NOT `isRefundable`, because a session
+  // has no refund period at all — `isRefundable` is false on one for want of a
+  // date rather than for want of time, and using it would refuse every session
+  // refund, which has always been hers to decide (D-25).
+  const offering = offeringOf(booking);
+  if (offering.firstDate && !isRefundable(offering)) {
+    const deadline = refundDeadline(offering.firstDate, offering.refundDays);
+    return {
+      outcome: "refused",
+      reason: `The refund period ran out${deadline ? ` on ${formatDayLong(deadline)}` : ""}, so this cannot be refunded from the portal. Sending the money back anyway is a decision to make in Stripe.`,
+    };
+  }
+
   const refund = await refundEverythingHeld(booking);
   if (!refund.ok) {
     console.error(

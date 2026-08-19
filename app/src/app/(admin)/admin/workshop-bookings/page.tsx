@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import BookingActions, {
   type LedgerRow,
 } from "@/components/admin/BookingActions";
@@ -484,13 +485,53 @@ function Empty({
 
 // ── the page ─────────────────────────────────────────────────────────────────
 
+/** One of the two tabs, drawn as a link so the choice survives a reload. */
+function Tab({
+  href,
+  label,
+  count,
+  current,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  current: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className={
+        current
+          ? "t border-b-2 border-gold pb-2 text-[19px] font-semibold text-plate-text"
+          : "t border-b-2 border-transparent pb-2 text-[19px] text-plate-soft hover:text-plate-text"
+      }
+    >
+      {label}{" "}
+      <span className="fig font-mono text-[16px] tabular-nums">{count}</span>
+    </Link>
+  );
+}
+
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ archive?: string }>;
+  searchParams: Promise<{ archive?: string; show?: string; kind?: string }>;
 }) {
-  const { archive } = await searchParams;
+  const { archive, show, kind } = await searchParams;
   const showWholeArchive = archive === "all";
+  // The two tabs (operator, 2026-08-19). Upcoming is the default, because a
+  // booking she has to do something about is always one that has not happened.
+  const showingPast = show === "past";
+
+  // WHICH KIND, or all of them (operator, 2026-08-19). A query value rather
+  // than client state, for the same reason the tabs are links: it survives a
+  // reload and can be bookmarked. Anything unrecognised means all — a typo in
+  // the address should show her everything rather than an empty table.
+  const KINDS = ["workshop", "course", "service"] as const;
+  const filtered = (KINDS as readonly string[]).includes(kind ?? "")
+    ? (kind as (typeof KINDS)[number])
+    : null;
 
   const all = await listAllBookings();
 
@@ -509,12 +550,26 @@ export default async function Page({
   const stillToCome = (booking: BookingWithOffering) =>
     !hasBeen(offeringOf(booking));
 
+  // The filter is applied BEFORE the split, so the two tab counts are counts of
+  // what each tab will actually show. Counting one thing and showing another is
+  // the way a filtered table starts lying about itself.
+  const ofKind = (booking: BookingWithOffering) =>
+    filtered === null || offeringOf(booking).kind === filtered;
+
   const upcoming = all
-    .filter(stillToCome)
+    .filter((booking) => stillToCome(booking) && ofKind(booking))
     .sort((a, b) => dateOf(a) - dateOf(b) || a.id - b.id);
   const archived = all
-    .filter((booking) => !stillToCome(booking))
+    .filter((booking) => !stillToCome(booking) && ofKind(booking))
     .sort((a, b) => dateOf(b) - dateOf(a) || b.id - a.id);
+
+  // THE TAB'S WHOLE POPULATION, before the kind filter, so the number beside
+  // each filter is the number of rows that filter will actually produce on the
+  // tab she is looking at. Counting from `all` instead would say how many
+  // sessions exist rather than how many are upcoming.
+  const inThisTab = all.filter((booking) =>
+    showingPast ? !stillToCome(booking) : stillToCome(booking),
+  );
 
   // Every total on this screen is NET: what she is actually holding, with
   // anything already sent back taken off. A gross figure would count a refunded
@@ -543,46 +598,14 @@ export default async function Page({
 
   return (
     <section className="pt-8" aria-labelledby="ledger-h">
-      <p className={EYEBROW}>Bookings</p>
-
-      {/* The one question this screen answers, in the figures that answer it.
-          Nothing here is a label: it is a sentence made of what is true. */}
-      <h1
-        id="ledger-h"
-        className="mt-3 max-w-[26ch] font-display text-[34px] font-normal leading-[1.08] text-plate-text sm:max-w-[34ch] sm:text-[40px]"
-      >
-        {live.length > 0 ? (
-          <>
-            {live.length === 1 ? (
-              <>
-                One live booking is for something that hasn&rsquo;t happened
-                yet, and you are holding {formatMoney(takenAhead)} against it.
-              </>
-            ) : (
-              <>
-                {live.length} live bookings are for things that haven&rsquo;t
-                happened yet, and you are holding {formatMoney(takenAhead)}{" "}
-                against them.
-              </>
-            )}
-            <br />
-            <span className="text-gold">
-              {refundableAhead > 0
-                ? `${formatMoney(refundableAhead)} of it is still inside its refund period.`
-                : "None of it is still inside its refund period."}
-            </span>
-          </>
-        ) : all.length > 0 ? (
-          <>
-            Nothing is booked for a day still to come.
-            <br />
-            <span className="text-gold">
-              Everything that has been paid for is in the archive below.
-            </span>
-          </>
-        ) : (
-          <>Nobody has booked a place yet.</>
-        )}
+      {/* THE ONE HEADING. The sentence that used to stand here — how many are
+          live and what she is holding against them — was removed at the
+          operator's request (2026-08-19), and every figure in it is still on
+          the screen: the counts are on the tabs and the money is beside them.
+          It is an `h1` rather than the `p` it was, because a page with no
+          heading has no outline for a screen reader to move by. */}
+      <h1 id="ledger-h" className={EYEBROW}>
+        Bookings
       </h1>
 
       {/* THE ONE THING NOTHING CAN TELL HER. A place released by an unpaid
@@ -606,138 +629,173 @@ export default async function Page({
         </p>
       )}
 
-      <p className="mt-5 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
-        A booking sits in the first table until its day has been — or, on a
-        course, until the last date of the run has. The morning after, it moves
-        itself down to the archive. There is nothing to file.
-      </p>
-      <p className="mt-3 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
-        Every workshop and every course carries its own refund period, set when
-        you make it. Each row is measured against its own, and says which. A
-        course&rsquo;s is counted back from its first date.
-      </p>
-      <p className="mt-3 max-w-[72ch] text-[19px] leading-relaxed text-plate-soft">
-        Cancel is the everyday one. It releases the place, and while the booking
-        is still inside its refund period it asks whether to send the money back
-        as well. Past that period it cancels without a refund and says so
-        plainly. Refund can also be used on its own, later, if you change your
-        mind — and it sends back everything that has actually arrived, which on
-        a course part-paid is the deposit and nothing else. Delete stays out of
-        reach until a booking has been cancelled — it takes the record away
-        altogether, and it cannot be undone.
-      </p>
 
-      {/* Said once, quietly, because Deposit is empty on every workshop row
-          and Service has never appeared at all. */}
-      <p className="mt-6 max-w-[72ch] fig font-mono text-[15px] leading-relaxed text-plate-soft">
-        Deposit is empty on a workshop, which is paid in full when it is booked.
-        Type never reads Service, because a session cannot be bought online yet
-        — the column stays, so that nothing has to move when it can.
-      </p>
+      {/* TWO TABS, where two stacked tables were (operator, 2026-08-19). The
+          split is unchanged — a booking is upcoming until its day has been, or
+          on a course until the last date of the run has, and it moves itself
+          the morning after. What changed is that the archive is now somewhere
+          she goes rather than something she scrolls past. */}
+      <nav
+        aria-label="Which bookings"
+        className="mt-9 flex flex-wrap items-baseline gap-x-8 gap-y-3 border-b border-plate-rule/40"
+      >
+        {/* THE KIND TRAVELS WITH THE TAB. Dropping it would clear her filter
+            the moment she looked at the other side, which reads as the filter
+            having failed rather than as the tab having changed. */}
+        <Tab
+          href={`/admin/workshop-bookings${filtered ? `?kind=${filtered}` : ""}`}
+          label="Upcoming"
+          count={upcoming.length}
+          current={!showingPast}
+        />
+        <Tab
+          href={`/admin/workshop-bookings?show=past${filtered ? `&kind=${filtered}` : ""}`}
+          label="Past"
+          count={archived.length}
+          current={showingPast}
+        />
+      </nav>
 
-      {/* ── still to come ──────────────────────────────────────────────── */}
-      <section className="mt-10" aria-labelledby="upcoming-h">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-plate-rule/40 pt-6">
-          <div>
-            <h2
-              id="upcoming-h"
-              className="font-display text-[28px] font-normal leading-tight text-plate-text"
+      {/* WHICH KIND. Counts are of the tab she is on, so switching to Sessions
+          on Upcoming says how many sessions are upcoming rather than how many
+          exist — the number beside a filter has to be the number of rows it
+          will produce, or it is a different question's answer. */}
+      <nav
+        aria-label="Which kind of booking"
+        className="mt-6 flex flex-wrap items-center gap-2"
+      >
+        {(
+          [
+            [null, "All"],
+            ["workshop", "Workshops"],
+            ["course", "Courses"],
+            ["service", "Sessions"],
+          ] as const
+        ).map(([value, label]) => {
+          const params = new URLSearchParams();
+          if (showingPast) params.set("show", "past");
+          if (value) params.set("kind", value);
+          const query = params.toString();
+          const count =
+            value === null
+              ? inThisTab.length
+              : inThisTab.filter((b) => offeringOf(b).kind === value).length;
+          const current = filtered === value;
+          return (
+            <Link
+              key={label}
+              href={`/admin/workshop-bookings${query ? `?${query}` : ""}`}
+              aria-current={current ? "true" : undefined}
+              className={
+                current
+                  ? "t min-h-[38px] border border-gold bg-gold px-3 py-1.5 text-[15px] text-ink"
+                  : "t min-h-[38px] border border-plate-rule/60 px-3 py-1.5 text-[15px] text-plate-soft hover:border-gold hover:text-plate-text"
+              }
             >
-              Still to come
-            </h2>
-            <p className="mt-1 max-w-[62ch] fig font-mono text-[17px] tabular-nums text-plate-soft">
-              {upcoming.length === 0
-                ? "Nothing in the diary has been booked"
-                : `${upcoming.length} ${upcoming.length === 1 ? "row" : "rows"} — ${live.length} live${cancelledAhead > 0 ? `, ${cancelledAhead} cancelled` : ""}${lapsed.length > 0 ? `, ${lapsed.length} released` : ""} · soonest first`}
-              {outstandingAhead > 0 &&
-                ` · ${formatMoney(outstandingAhead)} of balances still to come in`}
-              {owedAhead > 0 &&
-                ` · ${formatMoney(owedAhead)} of the cancelled money has not gone back yet`}
-            </p>
-          </div>
-          {takenAhead > 0 && (
-            <p className="fig font-mono text-[24px] tabular-nums text-gold">
-              {formatMoney(takenAhead)} held
-            </p>
-          )}
-        </div>
+              {label}{" "}
+              <span className="fig font-mono text-[14px] tabular-nums">
+                {count}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
 
-        {upcoming.length === 0 ? (
-          <Empty
-            eyebrow="Empty · still to come"
-            eyebrowClass="text-action"
-            title="Nothing is booked yet."
-          >
-            Your workshops and courses are live on the site and nobody has
-            booked one. The first booking appears here the minute someone pays,
-            with the money and that offering&rsquo;s refund date already worked
-            out.
-          </Empty>
-        ) : (
-          <Table
-            id="upcoming-table"
-            caption="Bookings for days that have not happened yet, soonest first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the cancel, refund and delete actions available for that booking's state."
-            bookings={upcoming}
-          />
-        )}
-      </section>
-
-      {/* ── archive ────────────────────────────────────────────────────── */}
-      <section className="mt-14" aria-labelledby="archive-h">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t border-plate-rule/40 pt-6">
-          <div>
-            <h2
-              id="archive-h"
-              className="font-display text-[28px] font-normal leading-tight text-plate-soft"
-            >
-              Archive
-            </h2>
-            <p className="mt-1 max-w-[62ch] fig font-mono text-[17px] tabular-nums text-plate-soft">
-              {archived.length === 0
-                ? "No day has been yet"
-                : `${archived.length} ${archived.length === 1 ? "booking" : "bookings"} whose day has been · most recent first`}
-            </p>
-          </div>
-          {takenBefore > 0 && (
-            <p className="fig font-mono text-[24px] tabular-nums text-plate-soft">
-              {formatMoney(takenBefore)} taken
-            </p>
-          )}
-        </div>
-
-        {archived.length === 0 ? (
-          <Empty
-            eyebrow="Empty · archive"
-            eyebrowClass="text-ink-soft"
-            title="Nothing has happened yet."
-          >
-            The archive fills itself. The first booking drops down here the
-            morning after its day, and everything that has ever been paid for
-            stays in it. There is nothing above that needs moving.
-          </Empty>
-        ) : (
-          <Table
-            id="archive-table"
-            caption="Bookings whose day has already been, most recent first. The same columns as the table above. A day that has been cannot be cancelled, so cancel is spent on every row here; refund is still available as a goodwill decision, and delete only on a booking that was cancelled."
-            bookings={archiveShown}
-          >
-            {archived.length > archiveShown.length && (
-              <p className="max-w-[70ch] border-t border-pool-rule py-6 text-[17px] leading-relaxed text-ink-soft">
-                Showing the {archiveShown.length} most recent. The other{" "}
-                {archived.length - archiveShown.length} are below, newest first.
-                Nothing leaves the archive by the passing of time — only by you.{" "}
-                <a
-                  href="/admin/workshop-bookings?archive=all"
-                  className="font-medium text-action underline decoration-1 underline-offset-4"
-                >
-                  Show all {archived.length}
-                </a>
-                .
+      {/* The figures that were in the headline, kept where they are still
+          read: what is held against what is still to come, what came in on
+          what has been. */}
+      <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+        <p className="max-w-[62ch] fig font-mono text-[17px] tabular-nums text-plate-soft">
+          {showingPast
+            ? archived.length === 0
+              ? "No day has been yet"
+              : `${archived.length} ${archived.length === 1 ? "booking" : "bookings"} whose day has been · most recent first`
+            : upcoming.length === 0
+              ? "Nothing in the diary has been booked"
+              : `${upcoming.length} ${upcoming.length === 1 ? "row" : "rows"} — ${live.length} live${cancelledAhead > 0 ? `, ${cancelledAhead} cancelled` : ""}${lapsed.length > 0 ? `, ${lapsed.length} released` : ""} · soonest first`}
+          {!showingPast &&
+            outstandingAhead > 0 &&
+            ` · ${formatMoney(outstandingAhead)} of balances still to come in`}
+          {!showingPast &&
+            owedAhead > 0 &&
+            ` · ${formatMoney(owedAhead)} of the cancelled money has not gone back yet`}
+        </p>
+        {showingPast
+          ? takenBefore > 0 && (
+              <p className="fig font-mono text-[24px] tabular-nums text-plate-soft">
+                {formatMoney(takenBefore)} taken
+              </p>
+            )
+          : takenAhead > 0 && (
+              <p className="fig font-mono text-[24px] tabular-nums text-gold">
+                {formatMoney(takenAhead)} held
+                {refundableAhead > 0 && (
+                  <span className="ml-3 text-[17px] text-plate-soft">
+                    {formatMoney(refundableAhead)} still refundable
+                  </span>
+                )}
               </p>
             )}
-          </Table>
-        )}
-      </section>
+      </div>
+
+      {showingPast ? (
+        <section className="mt-6" aria-label="Bookings whose day has been">
+          {archived.length === 0 ? (
+            <Empty
+              eyebrow="Empty · past"
+              eyebrowClass="text-ink-soft"
+              title="Nothing has happened yet."
+            >
+              This fills itself. The first booking drops in here the morning
+              after its day, and everything that has ever been paid for stays in
+              it. There is nothing above that needs moving.
+            </Empty>
+          ) : (
+            <Table
+              id="archive-table"
+              caption="Bookings whose day has already been, most recent first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the actions available for that booking's state. A day that has been cannot be cancelled, so cancel is spent on every row here; refund is still available as a goodwill decision, and delete only on a booking that was cancelled."
+              bookings={archiveShown}
+            >
+              {archived.length > archiveShown.length && (
+                <p className="max-w-[70ch] border-t border-pool-rule py-6 text-[17px] leading-relaxed text-ink-soft">
+                  Showing the {archiveShown.length} most recent. The other{" "}
+                  {archived.length - archiveShown.length} are below, newest
+                  first. Nothing leaves here by the passing of time — only by
+                  you.{" "}
+                  <a
+                    href={`/admin/workshop-bookings?show=past&archive=all${filtered ? `&kind=${filtered}` : ""}`}
+                    className="font-medium text-action underline decoration-1 underline-offset-4"
+                  >
+                    Show all {archived.length}
+                  </a>
+                  .
+                </p>
+              )}
+            </Table>
+          )}
+        </section>
+      ) : (
+        <section className="mt-6" aria-label="Bookings still to come">
+          {upcoming.length === 0 ? (
+            <Empty
+              eyebrow="Empty · upcoming"
+              eyebrowClass="text-action"
+              title="Nothing is booked yet."
+            >
+              Your workshops and courses are live on the site and nobody has
+              booked one. The first booking appears here the minute someone
+              pays, with the money and that offering&rsquo;s refund date already
+              worked out.
+            </Empty>
+          ) : (
+            <Table
+              id="upcoming-table"
+              caption="Bookings for days that have not happened yet, soonest first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the cancel, refund and delete actions available for that booking's state."
+              bookings={upcoming}
+            />
+          )}
+        </section>
+      )}
     </section>
   );
 }
