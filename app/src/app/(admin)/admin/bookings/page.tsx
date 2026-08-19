@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import RequestActions, {
-  type RequestRow,
-} from "@/components/admin/RequestActions";
+import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
+import type { RequestRow } from "@/components/admin/RequestActions";
+import RequestLine from "@/components/admin/RequestLine";
 import { bookingReference } from "@/lib/bookings";
 import {
   formatDuration,
@@ -121,13 +121,18 @@ function StateLine({
   return <span className={NOTE}>Waiting on you</span>;
 }
 
-function Row({ request }: { request: ServiceRequestWithService }) {
+/**
+ * ONE REQUEST, TURNED INTO A LINE AND A SHEET.
+ *
+ * Everything here is a conversion the SERVER has to do: an instant into her
+ * timezone, pence into pounds, a state into a sentence. The browser's clock is
+ * not hers and never was, so none of it can be left to the component that
+ * draws it — `RequestLine` receives words and renders them.
+ */
+function lineFor(request: ServiceRequestWithService, showAnswer: boolean) {
   const service = request.service;
   const state = approvalState(factsOf(request));
 
-  // The slot if they chose one, their sentence if they did not — turned into
-  // one line HERE, on the server, because it is a conversion into her timezone
-  // and the browser's clock is not hers.
   const wanted =
     request.slotStart && request.slotEnd
       ? formatSlot(request.slotStart, request.slotEnd)
@@ -146,204 +151,81 @@ function Row({ request }: { request: ServiceRequestWithService }) {
     payBy: request.payBy,
   };
 
-  return (
-    <tr className="border-b border-pool-rule/25 last:border-b-0">
-      <td className={CELL}>
-        <span className="block font-display text-[21px] leading-tight text-ink">
-          {request.name}
-        </span>
-        <span className={NOTE}>{formatInstant(request.createdAt)}</span>
-        <StateLine request={request} state={state} />
-      </td>
+  // WHERE IT STANDS, in the words the line prints and the sheet repeats. A
+  // lapsed approval is the only state on this screen that changed without
+  // anybody doing anything, so it is the only one drawn in red.
+  const standing =
+    state === "lapsed"
+      ? `Ran out unpaid${request.payBy ? ` on ${formatMoment(request.payBy)}` : ""} — the time is yours again`
+      : state === "awaitingPayment"
+        ? `${formatMoney(request.approvedPence ?? 0)} to pay by ${request.payBy ? formatMoment(request.payBy) : "—"}`
+        : state === "paid"
+          ? `Paid${request.booking ? ` · ${bookingReference(request.booking.id)}` : ""}`
+          : state === "declined"
+            ? `Declined${request.declinedAt ? ` on ${formatInstant(request.declinedAt)}` : ""}`
+            : "Waiting on you";
 
-      {/* HOW TO REACH THEM, as links rather than as text to copy out. Still
-          here, and still useful: approving and declining both write to them,
-          but a question that is neither is an email she sends herself. */}
-      <td className={CELL}>
-        <a
-          href={`mailto:${request.email}?subject=${encodeURIComponent(`Your request — ${service.name}`)}`}
-          className="t break-all text-[17px] text-action underline decoration-action underline-offset-4 hover:text-ink hover:decoration-ink"
-        >
-          {request.email}
-        </a>
-        {request.phone ? (
-          <span className={NOTE}>{request.phone}</span>
-        ) : (
-          <span className={NOTE}>no phone number</span>
-        )}
-      </td>
+  // THE SHEET SAYS IT IN FULL. The line has to fit a column, so it keeps the
+  // fact; the sheet keeps the reassurance with it — "nothing was charged" is
+  // the thing she most wants to be sure of about an approval that ran out, and
+  // it is too long to sit in a table cell.
+  const standingLong =
+    state === "lapsed"
+      ? `${standing}. Nothing was charged.`
+      : state === "paid" && request.booking
+        ? `${standing} — it is on the bookings page`
+        : state === "declined"
+          ? `${standing} — they were told`
+          : standing;
 
-      <td className={CELL}>
-        <Link
-          href={`/admin/offerings/services/${service.slug}`}
-          className="t block font-display text-[21px] leading-tight text-ink underline decoration-pool-rule/50 underline-offset-4 hover:decoration-ink"
-        >
-          {service.name}
-        </Link>
-        <span className={NOTE}>
-          {formatDuration(service.durationMinutes)} &middot;{" "}
-          {formatMoney(service.priceGBP)} &middot;{" "}
-          {placeInOneLine(servicePlace(service))}
-        </span>
-        {/* WHAT SHE APPROVED, when it is not the list price. Said here rather
-            than in place of it, because the two being different is the fact
-            worth seeing — she drove somewhere, or it ran long. */}
-        {request.approvedPence !== null &&
-          request.approvedPence !== service.priceGBP && (
-            <span className={`${NOTE} text-gold`}>
-              You approved {formatMoney(request.approvedPence)}
-            </span>
-          )}
-      </td>
-
-      {/* THEIR WORDS, PRINTED WHOLE, and hers under them once she has answered.
-          Not truncated behind a "read more": the message IS the request, and a
-          queue that hides it is a queue she has to click through twice to work.
-          `whitespace-pre-line` keeps the line breaks they typed. */}
-      <td className={CELL}>
-        {/* A CHOSEN SLOT LOOKS DIFFERENT FROM A SENTENCE, and it should: one is
-            a time out of her diary that nobody else is being offered, and the
-            other is a wish somebody typed. Reading them the same way would let
-            her answer the second as though it were the first. */}
-        <span
-          className={
-            request.slotStart
-              ? "block max-w-[42ch] fig font-mono text-[18px] tabular-nums leading-relaxed text-ink"
-              : "block max-w-[42ch] whitespace-pre-line text-[19px] leading-relaxed text-ink"
-          }
-        >
-          {wanted}
-        </span>
-        {request.slotStart && state !== "declined" && state !== "lapsed" && (
-          <span className={`${NOTE} text-gold`}>Held for them</span>
-        )}
-        {request.slotStart && (state === "declined" || state === "lapsed") && (
-          <span className={NOTE}>That time is back in your diary</span>
-        )}
-        {request.agreedTime && (
-          <span className="mt-3 block max-w-[42ch] whitespace-pre-line border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink">
-            You said: {request.agreedTime}
-          </span>
-        )}
-        {request.message ? (
-          <span className="mt-3 block max-w-[42ch] whitespace-pre-line border-l-2 border-pool-rule/40 pl-4 text-[17px] leading-relaxed text-ink-soft">
-            {request.message}
-          </span>
-        ) : (
-          <span className={NOTE}>no message</span>
-        )}
-        {request.declineNote && (
-          <span className="mt-3 block max-w-[42ch] whitespace-pre-line border-l-2 border-pool-rule/40 pl-4 text-[17px] leading-relaxed text-ink-soft">
-            You wrote: {request.declineNote}
-          </span>
-        )}
-      </td>
-
-      <td className="py-5 align-top">
-        <RequestActions request={row} />
-      </td>
-    </tr>
-  );
-}
-
-/**
- * ONE ANSWERED REQUEST, in the archive's own table.
- *
- * FEWER COLUMNS, because fewer things are still true of it. The live table asks
- * "what are you going to do about this" and gives five columns to answering;
- * this one asks "what did you do", which is one column, and it is the only
- * thing here that the other table does not already say better.
- *
- * The controls stay: `RequestActions` draws itself from the row's state, so an
- * archived one shows the two answers spent and says why, and Delete live where
- * D-33 allows it. Dropping them would mean she could not remove a request from
- * the only screen it still appears on.
- */
-function ArchivedRow({ request }: { request: ServiceRequestWithService }) {
-  const { service } = request;
-  const state = approvalState(factsOf(request), new Date());
-  const wanted =
-    request.slotStart && request.slotEnd
-      ? formatSlot(request.slotStart, request.slotEnd)
-      : (request.preferredTime ?? "They did not say.");
-
-  const row: RequestRow = {
-    id: request.id,
-    name: request.name,
-    serviceName: service.name,
-    listPence: service.priceGBP,
-    wanted,
-    chosen: request.slotStart !== null,
-    state,
-    approvedPence: request.approvedPence,
-    agreedTime: request.agreedTime,
-    payBy: request.payBy,
-  };
+  // The archive's fourth column is the answer rather than the standing — it is
+  // the one thing that table exists to show.
+  const answeredCell = showAnswer
+    ? state === "declined"
+      ? `Declined${request.declinedAt ? ` ${formatInstant(request.declinedAt)}` : ""}`
+      : state === "paid"
+        ? `Paid for${request.approvedPence !== null ? ` · ${formatMoney(request.approvedPence)}` : ""}`
+        : `Approved${request.approvedPence !== null ? ` · ${formatMoney(request.approvedPence)}` : ""}`
+    : undefined;
 
   return (
-    <tr className="border-b border-pool-rule/25 last:border-b-0">
-      <td className={CELL}>
-        <span className="block font-display text-[21px] leading-tight text-ink">
-          {request.name}
-        </span>
-        <a
-          href={`mailto:${request.email}?subject=${encodeURIComponent(`Your request — ${service.name}`)}`}
-          className="t mt-1 block break-all text-[17px] text-action underline decoration-action underline-offset-4 hover:text-ink hover:decoration-ink"
-        >
-          {request.email}
-        </a>
-        <span className={NOTE}>asked {formatInstant(request.createdAt)}</span>
-      </td>
-
-      <td className={CELL}>
-        <Link
-          href={`/admin/offerings/services/${service.slug}`}
-          className="t block font-display text-[21px] leading-tight text-ink underline decoration-pool-rule/50 underline-offset-4 hover:decoration-ink"
-        >
-          {service.name}
-        </Link>
-        <span
-          className={
-            request.slotStart
-              ? "mt-1 block max-w-[36ch] fig font-mono text-[17px] tabular-nums leading-relaxed text-ink-soft"
-              : "mt-1 block max-w-[36ch] whitespace-pre-line text-[17px] leading-relaxed text-ink-soft"
-          }
-        >
-          {wanted}
-        </span>
-      </td>
-
-      {/* WHAT SHE ANSWERED — the one thing this table exists to show, and the
-          only column the live table has no room for once a request is closed. */}
-      <td className={CELL}>
-        <span className="block text-[19px] leading-relaxed text-ink">
-          {state === "declined"
-            ? `You declined it${request.declinedAt ? ` on ${formatInstant(request.declinedAt)}` : ""}.`
-            : state === "paid"
-              ? `Paid for. It is in Bookings${request.approvedPence !== null ? `, at ${formatMoney(request.approvedPence)}` : ""}.`
-              : `You approved it${request.approvedPence !== null ? ` at ${formatMoney(request.approvedPence)}` : ""}${request.approvedAt ? ` on ${formatInstant(request.approvedAt)}` : ""}.`}
-        </span>
-        {state === "awaitingPayment" && request.payBy && (
-          <span className={`${NOTE} text-gold`}>
-            Their link works until {formatMoment(request.payBy)}
-          </span>
-        )}
-        {request.agreedTime && (
-          <span className="mt-2 block max-w-[38ch] whitespace-pre-line border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink">
-            You said: {request.agreedTime}
-          </span>
-        )}
-        {request.declineNote && (
-          <span className="mt-2 block max-w-[38ch] whitespace-pre-line border-l-2 border-pool-rule/40 pl-4 text-[17px] leading-relaxed text-ink-soft">
-            You wrote: {request.declineNote}
-          </span>
-        )}
-      </td>
-
-      <td className="py-5 align-top">
-        <RequestActions request={row} />
-      </td>
-    </tr>
+    <RequestLine
+      key={request.id}
+      row={row}
+      answeredCell={answeredCell}
+      detail={{
+        email: request.email,
+        phone: request.phone,
+        askedAt: formatInstant(request.createdAt),
+        serviceHref: `/admin/offerings/services/${service.slug}`,
+        serviceMeta: `${formatDuration(service.durationMinutes)} · ${formatMoney(service.priceGBP)} · ${placeInOneLine(servicePlace(service))}`,
+        message: request.message,
+        declineNote: request.declineNote,
+        standing,
+        standingLong,
+        // A slot is only still out of her diary while the request is live.
+        holding: state !== "declined" && state !== "lapsed",
+        listPrice: formatMoney(service.priceGBP),
+        approved:
+          request.approvedPence !== null
+            ? `${formatMoney(request.approvedPence)}${
+                request.approvedPence !== service.priceGBP
+                  ? ` · the page says ${formatMoney(service.priceGBP)}`
+                  : ""
+              }`
+            : null,
+        answeredOn:
+          state === "declined" && request.declinedAt
+            ? formatInstant(request.declinedAt)
+            : request.approvedAt
+              ? formatInstant(request.approvedAt)
+              : null,
+        payByLine:
+          state === "awaitingPayment" && request.payBy
+            ? `Works until ${formatMoment(request.payBy)}`
+            : null,
+      }}
+    />
   );
 }
 
@@ -378,9 +260,9 @@ function Tab({
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ show?: string }>;
+  searchParams: Promise<{ show?: string; page?: string }>;
 }) {
-  const { show } = await searchParams;
+  const { show, page: pageParam } = await searchParams;
   const requests = await listServiceRequests();
   const now = new Date();
   const states = new Map(
@@ -407,6 +289,19 @@ export default async function Page({
   // things to answer are what it opens on.
   const showingArchive = show === "archived";
   const rows = showingArchive ? archived : onHerDesk;
+
+  // TWELVE TO A PAGE (operator, 2026-08-19). The page number is read off the
+  // query and clamped to one that exists, so `?page=99` on a two-page queue
+  // lands on the last page rather than on an empty table.
+  const page = currentPage(pageParam, rows.length);
+  const shown = pageSlice(rows, page);
+  const pageHref = (next: number) => {
+    const params = new URLSearchParams();
+    if (showingArchive) params.set("show", "archived");
+    if (next > 1) params.set("page", String(next));
+    const query = params.toString();
+    return `/admin/bookings${query ? `?${query}` : ""}`;
+  };
 
   return (
     <section className="pt-8" aria-labelledby="requests-h">
@@ -495,7 +390,7 @@ export default async function Page({
         <div className="pool on-pool mt-7 px-6 py-2 sm:px-8">
           <div className="overflow-x-auto">
             {showingArchive ? (
-              <table className="w-full min-w-[880px] border-collapse text-left">
+              <table className="w-full min-w-[820px] border-collapse text-left">
                 <caption className="sr-only">
                   Requests you have answered, newest first
                 </caption>
@@ -506,7 +401,10 @@ export default async function Page({
                       <span className={CAPTION}>and when they asked</span>
                     </th>
                     <th scope="col" className={HEAD}>
-                      What they asked for
+                      Session
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      When
                     </th>
                     <th scope="col" className={HEAD}>
                       What you answered
@@ -516,14 +414,10 @@ export default async function Page({
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {archived.map((request) => (
-                    <ArchivedRow key={request.id} request={request} />
-                  ))}
-                </tbody>
+                <tbody>{shown.map((request) => lineFor(request, true))}</tbody>
               </table>
             ) : (
-              <table className="w-full min-w-[1040px] border-collapse text-left">
+              <table className="w-full min-w-[820px] border-collapse text-left">
                 <caption className="sr-only">
                   Session requests waiting on you, newest first
                 </caption>
@@ -531,17 +425,16 @@ export default async function Page({
                   <tr className="border-b-2 border-ink">
                     <th scope="col" className={HEAD}>
                       Who
-                      <span className={CAPTION}>and where it stands</span>
+                      <span className={CAPTION}>and when they asked</span>
                     </th>
                     <th scope="col" className={HEAD}>
-                      How to reach them
-                    </th>
-                    <th scope="col" className={HEAD}>
-                      What they asked for
+                      Session
                     </th>
                     <th scope="col" className={HEAD}>
                       When
-                      <span className={CAPTION}>their words, then yours</span>
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      Where it stands
                     </th>
                     <th scope="col" className={`${HEAD} pr-0`}>
                       Your answer
@@ -549,14 +442,16 @@ export default async function Page({
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {onHerDesk.map((request) => (
-                    <Row key={request.id} request={request} />
-                  ))}
-                </tbody>
+                <tbody>{shown.map((request) => lineFor(request, false))}</tbody>
               </table>
             )}
           </div>
+          <Pager
+            page={page}
+            total={rows.length}
+            href={pageHref}
+            label="requests"
+          />
         </div>
       ) : (
         /* Drawn deliberately, and worded for WHICH emptiness it is. An empty
@@ -581,10 +476,10 @@ export default async function Page({
           <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
             {requests.length === 0 ? (
               <>
-                Requests arrive from the form at the foot of each session&rsquo;s
-                page. They land here and you get an email at the same time, so
-                this screen is somewhere to answer from rather than somewhere to
-                wait.
+                Requests arrive from the form at the foot of each
+                session&rsquo;s page. They land here and you get an email at the
+                same time, so this screen is somewhere to answer from rather
+                than somewhere to wait.
               </>
             ) : showingArchive ? (
               <>

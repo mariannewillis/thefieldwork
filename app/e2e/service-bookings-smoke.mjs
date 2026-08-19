@@ -887,11 +887,24 @@ try {
     oneLine(lapsedQueue),
   );
   ok(
-    "and the row says it, with the moment it ran out and that nothing was charged",
-    /this has run out and the time is yours again/.test(lapsedQueue) &&
-      /Nothing was charged/.test(lapsedQueue),
+    "and the row says it ran out, and that the time is hers again",
+    /Ran out unpaid/.test(lapsedQueue) &&
+      /the time is yours again/.test(lapsedQueue),
     oneLine(lapsedQueue),
   );
+  // THE REASSURANCE IS IN THE SHEET NOW (2026-08-19). The line has to fit a
+  // column; "nothing was charged" is the thing she most wants to be sure of
+  // about an approval that ran out, and it is too long to sit in a cell.
+  await page.locator("tr", { hasText: "Anna Frost" }).first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  const lapsedSheet = await page.locator("dialog[open]").innerText();
+  ok(
+    "and pressing the row says in full that nothing was charged",
+    /Nothing was charged/.test(lapsedSheet),
+    oneLine(lapsedSheet),
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
 
   await page.goto(lapsingLink);
   ok(
@@ -1167,7 +1180,8 @@ try {
   const answeredAfter = await namesOn(`${BASE}/admin/bookings?show=archived`);
   ok(
     "AN APPROVAL THAT RUNS OUT COMES BACK ON ITS OWN, with nothing having run",
-    waitingAfter.includes("Anna Frost") && !answeredAfter.includes("Anna Frost"),
+    waitingAfter.includes("Anna Frost") &&
+      !answeredAfter.includes("Anna Frost"),
     JSON.stringify({ waiting: waitingAfter, answered: answeredAfter }),
   );
 
@@ -1228,11 +1242,18 @@ try {
     ledger.includes("Thursday the 3rd at 10, at yours"),
     oneLine(ledger),
   );
+  // ALSO IN THE SHEET NOW. The ledger row is one line; the refund period is one
+  // of the facts behind it.
+  await page.locator("tr", { hasText: "An Hour Of Attention" }).first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  const sessionSheet = await page.locator("dialog[open]").innerText();
   ok(
-    "and says plainly that refunding one is her decision, not a period's",
-    /No refund period on a session/.test(ledger),
-    oneLine(ledger),
+    "and pressing the row says refunding a session is her decision, not a period's",
+    /None on a session/.test(sessionSheet),
+    oneLine(sessionSheet),
   );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
 
   // ── the operator's own data, again, at the end ────────────────────────────
   const { rows: after } = await db.query(

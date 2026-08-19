@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import BookingLine from "@/components/admin/BookingLine";
+import Pager, {
+  currentPage,
+  pageSlice,
+} from "@/components/admin/Pager";
 import BookingActions, {
   type LedgerRow,
 } from "@/components/admin/BookingActions";
@@ -73,9 +78,6 @@ export const metadata: Metadata = {
   title: "Bookings — The Field Work",
 };
 
-/** How many of the archive are drawn before it offers to show the rest. */
-const ARCHIVE_SHOWN = 5;
-
 const EYEBROW =
   "fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold";
 const HEAD =
@@ -138,258 +140,120 @@ function whenWords(offering: Offering): string {
 }
 
 /**
- * The line under the offering — the one thing about this booking she has to
- * know before she touches anything.
+ * ONE BOOKING, TURNED INTO A LINE AND A SHEET.
  *
- * On a live booking that is its own refund period, measured against ITS OWN
- * offering and never a site-wide rule. On a cancelled one it is what happened
- * to the money, and who did it. And on a course place whose balance never
- * arrived it is that, before anything else: a released place is the state that
- * changes what the room holds, so it is the state that gets said first.
+ * This replaces four components — the state line, the deposit column, the money
+ * column and the row itself — that between them printed seven columns of prose
+ * on every row. The ledger read as a file rather than a list (operator,
+ * 2026-08-19); what is left on the line is who, what kind, which offering,
+ * where it stands and what she is holding, and the rest opens by pressing it.
+ *
+ * EVERY CONVERSION IS THE SERVER'S. An instant into her timezone, pence into
+ * pounds, a status into a sentence — `BookingLine` receives words and only
+ * draws them, because the browser's clock is not hers.
  */
-function StateLine({ booking }: { booking: BookingWithOffering }) {
+function lineFor(booking: BookingWithOffering) {
   const offering = offeringOf(booking);
+  const row = toLedgerRow(booking);
+  const deposit = booking.payments.find((one) => one.kind === "deposit");
+  const owed = outstandingPence(booking);
   const deadline = offering.firstDate
     ? refundDeadline(offering.firstDate, offering.refundDays)
     : null;
-  const owed = refundOwed(booking);
+  const lastRefundedAt = booking.payments
+    .map((one) => one.refundedAt)
+    .filter((at): at is Date => at !== null)
+    .sort((one, other) => other.getTime() - one.getTime())[0];
 
-  if (booking.status === "paid") {
-    // ── the released place ──────────────────────────────────────────────────
-    // Said first and said in red, because it is the only state on this screen
-    // that changed something — the room — without anybody doing anything.
-    if (hasLapsed(booking)) {
-      return (
-        <span className={`${NOTE} text-pool-error`}>
-          Balance not paid by {formatDayShort(booking.balanceDueAt as Date)} —
-          this place is released and back on sale.{" "}
-          {formatMoney(heldPence(booking))} of theirs is still with you.
-        </span>
-      );
-    }
-    if (outstandingPence(booking) > 0 && booking.balanceDueAt) {
-      return (
-        <span className={NOTE}>
-          {formatMoney(outstandingPence(booking))} due{" "}
-          {formatDayShort(booking.balanceDueAt)} — the place is released if it
-          is not paid
-        </span>
-      );
-    }
-    if (alreadyRefunded(booking)) {
-      return (
-        <span className={`${NOTE} text-pool-success`}>
-          Refunded{" "}
-          {booking.payments.find((one) => one.refundedAt)?.refundedAt
-            ? `on ${formatInstant(booking.payments.find((one) => one.refundedAt)!.refundedAt as Date)}`
-            : ""}{" "}
-          — the place is still held
-        </span>
-      );
-    }
-    // A session has no refund period, which is not the same as being
-    // unrefundable: refund on the row is available and always was (D-25).
-    if (offering.kind === "service") {
-      return (
-        <span className={NOTE}>
-          No refund period on a session — refunding is yours to decide
-        </span>
-      );
-    }
-    if (offering.refundDays === 0) {
-      return <span className={NOTE}>This one cannot be refunded</span>;
-    }
-    if (hasBeen(offering)) {
-      return (
-        <span className={NOTE}>Refund period {offering.refundDays} days</span>
-      );
-    }
-    if (!deadline) return null;
-    if (isRefundable(offering)) {
-      // The deadline day itself still counts, so the day it falls on is worth
-      // saying out loud rather than printing today's date back at her.
-      const now = new Date();
-      const lastDay =
-        deadline.getUTCFullYear() === now.getUTCFullYear() &&
-        deadline.getUTCMonth() === now.getUTCMonth() &&
-        deadline.getUTCDate() === now.getUTCDate();
-      return (
-        <span className={NOTE}>
-          Refund period {offering.refundDays} days —{" "}
-          {lastDay
-            ? "today is the last day"
-            : `closes ${formatDayShort(deadline)}`}
-        </span>
-      );
-    }
-    return (
-      <span className={`${NOTE} text-pool-error`}>
-        Refund period {offering.refundDays} days — closed{" "}
-        {formatDayShort(deadline)}
-      </span>
-    );
-  }
-
-  const by =
+  const cancelledBy =
     booking.cancelledReason === "marianne"
       ? "by you"
       : booking.cancelledReason === "soldOut"
         ? "— the last place went while they were paying"
         : "by them";
-  const when = booking.cancelledAt
-    ? ` ${formatInstant(booking.cancelledAt)}`
-    : "";
 
-  if (booking.status === "cancelledRefunded") {
-    const refundedAt = booking.payments.find(
-      (one) => one.refundedAt,
-    )?.refundedAt;
-    return (
-      <span className={NOTE}>
-        Cancelled{when} {by} — refunded
-        {refundedAt ? ` ${formatInstant(refundedAt)}` : ""}
-      </span>
-    );
-  }
-  return (
-    <span className={owed ? `${NOTE} text-pool-error` : NOTE}>
-      Cancelled{when} {by} —{" "}
-      {owed ? "the money has not gone back" : "nothing was owed back"}
-    </span>
-  );
-}
+  // WHERE IT STANDS, in one line. Five true situations, and the third of them
+  // is the one a shorter version would get wrong: she can refund WITHOUT
+  // cancelling, and reading "paid in full" beside a held figure of £0 would be
+  // the row lying about both halves at once.
+  const standing =
+    booking.status === "paid"
+      ? hasLapsed(booking)
+        ? "Released — the balance was not paid"
+        : alreadyRefunded(booking)
+          ? `Refunded${lastRefundedAt ? ` ${formatInstant(lastRefundedAt)}` : ""} — the place is still held`
+          : owed > 0
+            ? `${formatMoney(owed)} still to come in`
+            : "Paid in full"
+      : booking.status === "cancelledRefunded"
+        ? `Cancelled ${cancelledBy} — refunded`
+        : refundOwed(booking)
+          ? `Cancelled ${cancelledBy} — the money has not gone back`
+          : `Cancelled ${cancelledBy} — nothing was owed back`;
 
-/**
- * The deposit column, which the approved screen drew and nothing could fill.
- *
- * Empty on a workshop, and it says why once in the note under the headline
- * rather than on every row. On a course it is the two figures that make the
- * arrangement: what was taken at booking, and what is still to come.
- */
-function Deposit({ booking }: { booking: BookingWithOffering }) {
-  const deposit = booking.payments.find((one) => one.kind === "deposit");
-  const owed = outstandingPence(booking);
+  const alarming =
+    (booking.status === "paid" && hasLapsed(booking)) || refundOwed(booking);
 
-  if (!deposit) {
-    return (
-      <>
-        <span
-          className="block fig font-mono text-[17px] text-ink-soft"
-          aria-hidden="true"
-        >
-          &ndash;
-        </span>
-        <span className="sr-only">
-          No deposit. This one was paid in full when it was booked.
-        </span>
-      </>
-    );
-  }
+  const refundPeriod =
+    offering.kind === "service"
+      ? "None on a session — refunding is yours to decide"
+      : offering.refundDays === 0
+        ? "This one cannot be refunded"
+        : deadline
+          ? `${offering.refundDays} days — ${isRefundable(offering) ? `closes ${formatDayShort(deadline)}` : `closed ${formatDayShort(deadline)}`}`
+          : `${offering.refundDays} days`;
 
   return (
-    <>
-      <span className="block whitespace-nowrap fig font-mono text-[17px] tabular-nums text-ink">
-        {formatMoney(deposit.amountPence)}
-      </span>
-      <span className={NOTE}>
-        {owed === 0
-          ? "settled in full"
-          : `${formatMoney(owed)} still owed${booking.balanceDueAt ? ` · ${formatDayShort(booking.balanceDueAt)}` : ""}`}
-      </span>
-    </>
-  );
-}
-
-/** The money column: what is with her, and what has left. */
-function Money({ booking }: { booking: BookingWithOffering }) {
-  const held = heldPence(booking);
-  const paid = paidPence(booking);
-  const owed = refundOwed(booking);
-
-  if (alreadyRefunded(booking)) {
-    const refundedAt = booking.payments.find(
-      (one) => one.refundedAt,
-    )?.refundedAt;
-    return (
-      <>
-        <span className="block whitespace-nowrap fig font-mono text-[19px] font-semibold tabular-nums text-pool-success">
-          {formatMoney(0)}
-        </span>
-        <span className={NOTE}>
-          {formatMoney(paid)} went back
-          {refundedAt ? ` on ${formatInstant(refundedAt)}` : ""}
-        </span>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <span
-        className={`block whitespace-nowrap fig font-mono text-[19px] font-semibold tabular-nums ${owed ? "text-pool-error" : "text-ink"}`}
-      >
-        {formatMoney(held)}
-      </span>
-      <span className={NOTE}>
-        {owed ? "still with you" : `paid ${formatInstant(booking.paidAt)}`}
-      </span>
-    </>
-  );
-}
-
-function Row({ booking }: { booking: BookingWithOffering }) {
-  const offering = offeringOf(booking);
-  return (
-    <tr className="border-t border-pool-rule align-top">
-      <th
-        scope="row"
-        className="whitespace-nowrap py-5 pr-5 text-left align-top text-[17px] font-semibold text-ink"
-      >
-        {booking.buyerName}
-      </th>
-      <td className={`${CELL} fig font-mono text-[15px] text-ink-soft`}>
-        <a
-          href={`mailto:${booking.buyerEmail}`}
-          className="text-ink-soft underline decoration-pool-rule hover:text-ink hover:decoration-ink"
-        >
-          {booking.buyerEmail}
-        </a>
-      </td>
-      <td
-        className={`${CELL} whitespace-nowrap fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft`}
-      >
-        {offering.kind === "workshop"
-          ? "Workshop"
-          : offering.kind === "course"
-            ? "Course"
-            : "Session"}
-      </td>
-      <td className={CELL}>
-        <span className="block font-display text-[21px] leading-tight text-ink">
-          {offering.name}
-        </span>
-        <span className={NOTE}>
-          {whenWords(offering)} &middot;{" "}
-          {offering.kind === "service" ? "one session" : places(booking.places)}
-          {booking.status === "paid" ? "" : ", released"}
-        </span>
-        <StateLine booking={booking} />
-      </td>
-      <td className={CELL}>
-        <Deposit booking={booking} />
-      </td>
-      <td className={CELL}>
-        <Money booking={booking} />
-      </td>
-      <td className="py-5 align-top">
-        <BookingActions booking={toLedgerRow(booking)} />
-      </td>
-    </tr>
+    <BookingLine
+      key={booking.id}
+      row={row}
+      line={{
+        kindWord:
+          offering.kind === "workshop"
+            ? "Workshop"
+            : offering.kind === "course"
+              ? "Course"
+              : "Session",
+        offeringName: offering.name,
+        whenWords: `${whenWords(offering)} · ${offering.kind === "service" ? "one session" : places(booking.places)}`,
+        held: formatMoney(heldPence(booking)),
+        standing,
+        alarming,
+      }}
+      detail={{
+        email: booking.buyerEmail,
+        reference: bookingReference(booking.id),
+        places:
+          offering.kind === "service" ? "One session" : places(booking.places),
+        paidOn: formatInstant(booking.paidAt),
+        // Empty on a workshop, which is paid in full when it is booked — the
+        // sheet drops a null fact rather than drawing a labelled blank.
+        deposit: deposit ? formatMoney(deposit.amountPence) : null,
+        outstanding:
+          owed > 0
+            ? `${formatMoney(owed)}${booking.balanceDueAt ? ` · due ${formatDayShort(booking.balanceDueAt)}` : ""}`
+            : null,
+        refundPeriod,
+        everPaid: formatMoney(paidPence(booking)),
+        cancelled: booking.cancelledAt
+          ? `${formatInstant(booking.cancelledAt)} ${cancelledBy}`
+          : null,
+        refunded: lastRefundedAt ? formatInstant(lastRefundedAt) : null,
+      }}
+    />
   );
 }
 
 // ── the tables ───────────────────────────────────────────────────────────────
 
+/**
+ * THE COLUMN HEADS, for the one line each row is now.
+ *
+ * Five and the controls, where there were seven of prose. Email, deposit, the
+ * refund period and who cancelled it are all in the sheet — a queue is for
+ * finding the row that needs her; the file is what she wants once she has
+ * found it (operator, 2026-08-19).
+ */
 function Headers() {
   return (
     <thead>
@@ -398,25 +262,22 @@ function Headers() {
           Name
         </th>
         <th scope="col" className={HEAD}>
-          Email
-        </th>
-        <th scope="col" className={HEAD}>
           Type
         </th>
         <th scope="col" className={HEAD}>
           Offering
+          <span className={CAPTION}>and when</span>
         </th>
         <th scope="col" className={HEAD}>
-          Deposit<span className={CAPTION}>courses only</span>
+          Where it stands
         </th>
         <th scope="col" className={HEAD}>
-          Held<span className={CAPTION}>what is with you now</span>
+          Held
+          <span className={CAPTION}>with you now</span>
         </th>
         <th scope="col" className={`${HEAD} pr-0`}>
           Actions
-          <span className={CAPTION}>
-            cancel &middot; refund &middot; delete
-          </span>
+          <span className={CAPTION}>cancel &middot; refund &middot; delete</span>
         </th>
       </tr>
     </thead>
@@ -439,15 +300,11 @@ function Table({
       <div className="overflow-x-auto">
         <table
           id={id}
-          className="w-full min-w-[940px] border-collapse text-left"
+          className="w-full min-w-[900px] border-collapse text-left"
         >
           <caption className="sr-only">{caption}</caption>
           <Headers />
-          <tbody>
-            {bookings.map((booking) => (
-              <Row key={booking.id} booking={booking} />
-            ))}
-          </tbody>
+          <tbody>{bookings.map(lineFor)}</tbody>
         </table>
       </div>
       {children}
@@ -516,10 +373,9 @@ function Tab({
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ archive?: string; show?: string; kind?: string }>;
+  searchParams: Promise<{ show?: string; kind?: string; page?: string }>;
 }) {
-  const { archive, show, kind } = await searchParams;
-  const showWholeArchive = archive === "all";
+  const { show, kind, page: pageParam } = await searchParams;
   // The two tabs (operator, 2026-08-19). Upcoming is the default, because a
   // booking she has to do something about is always one that has not happened.
   const showingPast = show === "past";
@@ -592,9 +448,22 @@ export default async function Page({
   const lapsed = live.filter((b) => hasLapsed(b));
 
   const takenBefore = archived.reduce((sum, b) => sum + heldPence(b), 0);
-  const archiveShown = showWholeArchive
-    ? archived
-    : archived.slice(0, ARCHIVE_SHOWN);
+
+  // TWELVE TO A PAGE (operator, 2026-08-19), which replaces the archive's old
+  // "showing the 5 most recent · show all". A page is a better answer to a long
+  // list than a truncation with an escape hatch: it says how many there are and
+  // lets her walk them.
+  const rows = showingPast ? archived : upcoming;
+  const page = currentPage(pageParam, rows.length);
+  const shown = pageSlice(rows, page);
+  const pageHref = (next: number) => {
+    const params = new URLSearchParams();
+    if (showingPast) params.set("show", "past");
+    if (filtered) params.set("kind", filtered);
+    if (next > 1) params.set("page", String(next));
+    const query = params.toString();
+    return `/admin/workshop-bookings${query ? `?${query}` : ""}`;
+  };
 
   return (
     <section className="pt-8" aria-labelledby="ledger-h">
@@ -754,23 +623,16 @@ export default async function Page({
             <Table
               id="archive-table"
               caption="Bookings whose day has already been, most recent first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the actions available for that booking's state. A day that has been cannot be cancelled, so cancel is spent on every row here; refund is still available as a goodwill decision, and delete only on a booking that was cancelled."
-              bookings={archiveShown}
+              bookings={shown}
             >
-              {archived.length > archiveShown.length && (
-                <p className="max-w-[70ch] border-t border-pool-rule py-6 text-[17px] leading-relaxed text-ink-soft">
-                  Showing the {archiveShown.length} most recent. The other{" "}
-                  {archived.length - archiveShown.length} are below, newest
-                  first. Nothing leaves here by the passing of time — only by
-                  you.{" "}
-                  <a
-                    href={`/admin/workshop-bookings?show=past&archive=all${filtered ? `&kind=${filtered}` : ""}`}
-                    className="font-medium text-action underline decoration-1 underline-offset-4"
-                  >
-                    Show all {archived.length}
-                  </a>
-                  .
-                </p>
-              )}
+              {/* THE PAGER REPLACES "showing the 5 most recent · show all",
+                  which was a truncation with an escape hatch. */}
+              <Pager
+                page={page}
+                total={rows.length}
+                href={pageHref}
+                label="bookings"
+              />
             </Table>
           )}
         </section>
@@ -791,8 +653,15 @@ export default async function Page({
             <Table
               id="upcoming-table"
               caption="Bookings for days that have not happened yet, soonest first. Columns: name, email, type of offering, offering and dates with its own refund period, deposit and what is still owed on it, money currently held, and the cancel, refund and delete actions available for that booking's state."
-              bookings={upcoming}
-            />
+              bookings={shown}
+            >
+              <Pager
+                page={page}
+                total={rows.length}
+                href={pageHref}
+                label="bookings"
+              />
+            </Table>
           )}
         </section>
       )}

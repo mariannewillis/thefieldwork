@@ -293,7 +293,8 @@ export default function BookingActions({ booking }: { booking: LedgerRow }) {
    * `insidePeriod` alone would have quietly taken the control off every
    * session on the screen.
    */
-  const periodHasPassed = booking.refundDeadline !== null && !booking.insidePeriod;
+  const periodHasPassed =
+    booking.refundDeadline !== null && !booking.insidePeriod;
   const canRefund = !booking.refunded && !periodHasPassed;
   const refundWhyNot = booking.refunded
     ? `Refund is spent — the money already went back${booking.refundedAt ? ` on ${formatInstant(booking.refundedAt)}` : ""}. There is nothing left to send.`

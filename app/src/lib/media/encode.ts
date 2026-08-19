@@ -167,7 +167,7 @@ export async function encodeDerivatives(
     .toFormat("png")
     .toBuffer();
 
-    // HOW WIDE THE PICTURE SHE CHOSE ACTUALLY IS, before anything is resized.
+  // HOW WIDE THE PICTURE SHE CHOSE ACTUALLY IS, before anything is resized.
   // `withoutEnlargement` above means a small source is never stretched — which
   // is right, since no encoder can add detail that was never captured — but it
   // also means a 828px photograph is stored under a name that says 2400 and

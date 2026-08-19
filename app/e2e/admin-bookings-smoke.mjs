@@ -547,8 +547,35 @@ try {
     "a day that has been fell onto the Past tab by itself",
     (await page
       .locator("#archive-table tr", { hasText: "Gwilym Hart" })
-      .count()) === 1 &&
-      (await page.locator("#upcoming-table").count()) === 0,
+      .count()) === 1 && (await page.locator("#upcoming-table").count()) === 0,
+  );
+
+  // ── twelve to a page ──────────────────────────────────────────────────────
+  //
+  // THIS FIXTURE HAS TEN, which is what makes the second assertion the useful
+  // one: a table that fits on a page must not draw a pager at all. "Page 1 of
+  // 1" beside ten rows is chrome answering a question nobody asked. The cap
+  // itself is asserted as a ceiling, and the clamp below is what a bad page
+  // number does.
+  await page.goto(`${BASE}/admin/workshop-bookings`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
+  const onPage = await page.locator("#upcoming-table tbody tr").count();
+  ok(
+    "a page never holds more than twelve rows",
+    onPage <= 12,
+    String(onPage),
+  );
+  ok(
+    "and a table that fits on one page draws no pager",
+    (await page.locator('nav[aria-label*="Pages of"]').count()) === 0,
+    String(onPage),
+  );
+
+  await page.goto(`${BASE}/admin/workshop-bookings?page=99`);
+  await page.waitForSelector("#ledger-h", { timeout: 30_000 });
+  ok(
+    "a page number past the end lands on rows rather than an empty table",
+    (await page.locator("#upcoming-table tbody tr").count()) === onPage,
   );
 
   // ── filtering by kind ─────────────────────────────────────────────────────
@@ -567,28 +594,47 @@ try {
 
   await page.goto(`${BASE}/admin/workshop-bookings`);
   await page.waitForSelector("#ledger-h", { timeout: 30_000 });
+  // THE COLUMNS ARE FIVE AND THE CONTROLS (operator, 2026-08-19). Email, the
+  // deposit and the money-ever-paid are facts in the sheet now; what is left on
+  // the line is what she scans a ledger for.
   ok(
-    "the columns are in the approved order",
+    "the columns are the five the line now carries",
     (await page.locator("#upcoming-table thead").innerText())
       .replace(/\s+/g, " ")
       .toLowerCase()
-      .startsWith("name email type offering deposit courses only held"),
+      .startsWith("name type offering and when where it stands held"),
     (await page.locator("#upcoming-table thead").innerText()).replace(
       /\s+/g,
       " ",
     ),
   );
-  // The Type cell is set in uppercase by the stylesheet, so innerText gives it
-  // back as WORKSHOP — the assertion has to ask for what is drawn.
+
   ok(
     "Type says Workshop on every row",
     body.includes("WORKSHOP") && !body.includes("SERVICE"),
   );
+  // THE REFUND PERIOD IS IN THE SHEET. It is a fact about the offering rather
+  // than the thing she scans the ledger for, and printing it on every row is
+  // what made the table a file (2026-08-19).
+  await page.locator("tr", { hasText: "Anna Keeling" }).first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
   ok(
-    "each row states its own workshop's refund period",
-    (await rowText(page, "Anna Keeling")).includes("Refund period 14 days") &&
-      (await rowText(page, "Ffion Oakes")).includes("closed"),
+    "pressing a row states that offering's own refund period",
+    (await page.locator("dialog[open]").innerText()).includes("14 days"),
+    oneLine(await page.locator("dialog[open]").innerText()),
   );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
+
+  await page.locator("tr", { hasText: "Ffion Oakes" }).first().click();
+  await page.waitForSelector("dialog[open]", { timeout: 20_000 });
+  ok(
+    "and says when it closed on one whose period has gone",
+    /closed/.test(await page.locator("dialog[open]").innerText()),
+    oneLine(await page.locator("dialog[open]").innerText()),
+  );
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
 
   // ── refund closes with the refund period ──────────────────────────────────
   //
