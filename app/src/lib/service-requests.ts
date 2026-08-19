@@ -124,6 +124,32 @@ export function approvalState(
   return hasApprovalLapsed(request, now) ? "lapsed" : "awaitingPayment";
 }
 
+/**
+ * IS THIS ONE STILL ON HER DESK?
+ *
+ * The one question the queue is split by (operator, 2026-08-19: "requests
+ * should be archived when they are approved or declined"). Two states are hers
+ * to answer and three are answered:
+ *
+ *   pending          nobody has said anything yet.
+ *   lapsed           she approved it, nobody paid, and it is BACK with her —
+ *                    which is why archiving cannot be a column she sets when
+ *                    she approves. Nothing runs when an approval expires
+ *                    (D-25); the request simply becomes hers again, and a
+ *                    stored flag would still say "archived" while the headline
+ *                    said "back with you".
+ *   awaitingPayment  answered. The link is out and the deadline is running.
+ *   declined         answered, and they were told.
+ *   paid             answered and paid for; it is a booking now.
+ *
+ * DERIVED, LIKE EVERYTHING ELSE HERE. `approvalState` already reads the row and
+ * the clock; this reads `approvalState`. There is no second fact to keep in
+ * step and nothing to migrate — the archive is a view of the same rows.
+ */
+export function needsHer(state: ApprovalState): boolean {
+  return state === "pending" || state === "lapsed";
+}
+
 // ── reading ──────────────────────────────────────────────────────────────────
 
 /**

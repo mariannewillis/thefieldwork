@@ -15,6 +15,7 @@ import {
   approvalState,
   factsOf,
   listServiceRequests,
+  needsHer,
   type ApprovalState,
   type ServiceRequestWithService,
 } from "@/lib/service-requests";
@@ -245,7 +246,141 @@ function Row({ request }: { request: ServiceRequestWithService }) {
   );
 }
 
-export default async function Page() {
+/**
+ * ONE ANSWERED REQUEST, in the archive's own table.
+ *
+ * FEWER COLUMNS, because fewer things are still true of it. The live table asks
+ * "what are you going to do about this" and gives five columns to answering;
+ * this one asks "what did you do", which is one column, and it is the only
+ * thing here that the other table does not already say better.
+ *
+ * The controls stay: `RequestActions` draws itself from the row's state, so an
+ * archived one shows the two answers spent and says why, and Delete live where
+ * D-33 allows it. Dropping them would mean she could not remove a request from
+ * the only screen it still appears on.
+ */
+function ArchivedRow({ request }: { request: ServiceRequestWithService }) {
+  const { service } = request;
+  const state = approvalState(factsOf(request), new Date());
+  const wanted =
+    request.slotStart && request.slotEnd
+      ? formatSlot(request.slotStart, request.slotEnd)
+      : (request.preferredTime ?? "They did not say.");
+
+  const row: RequestRow = {
+    id: request.id,
+    name: request.name,
+    serviceName: service.name,
+    listPence: service.priceGBP,
+    wanted,
+    chosen: request.slotStart !== null,
+    state,
+    approvedPence: request.approvedPence,
+    agreedTime: request.agreedTime,
+    payBy: request.payBy,
+  };
+
+  return (
+    <tr className="border-b border-pool-rule/25 last:border-b-0">
+      <td className={CELL}>
+        <span className="block font-display text-[21px] leading-tight text-ink">
+          {request.name}
+        </span>
+        <a
+          href={`mailto:${request.email}?subject=${encodeURIComponent(`Your request — ${service.name}`)}`}
+          className="t mt-1 block break-all text-[17px] text-action underline decoration-action underline-offset-4 hover:text-ink hover:decoration-ink"
+        >
+          {request.email}
+        </a>
+        <span className={NOTE}>asked {formatInstant(request.createdAt)}</span>
+      </td>
+
+      <td className={CELL}>
+        <Link
+          href={`/admin/offerings/services/${service.slug}`}
+          className="t block font-display text-[21px] leading-tight text-ink underline decoration-pool-rule/50 underline-offset-4 hover:decoration-ink"
+        >
+          {service.name}
+        </Link>
+        <span
+          className={
+            request.slotStart
+              ? "mt-1 block max-w-[36ch] fig font-mono text-[17px] tabular-nums leading-relaxed text-ink-soft"
+              : "mt-1 block max-w-[36ch] whitespace-pre-line text-[17px] leading-relaxed text-ink-soft"
+          }
+        >
+          {wanted}
+        </span>
+      </td>
+
+      {/* WHAT SHE ANSWERED — the one thing this table exists to show, and the
+          only column the live table has no room for once a request is closed. */}
+      <td className={CELL}>
+        <span className="block text-[19px] leading-relaxed text-ink">
+          {state === "declined"
+            ? `You declined it${request.declinedAt ? ` on ${formatInstant(request.declinedAt)}` : ""}.`
+            : state === "paid"
+              ? `Paid for. It is in Bookings${request.approvedPence !== null ? `, at ${formatMoney(request.approvedPence)}` : ""}.`
+              : `You approved it${request.approvedPence !== null ? ` at ${formatMoney(request.approvedPence)}` : ""}${request.approvedAt ? ` on ${formatInstant(request.approvedAt)}` : ""}.`}
+        </span>
+        {state === "awaitingPayment" && request.payBy && (
+          <span className={`${NOTE} text-gold`}>
+            Their link works until {formatMoment(request.payBy)}
+          </span>
+        )}
+        {request.agreedTime && (
+          <span className="mt-2 block max-w-[38ch] whitespace-pre-line border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink">
+            You said: {request.agreedTime}
+          </span>
+        )}
+        {request.declineNote && (
+          <span className="mt-2 block max-w-[38ch] whitespace-pre-line border-l-2 border-pool-rule/40 pl-4 text-[17px] leading-relaxed text-ink-soft">
+            You wrote: {request.declineNote}
+          </span>
+        )}
+      </td>
+
+      <td className="py-5 align-top">
+        <RequestActions request={row} />
+      </td>
+    </tr>
+  );
+}
+
+/** One of the two tabs, drawn as a link so the split survives a reload. */
+function Tab({
+  href,
+  label,
+  count,
+  current,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  current: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className={
+        current
+          ? "t border-b-2 border-gold pb-2 text-[19px] font-semibold text-plate-text"
+          : "t border-b-2 border-transparent pb-2 text-[19px] text-plate-soft hover:text-plate-text"
+      }
+    >
+      {label}{" "}
+      <span className="fig font-mono text-[16px] tabular-nums">{count}</span>
+    </Link>
+  );
+}
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ show?: string }>;
+}) {
+  const { show } = await searchParams;
   const requests = await listServiceRequests();
   const now = new Date();
   const states = new Map(
@@ -260,6 +395,18 @@ export default async function Page() {
   const awaiting = requests.filter(
     (r) => states.get(r.id) === "awaitingPayment",
   );
+
+  // ANSWERED OR NOT, and nothing else decides which table a request is in. A
+  // lapsed approval is back on her desk by arithmetic (D-25), so it leaves the
+  // archive on its own the moment it runs out — which is the whole reason this
+  // is derived rather than a column set when she presses approve.
+  const onHerDesk = requests.filter((r) => needsHer(states.get(r.id)!));
+  const archived = requests.filter((r) => !needsHer(states.get(r.id)!));
+
+  // The archive is opt-in: she comes to this screen to answer things, so the
+  // things to answer are what it opens on.
+  const showingArchive = show === "archived";
+  const rows = showingArchive ? archived : onHerDesk;
 
   return (
     <section className="pt-8" aria-labelledby="requests-h">
@@ -300,67 +447,157 @@ export default async function Page() {
         Approving sends them a link to pay and gives them 48 hours to use it.
         Declining closes the request with a line you write. Nothing is charged
         until they pay, and nothing you do here moves money.
+        {/* SAID HERE BECAUSE IT IS NO LONGER IN FRONT OF HER. An approved
+            request is under Answered now, so the one fact about it that is
+            still live — somebody is holding a working link — has to be said on
+            the tab she is actually looking at. */}
         {awaiting.length > 0 && (
           <>
             {" "}
             {awaiting.length === 1
-              ? "One person has a link and has not used it yet."
-              : `${awaiting.length} people have links they have not used yet.`}
+              ? "One person has a link and has not used it yet"
+              : `${awaiting.length} people have links they have not used yet`}
+            , under{" "}
+            <Link
+              href="/admin/bookings?show=archived"
+              className="text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+            >
+              Answered
+            </Link>
+            .
           </>
         )}
       </p>
 
-      {requests.length > 0 ? (
-        <div className="pool on-pool mt-9 px-6 py-2 sm:px-8">
+      {/* TWO TABS, and the split is what she has answered rather than a column
+          anybody sets. Links rather than buttons: the choice survives a reload,
+          it can be bookmarked, and this screen needs no client state to hold
+          it. */}
+      <nav
+        aria-label="Which requests"
+        className="mt-9 flex flex-wrap items-baseline gap-x-8 gap-y-3 border-b border-plate-rule/40"
+      >
+        <Tab
+          href="/admin/bookings"
+          label="Waiting on you"
+          count={onHerDesk.length}
+          current={!showingArchive}
+        />
+        <Tab
+          href="/admin/bookings?show=archived"
+          label="Answered"
+          count={archived.length}
+          current={showingArchive}
+        />
+      </nav>
+
+      {rows.length > 0 ? (
+        <div className="pool on-pool mt-7 px-6 py-2 sm:px-8">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] border-collapse text-left">
-              <caption className="sr-only">
-                Session requests, newest first
-              </caption>
-              <thead>
-                <tr className="border-b-2 border-ink">
-                  <th scope="col" className={HEAD}>
-                    Who
-                    <span className={CAPTION}>and where it stands</span>
-                  </th>
-                  <th scope="col" className={HEAD}>
-                    How to reach them
-                  </th>
-                  <th scope="col" className={HEAD}>
-                    What they asked for
-                  </th>
-                  <th scope="col" className={HEAD}>
-                    When
-                    <span className={CAPTION}>their words, then yours</span>
-                  </th>
-                  <th scope="col" className={`${HEAD} pr-0`}>
-                    Your answer
-                    <span className={CAPTION}>approve &middot; decline</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request) => (
-                  <Row key={request.id} request={request} />
-                ))}
-              </tbody>
-            </table>
+            {showingArchive ? (
+              <table className="w-full min-w-[880px] border-collapse text-left">
+                <caption className="sr-only">
+                  Requests you have answered, newest first
+                </caption>
+                <thead>
+                  <tr className="border-b-2 border-ink">
+                    <th scope="col" className={HEAD}>
+                      Who
+                      <span className={CAPTION}>and when they asked</span>
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      What they asked for
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      What you answered
+                    </th>
+                    <th scope="col" className={`${HEAD} pr-0`}>
+                      &nbsp;
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {archived.map((request) => (
+                    <ArchivedRow key={request.id} request={request} />
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <table className="w-full min-w-[1040px] border-collapse text-left">
+                <caption className="sr-only">
+                  Session requests waiting on you, newest first
+                </caption>
+                <thead>
+                  <tr className="border-b-2 border-ink">
+                    <th scope="col" className={HEAD}>
+                      Who
+                      <span className={CAPTION}>and where it stands</span>
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      How to reach them
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      What they asked for
+                    </th>
+                    <th scope="col" className={HEAD}>
+                      When
+                      <span className={CAPTION}>their words, then yours</span>
+                    </th>
+                    <th scope="col" className={`${HEAD} pr-0`}>
+                      Your answer
+                      <span className={CAPTION}>approve &middot; decline</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {onHerDesk.map((request) => (
+                    <Row key={request.id} request={request} />
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       ) : (
-        /* The ordinary state on a new site, drawn deliberately. An empty table
-           with headers reads as something that failed to load. */
-        <div className="pool on-pool mt-9 max-w-[62ch] px-7 py-7">
+        /* Drawn deliberately, and worded for WHICH emptiness it is. An empty
+           table with headers reads as something that failed to load, and
+           "nobody has ever asked" is a different fact from "you have answered
+           everybody". */
+        <div className="pool on-pool mt-7 max-w-[62ch] px-7 py-7">
           <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
-            Nothing yet
+            {requests.length === 0
+              ? "Nothing yet"
+              : showingArchive
+                ? "Nothing answered"
+                : "All clear"}
           </p>
           <p className="mt-2 font-display text-[26px] leading-tight text-ink">
-            No one has asked for a session yet.
+            {requests.length === 0
+              ? "No one has asked for a session yet."
+              : showingArchive
+                ? "You have not answered anything yet."
+                : "Nothing is waiting on you."}
           </p>
           <p className="mt-3 text-[17px] leading-relaxed text-ink-soft">
-            Requests arrive from the form at the foot of each session&rsquo;s
-            page. They land here and you get an email at the same time, so this
-            screen is somewhere to answer from rather than somewhere to wait.
+            {requests.length === 0 ? (
+              <>
+                Requests arrive from the form at the foot of each session&rsquo;s
+                page. They land here and you get an email at the same time, so
+                this screen is somewhere to answer from rather than somewhere to
+                wait.
+              </>
+            ) : showingArchive ? (
+              <>
+                A request moves here once you have approved or declined it. If
+                an approval runs out unpaid it goes back to Waiting on you,
+                because it needs you again.
+              </>
+            ) : (
+              <>
+                Everything that has come in has been answered. What you said is
+                under Answered, and anything paid for is in Bookings.
+              </>
+            )}
           </p>
         </div>
       )}

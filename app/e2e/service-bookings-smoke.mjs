@@ -1024,7 +1024,10 @@ try {
   // nothing. It exists because somebody can ask for their message to be taken
   // away and the privacy page says she can do it — so the case that matters
   // most here is the PENDING one, deleted without a word going anywhere.
-  await page.goto(`${BASE}/admin/bookings`);
+  // ON THE ANSWERED TAB, because both of these have been answered. A request
+  // leaves the default queue the moment she approves or declines it, and comes
+  // back only if the approval runs out (2026-08-19).
+  await page.goto(`${BASE}/admin/bookings?show=archived`);
   await page.waitForSelector("#requests-h", { timeout: 30_000 });
 
   // Refused where something is still live between her and them. Colin was
@@ -1056,8 +1059,11 @@ try {
   );
 
   // The one that was asked for. Nothing has been answered, so nothing is owed
-  // to them but the removal itself.
+  // to them but the removal itself — and because nothing has been answered, it
+  // is on the DEFAULT tab rather than the archive.
   const beforeDelete = emailCount(server.out(), CLIENT);
+  await page.goto(`${BASE}/admin/bookings`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
   const helen = page.locator("tr", { hasText: "Helen Vaughn" });
   await helen.locator('button:has-text("Delete")').click();
   const deleteModal = page.locator("dialog[open]");
@@ -1091,7 +1097,10 @@ try {
   );
 
   // A declined one goes the same way. They were told the answer at the time,
-  // so there is nothing outstanding to send now either.
+  // so there is nothing outstanding to send now either — and it is under
+  // Answered, which is where a declined request lives.
+  await page.goto(`${BASE}/admin/bookings?show=archived`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
   const peterAgain = page.locator("tr", { hasText: "Peter Nash" });
   await peterAgain.locator('button:has-text("Delete")').click();
   const peterModal = page.locator("dialog[open]");
@@ -1111,6 +1120,66 @@ try {
     "and it is gone, with nothing further sent",
     (await requestRow(asked.declined)) === null &&
       emailCount(server.out(), CLIENT) === beforeDelete,
+  );
+
+  // ── answering a request takes it off the queue ────────────────────────────
+  //
+  // The split is DERIVED from the state rather than set when she presses a
+  // button, and the reason is the lapsed one: an approval runs out by the clock
+  // with nothing running (D-25), so a stored "archived" flag would still say
+  // archived while the headline said "back with you". These four assertions are
+  // the whole of that claim.
+  const namesOn = async (url) => {
+    await page.goto(url);
+    await page.waitForSelector("#requests-h", { timeout: 30_000 });
+    return (await page.locator("tbody tr td:first-child").allInnerTexts()).map(
+      (cell) => cell.split("\n")[0].trim(),
+    );
+  };
+
+  const waitingNames = await namesOn(`${BASE}/admin/bookings`);
+  const answeredNames = await namesOn(`${BASE}/admin/bookings?show=archived`);
+
+  ok(
+    "a request she has answered is off the queue and under Answered",
+    // Colin, approved a moment ago with his link still live. Peter was declined
+    // and would say the same thing, but the delete section above removed him.
+    !waitingNames.includes("Colin Webb") &&
+      answeredNames.includes("Colin Webb"),
+    JSON.stringify({ waiting: waitingNames, answered: answeredNames }),
+  );
+
+  ok(
+    "and one that was paid for is answered too",
+    answeredNames.includes("Ruth Bailey") &&
+      !waitingNames.includes("Ruth Bailey"),
+    JSON.stringify({ waiting: waitingNames, answered: answeredNames }),
+  );
+
+  // Anna's first approval ran out and was approved AGAIN above, so she is
+  // awaiting payment now — answered. Made to lapse once more here, which is
+  // the state nothing writes down.
+  await db.query(
+    `UPDATE "ServiceRequest" SET "payBy" = now() - interval '1 hour' WHERE id = $1`,
+    [asked.lapsing],
+  );
+  const waitingAfter = await namesOn(`${BASE}/admin/bookings`);
+  const answeredAfter = await namesOn(`${BASE}/admin/bookings?show=archived`);
+  ok(
+    "AN APPROVAL THAT RUNS OUT COMES BACK ON ITS OWN, with nothing having run",
+    waitingAfter.includes("Anna Frost") && !answeredAfter.includes("Anna Frost"),
+    JSON.stringify({ waiting: waitingAfter, answered: answeredAfter }),
+  );
+
+  ok(
+    "and the two tabs count what they hold",
+    (await page.locator('nav[aria-label="Which requests"] a').allInnerTexts())
+      .map((tab) => tab.replace(/\s+/g, " ").trim())
+      .join(" | ") ===
+      `Waiting on you ${waitingAfter.length} | Answered ${answeredAfter.length}`,
+    (await page.locator('nav[aria-label="Which requests"] a').allInnerTexts())
+      .map((tab) => tab.replace(/\s+/g, " ").trim())
+      .join(" | "),
   );
 
   // ── the ledger, with all three kinds in it ────────────────────────────────
