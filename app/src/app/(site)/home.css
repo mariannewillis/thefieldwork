@@ -814,26 +814,28 @@ a.cta {
    room and a face. */
 .ledger-row {
   display: flex;
-  /* STRETCH, so the picture is as tall as the words beside it (operator,
-     2026-08-19). It was `flex-start`, which left the picture a fixed square and
-     the row's height set by the text — so widening the picture did nothing
-     until it grew taller than the words, and then it grew the row instead of
-     filling it. */
-  align-items: stretch;
+  /* TOP-ALIGNED, because the picture has a shape of its own again (operator,
+     2026-08-19). Stretching came first and made every picture exactly as tall
+     as its own words, which meant a three-line row got a taller crop than a
+     two-line one — right for filling the row, wrong for a column of five
+     pictures that should read as one set. */
+  align-items: flex-start;
   gap: clamp(11px, 1.1vw, 15px);
 }
 .ledger-row__frame {
   flex: 0 0 auto;
   width: clamp(64px, 6vw, 90px);
-  /* NOT A FIXED RATIO ANY MORE. The height is whatever the words beside it come
-     to, so the crop is a little different on a row of two lines than on one of
-     three — which is the point: the picture is a column of the row, and a
-     column matches its neighbour's height rather than keeping its own.
+  /* ONE SHAPE FOR ALL OF THEM (operator, 2026-08-19), and it is the PORTAL'S
+     shape: 4:5 is what the Offerings screen crops these to, so the picture she
+     approves there is the picture she gets here rather than a second crop of
+     the same file that can cut differently.
 
-     The floor stops a one-line row from serving a letterbox sliver, and a
-     square is where a short row lands, so the shape stays close to the one
-     that survives both a room and a face. */
-  min-height: clamp(64px, 6vw, 90px);
+     It also happens to fit: at the 90px this settles to on a desktop the frame
+     is 112px tall against a two-line row's 111px, so the common row still fills
+     top to bottom. A longer row is taller than its picture, which is the price
+     of one shape across the set and the right way round — five pictures that
+     read as a set beat five that each match their own paragraph. */
+  aspect-ratio: 4 / 5;
   display: block;
   overflow: hidden;
 }
