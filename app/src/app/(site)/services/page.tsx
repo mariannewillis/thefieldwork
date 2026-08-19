@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { servicesIndex } from "@/content/services";
 import { formatDuration, formatMoney } from "@/lib/format";
@@ -109,16 +110,7 @@ export default async function Page() {
 
   return (
     <>
-      {/* Her hands at the edge — the promise of the page. Decorative, so it
-          carries no alt and is hidden from assistive tech. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/media/${servicesIndex.plate.src}-2400.jpg`}
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src={servicesIndex.plate.src} />
 
       <a
         href="#list"

@@ -136,10 +136,16 @@ export type Derivative = {
  * that order and a browser takes the first it understands, so the JPEG is the
  * one nobody modern downloads and every caller can still fall back to.
  */
+export type Encoded = {
+  derivatives: Derivative[];
+  /** How wide the picture she chose actually is, before any resizing. */
+  sourceWidth: number;
+};
+
 export async function encodeDerivatives(
   source: Buffer,
   basename: string,
-): Promise<Derivative[]> {
+): Promise<Encoded> {
   const graded = await sharp(source)
     .rotate() // honour the EXIF orientation before the tag is discarded
     .modulate({ saturation: SATURATION })
@@ -160,6 +166,14 @@ export async function encodeDerivatives(
     // Back to a bitmap once, so the grade is not recomputed six times over.
     .toFormat("png")
     .toBuffer();
+
+    // HOW WIDE THE PICTURE SHE CHOSE ACTUALLY IS, before anything is resized.
+  // `withoutEnlargement` above means a small source is never stretched — which
+  // is right, since no encoder can add detail that was never captured — but it
+  // also means a 828px photograph is stored under a name that says 2400 and
+  // looks soft the moment a page puts it across the top of a screen. The only
+  // place that can be said is here, where the number exists.
+  const sourceWidth = (await sharp(graded).metadata()).width ?? 0;
 
   const derivatives: Derivative[] = [];
 
@@ -183,5 +197,16 @@ export async function encodeDerivatives(
     }
   }
 
-  return derivatives;
+  return { derivatives, sourceWidth };
 }
+
+/**
+ * The width below which a picture will look soft where the site uses one big.
+ *
+ * 1600 rather than 2400: the full-bleed plates are drawn at 1440 on a desktop,
+ * so anything at or above that is sharp on an ordinary screen and only short of
+ * the ideal on a high-density one. Below 1600 it is visibly soft on a laptop,
+ * which is what the operator saw on the detail pages — three of the heroes are
+ * 828px, because they came off WhatsApp, which resamples on send.
+ */
+export const SHARP_ENOUGH_WIDTH = 1600;

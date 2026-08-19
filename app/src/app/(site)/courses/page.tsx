@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { coursesIndex } from "@/content/courses";
 import {
@@ -143,16 +144,7 @@ export default async function Page() {
 
   return (
     <>
-      {/* The whole circle of chairs — the promise of the page. Decorative, so
-          it carries no alt and is hidden from assistive tech. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/media/${coursesIndex.plate.src}-2400.jpg`}
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src={coursesIndex.plate.src} />
 
       <a
         href="#list"

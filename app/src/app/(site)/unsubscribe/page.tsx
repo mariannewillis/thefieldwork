@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import Link from "next/link";
 import { SiteBrand, SiteFooter } from "@/components/site/SiteChrome";
 
@@ -20,14 +21,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/media/chair-with-her-coat-2400.jpg"
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src="chair-with-her-coat" />
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
         <SiteBrand />
         <section className="mt-14 max-w-[620px]">

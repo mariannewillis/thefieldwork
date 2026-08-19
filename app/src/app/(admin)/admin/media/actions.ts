@@ -1,6 +1,7 @@
 "use server";
 
 import { MediaKind } from "@prisma/client";
+import { SHARP_ENOUGH_WIDTH } from "@/lib/media/encode";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/server";
@@ -78,8 +79,31 @@ export type Added =
        * a flag, because the screen's only job with it is to print it.
        */
       alreadyHeld: string | null;
+      /**
+       * Set when the picture is too small for the places the site uses one big.
+       * A sentence, and NOT an error: a small photograph is perfectly good in a
+       * thumbnail, and refusing it would block a use that is fine. It is said
+       * because nothing else can say it — she has no way of knowing that the
+       * photograph she just sent from her phone was resampled on the way.
+       */
+      soft: string | null;
     }
   | { ok: false; error: string };
+
+/**
+ * "That picture is 828 pixels wide…" — a fact she cannot otherwise learn.
+ *
+ * The operator reported the detail pages as looking low quality (2026-08-19).
+ * Three of the heroes are 828px because they came through WhatsApp, which
+ * resamples on send; the pipeline stores them under a name that says 2400 and
+ * never enlarges them, which is right — no encoder adds detail that was never
+ * captured — and leaves them soft the moment a page draws one across the top of
+ * a screen. This is the only place that number exists, so it is said here.
+ */
+function softWords(width: number): string | null {
+  if (width === 0 || width >= SHARP_ENOUGH_WIDTH) return null;
+  return `This picture is ${width} pixels wide, which is small for the places the site shows one full width — across the top of its own page, it will look a little soft. It is fine anywhere it appears small. Pictures sent through WhatsApp are shrunk on the way; if you have the original, that one will be sharper.`;
+}
 
 /**
  * A photograph, into the library.
@@ -125,12 +149,18 @@ export async function addLibraryPicture(formData: FormData): Promise<Added> {
       ok: true,
       ref: result.basename,
       alreadyHeld: heldWords(result.alreadyHeld, "picture"),
+      soft: softWords(result.sourceWidth),
     };
   }
 
   await recordPicture(result.basename, result.hash);
   refresh();
-  return { ok: true, ref: result.basename, alreadyHeld: null };
+  return {
+    ok: true,
+    ref: result.basename,
+    alreadyHeld: null,
+    soft: softWords(result.sourceWidth),
+  };
 }
 
 /**
@@ -178,7 +208,13 @@ export async function addLibraryDocument(formData: FormData): Promise<Added> {
   const hash = hashOf(bytes);
   const held = await heldWithHash(MediaKind.document, hash);
   if (held) {
-    return { ok: true, ref: held.ref, alreadyHeld: heldWords(held, "file") };
+    return {
+      ok: true,
+      ref: held.ref,
+      alreadyHeld: heldWords(held, "file"),
+      // A document and a film have no pixels of ours to judge.
+      soft: null,
+    };
   }
 
   const taken = new Set(
@@ -215,7 +251,7 @@ export async function addLibraryDocument(formData: FormData): Promise<Added> {
   });
 
   refresh();
-  return { ok: true, ref: storedAs, alreadyHeld: null };
+  return { ok: true, ref: storedAs, alreadyHeld: null, soft: null };
 }
 
 /**
@@ -270,7 +306,7 @@ export async function addLibraryVideo(formData: FormData): Promise<Added> {
   // been. A film has no bytes and no upload: pasting the same address twice
   // costs nothing and creates nothing, so there is no second copy to report and
   // no sentence worth interrupting her with.
-  return { ok: true, ref: film.watchUrl, alreadyHeld: null };
+  return { ok: true, ref: film.watchUrl, alreadyHeld: null, soft: null };
 }
 
 /** One film in the library, as a picker needs it. */

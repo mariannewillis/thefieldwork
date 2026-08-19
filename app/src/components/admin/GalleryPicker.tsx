@@ -177,6 +177,13 @@ export default function GalleryPicker({
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState<string | null>(null);
   /**
+   * "This picture is 828 pixels wide…" — the same kind of thing as `held`
+   * below: a fact she cannot otherwise learn, not a refusal. It is kept apart
+   * from `refused` because nothing has gone wrong, and apart from `held`
+   * because the two can both be true of one upload.
+   */
+  const [soft, setSoft] = useState<string | null>(null);
+  /**
    * "You already have this picture…" — a fact, not a refusal, and drawn as one.
    *
    * It sits in its own state rather than sharing `refused`, because the two are
@@ -278,6 +285,7 @@ export default function GalleryPicker({
         // Already here: the ref that came back names the copy she has, so the
         // tick below chooses THAT one and this only has to say so.
         if (result.alreadyHeld) setHeld(result.alreadyHeld);
+        if (result.soft) setSoft(result.soft);
         onAdded?.(result.ref);
         // An upload is a choice: she went and found this file in order to use
         // it, so it arrives ticked rather than waiting to be found again.
@@ -526,6 +534,18 @@ export default function GalleryPicker({
               className="mt-4 max-w-[62ch] border-l-2 border-action pl-4 text-[17px] leading-relaxed text-ink"
             >
               {held}
+            </p>
+          )}
+
+          {/* Also not an alert, and for the same reason: the picture is in and
+              she can use it. What she could not otherwise know is that it will
+              look soft where the site draws one full width. */}
+          {soft && (
+            <p
+              role="status"
+              className="mt-4 max-w-[62ch] border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink"
+            >
+              {soft}
             </p>
           )}
         </div>

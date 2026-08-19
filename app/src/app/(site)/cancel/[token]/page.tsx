@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { SiteBrand, SiteFooter } from "@/components/site/SiteChrome";
 import { cancelPage } from "@/content/workshops";
 import {
@@ -102,17 +103,7 @@ function Receipt({
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* An empty chair with a coat on it, where somebody says they cannot
-          come. Decorative, so it carries no alt and is hidden from assistive
-          tech. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/media/${cancelPage.plate.src}-2400.jpg`}
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src={cancelPage.plate.src} />
 
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
         {/* The mark at the site's one size, without the nav — see the

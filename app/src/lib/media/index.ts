@@ -96,6 +96,13 @@ export type Ingested =
        * upload that genuinely arrived.
        */
       alreadyHeld: Held | null;
+      /**
+       * How wide the picture she chose actually is. Carried out so the screen
+       * can say plainly when it is too small for the places the site puts a
+       * picture big — nothing here refuses it, because a small photograph is
+       * perfectly good in a thumbnail.
+       */
+      sourceWidth: number;
     }
   | { ok: false; error: string };
 
@@ -182,9 +189,9 @@ export async function ingestImage(source: {
     source.basename ??
     nameFor(source.filename, new Set(await listMediaBasenames()));
 
-  let derivatives;
+  let encoded;
   try {
-    derivatives = await encodeDerivatives(source.bytes, basename);
+    encoded = await encodeDerivatives(source.bytes, basename);
   } catch (e) {
     // It passed the first bytes and still would not decode: truncated,
     // corrupt, or a format sharp was not built with. Not her fault and not
@@ -203,6 +210,7 @@ export async function ingestImage(source: {
   // because the consequence of being wrong is silent: a picture stored with
   // nothing to identify it is a picture the guard can never recognise again,
   // and it would go on quietly accumulating copies with no symptom.
+  const { derivatives, sourceWidth } = encoded;
   const wanted = canonicalDerivative(basename);
   const canonical = derivatives.find(
     (derivative) => derivative.file === wanted,
@@ -222,7 +230,13 @@ export async function ingestImage(source: {
     if (held) {
       // Nothing written, nothing named, nothing to undo. The basename that
       // comes back is the one she already has.
-      return { ok: true, basename: held.ref, hash, alreadyHeld: held };
+      return {
+        ok: true,
+        basename: held.ref,
+        hash,
+        alreadyHeld: held,
+        sourceWidth,
+      };
     }
   }
 
@@ -247,7 +261,7 @@ export async function ingestImage(source: {
     };
   }
 
-  return { ok: true, basename, hash, alreadyHeld: null };
+  return { ok: true, basename, hash, alreadyHeld: null, sourceWidth };
 }
 
 const NOT_A_PICTURE =

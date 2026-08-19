@@ -451,6 +451,8 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
   const [refused, setRefused] = useState<string | null>(null);
   /** "You already have this picture…" — a fact rather than a refusal. */
   const [held, setHeld] = useState<string | null>(null);
+  /** "This picture is 828 pixels wide…" — a fact, like `held`, not a refusal. */
+  const [soft, setSoft] = useState<string | null>(null);
   const [link, setLink] = useState("");
 
   async function take(input: HTMLInputElement) {
@@ -460,6 +462,7 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
     setBusy(true);
     setRefused(null);
     setHeld(null);
+    setSoft(null);
     try {
       for (const file of files) {
         const body = new FormData();
@@ -476,6 +479,7 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
         // dropping twelve photographs of which three are repeats leaves one
         // sentence to read instead of three stacked on top of each other.
         if (result.alreadyHeld) setHeld(result.alreadyHeld);
+        if (result.soft) setSoft(result.soft);
       }
     } catch {
       setRefused("That did not get there. Check the connection and try again.");
@@ -490,6 +494,7 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
     setBusy(true);
     setRefused(null);
     setHeld(null);
+    setSoft(null);
     try {
       const body = new FormData();
       body.set("url", raw);
@@ -597,6 +602,18 @@ export function AddToLibrary({ kind }: { kind: LibraryRow["kind"] }) {
           className="mt-4 max-w-[62ch] border-l-2 border-action pl-4 text-[17px] leading-relaxed text-ink"
         >
           {held}
+        </p>
+      )}
+
+      {/* Also not an alert: the picture is in and she can use it. What she
+          could not otherwise know is that it will look soft where the site
+          draws one full width. */}
+      {soft && (
+        <p
+          role="status"
+          className="mt-4 max-w-[62ch] border-l-2 border-gold pl-4 text-[17px] leading-relaxed text-ink"
+        >
+          {soft}
         </p>
       )}
     </div>

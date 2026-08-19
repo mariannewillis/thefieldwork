@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { SiteBrand, SiteFooter } from "@/components/site/SiteChrome";
 import SubscribeForm from "@/components/site/SubscribeForm";
 
@@ -21,15 +22,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
-      {/* The window at dusk. Decorative, so it carries no alt. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/media/marianne-altar-light-2400.jpg"
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src="marianne-altar-light" />
 
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
         <SiteBrand />

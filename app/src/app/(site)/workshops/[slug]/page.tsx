@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { notFound } from "next/navigation";
 import BookingPanel from "@/components/site/BookingPanel";
 import FilmEmbed from "@/components/site/FilmEmbed";
@@ -89,16 +90,13 @@ export default async function Page({
 
   return (
     <>
-      {/* The page ground: an abstract, fixed and scrimmed. Decorative, so it
-          carries no alt and is hidden from assistive tech. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/media/${workshopDetail.plate.src}-2400.jpg`}
-        alt=""
-        aria-hidden="true"
-        className="page-field page-field--abstract"
-      />
-      <div className="page-scrim page-scrim--abstract" aria-hidden="true" />
+      {/* A PHOTOGRAPH, so it takes the photograph's treatment (operator,
+          2026-08-19). It was `abstract` — brightness 0.92 and mirrored — which
+          was tuned for the abstract that used to be here and has nothing to
+          compete with. The moment every page took the room photograph instead,
+          those values were showing a face at near-full brightness behind the
+          prose, and every compression artefact in it with them. */}
+      <PageField src={workshopDetail.plate.src} />
 
       <a
         href="#book"

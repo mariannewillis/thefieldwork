@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PageField from "@/components/site/PageField";
 import { SiteFooter } from "@/components/site/SiteChrome";
 import { sessionPayPage } from "@/content/services";
 import { bookingConfirmation } from "@/content/workshops";
@@ -62,16 +63,7 @@ export default async function Page({
 
   return (
     <>
-      {/* Warm and settled, for the moment after paying. Decorative, so it
-          carries no alt and is hidden from assistive tech. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/media/${bookingConfirmation.plate.src}-2400.jpg`}
-        alt=""
-        aria-hidden="true"
-        className="page-field"
-      />
-      <div className="page-scrim" aria-hidden="true" />
+      <PageField src={bookingConfirmation.plate.src} />
 
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
         <a href="/" aria-label="The Field Work — home" className="inline-block">
