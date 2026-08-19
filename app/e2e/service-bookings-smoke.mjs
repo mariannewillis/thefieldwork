@@ -1171,6 +1171,31 @@ try {
     JSON.stringify({ waiting: waitingAfter, answered: answeredAfter }),
   );
 
+  // ── an answered row SAYS what she did, rather than offering it again ──────
+  //
+  // The spent controls were right while everything sat in one queue: a greyed
+  // Approve beside a live one said which was which. With answered requests on
+  // their own tab there is no live control near them to be told apart from, and
+  // two dead buttons on every row are a decision she is invited to make again
+  // and cannot (operator, 2026-08-19).
+  await page.goto(`${BASE}/admin/bookings?show=archived`);
+  await page.waitForSelector("#requests-h", { timeout: 30_000 });
+  const colinCell = await page
+    .locator("tr", { hasText: "Colin Webb" })
+    .locator("td")
+    .last()
+    .innerText();
+  ok(
+    "an approved row says APPROVED where the two answers used to be",
+    /approved/i.test(colinCell) && !/decline/i.test(colinCell),
+    oneLine(colinCell),
+  );
+  ok(
+    "and it still offers the one control that is live on it",
+    /delete/i.test(colinCell),
+    oneLine(colinCell),
+  );
+
   ok(
     "and the two tabs count what they hold",
     (await page.locator('nav[aria-label="Which requests"] a').allInnerTexts())

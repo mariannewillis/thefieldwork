@@ -202,55 +202,99 @@ export default function RequestActions({ request }: { request: RequestRow }) {
     setOpen(which);
   }
 
+  /**
+   * WHAT SHE DID, WHERE THE TWO ANSWERS WOULD HAVE BEEN (operator, 2026-08-19).
+   *
+   * The spent controls were right while everything sat in one queue: a request
+   * she had answered was in the same table as one she had not, so a greyed
+   * Approve beside a live one said which was which and explained itself when
+   * pressed. Once answered requests moved to their own tab there is no live
+   * control anywhere near them to be told apart from, and two dead buttons on
+   * every row of the archive are a decision she is being invited to make again
+   * and cannot.
+   *
+   * So the answer is STATED instead. Nothing is hidden by it — the row already
+   * says what she agreed and when, and the sentence that used to be a button's
+   * `title` is a sentence she can read without pressing anything.
+   *
+   * The spent controls below are now a FALLBACK rather than a path: the three
+   * states named here are exactly the three where neither answer is offered, so
+   * nothing reaches them today. They are kept for the state nobody has invented
+   * yet — a sixth one would otherwise draw a row with no controls and no word
+   * about why, which is the one outcome worse than a dead button.
+   */
+  const answered =
+    state === "declined"
+      ? "Declined"
+      : state === "paid"
+        ? "Paid for"
+        : state === "awaitingPayment"
+          ? "Approved"
+          : null;
+
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        {canApprove ? (
-          <button
-            type="button"
-            onClick={() => ask("approve")}
-            className={PRIMARY}
-            aria-label={
-              again
-                ? `Approve ${request.name}'s request again — the last approval ran out unpaid`
-                : `Approve ${request.name}'s request for ${request.serviceName}`
+        {answered ? (
+          <span
+            className={
+              state === "declined"
+                ? "fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft"
+                : "fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold"
             }
           >
-            {again ? "Approve again" : "Approve"}
-          </button>
+            {answered}
+          </span>
         ) : (
-          <button
-            type="button"
-            aria-disabled="true"
-            onClick={() => setRefusal(approveWhyNot)}
-            className={SPENT}
-            title={approveWhyNot}
-            aria-label={approveWhyNot}
-          >
-            Approve
-          </button>
-        )}
+          <>
+            {canApprove ? (
+              <button
+                type="button"
+                onClick={() => ask("approve")}
+                className={PRIMARY}
+                aria-label={
+                  again
+                    ? `Approve ${request.name}'s request again — the last approval ran out unpaid`
+                    : `Approve ${request.name}'s request for ${request.serviceName}`
+                }
+              >
+                {again ? "Approve again" : "Approve"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-disabled="true"
+                onClick={() => setRefusal(approveWhyNot)}
+                className={SPENT}
+                title={approveWhyNot}
+                aria-label={approveWhyNot}
+              >
+                Approve
+              </button>
+            )}
 
-        {canDecline ? (
-          <button
-            type="button"
-            onClick={() => ask("decline")}
-            className={OUTLINE}
-            aria-label={`Decline ${request.name}'s request for ${request.serviceName}`}
-          >
-            Decline
-          </button>
-        ) : (
-          <button
-            type="button"
-            aria-disabled="true"
-            onClick={() => setRefusal(declineWhyNot)}
-            className={SPENT}
-            title={declineWhyNot}
-            aria-label={declineWhyNot}
-          >
-            Decline
-          </button>
+            {canDecline ? (
+              <button
+                type="button"
+                onClick={() => ask("decline")}
+                className={OUTLINE}
+                aria-label={`Decline ${request.name}'s request for ${request.serviceName}`}
+              >
+                Decline
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-disabled="true"
+                onClick={() => setRefusal(declineWhyNot)}
+                className={SPENT}
+                title={declineWhyNot}
+                aria-label={declineWhyNot}
+              >
+                Decline
+              </button>
+            )}
+          </>
         )}
 
         {/* Apart from the other two, and quieter than both. It is not an answer
