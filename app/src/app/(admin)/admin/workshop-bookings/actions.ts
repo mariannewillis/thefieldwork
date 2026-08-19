@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import {
   cancelBookingFromPortal,
@@ -213,4 +214,40 @@ export async function deletePlace(
   // is read on the offerings screen.
   revalidateEverywhere(booking);
   return { error: null, done: Date.now() };
+}
+
+// ── what she has looked at ───────────────────────────────────────────────────
+
+/**
+ * Mark one booking as seen, because she has just opened it.
+ *
+ * FIRED WHEN THE ROW IS OPENED, not when the ledger is drawn — see the twin of
+ * this in the requests actions for why that distinction is the whole feature.
+ *
+ * `updateMany` with `seenAt: null` in the filter, so opening a row twice is not
+ * an error and the second opening does not move the timestamp: what is recorded
+ * is when she FIRST saw it.
+ */
+export async function markBookingSeen(id: number): Promise<void> {
+  await requireSession();
+  if (!Number.isInteger(id)) return;
+  await prisma.booking.updateMany({
+    where: { id, seenAt: null },
+    data: { seenAt: new Date() },
+  });
+}
+
+/**
+ * Mark every booking as seen.
+ *
+ * The escape hatch the per-row mark needs: a row she took in from its line
+ * alone should not stay marked new forever because she did not open it.
+ */
+export async function markAllBookingsSeen(): Promise<void> {
+  await requireSession();
+  await prisma.booking.updateMany({
+    where: { seenAt: null },
+    data: { seenAt: new Date() },
+  });
+  revalidatePath("/admin/workshop-bookings");
 }

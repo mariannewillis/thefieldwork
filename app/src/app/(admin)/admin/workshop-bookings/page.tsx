@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { markAllBookingsSeen } from "@/app/(admin)/admin/workshop-bookings/actions";
 import BookingLine from "@/components/admin/BookingLine";
+import MarkAllSeen from "@/components/admin/MarkAllSeen";
 import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
 import BookingActions, {
   type LedgerRow,
@@ -204,6 +206,7 @@ function lineFor(booking: BookingWithOffering) {
     <BookingLine
       key={booking.id}
       row={row}
+      unseen={booking.seenAt === null}
       line={{
         kindWord:
           offering.kind === "workshop"
@@ -452,6 +455,10 @@ export default async function Page({
   // "showing the 5 most recent · show all". A page is a better answer to a long
   // list than a truncation with an escape hatch: it says how many there are and
   // lets her walk them.
+  // NEVER OPENED. Not "recent": a booking from Tuesday she has never once
+  // looked at is still new to her on Friday.
+  const unseen = all.filter((b) => b.seenAt === null).length;
+
   const rows = showingPast ? archived : upcoming;
   const page = currentPage(pageParam, rows.length);
   const shown = pageSlice(rows, page);
@@ -521,6 +528,16 @@ export default async function Page({
           count={archived.length}
           current={showingPast}
         />
+        {unseen > 0 && (
+          <span className="ml-auto flex flex-wrap items-baseline gap-x-4">
+            <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-action">
+              {unseen === 1
+                ? "1 you have not opened"
+                : `${unseen} you have not opened`}
+            </span>
+            <MarkAllSeen action={markAllBookingsSeen} count={unseen} />
+          </span>
+        )}
       </nav>
 
       {/* WHICH KIND. Counts are of the tab she is on, so switching to Sessions

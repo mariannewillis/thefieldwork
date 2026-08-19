@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import { markAllSubscribersSeen } from "@/app/(admin)/admin/subscribers/actions";
+import MarkAllSeen from "@/components/admin/MarkAllSeen";
+import Pager, {
+  currentPage,
+  pageSlice,
+} from "@/components/admin/Pager";
 import SubscriberActions from "@/components/admin/SubscriberActions";
 import { formatDayShort } from "@/lib/format";
 import { allSubscribers } from "@/lib/newsletter/subscribers";
@@ -29,7 +35,12 @@ export const dynamic = "force-dynamic";
 const EYEBROW =
   "fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold";
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
   const everyone = await allSubscribers();
 
   const confirmed = everyone.filter(
@@ -39,6 +50,10 @@ export default async function Page() {
     (person) => !person.confirmedAt && !person.unsubscribedAt,
   );
   const gone = everyone.filter((person) => person.unsubscribedAt);
+  const page = currentPage(pageParam, confirmed.length);
+  // Only the confirmed ones. Somebody who asked and never came back is not
+  // waiting on her, and a badge for a non-event is a badge she learns to ignore.
+  const unseen = confirmed.filter((person) => person.seenAt === null).length;
 
   return (
     <section className="pt-8" aria-labelledby="subs-h">
@@ -86,6 +101,21 @@ export default async function Page() {
         confirmation mean nothing.
       </p>
 
+      {/* PAGED, AND ONLY THIS ONE. The confirmed list is the one that grows —
+          the other two are the exceptions, and a page of twelve under a list of
+          three unconfirmed addresses is chrome answering a question nobody
+          asked (operator, 2026-08-19). */}
+      {unseen > 0 && (
+        <p className="mt-7 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+          <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-action">
+            {unseen === 1
+              ? "1 you have not looked at"
+              : `${unseen} you have not looked at`}
+          </span>
+          <MarkAllSeen action={markAllSubscribersSeen} count={unseen} />
+        </p>
+      )}
+
       <Group
         title="Confirmed"
         note={
@@ -93,9 +123,18 @@ export default async function Page() {
             ? "one person · the letter goes to them"
             : `${confirmed.length} people · newest first`
         }
-        people={confirmed}
+        people={pageSlice(confirmed, page)}
         empty="Nobody yet. The first person to use the form on the site and press the link in the message appears here."
-      />
+      >
+        <Pager
+          page={page}
+          total={confirmed.length}
+          href={(next) =>
+            next > 1 ? `/admin/subscribers?page=${next}` : "/admin/subscribers"
+          }
+          label="people"
+        />
+      </Group>
 
       {waiting.length > 0 && (
         <Group
@@ -126,6 +165,7 @@ type Person = {
   joinedAt: Date;
   confirmedAt: Date | null;
   unsubscribedAt: Date | null;
+  seenAt: Date | null;
 };
 
 function Group({
@@ -134,12 +174,15 @@ function Group({
   people,
   pending,
   empty,
+  children,
 }: {
   title: string;
   note: string;
   people: Person[];
   pending?: boolean;
   empty: string;
+  /** The pager, on the one group long enough to need one. */
+  children?: React.ReactNode;
 }) {
   return (
     <div className="mt-11">
@@ -163,12 +206,29 @@ function Group({
                 index === 0 ? "" : "border-t border-pool-rule/30"
               }`}
             >
+              {/* NAME AND EMAIL ON ONE LINE (operator, 2026-08-19). They were
+                  stacked, which gave a list of forty addresses eighty lines and
+                  made the page a scroll rather than a list. A subscriber is two
+                  facts and a date; it fits. */}
               <span className="min-w-[16rem] flex-1">
-                <span className="block font-display text-[24px] leading-tight text-ink">
-                  {person.name ?? person.email}
+                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  {person.seenAt === null && (
+                    <span
+                      aria-hidden="true"
+                      title="New — you have not looked at this one"
+                      className="h-2 w-2 shrink-0 rounded-full bg-action"
+                    />
+                  )}
+                  <span className="font-display text-[21px] leading-tight text-ink">
+                    {person.name ?? person.email}
+                  </span>
+                  {person.name && (
+                    <span className="fig font-mono text-[15px] text-ink-soft">
+                      {person.email}
+                    </span>
+                  )}
                 </span>
                 <span className="fig mt-1 block font-mono text-[15px] text-ink-soft">
-                  {person.name ? `${person.email} · ` : ""}
                   {person.unsubscribedAt
                     ? `left ${formatDayShort(person.unsubscribedAt)}`
                     : person.confirmedAt
@@ -184,6 +244,7 @@ function Group({
               />
             </li>
           ))}
+          {children && <li className="px-7">{children}</li>}
         </ul>
       )}
     </div>

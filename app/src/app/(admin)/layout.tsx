@@ -6,6 +6,7 @@ import {
 } from "next/font/google";
 import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
+import { unseenCounts } from "@/lib/unseen";
 import { getSession } from "@/lib/auth/server";
 import "./admin.css";
 
@@ -58,6 +59,8 @@ export default async function AdminLayout({
   const session = await getSession();
   if (!session) redirect("/admin/login");
 
+  const unseen = await unseenCounts();
+
   // The temporary password opens the sign-in form and nothing else. Enforced
   // here rather than only after login, so it cannot be stepped around by
   // navigating straight to a section.
@@ -65,7 +68,12 @@ export default async function AdminLayout({
 
   return (
     <div className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <AdminShell username={session.username}>{children}</AdminShell>
+      {/* THE RAIL CARRIES WHAT SHE HAS NOT LOOKED AT. Read here rather than on
+          each screen, because the point of a badge is that she sees it without
+          opening the screen it belongs to. */}
+      <AdminShell username={session.username} unseen={unseen}>
+        {children}
+      </AdminShell>
     </div>
   );
 }

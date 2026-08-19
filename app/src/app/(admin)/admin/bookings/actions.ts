@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/server";
+import { prisma } from "@/lib/db";
 import { balanceLink } from "@/lib/bookings";
 import {
   approvalEmail,
@@ -220,4 +221,48 @@ export async function removeSession(
   revalidatePath("/admin/availability");
   revalidatePath("/services");
   return { error: null, done: Date.now() };
+}
+
+// ── what she has looked at ───────────────────────────────────────────────────
+
+/**
+ * Mark one request as seen, because she has just opened it.
+ *
+ * FIRED WHEN THE ROW IS OPENED, not when the queue is drawn. A screen that
+ * marks everything seen because it rendered has stopped meaning anything by the
+ * mark within a week — she would open the queue for two seconds, clear forty
+ * dots, and never trust the forty-first.
+ *
+ * IT RETURNS NOTHING AND REVALIDATES NOTHING. The row that opened it has
+ * already cleared its own dot on the screen, and it is telling the truth by
+ * doing so — she is looking at it. Redrawing the whole queue underneath an open
+ * sheet would move the page while she is reading.
+ *
+ * `updateMany` rather than `update` so opening the same row twice is not an
+ * error, and `seenAt: null` in the filter so the second opening does not move
+ * the timestamp: what is recorded is when she FIRST saw it.
+ */
+export async function markRequestSeen(id: number): Promise<void> {
+  await requireSession();
+  if (!Number.isInteger(id)) return;
+  await prisma.serviceRequest.updateMany({
+    where: { id, seenAt: null },
+    data: { seenAt: new Date() },
+  });
+}
+
+/**
+ * Mark every request on the queue as seen.
+ *
+ * The escape hatch the per-row mark needs: she can take a row in from its line
+ * alone — the name, the session and the time are all on it — and nothing should
+ * stay marked new forever because she did not need to open it.
+ */
+export async function markAllRequestsSeen(): Promise<void> {
+  await requireSession();
+  await prisma.serviceRequest.updateMany({
+    where: { seenAt: null },
+    data: { seenAt: new Date() },
+  });
+  revalidatePath("/admin/bookings");
 }

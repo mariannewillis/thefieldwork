@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MarkAllSeen from "@/components/admin/MarkAllSeen";
 import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
 import type { RequestRow } from "@/components/admin/RequestActions";
 import RequestLine from "@/components/admin/RequestLine";
@@ -11,6 +12,7 @@ import {
   formatMoney,
   formatSlot,
 } from "@/lib/format";
+import { markAllRequestsSeen } from "@/app/(admin)/admin/bookings/actions";
 import {
   approvalState,
   factsOf,
@@ -193,6 +195,7 @@ function lineFor(request: ServiceRequestWithService, showAnswer: boolean) {
       key={request.id}
       row={row}
       answeredCell={answeredCell}
+      unseen={request.seenAt === null}
       detail={{
         email: request.email,
         phone: request.phone,
@@ -284,6 +287,11 @@ export default async function Page({
   // is derived rather than a column set when she presses approve.
   const onHerDesk = requests.filter((r) => needsHer(states.get(r.id)!));
   const archived = requests.filter((r) => !needsHer(states.get(r.id)!));
+
+  // NEVER OPENED. Not "recent" — a request from Tuesday she has never once
+  // looked at is still new to her on Friday, and one she read this morning is
+  // not, whatever its age says.
+  const unseen = requests.filter((r) => r.seenAt === null).length;
 
   // The archive is opt-in: she comes to this screen to answer things, so the
   // things to answer are what it opens on.
@@ -378,6 +386,13 @@ export default async function Page({
           count={onHerDesk.length}
           current={!showingArchive}
         />
+        {unseen > 0 && (
+          <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-action">
+            {unseen === 1
+              ? "1 you have not opened"
+              : `${unseen} you have not opened`}
+          </span>
+        )}
         <Tab
           href="/admin/bookings?show=archived"
           label="Answered"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { markBookingSeen } from "@/app/(admin)/admin/workshop-bookings/actions";
 import BookingActions, {
   type LedgerRow,
 } from "@/components/admin/BookingActions";
@@ -49,25 +50,42 @@ export type BookingLineProps = {
     cancelled: string | null;
     refunded: string | null;
   };
+  /** True until she has opened it. A booking arrives by webhook, unwatched. */
+  unseen: boolean;
 };
 
 const CELL = "py-4 pr-5 align-middle";
 const NOTE = "block fig font-mono text-[15px] text-ink-soft";
 
-export default function BookingLine({ row, line, detail }: BookingLineProps) {
+export default function BookingLine({
+  row,
+  line,
+  detail,
+  unseen,
+}: BookingLineProps) {
   const [open, setOpen] = useState(false);
+  /** Optimistic, and honestly so: she IS looking at it. See `RequestLine`. */
+  const [seen, setSeen] = useState(!unseen);
+
+  function look() {
+    setOpen(true);
+    if (!seen) {
+      setSeen(true);
+      void markBookingSeen(row.id);
+    }
+  }
 
   return (
     <>
       <tr
         tabIndex={0}
         role="button"
-        aria-label={`${row.buyerName} — ${line.offeringName}. Open the full booking.`}
-        onClick={() => setOpen(true)}
+        aria-label={`${seen ? "" : "New. "}${row.buyerName} — ${line.offeringName}. Open the full booking.`}
+        onClick={look}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            setOpen(true);
+            look();
           }
         }}
         className="cursor-pointer border-t border-pool-rule hover:bg-gold/10 focus-visible:bg-gold/10 focus-visible:outline-none"
@@ -76,7 +94,17 @@ export default function BookingLine({ row, line, detail }: BookingLineProps) {
           scope="row"
           className="whitespace-nowrap py-4 pr-5 text-left align-middle text-[17px] font-semibold text-ink"
         >
-          {row.buyerName}
+          <span className="flex items-center gap-2">
+            {!seen && (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 shrink-0 rounded-full bg-action"
+                />
+              </>
+            )}
+            {row.buyerName}
+          </span>
         </th>
 
         <td

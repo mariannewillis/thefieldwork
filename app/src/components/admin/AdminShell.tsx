@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ADMIN_NAV, type NavItem } from "@/content/admin-nav";
+import { UNSEEN_BY_HREF, type UnseenCounts } from "@/lib/unseen-shape";
 import { signOut } from "@/app/(admin)/actions";
 
 /**
@@ -36,10 +37,13 @@ function isActive(pathname: string, href: string): boolean {
 function NavLink({
   item,
   pathname,
+  unseen,
   onNavigate,
 }: {
   item: NavItem;
   pathname: string;
+  /** How many on this screen she has never opened. 0 draws nothing. */
+  unseen: number;
   onNavigate?: () => void;
 }) {
   const active = isActive(pathname, item.href);
@@ -62,6 +66,26 @@ function NavLink({
         {item.icon}
       </svg>
       {item.label}
+      {/* WHAT IS WAITING, WITHOUT OPENING IT. The three screens things arrive
+          on — a form submitted, a webhook paid, a confirmation link pressed —
+          are the three that can carry a number here. A screen she has to open
+          to find out whether it needed her is a screen she opens for nothing
+          most days. */}
+      {unseen > 0 && (
+        <>
+          <span
+            aria-hidden="true"
+            className="ml-auto min-w-[22px] rounded-full bg-action px-1.5 py-0.5 text-center fig font-mono text-[13px] tabular-nums leading-tight text-pool"
+          >
+            {unseen > 99 ? "99+" : unseen}
+          </span>
+          <span className="sr-only">
+            {unseen === 1
+              ? "1 you have not opened"
+              : `${unseen} you have not opened`}
+          </span>
+        </>
+      )}
     </Link>
   );
 }
@@ -70,10 +94,12 @@ function NavLink({
 function RailBody({
   pathname,
   username,
+  unseen,
   onNavigate,
 }: {
   pathname: string;
   username: string;
+  unseen: UnseenCounts;
   onNavigate?: () => void;
 }) {
   return (
@@ -103,6 +129,11 @@ function RailBody({
             key={item.href}
             item={item}
             pathname={pathname}
+            unseen={
+              UNSEEN_BY_HREF[item.href]
+                ? unseen[UNSEEN_BY_HREF[item.href]]
+                : 0
+            }
             onNavigate={onNavigate}
           />
         ))}
@@ -158,9 +189,12 @@ function Clock() {
 
 export default function AdminShell({
   username,
+  unseen,
   children,
 }: {
   username: string;
+  /** What she has not opened, per screen. Drawn as a badge on the rail. */
+  unseen: UnseenCounts;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -203,7 +237,7 @@ export default function AdminShell({
           aria-label="Admin sections"
         >
           <div className="relative z-10 flex flex-col gap-7 h-full">
-            <RailBody pathname={pathname} username={username} />
+            <RailBody pathname={pathname} username={username} unseen={unseen} />
           </div>
         </aside>
 
@@ -341,6 +375,7 @@ export default function AdminShell({
             <RailBody
               pathname={pathname}
               username={username}
+              unseen={unseen}
               onNavigate={() => setMenuOpen(false)}
             />
           </div>

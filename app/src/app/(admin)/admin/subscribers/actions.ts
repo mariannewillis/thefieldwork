@@ -102,3 +102,26 @@ export async function resendConfirmation(
         done: 0,
       };
 }
+
+// ── what she has looked at ───────────────────────────────────────────────────
+
+/**
+ * Mark every subscriber as seen.
+ *
+ * A SUBSCRIBER HAS NO ROW TO OPEN, and that is why this is the only control of
+ * the three. A booking and a request each have a sheet full of things she needs
+ * — a message, a refund period, an amount — so opening one is a real act and
+ * marking it seen means something. A subscriber is a name, an address and a
+ * date, and all three are already on the line: there is nothing behind it to
+ * open, so "I have read these" is the honest gesture and the only one.
+ *
+ * The rail's badge is what it clears.
+ */
+export async function markAllSubscribersSeen(): Promise<void> {
+  await requireSession();
+  await prisma.subscriber.updateMany({
+    where: { seenAt: null },
+    data: { seenAt: new Date() },
+  });
+  revalidatePath("/admin/subscribers");
+}

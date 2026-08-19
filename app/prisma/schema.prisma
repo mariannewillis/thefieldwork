@@ -798,6 +798,26 @@ model ServiceRequest {
   declinedAt  DateTime?
   declineNote String?
 
+  /// WHEN SHE LOOKED AT THIS ONE. Null until she has.
+  ///
+  /// Requests arrive while she is not looking — a form on the site, at any hour
+  /// — and she gets an email at the time. This is the safety net for the week
+  /// she was away, not the notification: the queue can say which of these she
+  /// has never once opened.
+  ///
+  /// STORED RATHER THAN DERIVED, and it is the exception that proves the rule
+  /// this schema otherwise follows (D-25: holding and lapsing are derived,
+  /// never swept). Everything else on this row is a fact about the REQUEST and
+  /// can be computed from its own columns and the clock. This is a fact about
+  /// HER ATTENTION, and nothing else in the database records it — deriving it
+  /// from age would answer a different question, marking a three-day-old
+  /// request she has never seen as no longer new.
+  ///
+  /// SET WHEN SHE OPENS THE ROW, not when the queue is drawn. A screen that
+  /// marks everything seen because it rendered is a screen that has stopped
+  /// meaning anything by the mark within a week.
+  seenAt DateTime?
+
   /// The session they paid for, once they have. Written by the Stripe webhook
   /// and by nothing else.
   booking Booking?
@@ -808,6 +828,8 @@ model ServiceRequest {
   /// The queue reads oldest-unanswered-first within a status, which is the
   /// order she works in.
   @@index([status, createdAt])
+  /// "How many has she never opened" is asked on every draw of the screen.
+  @@index([seenAt])
   @@index([serviceId])
   /// Every read of the diary asks "what is claimed between these two instants?"
   /// and this is what answers it. Which of them are LIVE is arithmetic on top
@@ -1005,6 +1027,25 @@ model Booking {
   /// row below.
   paidAt DateTime
 
+  /// WHEN SHE LOOKED AT THIS ONE. Null until she has.
+  ///
+  /// A booking arrives by webhook while she is not looking, and she gets an
+  /// email at the time. This is the safety net for the week she was away, not
+  /// the notification: the ledger can say which of these she has never once
+  /// opened.
+  ///
+  /// STORED RATHER THAN DERIVED. Everything else on this row is a fact about
+  /// the BOOKING and is computed from its own columns and the clock (D-25).
+  /// This is a fact about HER ATTENTION, which nothing else records — deriving
+  /// it from age would answer a different question, and would stop marking a
+  /// three-day-old booking she has never seen while still marking one she read
+  /// this morning.
+  ///
+  /// SET WHEN SHE OPENS THE ROW, not when the ledger is drawn. A screen that
+  /// marks everything seen because it rendered has stopped meaning anything by
+  /// the mark within a week.
+  seenAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1017,6 +1058,8 @@ model Booking {
   @@index([workshopId, status])
   @@index([courseId, status])
   @@index([serviceId, status])
+  /// "How many has she never opened" is asked on every draw of the ledger.
+  @@index([seenAt])
 }
 
 /// What a payment was for. Three kinds and no fourth, because the operator's
@@ -1291,7 +1334,15 @@ model Subscriber {
 
   /// When they confirmed, by pressing the link in the opt-in email. Null means
   /// they have not, and nothing is ever sent to a null.
-  confirmedAt    DateTime?
+  confirmedAt DateTime?
+
+  /// WHEN SHE LOOKED AT THIS ONE. Null until she has.
+  ///
+  /// Somebody joins the letter by pressing a link in their own inbox, at any
+  /// hour, and nothing tells her at the time. The same safety net the ledger
+  /// and the queue carry, for the same reason and by the same rule: set when
+  /// she OPENS the row, never when the list is drawn.
+  seenAt         DateTime?
   /// When they left. Null means they have not.
   unsubscribedAt DateTime?
 
@@ -1308,6 +1359,8 @@ model Subscriber {
   sends NewsletterSend[]
 
   @@index([confirmedAt, unsubscribedAt])
+  /// "How many has she never opened" is asked on every draw of the rail.
+  @@index([seenAt])
 }
 
 enum NewsletterStatus {

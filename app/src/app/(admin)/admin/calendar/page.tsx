@@ -429,14 +429,18 @@ export default async function Page({
         )}
       </div>
 
+      {/* POINTS AT WHERE THE HOURS ACTUALLY ARE, now that Availability has left
+          the rail (operator, 2026-08-19). It used to send her to a read-only
+          overview of the same setting; Offerings is where it is set, which is
+          the answer the sentence was reaching for anyway. */}
       <p className="mt-8 max-w-[64ch] text-[19px] leading-relaxed text-plate-soft">
         The hours you are open to be asked for are set on each session, not here
-        &mdash; see{" "}
+        &mdash; open one in{" "}
         <Link
-          href="/admin/availability"
+          href="/admin/offerings?kind=services"
           className="text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
         >
-          Availability
+          Offerings
         </Link>
         .
       </p>

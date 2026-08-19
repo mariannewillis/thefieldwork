@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import DetailSheet from "@/components/admin/DetailSheet";
+import { markRequestSeen } from "@/app/(admin)/admin/bookings/actions";
 import RequestActions, {
   type RequestRow,
 } from "@/components/admin/RequestActions";
@@ -51,6 +52,8 @@ export type RequestLineProps = {
   };
   /** Drawn on the archive, where the answer is the point. */
   answeredCell?: string;
+  /** True until she has opened it. Requests arrive while she is not looking. */
+  unseen: boolean;
 };
 
 const CELL = "py-4 pr-5 align-middle";
@@ -60,8 +63,26 @@ export default function RequestLine({
   row,
   detail,
   answeredCell,
+  unseen,
 }: RequestLineProps) {
   const [open, setOpen] = useState(false);
+  /**
+   * THE DOT CLEARS THE MOMENT SHE OPENS IT, before the server has been told.
+   *
+   * Optimistic, and honestly so: she IS looking at it. Waiting for the write to
+   * come back would leave the mark on a row whose sheet is open in front of
+   * her, and refreshing the whole queue to clear one dot would move the page
+   * she is reading.
+   */
+  const [seen, setSeen] = useState(!unseen);
+
+  function look() {
+    setOpen(true);
+    if (!seen) {
+      setSeen(true);
+      void markRequestSeen(row.id);
+    }
+  }
 
   return (
     <>
@@ -70,19 +91,35 @@ export default function RequestLine({
         // is not merely a div with a click handler on it.
         tabIndex={0}
         role="button"
-        aria-label={`${row.name} — ${row.serviceName}. Open the full request.`}
-        onClick={() => setOpen(true)}
+        aria-label={`${seen ? "" : "New. "}${row.name} — ${row.serviceName}. Open the full request.`}
+        onClick={look}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            setOpen(true);
+            look();
           }
         }}
         className="cursor-pointer border-b border-pool-rule/25 last:border-b-0 hover:bg-gold/10 focus-visible:bg-gold/10 focus-visible:outline-none"
       >
         <td className={CELL}>
-          <span className="block font-display text-[21px] leading-tight text-ink">
-            {row.name}
+          <span className="flex items-baseline gap-2">
+            {/* NEW, and quiet about it. A dot rather than a word: the column is
+                her name, and a row that shouts NEW at her in a table of twelve
+                is harder to read than one that marks itself. The screen reader
+                gets the word, since a dot is nothing to it. */}
+            {!seen && (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 shrink-0 rounded-full bg-action"
+                />
+              </>
+            )}
+            <span
+              className={`block font-display text-[21px] leading-tight ${seen ? "text-ink" : "font-semibold text-ink"}`}
+            >
+              {row.name}
+            </span>
           </span>
           <span className={NOTE}>{detail.askedAt}</span>
         </td>
