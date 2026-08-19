@@ -132,14 +132,22 @@ export default async function Page() {
       {/* The masthead is full-bleed on the site's gutter, as on every page.
           This page's own words keep the 1180 measure. */}
       <div className="mx-auto max-w-[1180px] px-6 lg:px-10">
-        <div className="max-w-[54ch] pb-14 pt-8 lg:pb-20 lg:pt-14">
-          <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold">
+        {/* The paragraph runs the full measure of the table below it
+            (operator, 2026-08-19), so the head and the list share one left and
+            one right edge instead of the words stopping short of the rows they
+            introduce. The heading keeps its own measure: a 60px display line
+            set to 1180px is four or five words a line and reads as a banner. */}
+        <div className="pb-14 pt-8 lg:pb-20 lg:pt-14">
+          {/* THE GOLD LINE IS THE HEADING NOW (operator, 2026-08-19). The
+              display title under it is gone, so the page is its label and one
+              paragraph — but it is an `h1` rather than the `p` it was, because
+              a page with no heading at all has no outline for a screen reader
+              to move by and nothing for a search result to print. The name of
+              the page still exists; it is just no longer set at 60px. */}
+          <h1 className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-gold">
             {servicesIndex.eyebrow}
-          </p>
-          <h1 className="mt-4 font-display text-[46px] font-normal leading-[1.03] text-plate-text sm:text-[60px]">
-            {servicesIndex.title}
           </h1>
-          <p className="mt-6 text-[21px] leading-relaxed text-plate-soft">
+          <p className="mt-5 text-[21px] leading-relaxed text-plate-soft">
             {servicesIndex.lede}
           </p>
         </div>
@@ -155,16 +163,15 @@ export default async function Page() {
           </h2>
 
           {services.length > 0 ? (
-            <>
-              <p className="mt-3 max-w-[52ch] text-[17px] leading-relaxed text-plate-soft">
-                {servicesIndex.listNote}
-              </p>
-              <div className="mt-8">
-                {services.map((service) => (
-                  <Row key={service.id} service={service} />
-                ))}
-              </div>
-            </>
+            /* ONE PARAGRAPH ON THE PAGE, and it is the one at the top
+               (operator, 2026-08-19). A second note between the section's
+               label and its first row said in smaller type what the lede had
+               already said, and pushed the rows down the page to say it. */
+            <div className="mt-8">
+              {services.map((service) => (
+                <Row key={service.id} service={service} />
+              ))}
+            </div>
           ) : (
             /* Drawn deliberately. A page that simply ends is
                indistinguishable from one that is broken, and this list can be
