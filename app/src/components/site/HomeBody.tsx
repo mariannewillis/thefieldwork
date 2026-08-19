@@ -338,7 +338,12 @@ function Schedule({
                           an instruction to her and belongs in the portal, not
                           an apology to a visitor on the front page. */}
                       {row.image && (
-                        <picture>
+                        // THE WRAPPER IS THE FLEX CHILD, not the <img> inside
+                        // it — so the wrapper is what gets sized and stretched,
+                        // and the picture fills it. Sizing the <img> alone left
+                        // an inline <picture> between it and the row, which is
+                        // why widening the image did not change the row.
+                        <picture className="ledger-row__frame">
                           <source
                             type="image/avif"
                             srcSet={`/media/${row.image}-1200.avif`}
