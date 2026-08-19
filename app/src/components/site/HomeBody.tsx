@@ -387,7 +387,10 @@ function Crown({ beat }: { beat: ResolvedBeat }) {
           </p>
         ))}
       </div>
-      <SubscribeForm note="No confirmation of anything you have booked comes through this — those are separate, and always were." />
+      {/* No line under the button: the two paragraphs above it already say
+          that nothing is sold twice, nothing is passed on, and every letter
+          carries a way off the list. */}
+      <SubscribeForm note={null} />
     </div>
   );
 }

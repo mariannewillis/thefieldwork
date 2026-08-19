@@ -780,12 +780,20 @@ a.cta {
 .crown .sub {
   margin-top: clamp(24px, 3vw, 40px);
 }
-/* EXCEPT THE BUTTON (operator, 2026-08-19). It is the last thing on the page
-   and the only thing being asked for, and it sat under the left-hand field
-   while the heading above it and the line below it were both centred — so it
-   read as the end of the first column rather than as the page's one ask. The
-   fields stay left-aligned, for the reason above; this moves the one element
-   whose alignment was doing no work. */
+/* EXCEPT THE BUTTON AND THE LABELS (operator, 2026-08-19).
+
+   The button is the last thing on the page and the only thing being asked for,
+   and it sat under the left-hand field while the heading above it and the line
+   below it were both centred — so it read as the end of the first column
+   rather than as the page's one ask.
+
+   The two labels follow it, each centred over its own field, so the whole
+   beat now reads down one axis. This is the Crown only: on /subscribe the
+   form is one thing among several on a left-aligned page, and centring it
+   there would make it the poster the note above warns about. */
 .crown .sub button {
   align-self: center;
+}
+.crown .sub__label {
+  text-align: center;
 }

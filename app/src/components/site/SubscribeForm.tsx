@@ -32,10 +32,18 @@ import "./subscribe-form.css";
 const NOT_YET: SubscribeState = { error: null, asked: false };
 
 export default function SubscribeForm({
-  /** The line under the button. Differs between the two grounds. */
+  /**
+   * The line under the button. Differs between the two grounds, and NULL means
+   * none at all — which is not the same as leaving it out, and the difference
+   * is load-bearing: left out, the form supplies its own reassurance about
+   * confirmation and unsubscribing, which is right on a page that says nothing
+   * else about either. On the home page the beat above the form already says
+   * both in its own words, so a line repeating them is the fourth sentence in a
+   * row making the same promise (operator, 2026-08-19).
+   */
   note,
 }: {
-  note?: string;
+  note?: string | null;
 }) {
   const [state, action, pending] = useActionState(subscribe, NOT_YET);
   const id = useId();
@@ -108,10 +116,12 @@ export default function SubscribeForm({
         </p>
       )}
 
-      <p className="sub__note">
-        {note ??
-          "One page, once a month. You will be sent a message to confirm the address is yours before anything else arrives, and every letter carries a link that takes you off the list in one press."}
-      </p>
+      {note !== null && (
+        <p className="sub__note">
+          {note ??
+            "One page, once a month. You will be sent a message to confirm the address is yours before anything else arrives, and every letter carries a link that takes you off the list in one press."}
+        </p>
+      )}
     </form>
   );
 }
