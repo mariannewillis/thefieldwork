@@ -12,6 +12,7 @@
  * These become rows in the page-content table when that lands, and this module
  * becomes the seeder. The components do not change.
  */
+import { openingPlate } from "@/content/home";
 
 /*
  * The main navigation and the footer line used to live here. They moved to
@@ -29,10 +30,7 @@ export const workshopsIndex = {
   alreadyHappened: "Already happened",
 
   /** The ground photograph — the whole circle of chairs, the page's promise. */
-  plate: {
-    src: "work-wide-the-room",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   /**
    * Drawn deliberately rather than left to chance. A practitioner running
@@ -51,10 +49,7 @@ export const workshopDetail = {
    * there is nobody in it to compete with the type, and the warm core sits
    * low-left where the page has no content.
    */
-  plate: {
-    src: "aura-field-abstract",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   eyebrow: "A workshop",
   when: "When",
@@ -130,10 +125,7 @@ export const workshopDetail = {
  */
 export const bookingConfirmation = {
   /** Warm and settled, for the moment after paying. */
-  plate: {
-    src: "aura-light-in-a-room",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   eyebrow: "Your place is booked",
   when: "When",
@@ -174,10 +166,7 @@ export const bookingConfirmation = {
  */
 export const cancelPage = {
   /** An empty chair with a coat on it, where somebody says they cannot come. */
-  plate: {
-    src: "chair-with-her-coat",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   title: "Cancel your place",
   keepInstead: "Changed your mind about cancelling?",

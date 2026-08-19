@@ -81,7 +81,7 @@
  * ═════════════════════════════════════════════════════════════════════════
  */
 
-import type { Plate } from "@/content/home";
+import { opening, type Plate } from "@/content/home";
 
 export const privacy = {
   meta: {
@@ -92,13 +92,7 @@ export const privacy = {
 
   /** ═══ BEAT 1 — the lede. Small pool, anchored left, on the hero. ═══════ */
   intro: {
-    plate: {
-      src: "window-last-light",
-      alt: "The last of the daylight in a window, the room around it already dark.",
-      b: 0.48,
-      ox: "50%",
-      oy: "50%",
-    } satisfies Plate,
+    plate: opening(0.48) satisfies Plate,
     eyebrow: "What is kept, and why",
     heading: "No analytics, and no cookie on any page you can read.",
     /**

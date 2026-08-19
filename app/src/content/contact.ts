@@ -33,7 +33,7 @@
  * she answers it herself.
  */
 
-import type { Plate } from "@/content/home";
+import { opening, type Plate } from "@/content/home";
 
 /**
  * Her mailbox, as the public page prints it.
@@ -56,15 +56,7 @@ export const contact = {
 
   /** ═══ BEAT 1 — direct contact. Small pool, anchored left, on the hero. ═══ */
   direct: {
-    plate: {
-      src: "marianne-hands-at-the-edge-r2",
-      // The about page's hero, one frame over: the same room, the same gap
-      // between her hands and the person under them.
-      alt: "She stands over a person resting under a pale cover, her hands held a clear distance above them; a window and the rest of the room sit in shadow behind.",
-      b: 0.5,
-      ox: "50%",
-      oy: "50%",
-    } satisfies Plate,
+    plate: opening(0.5) satisfies Plate,
     eyebrow: "Ask a question",
     heading: "Write to her directly.",
     body: "No booking system stands between you and Marianne. A message goes straight to her, and she is the one who reads it.",

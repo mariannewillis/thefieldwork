@@ -12,6 +12,7 @@
  * Taken from docs/screens/courses flow/courses-index.html and course-detail.html,
  * which are where this wording was approved.
  */
+import { openingPlate } from "@/content/home";
 
 export const coursesIndex = {
   eyebrow: "Courses",
@@ -26,10 +27,7 @@ export const coursesIndex = {
   finished: "Finished",
 
   /** The ground photograph — the whole circle of chairs, as on the workshops index. */
-  plate: {
-    src: "work-wide-the-room",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   /**
    * It matters more here than on the workshops page: a course runs two or
@@ -58,10 +56,7 @@ export const courseDetail = {
    * the workshop detail page gives: there is nobody in it to compete with the
    * type.
    */
-  plate: {
-    src: "aura-field-abstract",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   eyebrow: "A course",
   when: "When",
@@ -136,10 +131,7 @@ export const courseDetail = {
  */
 export const payPage = {
   /** The ground photograph. The same settled plate the confirmation uses. */
-  plate: {
-    src: "work-wide-the-room",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   title: "The rest of your place",
   overdueTitle: "This was due — and the place is still here",

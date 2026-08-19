@@ -30,6 +30,42 @@ export type Plate = {
   oy: string;
 };
 
+/**
+ * THE SITE'S OPENING PHOTOGRAPH — the one behind the top of every page
+ * (operator, 2026-08-19).
+ *
+ * It was seven different pictures: the home page opened on the room, About and
+ * Contact on her hands, Privacy on a window, Sessions on a close crop, and the
+ * three transactional pages on whatever suited them. Each was defensible on its
+ * own page and the set read as several sites.
+ *
+ * ONE CONSTANT RATHER THAN THE SAME BASENAME TYPED IN NINE PLACES. Changing the
+ * picture the site opens on is now one edit, and there is no way for eight of
+ * nine pages to be changed and the ninth forgotten — which is the failure this
+ * shape exists to make impossible rather than merely unlikely.
+ *
+ * INTERIOR BEATS ARE NOT THIS. About's portrait, Privacy's later plates and the
+ * home page's own six other photographs stay their own pictures: what was asked
+ * for is the picture at the TOP of a page, which is the one a visitor meets
+ * before they have read anything.
+ *
+ * The focal point travels with it, because 46%/40% is where the subject sits in
+ * THIS frame. Brightness does not: how far a plate is dimmed depends on what is
+ * written over it, so a page that needs its own says so at the point of use.
+ */
+export const openingPlate = {
+  src: "work-wide-the-room",
+  alt: "A woman stands over a client resting under a white cover, her hands hovering with a clear gap above him; her own room — a bookshelf, a plant, a window — sits in shadow behind them.",
+  b: 0.52,
+  ox: "46%",
+  oy: "40%",
+} as const;
+
+/** The same picture, dimmed to suit whatever is written over it. */
+export function opening(brightness: number): Plate {
+  return { ...openingPlate, b: brightness };
+}
+
 export type LedgerRow = {
   href: string;
   date: string;
@@ -85,13 +121,10 @@ export const home = {
     id: "what-happens",
     hidden: false,
     structural: true,
-    plate: {
-      src: "work-wide-the-room",
-      alt: "A woman stands over a client resting under a white cover, her hands hovering with a clear gap above him; her own room — a bookshelf, a plant, a window — sits in shadow behind them.",
-      b: 0.52,
-      ox: "46%",
-      oy: "40%",
-    } satisfies Plate,
+    // The site's opening photograph, defined once above and shared by the top
+    // of every page. Editing it in the portal changes the home page only — an
+    // override is per-page by design (D-34); this constant is the seed.
+    plate: openingPlate satisfies Plate,
     eyebrowLead: "Aura healing",
     eyebrowMid: "hands-off",
     eyebrowEnd: "one hour",

@@ -27,7 +27,7 @@
  * ═════════════════════════════════════════════════════════════════════════
  */
 
-import type { Plate } from "@/content/home";
+import { opening, type Plate } from "@/content/home";
 
 export const about = {
   meta: {
@@ -38,13 +38,7 @@ export const about = {
 
   /** ═══ BEAT 1 — the practice. Small pool, anchored left, on the hero. ═══ */
   practice: {
-    plate: {
-      src: "marianne-hands-at-the-edge",
-      alt: "She stands over a person resting under a pale cover, her hands held a clear distance above them; the rest of the room is in shadow.",
-      b: 0.5,
-      ox: "50%",
-      oy: "50%",
-    } satisfies Plate,
+    plate: opening(0.5) satisfies Plate,
     eyebrow: "Before the hour, the person",
     heading: "One practitioner. One room. No clinic front.",
     body: "The Field Work is Marianne, working alone. No reception, no other therapists on a rota, no name badge — the person who reads your message is the person you sit with.",

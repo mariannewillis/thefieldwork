@@ -14,6 +14,7 @@
  * time rewritten, because there is no hold and the approved screens assume one.
  * See D-24.
  */
+import { openingPlate } from "@/content/home";
 
 export const servicesIndex = {
   eyebrow: "One-to-one · not a group setting",
@@ -25,10 +26,7 @@ export const servicesIndex = {
     "Pick by how long you want, or by what you need before the hour starts. There is no online checkout on these — you ask, and Marianne writes back.",
 
   /** The ground photograph — her hands at the edge, the page's whole promise. */
-  plate: {
-    src: "work-close-hands",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   /**
    * Drawn deliberately rather than left to chance, for the reason the courses
@@ -58,10 +56,7 @@ export const serviceDetail = {
    * the workshop and course detail pages give: there is nobody in it to
    * compete with the type.
    */
-  plate: {
-    src: "aura-field-abstract",
-    alt: "",
-  },
+  plate: { src: openingPlate.src, alt: "" },
 
   eyebrow: "One to one",
   howLong: "How long",
@@ -178,7 +173,7 @@ export const serviceDetail = {
  */
 export const sessionPayPage = {
   /** The ground photograph. The same settled plate the other pay page uses. */
-  plate: { src: "work-wide-the-room", alt: "" },
+  plate: { src: openingPlate.src, alt: "" },
 
   title: "Marianne has said yes.",
   doneTitle: "This one is already paid for.",
