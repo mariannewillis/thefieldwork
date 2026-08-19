@@ -92,9 +92,9 @@ function leadingBlanks(first: Date): number {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; day?: string }>;
 }) {
-  const { month } = await searchParams;
+  const { month, day: dayParam } = await searchParams;
   const now = new Date();
 
   // The month asked for, or the one she is in. A malformed parameter falls back
@@ -138,7 +138,15 @@ export default async function Page({
 
   const days = daysOf(year, monthNumber);
   const today = londonDayKey(now);
-  const busyDays = days.filter((day) => byDay.has(day.key));
+  // ONE DAY, OR THE WHOLE MONTH. A day she asked for that is not in this month
+  // — a stale link, a hand-typed key — is ignored rather than shown as an empty
+  // list: she gets the month, which is what she was looking at.
+  const chosen =
+    dayParam && days.some((day) => day.key === dayParam) ? dayParam : null;
+
+  const busyDays = days.filter(
+    (day) => byDay.has(day.key) && (chosen === null || day.key === chosen),
+  );
 
   /**
    * ONE SPAN, TURNED INTO AN ENTRY.
@@ -280,13 +288,40 @@ export default async function Page({
               return (
                 <li
                   key={day.key}
-                  className="min-h-[108px] border-b border-r border-pool-rule p-2 align-top"
+                  className={`min-h-[108px] border-b border-r border-pool-rule p-2 align-top ${
+                    chosen === day.key ? "bg-gold/15" : ""
+                  }`}
                 >
-                  <p
-                    className={`${NOTE} ${isToday ? "text-action" : ""}`}
-                    aria-label={day.words}
-                  >
-                    {Number(day.key.slice(-2))}
+                  {/* PRESSING A DAY NARROWS THE LIST BELOW to that day
+                      (operator, 2026-08-19). A link rather than client state,
+                      like every other choice on this screen: it survives a
+                      reload, it can be sent to herself, and the page needs no
+                      component to hold it.
+
+                      Pressing the SAME day again clears it, so the control that
+                      narrows is the control that widens — she never has to find
+                      a separate "show everything". */}
+                  <p className={`${NOTE} ${isToday ? "text-action" : ""}`}>
+                    <Link
+                      href={
+                        chosen === day.key
+                          ? `/admin/calendar?month=${monthKey(year, monthNumber)}`
+                          : `/admin/calendar?month=${monthKey(year, monthNumber)}&day=${day.key}`
+                      }
+                      aria-label={
+                        chosen === day.key
+                          ? `${day.words} — showing only this day. Press to show the whole month.`
+                          : `${day.words} — press to show only this day below.`
+                      }
+                      aria-current={chosen === day.key ? "true" : undefined}
+                      className={
+                        chosen === day.key
+                          ? "t border-b-2 border-gold text-gold"
+                          : "t hover:text-gold"
+                      }
+                    >
+                      {Number(day.key.slice(-2))}
+                    </Link>
                     {isToday && <span className="ml-2">today</span>}
                   </p>
 
@@ -312,17 +347,35 @@ export default async function Page({
 
       {/* ── what is in it ──────────────────────────────────────────────── */}
       <div className="pool on-pool mt-9 px-6 py-7 sm:px-8">
+        {/* SAYS WHEN IT IS NARROWED, and offers the way out. A list that has
+            been filtered without saying so is a list she reads as the whole
+            month and trusts wrongly. */}
+        {chosen && (
+          <p className="mb-5 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-pool-rule pb-4">
+            <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-gold">
+              One day only
+            </span>
+            <Link
+              href={`/admin/calendar?month=${monthKey(year, monthNumber)}`}
+              className="t text-[17px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
+            >
+              Show the whole month
+            </Link>
+          </p>
+        )}
+
         {busyDays.length === 0 ? (
           /* Drawn deliberately rather than left as an empty list. A month with
              nothing in it is an ordinary state and a good one, and a blank space
              reads as something that failed to load. */
           <>
             <p className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
-              Nothing at all
+              {chosen ? "Nothing that day" : "Nothing at all"}
             </p>
             <p className="mt-2 max-w-[46ch] font-display text-[26px] leading-tight text-ink">
-              Every day this month is free, and every one of them is being
-              offered.
+              {chosen
+                ? "That day is free, and it is being offered."
+                : "Every day this month is free, and every one of them is being offered."}
             </p>
           </>
         ) : (

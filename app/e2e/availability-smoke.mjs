@@ -493,6 +493,15 @@ const { rows: courseBefore } = await db.query(
    JOIN "Course" c ON c.id = s."courseId" WHERE c.slug = 'ifr-course' ORDER BY s.id`,
 );
 
+// HIS OWN WORKSHOPS, BEFORE THIS RUN TOUCHES ANYTHING. Read once and compared
+// at the end, so the untouchables check is about what was here rather than
+// about two slugs that happened to be here when it was written.
+const workshopsBefore = (
+  await db.query(
+    `SELECT slug, name FROM "Workshop" WHERE slug NOT LIKE 'smoke-%' ORDER BY slug`,
+  )
+).rows;
+
 const server = await startServer();
 const browser = await chromium.launch();
 
@@ -1244,8 +1253,9 @@ try {
     !/DTSTART;TZID/.test(ics) && /DTSTART:\d{8}T\d{6}Z/.test(ics),
   );
   ok(
-    "the operator's own workshop is in it, by name",
-    ics.includes("The Long Attention"),
+    "the operator's own workshops are in it, by name",
+    workshopsBefore.every((w) => ics.includes(w.name)),
+    workshopsBefore.map((w) => w.name).join(" | "),
   );
   ok(
     "the course's dates are in it, each with its own UID",
@@ -1448,10 +1458,17 @@ try {
     JSON.stringify(courseAfter),
   );
 
+  // WHAT THIS RUN FOUND, AND THAT IT PUT IT BACK — rather than two named slugs.
+  // Naming them made the check fail the day one stopped existing, which tests
+  // the fixture rather than the claim that this run touched nothing of his.
   const { rows: theirs } = await db.query(
-    `SELECT slug FROM "Workshop" WHERE slug IN ('the-long-attention','lorem-ipsum') ORDER BY slug`,
+    `SELECT slug FROM "Workshop" WHERE slug NOT LIKE 'smoke-%' ORDER BY slug`,
   );
-  ok("and both his workshops are still there", theirs.length === 2);
+  ok(
+    "and his workshops are still there, every one that was",
+    theirs.length === workshopsBefore.length,
+    `${theirs.length} now, ${workshopsBefore.length} before`,
+  );
 
   // ── the one that matters most ────────────────────────────────────────────
   ok(
