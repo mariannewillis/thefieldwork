@@ -780,3 +780,12 @@ a.cta {
 .crown .sub {
   margin-top: clamp(24px, 3vw, 40px);
 }
+/* EXCEPT THE BUTTON (operator, 2026-08-19). It is the last thing on the page
+   and the only thing being asked for, and it sat under the left-hand field
+   while the heading above it and the line below it were both centred — so it
+   read as the end of the first column rather than as the page's one ask. The
+   fields stay left-aligned, for the reason above; this moves the one element
+   whose alignment was doing no work. */
+.crown .sub button {
+  align-self: center;
+}
