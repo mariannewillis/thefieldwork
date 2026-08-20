@@ -230,6 +230,9 @@ model Workshop {
   /// Messages she has written to the people on this one.
   messages OfferingMessage[]
 
+  /// Her flyer for it, once she has changed anything on it.
+  flyer Flyer?
+
   /// Both lists that exist — the public index and the portal's — read in date
   /// order, and both split on published.
   @@index([published, date])
@@ -350,6 +353,9 @@ model Course {
 
   /// Messages she has written to the people on this one.
   messages OfferingMessage[]
+
+  /// Her flyer for it, once she has changed anything on it.
+  flyer Flyer?
 
   /// Both lists that will exist — the portal's and the public index — split on
   /// published.
@@ -622,6 +628,9 @@ model Service {
 
   /// Messages she has written to the people on this one.
   messages OfferingMessage[]
+
+  /// Her flyer for it, once she has changed anything on it.
+  flyer Flyer?
 
   /// The portal's list and the public index, split on published.
   @@index([published])
@@ -1868,6 +1877,75 @@ enum PageItemKind {
 /// because each of the seven has a different shape. One ordering space is the
 /// whole point: a section she adds goes BETWEEN two beats, which is impossible
 /// if beats and her own sections are ordered separately.
+/// HOW MANY PHOTOGRAPHS THE FLYER USES, and therefore which composition it is.
+///
+/// Two, because there are two answers rather than a range. The research behind
+/// `docs/screens/flyers/` is plain that three pictures at the same size is the
+/// documented failure of event-poster design, so this does not offer "however
+/// many she has" — it offers the two shapes that work.
+enum FlyerLayout {
+  /// One photograph, full bleed, under the plum wash. Everything else sits on
+  /// it. The quiet one, and the right answer when she has one good picture.
+  one
+  /// The same ground, plus a strip of two — one large and one small, 1.6 : 1 —
+  /// between the name and the date. For when she has a detail worth looking at
+  /// and a picture of the room.
+  three
+}
+
+/// A FLYER FOR ONE OFFERING — the OVERRIDES, and nothing else.
+///
+/// The same model the pages panel uses, and for the same reason: every field
+/// here is NULL until she changes it, and null means "whatever the workshop
+/// says". So a flyer stays in step with its offering — she renames the workshop
+/// and the flyer is renamed — until the moment she decides the flyer should say
+/// something different, and from then on it says that.
+///
+/// A row exists only once she has opened the tab and changed something. No row
+/// is a flyer that is entirely the offering, which is what a flyer should be
+/// before anybody touches it.
+///
+/// ONE PER OFFERING, enforced by the unique on each key. She is not managing a
+/// folder of variants of one workshop's flyer; she is deciding what the flyer
+/// for this workshop says. The two LAYOUTS are the variation, and they are a
+/// field rather than a second row.
+model Flyer {
+  id Int @id @default(autoincrement())
+
+  /// Exactly one of these is set. The same three-nullable-keys shape
+  /// `OfferingMessage` uses, for the same reason: one table, three parents.
+  workshopId Int?      @unique
+  workshop   Workshop? @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  courseId   Int?      @unique
+  course     Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  serviceId  Int?      @unique
+  service    Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  layout FlyerLayout @default(one)
+
+  /// The four lines she can rewrite. Null on each means the offering's own —
+  /// its name, its summary — or, for the two the offering has no field for,
+  /// the sentence the site itself uses.
+  eyebrow  String?
+  headline String?
+  blurb    String?
+  footnote String?
+
+  /// The three pictures, as media basenames. Null means the offering's own: its
+  /// hero for the ground, and the first two of its gallery for the strip.
+  groundRef String?
+  detailRef String?
+  placeRef  String?
+
+  /// WHERE IN THE GROUND PHOTOGRAPH the sheet is looking, top to bottom, as a
+  /// percentage. A flyer is a tall crop of a landscape photograph, so what is
+  /// worth seeing is very often not in the middle — the same control, and the
+  /// same reasoning, as a band on the pages panel.
+  groundFocus Int @default(38)
+
+  updatedAt DateTime @updatedAt
+}
+
 /// WHAT IS SHOWING, AND WHAT IS NOT (operator, 2026-08-20).
 ///
 /// One row per thing that can be taken off the site, and exactly two kinds of

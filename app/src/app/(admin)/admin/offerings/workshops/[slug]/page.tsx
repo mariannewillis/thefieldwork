@@ -2,6 +2,7 @@ import Link from "next/link";
 import OfferingMessage from "@/components/admin/OfferingMessage";
 import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
+import FlyerTab from "@/components/admin/FlyerTab";
 import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
@@ -135,6 +136,15 @@ export default async function Page({
           sent={mail.sent}
         />
       )}
+
+      {/* THE FLYER IS ITS OWN COMPONENT and it reads its own data, unlike the
+          three tabs above it. Those need what this page already has in hand —
+          the record, who is coming, what she has written to them — and passing
+          them down costs nothing. A flyer needs a DIFFERENT read: the offering
+          resolved against her overrides, the whole media library, and a QR
+          generated from the address. Loading all of that on every visit to the
+          editor tab, for a tab she may never open, is work nobody asked for. */}
+      {showing === "flyer" && <FlyerTab kind="workshop" slug={workshop.slug} />}
     </>
   );
 }

@@ -74,6 +74,8 @@ const SHOTS = resolve("e2e", "_media-shots");
 
 /** The client's real address. Nothing in this run may ever name it. */
 const FORBIDDEN = "marianne@thefieldwork.co.uk";
+/** Her own admin account, which this run reads and never writes. */
+const OWNER_ADMIN = "marianne@thefieldwork.co.uk";
 
 const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
 
@@ -345,6 +347,12 @@ try {
   const lettersBefore = (
     await db.query(`SELECT id FROM "Newsletter" ORDER BY id`)
   ).rows.map((row) => row.id);
+  const credBefore = (
+    await db.query(
+      `SELECT "credentialVersion" FROM "AdminUser" WHERE username = $1`,
+      [OWNER_ADMIN],
+    )
+  ).rows[0]?.credentialVersion;
 
   // Kept for the untouchables check at the end: what was here before this run.
   const workshopsBefore = (
@@ -1268,13 +1276,21 @@ try {
       letters.rows[0].n === lettersBefore.length,
       `${letters.rows[0].n} of ${lettersBefore.length}`,
     );
+    // HERS BY NAME, and compared against what it was at the start.
+    //
+    // This read `username <> $1 LIMIT 1` — "some admin that is not the smoke
+    // one" — and picked whichever row came back first. On 2026-08-20 a
+    // throwaway admin left behind by a crashed probe was that row, and the
+    // suite reported her credential version as having changed from 3 to 1 when
+    // nothing of hers had been touched at all. Naming her account is the fix;
+    // taking the baseline at the start is the same fix the two checks above got.
     const cred = await db.query(
-      `SELECT "credentialVersion" FROM "AdminUser" WHERE username <> $1 LIMIT 1`,
-      [USER],
+      `SELECT "credentialVersion" FROM "AdminUser" WHERE username = $1`,
+      [OWNER_ADMIN],
     );
     ok(
-      "credentialVersion is still 3",
-      cred.rows.length === 0 || cred.rows[0].credentialVersion === 3,
+      "her credential version is exactly what it was before this run",
+      cred.rows[0]?.credentialVersion === credBefore,
       String(cred.rows[0]?.credentialVersion),
     );
   }

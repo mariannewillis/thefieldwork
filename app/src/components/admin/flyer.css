@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE FLYER — A5 portrait, and the same sheet whether she is looking at it in
+   the portal or printing it.
+
+   ITS OWN STYLESHEET, and that is forced rather than chosen. The portal is
+   Tailwind and the site is `home.css`; this is neither, because it is a piece
+   of PAPER: every measurement is in millimetres and points, it has an `@page`
+   rule, and it has to survive being rendered by a print engine that has never
+   heard of the rest of this application. Utilities in the markup would put its
+   measurements in three different files and its print behaviour in none.
+
+   IT IS THE SAME COMPOSITION AS `docs/screens/flyers/*.html`, which is where it
+   was designed and where the reasoning for the layout is written down at
+   length. What is here is that design, parameterised. If the two ever disagree
+   the mockups are the record of what was agreed.
+
+   THE PREVIEW IS THE PRINT. The sheet is drawn at its real size and scaled with
+   a transform for the portal, so what she is looking at is the thing that comes
+   out of the printer rather than a picture of it. A preview built at "roughly
+   A5 in pixels" is a preview that lies at the only moment it matters.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.flyer {
+  --plum-900: #160712;
+  --blush: #fbf3f1;
+  --gold: #e9c87e;
+  --magenta: #c2187a;
+  --ink: #160712;
+  --ink-soft: #5a4356;
+  --rule: #d3c6cb;
+
+  position: relative;
+  width: 148mm;
+  height: 210mm;
+  overflow: hidden;
+  background: var(--plum-900);
+  color: var(--blush);
+  font-family: var(--font-body), "Source Sans 3", system-ui, sans-serif;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.flyer * {
+  box-sizing: border-box;
+}
+
+/* ── the ground ─────────────────────────────────────────────────────────── */
+
+.flyer__plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% var(--focus, 38%);
+  filter: brightness(0.62) saturate(1.08) contrast(1.03);
+}
+
+/* THE WASH IS HELD BACK HARDER WHEN THERE IS A STRIP. On the one-picture sheet
+   the ground is the only photograph and has to carry; with two pictures over
+   it, its job is atmosphere, and a ground competing with them would give the
+   sheet two focal points — which is the same as none. */
+.flyer__wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(22 7 18 / 0.6) 0%,
+    rgb(22 7 18 / 0.52) 34%,
+    rgb(22 7 18 / 0.78) 62%,
+    rgb(22 7 18 / 0.96) 100%
+  );
+}
+
+.flyer--three .flyer__wash {
+  background: linear-gradient(
+    180deg,
+    rgb(22 7 18 / 0.7) 0%,
+    rgb(22 7 18 / 0.64) 30%,
+    rgb(22 7 18 / 0.88) 64%,
+    rgb(22 7 18 / 0.97) 100%
+  );
+}
+
+/* An offering with no photograph at all still prints. Plum, and the type on it. */
+.flyer__plate--none {
+  background: var(--plum-900);
+}
+
+.flyer__body {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 12mm 12mm 11mm;
+}
+
+.flyer__mark {
+  height: 20mm;
+  width: auto;
+  align-self: flex-start;
+}
+
+/* ── what it is ─────────────────────────────────────────────────────────── */
+
+.flyer__top {
+  margin-top: 4mm;
+}
+
+.flyer--one .flyer__top {
+  margin-top: 8mm;
+}
+
+.flyer__eyebrow {
+  font-size: 8.4pt;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0;
+}
+
+.flyer__name {
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-weight: 400;
+  font-size: 36pt;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin: 3.5mm 0 0;
+  color: var(--blush);
+}
+
+.flyer--one .flyer__name {
+  font-size: 40pt;
+}
+
+.flyer__blurb {
+  font-size: 10.4pt;
+  line-height: 1.5;
+  color: #e3d3dd;
+  margin: 4mm 0 0;
+  max-width: 36ch;
+}
+
+/* ── the two photographs that are meant to be looked at ─────────────────── */
+
+/* 1.6 : 1 — the asymmetry the research calls for, and the reason the eye knows
+   which of the two to start with. A 1 : 1 pair would be two pictures having an
+   argument. The gap is 1.5mm of plum: two frames, not a gallery wall.
+
+   THREE THINGS SIZE IT, and it needed all three — measured, not guessed. With
+   only a height set it rendered 211px against the 117px asked for, and printed
+   the date across the altar:
+
+     flex: 0 0            a flex child shrinks by default, so the box lost
+                          height while its grid rows kept theirs.
+     grid-template-rows   `height: 100%` on an image resolves to AUTO against an
+                          auto-sized row, so each fell back to its intrinsic
+                          height and inflated the row it was meant to fill.
+     min-height: 0        a flex item will not go below its content, which would
+                          have let the images win regardless. */
+.flyer__strip {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5mm;
+  flex: 0 0 33mm;
+  grid-template-rows: 33mm;
+  min-height: 0;
+}
+
+/* One of the two missing is not a hole: the one that is there takes the width.
+   She may have a detail and no picture of the room. */
+.flyer__strip--single {
+  grid-template-columns: 1fr;
+}
+
+/* NO RADIUS, NO SHADOW, NO BORDER — the shape law the whole site keeps. */
+.flyer__strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.flyer__detail {
+  object-position: 50% 52%;
+}
+.flyer__place {
+  object-position: 46% 50%;
+}
+
+/* ── when it is ─────────────────────────────────────────────────────────── */
+
+.flyer__when {
+  padding-top: 4mm;
+  padding-bottom: 4mm;
+}
+
+.flyer--one .flyer__when {
+  margin-top: auto;
+  padding-top: 0;
+  padding-bottom: 6mm;
+}
+
+.flyer__day {
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+  font-weight: 400;
+  font-size: 24pt;
+  line-height: 1.06;
+  margin: 0;
+  color: var(--gold);
+}
+
+.flyer--one .flyer__day {
+  font-size: 26pt;
+}
+
+.flyer__hours {
+  font-family: var(--font-figures), "Azeret Mono", ui-monospace, monospace;
+  font-size: 9.4pt;
+  letter-spacing: 0.02em;
+  color: #e3d3dd;
+  margin: 2mm 0 0;
+}
+
+/* ── the clearing ───────────────────────────────────────────────────────── */
+
+.flyer__clearing {
+  background: var(--blush);
+  color: var(--ink);
+  padding: 6mm 7mm;
+  display: flex;
+  gap: 6mm;
+  align-items: flex-start;
+}
+
+.flyer__facts {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.flyer__fact {
+  display: flex;
+  gap: 3mm;
+  padding: 1.8mm 0;
+  border-bottom: 0.3mm solid var(--rule);
+  font-size: 9.6pt;
+  line-height: 1.32;
+}
+
+.flyer__fact:last-child {
+  border-bottom: 0;
+}
+
+.flyer__fact dt {
+  flex: 0 0 17mm;
+  font-size: 7.2pt;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-top: 0.5mm;
+}
+
+.flyer__fact dd {
+  margin: 0;
+  color: var(--ink);
+}
+
+.flyer__quiet {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 8.6pt;
+}
+
+.flyer__price {
+  font-family: var(--font-figures), "Azeret Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── the way in ─────────────────────────────────────────────────────────── */
+
+.flyer__way {
+  flex: 0 0 25mm;
+  text-align: center;
+}
+
+/* THE ONE MAGENTA ON THE SHEET. It is the site's action colour, and it is spent
+   on the only thing this piece of paper asks anybody to do. */
+.flyer__book {
+  font-size: 7.2pt;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  margin: 0 0 1.5mm;
+}
+
+.flyer__qr {
+  display: block;
+  width: 25mm;
+  height: 25mm;
+}
+
+/* The quiet zone is part of the code and not padding around it: a QR with the
+   blush running to its edge is one a scanner has to work at. */
+.flyer__qr rect {
+  fill: var(--blush);
+}
+
+/* SAID IN WORDS AS WELL AS IN SQUARES. A flyer only usable by somebody holding
+   a phone at the right distance in the right light has locked out the person
+   reading it on the way past. Broken where she would break it rather than
+   wherever the box runs out — a wrapped `lorem-` / `ipsum` reads as two words
+   and gets typed as two. */
+.flyer__address {
+  font-family: var(--font-figures), "Azeret Mono", ui-monospace, monospace;
+  font-size: 6.2pt;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  margin: 1.5mm 0 0;
+  white-space: pre-line;
+}
+
+.flyer__foot {
+  margin-top: 3.5mm;
+  font-size: 8.2pt;
+  line-height: 1.45;
+  color: #c9b4c1;
+}
+
+/* ── the two places it is shown ─────────────────────────────────────────── */
+
+/* IN THE PORTAL: drawn at full size and scaled, so the preview is the print.
+   `transform` rather than a smaller layout, because a sheet laid out at 60% of
+   A5 is a different sheet — the type reflows and the line breaks move, which is
+   exactly what a preview must not do. The wrapper reserves the scaled height,
+   since a transform does not affect layout and the page would otherwise leave a
+   full A5 of empty space beneath it. */
+.flyer-frame {
+  /* Big enough to judge. At 0.62 the sheet was 347px wide beside a panel twice
+     its width, which is a thumbnail of a design rather than the design. */
+  --flyer-scale: 0.8;
+  width: calc(148mm * var(--flyer-scale));
+  height: calc(210mm * var(--flyer-scale));
+}
+
+.flyer-frame .flyer {
+  transform: scale(var(--flyer-scale));
+  transform-origin: top left;
+}
+
+@media print {
+  @page {
+    size: A5 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* Nothing but the sheet. The print route draws nothing else, and this is the
+     belt to that braces. */
+  .flyer-print-only {
+    display: none !important;
+  }
+
+  .flyer-frame {
+    width: auto;
+    height: auto;
+  }
+
+  .flyer-frame .flyer {
+    transform: none;
+  }
+}

@@ -523,19 +523,45 @@ try {
 
   // The picture: the first real basename the library offers.
   {
-    const select = page.locator('select[name^="block-image-"]').first();
-    const values = await select
-      .locator("option")
-      .evaluateAll((options) =>
-        options.map((option) => option.value).filter(Boolean),
-      );
-    ok("the picture library has something in it", values.length > 0);
-    await select.selectOption(values[0]);
+    // CHOSEN BY EYE, because the dropdown of filenames is gone (operator,
+    // 2026-08-20 — "we dont need the drop down of pictures as we have the
+    // choose a picture modal"). It listed every basename with the hyphens
+    // swapped for spaces, which asked her to recognise a photograph from its
+    // filename while the photograph itself was two feet away on the screen.
+    ok(
+      "there is no list of filenames to choose a picture from",
+      (await page.locator('select[name^="block-image-"]').count()) === 0,
+    );
+
+    // SCOPED TO THE BLOCK'S OWN PICKER. The masthead has one too, and it comes
+    // first on the page — `.first()` picked that one and the letter's image
+    // block stayed empty while everything downstream reported nonsense.
+    await page
+      .locator('div:has(> input[type="hidden"][name^="block-image-"])')
+      .first()
+      .getByRole("button", { name: /pick from your pictures/i })
+      .first()
+      .click();
+    const dialog = page.getByRole("dialog");
+    await dialog.waitFor({ timeout: 30_000 });
+    ok(
+      "the picker shows pictures rather than names",
+      (await dialog.locator("img").count()) > 0,
+    );
+    await dialog.locator("li button").first().click();
+    await dialog.waitFor({ state: "detached", timeout: 30_000 });
+
+    const chosen = await page
+      .locator('input[type="hidden"][name^="block-image-"]')
+      .first()
+      .inputValue();
+    ok("and the chosen one is what the field holds", chosen.length > 0, chosen);
+
     await page
       .locator('input[name^="block-alt-"]')
       .first()
       .fill("Last light through the garden-room window at dusk.");
-    globalThis.__chosenPicture = values[0];
+    globalThis.__chosenPicture = chosen;
   }
 
   await page
@@ -625,13 +651,17 @@ try {
   // A picture with no line saying what is in it is refused.
   await page.getByRole("button", { name: "Picture", exact: true }).click();
   {
-    const select = page.locator('select[name^="block-image-"]').last();
-    const values = await select
-      .locator("option")
-      .evaluateAll((options) =>
-        options.map((option) => option.value).filter(Boolean),
-      );
-    await select.selectOption(values[0]);
+    // The LAST block's picker — the one just added — chosen by eye, as above.
+    await page
+      .locator('div:has(> input[type="hidden"][name^="block-image-"])')
+      .last()
+      .getByRole("button", { name: /pick from your pictures/i })
+      .first()
+      .click();
+    const dialog = page.getByRole("dialog");
+    await dialog.waitFor({ timeout: 30_000 });
+    await dialog.locator("li button").first().click();
+    await dialog.waitFor({ state: "detached", timeout: 30_000 });
   }
   await page.getByRole("button", { name: /save this draft/i }).click();
   await page.getByText(/needs another look/i).waitFor({ timeout: 90_000 });
@@ -646,7 +676,9 @@ try {
   );
   // Take it back out and save clean.
   await page
-    .locator("li", { has: page.locator('select[name^="block-image-"]') })
+    .locator("li", {
+      has: page.locator('input[type="hidden"][name^="block-image-"]'),
+    })
     .last()
     .getByRole("button", { name: "Remove" })
     .click();
@@ -987,19 +1019,44 @@ try {
 
   await page.screenshot({ path: join(SHOTS, "send-modal.png") });
 
-  // Untick the operator's own two real addresses. They are confirmed, so the
-  // modal offers them — and this run must not address them, which is the whole
-  // of claim 1.
-  for (const address of SEEDED) {
-    const row = page.locator("dialog li").filter({ hasText: address });
-    if ((await row.count()) > 0) {
-      await row.first().locator('input[type="checkbox"]').uncheck();
-    }
+  /**
+   * UNTICK EVERY REAL ADDRESS, not a list of the ones that existed when this
+   * was written.
+   *
+   * It named his two, and on 2026-08-20 it went red because he had signed up
+   * through his own site with a third: the modal offered all three, the suite
+   * knew about two, and "exactly one is left ticked" found two. Nothing had
+   * gone wrong — he had used his own app.
+   *
+   * The claim is "this run addresses nobody real", and the way to hold it is to
+   * untick everything that is not `.invalid` — which is true of an address he
+   * adds tomorrow as well.
+   */
+  // BY ID, FROM THE DATABASE, rather than by reading each row's words. The row
+  // shows a NAME where a subscriber has one, so "does this line say .invalid"
+  // is a question about how the modal is laid out rather than about who the
+  // person is — and reading the text unticked everybody, this run's own
+  // included. The checkbox's value is the subscriber's id, which is what
+  // actually identifies them.
+  const realIds = (
+    await db.query(
+      `SELECT id FROM "Subscriber" WHERE email NOT LIKE '%.invalid'`,
+    )
+  ).rows.map((row) => String(row.id));
+
+  for (const id of realIds) {
+    const box = page.locator(`dialog input[type="checkbox"][value="${id}"]`);
+    if ((await box.count()) > 0) await box.uncheck();
   }
+
   const ticked = await page
     .locator("dialog input[type=checkbox]:checked")
     .count();
-  ok("exactly one person is left ticked", ticked === 1, `${ticked} ticked`);
+  ok(
+    "exactly one person is left ticked, and they are this run's own",
+    ticked === 1,
+    `${ticked} ticked`,
+  );
 
   await page.getByRole("button", { name: /send it to 1 person/i }).click();
 

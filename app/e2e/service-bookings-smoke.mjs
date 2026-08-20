@@ -563,9 +563,19 @@ try {
 
   const queue = await page.locator("main").innerText();
   ok(
-    "the queue counts who is waiting and says what approving does",
-    /waiting to hear back/.test(queue) &&
-      queue.includes("Approving sends them a link to pay"),
+    "the queue counts who is waiting",
+    /waiting to hear back/.test(queue),
+    oneLine(queue),
+  );
+  // THE EXPLANATION IS GONE AND THE LIVE FACT STAYS (operator, 2026-08-20 —
+  // "get rid of the text after the heading"). What went was three sentences
+  // about what approving and declining do, read every day for a month. What is
+  // left only appears when it is true, which is the test: somebody is holding a
+  // payment link, and they are no longer in front of her because an approved
+  // request moves to Answered.
+  ok(
+    "and no longer explains what approving does, which she knows",
+    !queue.includes("Approving sends them a link to pay"),
     oneLine(queue),
   );
 
