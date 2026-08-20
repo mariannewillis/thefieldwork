@@ -86,20 +86,13 @@ export const about = {
       "Teaches the same work to other practitioners now.",
       "Sees one person at a time, by appointment, hands-off throughout.",
     ],
+    /**
+     * The way to ask, at the foot of her own box (operator, 2026-08-20). It was
+     * a beat of its own beneath this one — a whole section between reading
+     * about her and being able to say anything to her.
+     */
+    askLabel: "Ask a question first",
+    askHref: "/contact",
   },
 
-  /** ═══ BEAT 3 — the bridge to asking. Small pool, anchored left. ═══ */
-  beforeYouBook: {
-    plate: {
-      src: "chair-with-her-coat",
-      alt: "An empty armchair with a coat over the back of it, under a low lamp.",
-      b: 0.46,
-      ox: "50%",
-      oy: "50%",
-    } satisfies Plate,
-    eyebrow: "Before you book",
-    body: "You keep your clothes on. Nobody touches you. If a question is stopping you, ask it before the hour rather than during it.",
-    linkLabel: "Ask a question first",
-    linkHref: "/contact",
-  },
 } as const;

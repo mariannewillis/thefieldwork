@@ -43,11 +43,6 @@ export const servicesIndex = {
     insteadAfter: ", which are the same work in a room with other people.",
   },
 
-  /** The closing note the approved screen ends on. */
-  closing: {
-    title: "Not sure which length is right.",
-    body: "Ask on any of the pages above — a short answer, not a sales call. Say what you are wondering about and Marianne will tell you which hour fits.",
-  },
 } as const;
 
 export const serviceDetail = {

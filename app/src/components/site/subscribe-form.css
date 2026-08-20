@@ -119,6 +119,43 @@
   max-width: 46ch;
 }
 
+/* ── EVERYTHING DOWN ONE AXIS (operator, 2026-08-20) ───────────────────────
+ *
+ * For /subscribe, where the form IS the page. The note by `.crown .sub` above
+ * argues that a centred label-over-field reads as a poster rather than a
+ * column, and that stays true of a form sitting among other things — which is
+ * what /subscribe used to be. It is not what it is now: the page is a heading,
+ * a paragraph and this, and a left-aligned form under a centred heading reads
+ * as two pages stapled together. Being a poster is the right answer when the
+ * page is a poster.
+ *
+ * A modifier rather than a rule on the page, so the form carries its own
+ * appearance wherever it is put — the whole reason this stylesheet exists.
+ */
+.sub--centred {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.sub--centred .sub__label {
+  text-align: center;
+}
+
+.sub--centred input[type="email"],
+.sub--centred input[type="text"] {
+  text-align: center;
+}
+
+.sub--centred button {
+  align-self: center;
+}
+
+.sub--centred .sub__note,
+.sub--centred .sub__error,
+.sub--centred .sub__done {
+  margin-inline: auto;
+}
+
 /* The honeypot. Off-screen rather than display:none — a bot that reads the
    computed style skips a hidden field, and this one is meant to be filled in.
    It is out of the tab order and hidden from assistive tech, so no person

@@ -189,19 +189,6 @@ export default async function Page() {
           )}
         </section>
 
-        {/* The closing note the approved screen ends on. Left out when there
-            is nothing above it — "not sure which length is right" under an
-            empty list is a question about nothing. */}
-        {services.length > 0 && (
-          <section className="mt-20 max-w-[54ch]">
-            <h2 className="font-display text-[32px] font-normal leading-tight text-plate-text">
-              {servicesIndex.closing.title}
-            </h2>
-            <p className="mt-4 text-[19px] leading-relaxed text-plate-soft">
-              {servicesIndex.closing.body}
-            </p>
-          </section>
-        )}
       </main>
 
       <SiteFooter />

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { markAllSubscribersSeen } from "@/app/(admin)/admin/subscribers/actions";
 import MarkAllSeen from "@/components/admin/MarkAllSeen";
 import Pager, { currentPage, pageSlice } from "@/components/admin/Pager";
-import SubscriberActions from "@/components/admin/SubscriberActions";
-import { formatDayShort } from "@/lib/format";
+import SubscriberLine from "@/components/admin/SubscriberLine";
 import { allSubscribers } from "@/lib/newsletter/subscribers";
 
 /**
@@ -197,49 +196,12 @@ function Group({
       ) : (
         <ul className="pool on-pool mt-5 flex list-none flex-col gap-0 p-0">
           {people.map((person, index) => (
-            <li
+            <SubscriberLine
               key={person.id}
-              className={`flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-7 py-5 ${
-                index === 0 ? "" : "border-t border-pool-rule/30"
-              }`}
-            >
-              {/* NAME AND EMAIL ON ONE LINE (operator, 2026-08-19). They were
-                  stacked, which gave a list of forty addresses eighty lines and
-                  made the page a scroll rather than a list. A subscriber is two
-                  facts and a date; it fits. */}
-              <span className="min-w-[16rem] flex-1">
-                <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  {person.seenAt === null && (
-                    <span
-                      aria-hidden="true"
-                      title="New — you have not looked at this one"
-                      className="h-2 w-2 shrink-0 rounded-full bg-action"
-                    />
-                  )}
-                  <span className="font-display text-[21px] leading-tight text-ink">
-                    {person.name ?? person.email}
-                  </span>
-                  {person.name && (
-                    <span className="fig font-mono text-[15px] text-ink-soft">
-                      {person.email}
-                    </span>
-                  )}
-                </span>
-                <span className="fig mt-1 block font-mono text-[15px] text-ink-soft">
-                  {person.unsubscribedAt
-                    ? `left ${formatDayShort(person.unsubscribedAt)}`
-                    : person.confirmedAt
-                      ? `confirmed ${formatDayShort(person.confirmedAt)}`
-                      : `asked ${formatDayShort(person.joinedAt)}, not confirmed`}
-                </span>
-              </span>
-
-              <SubscriberActions
-                id={person.id}
-                who={person.name ?? person.email}
-                pending={Boolean(pending)}
-              />
-            </li>
+              person={person}
+              pending={Boolean(pending)}
+              first={index === 0}
+            />
           ))}
           {children && <li className="px-7">{children}</li>}
         </ul>

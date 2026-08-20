@@ -106,14 +106,38 @@ export async function resendConfirmation(
 // ── what she has looked at ───────────────────────────────────────────────────
 
 /**
+ * Mark one subscriber as seen — fired by pressing their line.
+ *
+ * A SUBSCRIBER HAS NOTHING BEHIND IT TO OPEN, and that stays true: a booking
+ * and a request each have a sheet full of things she needs — a message, a
+ * refund period, an amount — while a subscriber is a name, an address and a
+ * date, all three already on the line. So pressing one does not open anything.
+ * It records that she has read it, which is the only thing there was to do
+ * (operator, 2026-08-20).
+ *
+ * `updateMany` rather than `update` so pressing the same line twice is not an
+ * error, and `seenAt: null` in the filter so the second press does not move the
+ * timestamp: what is recorded is when she FIRST read it.
+ *
+ * IT REVALIDATES NOTHING. The line has already cleared its own dot on the
+ * screen and is telling the truth by doing so. Redrawing the list underneath
+ * her hand would move the next line she was about to press.
+ */
+export async function markSubscriberSeen(id: number): Promise<void> {
+  await requireSession();
+  if (!Number.isInteger(id)) return;
+  await prisma.subscriber.updateMany({
+    where: { id, seenAt: null },
+    data: { seenAt: new Date() },
+  });
+}
+
+/**
  * Mark every subscriber as seen.
  *
- * A SUBSCRIBER HAS NO ROW TO OPEN, and that is why this is the only control of
- * the three. A booking and a request each have a sheet full of things she needs
- * — a message, a refund period, an amount — so opening one is a real act and
- * marking it seen means something. A subscriber is a name, an address and a
- * date, and all three are already on the line: there is nothing behind it to
- * open, so "I have read these" is the honest gesture and the only one.
+ * The escape hatch the per-line mark needs: forty new addresses is forty
+ * presses to say one thing, and nothing should stay marked new forever because
+ * reading the list was enough.
  *
  * The rail's badge is what it clears.
  */

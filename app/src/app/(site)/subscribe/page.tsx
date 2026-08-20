@@ -27,12 +27,12 @@ export default function Page() {
       <main className="mx-auto max-w-[1180px] px-6 py-12 lg:px-10">
         <SiteBrand />
 
-        <section className="mt-14 max-w-[680px]">
-          <div className="pool on-pool mt-5 px-8 py-9 sm:px-10">
+        <section className="mx-auto mt-14 max-w-[680px]">
+          <div className="pool on-pool mt-5 px-8 py-9 text-center sm:px-10">
             <h1 className="font-display text-[38px] font-normal leading-[1.05] text-ink">
               A letter, once a month, from a quiet room in Frome.
             </h1>
-            <p className="mt-5 text-[19px] leading-relaxed text-ink-soft">
+            <p className="mx-auto mt-5 max-w-[52ch] text-[19px] leading-relaxed text-ink-soft">
               What is open and when, and whatever the room has actually been
               like &mdash; the chair moved nearer the window, what people have
               been arriving with this autumn. One page. Nothing is ever sold to
@@ -40,7 +40,7 @@ export default function Page() {
             </p>
 
             <div className="mt-8">
-              <SubscribeForm />
+              <SubscribeForm centred />
             </div>
           </div>
         </section>

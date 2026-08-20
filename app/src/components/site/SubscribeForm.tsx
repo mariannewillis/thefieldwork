@@ -42,15 +42,25 @@ export default function SubscribeForm({
    * row making the same promise (operator, 2026-08-19).
    */
   note,
+  centred = false,
 }: {
   note?: string | null;
+  /**
+   * Everything down one axis — the labels, the button, the notes, the block
+   * itself (operator, 2026-08-20). Used on /subscribe, where the form is the
+   * whole page rather than one thing among several.
+   *
+   * The Crown centres the button and the labels through `home.css` instead,
+   * because that beat is centred as a whole and the form is only part of it.
+   */
+  centred?: boolean;
 }) {
   const [state, action, pending] = useActionState(subscribe, NOT_YET);
   const id = useId();
 
   if (state.asked) {
     return (
-      <div className="sub">
+      <div className={centred ? "sub sub--centred" : "sub"}>
         <p className="sub__done">Now check your inbox.</p>
         <p className="sub__note">
           There is a message on its way with one link in it. Press it and the
@@ -63,7 +73,7 @@ export default function SubscribeForm({
   }
 
   return (
-    <form action={action} className="sub">
+    <form action={action} className={centred ? "sub sub--centred" : "sub"}>
       <div className="sub__row">
         <span className="sub__field">
           <label className="sub__label" htmlFor={`${id}-email`}>

@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  const { practice, person, beforeYouBook } = about;
+  const { practice, person } = about;
 
   return (
     <>
@@ -133,40 +133,31 @@ export default function Page() {
                 ))}
               </ul>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ══ BEAT 3 — BEFORE YOU BOOK ════════════════════════════════════════ */}
-      <section className="clearing relative flex min-h-[62vh] items-center overflow-hidden py-16">
-        <ClearingPlate plate={beforeYouBook.plate} />
-
-        <div className="pool on-pool relative z-[2] w-full max-w-[420px] px-8 py-8 sm:px-10 sm:py-10">
-          <p className="fig font-mono text-[15px] uppercase tracking-[0.18em] text-action">
-            {beforeYouBook.eyebrow}
-          </p>
-          <p className="mt-4 text-[19px] leading-relaxed text-ink-soft">
-            {beforeYouBook.body}
-          </p>
-          <a
-            href={beforeYouBook.linkHref}
-            className="t mt-7 inline-flex min-h-[56px] items-center gap-3 border border-action px-8 text-[18px] font-semibold text-action hover:bg-action hover:text-pool"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="h-[16px] w-[16px] shrink-0"
+            {/* THE WAY TO ASK, AT THE FOOT OF HER OWN BOX (operator,
+                2026-08-20). It used to be a beat of its own below this one,
+                which put a whole section between reading about her and being
+                able to say anything to her. It belongs where the reading ends. */}
+            <a
+              href={person.askHref}
+              className="t mt-9 inline-flex min-h-[56px] items-center gap-3 border border-action px-8 text-[18px] font-semibold text-action hover:bg-action hover:text-pool"
             >
-              <rect x="3" y="5" width="18" height="14" />
-              <path d="m3 7 9 6 9-6" />
-            </svg>
-            {beforeYouBook.linkLabel}
-          </a>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="h-[16px] w-[16px] shrink-0"
+              >
+                <rect x="3" y="5" width="18" height="14" />
+                <path d="m3 7 9 6 9-6" />
+              </svg>
+              {person.askLabel}
+            </a>
+          </div>
         </div>
       </section>
 
