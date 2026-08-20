@@ -1,4 +1,5 @@
 import { MediaKind } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Duplicates, {
@@ -160,6 +161,37 @@ export default async function Page({
         : null,
   }));
 
+  /**
+   * THE STILL FOR EACH FILM, read from wherever the film is used.
+   *
+   * A film's poster is fetched from the provider when she pastes the link ON an
+   * offering, and it lives on that offering — there is no poster column on the
+   * library row, because the library row is an address and nothing else.
+   *
+   * So the grid asks the three tables that hold films for the pair it needs,
+   * and a film nothing uses yet simply has no still to find. Three small reads
+   * of two columns each, on a screen that is already reading the whole library.
+   */
+  const [workshopFilms, courseFilms, serviceFilms] = await Promise.all([
+    prisma.workshop.findMany({
+      where: { filmUrl: { not: null }, filmPoster: { not: null } },
+      select: { filmUrl: true, filmPoster: true },
+    }),
+    prisma.course.findMany({
+      where: { filmUrl: { not: null }, filmPoster: { not: null } },
+      select: { filmUrl: true, filmPoster: true },
+    }),
+    prisma.service.findMany({
+      where: { filmUrl: { not: null }, filmPoster: { not: null } },
+      select: { filmUrl: true, filmPoster: true },
+    }),
+  ]);
+
+  const posters: Record<string, string> = {};
+  for (const row of [...workshopFilms, ...courseFilms, ...serviceFilms]) {
+    if (row.filmUrl && row.filmPoster) posters[row.filmUrl] = row.filmPoster;
+  }
+
   const total = counts.video + counts.picture + counts.document;
 
   return (
@@ -234,7 +266,7 @@ export default async function Page({
           </p>
         )}
         {which === "pictures" && <Pictures rows={forScreen} />}
-        {which === "videos" && <Videos rows={forScreen} />}
+        {which === "videos" && <Videos rows={forScreen} posters={posters} />}
         {which === "documents" && <Documents rows={forScreen} />}
 
         <AddToLibrary

@@ -34,11 +34,13 @@
 // IT NEVER TOUCHES THE OPERATOR'S OWN DATA. Everything it needs it creates: one
 // admin account, one workshop, one letter, one uploaded picture and two
 // documents, all named `smoke-media-*` and all removed at the end. The
-// untouchable rows — workshops the-long-attention and lorem-ipsum, course
-// ifr-course, the two real services, the nine EmailTemplate rows, the two
-// Subscriber rows and newsletters 12/13/14/26/30 — are read (that is the point
-// of claim 1) and never written to. The last checks assert that they came
-// through unchanged.
+// untouchable rows — his workshops, courses and services, the nine
+// EmailTemplate rows, his subscribers and every letter he has written — are
+// read (that is the point of claim 1) and never written to. The last checks
+// assert that they came through unchanged, by COUNTING THEM AT BOTH ENDS
+// rather than by naming them: a hardcoded list of his ids reports his ordinary
+// use of the app as damage the first time he signs up or deletes a letter,
+// which is exactly what it did on 2026-08-20.
 // =============================================================================
 
 import { spawn } from "node:child_process";
@@ -322,6 +324,28 @@ try {
     `SELECT "heroImage" FROM "Workshop" WHERE "heroImage" IS NOT NULL ORDER BY id LIMIT 1`,
   );
   const adoptedHero = heroBefore.rows[0]?.heroImage;
+  /**
+   * THE OPERATOR'S OWN ROWS, COUNTED AT THE START RATHER THAN NAMED IN ADVANCE.
+   *
+   * These two used to be `subs === 2` and `id IN (12,13,14,26,30)` — a hardcoded
+   * picture of his database on the day they were written. Both went red on
+   * 2026-08-20 without this run touching anything: he had signed up through the
+   * site himself, and had deleted one of his own letters. The suite was
+   * reporting his ordinary use of the app as damage.
+   *
+   * The claim is "this run changed none of it", and a claim about a DIFFERENCE
+   * is measured by taking both ends. It is the same brittleness the note above
+   * removed from the workshop check, in the two places it was left.
+   */
+  const realSubscribersBefore = (
+    await db.query(
+      `SELECT count(*)::int AS n FROM "Subscriber" WHERE email NOT LIKE '%.invalid'`,
+    )
+  ).rows[0].n;
+  const lettersBefore = (
+    await db.query(`SELECT id FROM "Newsletter" ORDER BY id`)
+  ).rows.map((row) => row.id);
+
   // Kept for the untouchables check at the end: what was here before this run.
   const workshopsBefore = (
     await db.query(
@@ -750,11 +774,20 @@ try {
     await dialog.waitFor({ state: "detached", timeout: 30_000 });
     ok("choosing one closes it — one press, one picture", true);
 
-    const hero = await page.locator('select[name="heroImage"]').inputValue();
+    // THE FIELD IS HIDDEN NOW and the dropdown of filenames is gone (operator,
+    // 2026-08-20). What she sees is the picture; what the form posts is still
+    // `heroImage`, which is what this has always been checking.
+    const hero = await page
+      .locator('input[type="hidden"][name="heroImage"]')
+      .inputValue();
     ok(
       "and the chosen picture is what the field now holds",
       hero.length > 0,
       hero,
+    );
+    ok(
+      "with no list of filenames left to read it off instead",
+      (await page.locator('select[name="heroImage"]').count()) === 0,
     );
   }
 
@@ -783,7 +816,11 @@ try {
     await dialog.getByRole("button", { name: /use these 3/i }).click();
     await dialog.waitFor({ state: "detached", timeout: 30_000 });
 
-    const rows = await page.locator('select[name^="image-url-"]').count();
+    // Same change as the hero above: the rail's rows carry hidden fields now
+    // rather than a dropdown of filenames apiece.
+    const rows = await page
+      .locator('input[type="hidden"][name^="image-url-"]')
+      .count();
     ok("and three rows arrive on the rail", rows === 3, String(rows));
   }
 
@@ -995,10 +1032,29 @@ try {
       caret: "initial",
     });
 
-    const tile = dialog
-      .locator("li button")
-      .filter({ hasText: /smoke-media-handout/i })
-      .first();
+    // A DOCUMENT IS A ROW NOW, not a tile (operator, 2026-08-20 — "atm the
+    // modal can reasonably hold 4 cards"). A document has no thumbnail, so a
+    // grid of them was a grid of grey boxes four across; the thing that
+    // identifies one is its name, which is a line of text, which is a row.
+    ok(
+      "and the documents are a table rather than a grid of grey boxes",
+      (await dialog.locator("table").count()) === 1 &&
+        (await dialog.locator("li button").count()) === 0,
+    );
+
+    // The search is the point of the table: type part of a name and the list
+    // is only what matches.
+    await dialog.getByPlaceholder("Search by name").fill("handout");
+    await page.waitForTimeout(400);
+    const rows = dialog.locator("tbody tr");
+    ok(
+      "searching narrows it to what she typed",
+      (await rows.count()) >= 1 &&
+        /smoke-media-handout/i.test(await rows.first().innerText()),
+      String(await rows.count()),
+    );
+
+    const tile = rows.filter({ hasText: /smoke-media-handout/i }).first();
     await tile.click();
     await dialog.getByRole("button", { name: /use this one/i }).click();
     await dialog.waitFor({ state: "detached", timeout: 30_000 });
@@ -1199,16 +1255,18 @@ try {
       `SELECT count(*)::int AS n FROM "Subscriber" WHERE email NOT LIKE '%.invalid'`,
     );
     ok(
-      "the two real subscribers are untouched",
-      subs.rows[0].n === 2,
-      String(subs.rows[0].n),
+      "his own subscribers are untouched, however many there were",
+      subs.rows[0].n === realSubscribersBefore,
+      `${subs.rows[0].n} now, ${realSubscribersBefore} before`,
     );
     const letters = await db.query(
-      `SELECT count(*)::int AS n FROM "Newsletter" WHERE id IN (12,13,14,26,30)`,
+      `SELECT count(*)::int AS n FROM "Newsletter" WHERE id = ANY($1)`,
+      [lettersBefore],
     );
     ok(
-      "newsletters 12/13/14/26/30 are all still there",
-      letters.rows[0].n === 5,
+      "every letter that was here before this run is still here",
+      letters.rows[0].n === lettersBefore.length,
+      `${letters.rows[0].n} of ${lettersBefore.length}`,
     );
     const cred = await db.query(
       `SELECT "credentialVersion" FROM "AdminUser" WHERE username <> $1 LIMIT 1`,

@@ -457,6 +457,73 @@ const SITES: Site[] = [
         })
         .then((result) => result.count),
   },
+  /**
+   * The pictures in a message about one offering (the Email tab, 2026-08-20).
+   *
+   * FOUND BY THE SUITE, NOT BY ME. `media-smoke` walks the schema for every
+   * column that holds a media reference and fails if one is missing from this
+   * list — and this one was, from the moment `OfferingMessageBlock` shipped.
+   * Without it a picture used in a message she has already sent counts as
+   * unused, and the Media screen would let her delete it: the copy in somebody's
+   * inbox points at a file that is no longer there.
+   *
+   * The `href` goes to the offering the message hangs off, because that is where
+   * the message is — a message has no page of its own.
+   */
+  {
+    column: "OfferingMessageBlock.imageBasename",
+    kind: MediaKind.picture,
+    load: async () => {
+      const rows = await prisma.offeringMessageBlock.findMany({
+        select: {
+          imageBasename: true,
+          message: {
+            select: {
+              subject: true,
+              sentAt: true,
+              workshop: { select: { slug: true, name: true } },
+              course: { select: { slug: true, name: true } },
+              service: { select: { slug: true, name: true } },
+            },
+          },
+        },
+      });
+      return rows
+        .filter((row) => present(row.imageBasename))
+        .map((row) => {
+          const on =
+            row.message.workshop ??
+            row.message.course ??
+            row.message.service ??
+            null;
+          const kindWord = row.message.workshop
+            ? "workshops"
+            : row.message.course
+              ? "courses"
+              : "services";
+          return {
+            kind: MediaKind.picture,
+            ref: row.imageBasename as string,
+            what: `a picture in the message “${row.message.subject}”${
+              on ? ` about ${on.name}` : ""
+            }`,
+            // A sent message cannot be edited, so there is nowhere useful to
+            // send her — the same rule the letters follow.
+            href:
+              row.message.sentAt || !on
+                ? null
+                : `/admin/offerings/${kindWord}/${on.slug}`,
+          };
+        });
+    },
+    repoint: (from, to) =>
+      prisma.offeringMessageBlock
+        .updateMany({
+          where: { imageBasename: from },
+          data: { imageBasename: to },
+        })
+        .then((result) => result.count),
+  },
   {
     column: "NewsletterAttachment.storedAs",
     kind: MediaKind.document,

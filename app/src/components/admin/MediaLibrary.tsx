@@ -15,7 +15,12 @@ import {
   mediaSrc,
   QUIET_BUTTON,
 } from "@/components/admin/OfferingFormParts";
+import FilmViewer, {
+  type FilmAt,
+  type ViewerFilm,
+} from "@/components/admin/FilmViewer";
 import PictureViewer, { type ViewerAt } from "@/components/admin/PictureViewer";
+import { parseFilm } from "@/lib/film";
 
 /**
  * The library's own screen — the parts of it that have to react.
@@ -306,35 +311,113 @@ export function Pictures({ rows }: { rows: LibraryRow[] }) {
   );
 }
 
-export function Videos({ rows }: { rows: LibraryRow[] }) {
+export function Videos({
+  rows,
+  posters,
+}: {
+  rows: LibraryRow[];
+  /** The provider's still for each film's address, when anything uses it. */
+  posters: Record<string, string>;
+}) {
+  const [at, setAt] = useState<FilmAt | null>(null);
+
   if (rows.length === 0) return <Empty what="films" />;
 
+  /**
+   * THE SAME GRID THE PICTURES GET (operator, 2026-08-20 — "in media we should
+   * see a similar grid in videos as we see in pictures").
+   *
+   * A film was a line of text with its address printed underneath, so the only
+   * way to find out WHICH film it was, was to open it on YouTube in another tab.
+   * A film has a picture — the provider's own still, already fetched when she
+   * pasted the link on an offering — and showing it turns a list of URLs into
+   * something she can recognise.
+   *
+   * WHERE THE STILL COMES FROM, and why some have none: the poster is fetched
+   * when a film is pasted ON an offering, and lives on that offering. A film in
+   * the library that nothing uses yet has no still anywhere to read, so it draws
+   * its provider's name instead — honest about what it is rather than showing a
+   * grey box that looks like a picture that failed.
+   */
+  const films: ViewerFilm[] = rows.map((row) => {
+    const film = parseFilm(row.ref);
+    return {
+      row,
+      poster: posters[row.ref] ?? null,
+      embedUrl: film?.embedUrl ?? null,
+      watchUrl: film?.watchUrl ?? row.ref,
+      providerName: film?.providerName ?? "A film",
+    };
+  });
+
   return (
-    <ul className="mt-8 flex list-none flex-col gap-0 p-0">
-      {rows.map((row) => (
-        <li key={row.id} className="border-t border-pool-rule/40 py-7">
-          <p className="font-display text-[26px] leading-tight text-ink">
-            {row.title ?? "A film"}
-          </p>
-          <p className="mt-2 break-all text-[15px] leading-relaxed text-ink-soft">
-            <a
-              href={row.ref}
-              target="_blank"
-              rel="noreferrer"
-              className="t underline decoration-pool-rule underline-offset-4 hover:text-ink"
+    <>
+      <ul className="mt-8 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
+        {films.map((film, index) => (
+          <li key={film.row.id} className="relative">
+            <button
+              type="button"
+              onClick={() => setAt({ index, asking: false })}
+              className="t block w-full border border-transparent p-0 text-left hover:border-action"
             >
-              {row.ref}
-            </a>
-          </p>
-          <p className="fig font-mono mt-2 text-[13px] text-ink-soft">
-            A link, not a file on this site &middot;{" "}
-            <Arrived addedAt={row.addedAt} />
-          </p>
-          <Uses uses={row.uses} />
-          <Remove row={row} />
-        </li>
-      ))}
-    </ul>
+              <span className="relative block aspect-video w-full bg-ink/10">
+                {film.poster ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/media/${film.poster}-1200.jpg`}
+                    alt=""
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center px-4 text-center fig font-mono text-[15px] uppercase tracking-[0.14em] text-ink-soft">
+                    {film.providerName}
+                  </span>
+                )}
+                {/* The one mark that says "this is a film and not a
+                    photograph". On the still rather than beside it, because the
+                    still IS a photograph until something says otherwise. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-2 left-2 flex h-9 w-9 items-center justify-center bg-ink/60 text-pool"
+                >
+                  &#9654;
+                </span>
+              </span>
+
+              <span className="block px-1 pb-1 pt-2 text-[15px] font-medium leading-snug text-ink">
+                {film.row.title ?? "A film"}
+              </span>
+              <span className="sr-only">
+                Watch it, and see where it is used
+              </span>
+            </button>
+
+            {/* A control ON the still, exactly as the pictures have: a dark
+                scrim and a light glyph, always visible, because a control that
+                only exists under a pointer does not exist on a tablet. */}
+            <button
+              type="button"
+              onClick={() => setAt({ index, asking: true })}
+              className="t absolute right-1 top-1 flex h-11 w-11 items-center justify-center bg-ink/55 text-pool hover:bg-action"
+            >
+              <BinIcon />
+              <span className="sr-only">
+                Remove {film.row.title ?? "this film"} from the library
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <p className={HELP}>
+        A film is a link and never a file on this site &mdash; nothing of it is
+        stored here but the address. What it is called comes from the workshop,
+        course or session it was pasted on.
+      </p>
+
+      <FilmViewer films={films} at={at} onClose={() => setAt(null)} />
+    </>
   );
 }
 

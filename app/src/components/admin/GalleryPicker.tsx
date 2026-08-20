@@ -13,6 +13,7 @@ import {
   mediaSrc,
   QUIET_BUTTON,
 } from "@/components/admin/OfferingFormParts";
+import { PER_PAGE } from "@/components/admin/Pager";
 
 /**
  * Choosing from the library, by eye.
@@ -85,6 +86,8 @@ const OVERLAY =
 const SHEET = "pool on-pool w-full max-w-[1000px] px-6 py-7 sm:px-9 sm:py-8";
 const TILE =
   "t relative flex w-full flex-col border border-pool-rule/50 p-0 text-left hover:border-action focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action";
+const HEAD =
+  "pb-3 pr-5 text-left align-bottom fig font-mono text-[15px] font-medium uppercase tracking-[0.14em] text-ink-soft";
 const TILE_ON =
   "t relative flex w-full flex-col border-2 border-action p-0 text-left";
 
@@ -175,6 +178,9 @@ export default function GalleryPicker({
 }) {
   const [picked, setPicked] = useState<string[]>(chosen ?? []);
   const [busy, setBusy] = useState(false);
+  /** Documents only — see `asTable` below for why they are not a grid. */
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const [refused, setRefused] = useState<string | null>(null);
   /**
    * "This picture is 828 pixels wide…" — the same kind of thing as `held`
@@ -241,6 +247,42 @@ export default function GalleryPicker({
   if (!open || !ready) return null;
 
   const words = WORDS[kind];
+
+  /**
+   * A DOCUMENT HAS NO PICTURE, so a grid of them is a grid of grey boxes
+   * (operator, 2026-08-20 — "atm the modal can reasonably hold 4 cards").
+   *
+   * A picture tile earns its size: the thumbnail IS the identifying
+   * information, and four across is four photographs she can tell apart at a
+   * glance. A document tile is a grey rectangle with a word in it, so the same
+   * four across shows four filenames in the space of a screen — and she may
+   * have forty. The thing that identifies a document is its NAME, which is one
+   * line of text, which is a row.
+   *
+   * So documents get a table, a search and a page: the three things a list you
+   * cannot recognise by eye needs. Pictures and films keep the grid, because
+   * for them the picture is the point.
+   */
+  const asTable = kind === "document";
+
+  const matching = asTable
+    ? assets.filter((asset) => {
+        const hay = [
+          asset.title ?? "",
+          asset.ref.replace(/-/g, " "),
+          kindWords(asset.contentType),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(query.trim().toLowerCase());
+      })
+    : assets;
+
+  const pages = Math.max(1, Math.ceil(matching.length / PER_PAGE));
+  const here = Math.min(page, pages);
+  const shown = asTable
+    ? matching.slice((here - 1) * PER_PAGE, here * PER_PAGE)
+    : matching;
 
   const toggle = (ref: string) => {
     setRefused(null);
@@ -378,9 +420,148 @@ export default function GalleryPicker({
           <p className="mt-8 max-w-[54ch] text-[19px] leading-relaxed text-ink">
             {words.empty}
           </p>
+        ) : asTable ? (
+          <>
+            {/* SEARCH FIRST, because on a list you cannot recognise by eye it
+                is the fastest way to the one you want — and it is a plain
+                filter over what is already on the screen rather than a trip to
+                the server, so it answers as she types. */}
+            <div className="mt-6 flex flex-wrap items-baseline gap-x-6 gap-y-3">
+              <label className="flex-1 min-w-[16rem]">
+                <span className="sr-only">Search your documents</span>
+                <input
+                  type="search"
+                  value={query}
+                  placeholder="Search by name"
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    // Back to the first page: staying on page 3 of a list that
+                    // is now one page long shows nothing and looks broken.
+                    setPage(1);
+                  }}
+                  className="w-full border border-pool-rule bg-transparent px-3 py-2.5 text-[17px] text-ink focus:border-ink focus:outline-none"
+                />
+              </label>
+              <p className="fig font-mono text-[15px] text-ink-soft">
+                {matching.length === assets.length
+                  ? `${assets.length} ${assets.length === 1 ? "document" : "documents"}`
+                  : `${matching.length} of ${assets.length}`}
+              </p>
+            </div>
+
+            {matching.length === 0 ? (
+              <p className="mt-8 max-w-[54ch] text-[19px] leading-relaxed text-ink">
+                Nothing here is called that. Try part of the name, or clear the
+                search to see all {assets.length}.
+              </p>
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[560px] border-collapse text-left">
+                  <caption className="sr-only">
+                    Your documents. Press one to{" "}
+                    {multiple ? "add it" : "choose it"}.
+                  </caption>
+                  <thead>
+                    <tr className="border-b-2 border-ink">
+                      <th scope="col" className={HEAD}>
+                        Name
+                      </th>
+                      <th scope="col" className={HEAD}>
+                        What it is
+                      </th>
+                      <th scope="col" className={`${HEAD} pr-0`}>
+                        Who can open it
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shown.map((asset) => {
+                      const on = picked.includes(asset.ref);
+                      return (
+                        <tr
+                          key={asset.ref}
+                          tabIndex={0}
+                          role="button"
+                          aria-pressed={multiple ? on : undefined}
+                          onClick={() => toggle(asset.ref)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              toggle(asset.ref);
+                            }
+                          }}
+                          className={`cursor-pointer border-t border-pool-rule ${
+                            on
+                              ? "bg-action/10"
+                              : "hover:bg-gold/10 focus-visible:bg-gold/10"
+                          } focus-visible:outline-none`}
+                        >
+                          <th
+                            scope="row"
+                            className="py-3 pr-5 text-left align-middle font-normal"
+                          >
+                            <span className="flex items-baseline gap-2">
+                              {/* The tick is the whole of the chosen state in
+                                  words — the tinted row says it in colour, and
+                                  colour alone is not a state anybody can read
+                                  who cannot see it. */}
+                              {multiple && (
+                                <span
+                                  aria-hidden="true"
+                                  className={`fig font-mono text-[15px] ${on ? "text-action" : "text-transparent"}`}
+                                >
+                                  &#10003;
+                                </span>
+                              )}
+                              <span className="text-[17px] font-medium text-ink">
+                                {asset.title ?? asset.ref.replace(/-/g, " ")}
+                              </span>
+                            </span>
+                          </th>
+                          <td className="py-3 pr-5 align-middle fig font-mono text-[15px] text-ink-soft">
+                            {kindWords(asset.contentType)}
+                            {asset.bytes ? ` · ${sizeWords(asset.bytes)}` : ""}
+                          </td>
+                          <td className="py-3 align-middle fig font-mono text-[15px] text-ink-soft">
+                            {asset.reachableWithoutASession
+                              ? "anybody with the link"
+                              : "only you"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {pages > 1 && (
+              <div className="mt-5 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+                <button
+                  type="button"
+                  disabled={here <= 1}
+                  onClick={() => setPage(here - 1)}
+                  className="t min-h-[38px] py-1.5 text-[16px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink disabled:no-underline disabled:opacity-40"
+                >
+                  &larr; Back
+                </button>
+                <span className="fig font-mono text-[15px] text-ink-soft">
+                  {here} of {pages}
+                </span>
+                <button
+                  type="button"
+                  disabled={here >= pages}
+                  onClick={() => setPage(here + 1)}
+                  className="t min-h-[38px] py-1.5 text-[16px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink disabled:no-underline disabled:opacity-40"
+                >
+                  More &rarr;
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <ul className="mt-7 grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-4">
-            {assets.map((asset) => {
+            {shown.map((asset) => {
               const on = picked.includes(asset.ref);
               return (
                 <li key={asset.ref}>
@@ -412,17 +593,11 @@ export default function GalleryPicker({
                       <span className="text-[15px] font-medium leading-snug text-ink">
                         {asset.title ?? asset.ref.replace(/-/g, " ")}
                       </span>
+                      {/* A document's line went with it to the table above —
+                          the compiler says so: `kind` is narrowed to picture or
+                          film in this branch, and the document arm was dead
+                          code the moment the table took over. */}
                       <span className="fig font-mono text-[13px] leading-snug text-ink-soft">
-                        {kind === "document" && (
-                          <>
-                            {kindWords(asset.contentType)}
-                            {asset.bytes ? ` · ${sizeWords(asset.bytes)}` : ""}
-                            {" · "}
-                            {asset.reachableWithoutASession
-                              ? "anybody with the link"
-                              : "only you"}
-                          </>
-                        )}
                         {kind === "video" && filmWords(asset.ref)}
                         {kind === "picture" &&
                           asset.useCount !== undefined &&
