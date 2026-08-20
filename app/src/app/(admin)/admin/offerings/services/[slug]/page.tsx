@@ -1,8 +1,8 @@
 import Link from "next/link";
+import OfferingMessage from "@/components/admin/OfferingMessage";
+import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
-import OfferingTabs, {
-  offeringTab,
-} from "@/components/admin/OfferingTabs";
+import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { askedForService } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import ServiceForm from "@/components/admin/ServiceForm";
@@ -39,7 +39,10 @@ export default async function Page({
 
   if (!service) notFound();
 
-  const attendees = await askedForService(service.id);
+  const [attendees, mail] = await Promise.all([
+    askedForService(service.id),
+    offeringMessages("service", service.id),
+  ]);
 
   const travels = service.location === "travels";
 
@@ -126,19 +129,19 @@ export default async function Page({
 
       {showing === "editor" && (
         <>
-      <ServiceForm
-        media={media}
-        venues={venues}
-        // Built from the STORED address, not from what is in the fields, so
-        // the link goes where the site will send people. Null while the
-        // address is not set yet, and the form then shows nothing.
-        mapUrl={mapUrl}
-        service={{
-          ...service,
-          // The textarea shows her own marks, not the markup they became.
-          body: toSource(service.bodyHtml),
-        }}
-      />
+          <ServiceForm
+            media={media}
+            venues={venues}
+            // Built from the STORED address, not from what is in the fields, so
+            // the link goes where the site will send people. Null while the
+            // address is not set yet, and the form then shows nothing.
+            mapUrl={mapUrl}
+            service={{
+              ...service,
+              // The textarea shows her own marks, not the markup they became.
+              body: toSource(service.bodyHtml),
+            }}
+          />
         </>
       )}
 
@@ -147,9 +150,16 @@ export default async function Page({
       )}
 
       {showing === "email" && (
-        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
-          Writing to the people on this one is the next thing being built.
-        </p>
+        <OfferingMessage
+          kind="service"
+          offeringId={service.id}
+          slug={service.slug}
+          subject={mail.draft.subject}
+          blocks={mail.draft.blocks}
+          attendees={attendees}
+          media={media}
+          sent={mail.sent}
+        />
       )}
     </>
   );

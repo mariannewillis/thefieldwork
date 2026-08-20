@@ -1,8 +1,8 @@
 import Link from "next/link";
+import OfferingMessage from "@/components/admin/OfferingMessage";
+import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
-import OfferingTabs, {
-  offeringTab,
-} from "@/components/admin/OfferingTabs";
+import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import CourseForm from "@/components/admin/CourseForm";
@@ -41,7 +41,10 @@ export default async function Page({
 
   if (!course) notFound();
 
-  const attendees = await attendingOffering("course", course.id);
+  const [attendees, mail] = await Promise.all([
+    attendingOffering("course", course.id),
+    offeringMessages("course", course.id),
+  ]);
 
   const dates = course.sessions;
   const run =
@@ -114,21 +117,21 @@ export default async function Page({
 
       {showing === "editor" && (
         <>
-      <CourseForm
-        media={media}
-        venues={venues}
-        // Built from the STORED address, not from what is in the fields, so
-        // the link goes where the site will send people. Null while the place
-        // is not set yet, and the form then shows nothing.
-        mapUrl={mapSearchUrl(course)}
-        course={{
-          ...course,
-          // The textarea shows her own marks, not the markup they became.
-          body: toSource(course.bodyHtml),
-          // In code they are CourseSessions; nothing Marianne reads says so.
-          dates,
-        }}
-      />
+          <CourseForm
+            media={media}
+            venues={venues}
+            // Built from the STORED address, not from what is in the fields, so
+            // the link goes where the site will send people. Null while the place
+            // is not set yet, and the form then shows nothing.
+            mapUrl={mapSearchUrl(course)}
+            course={{
+              ...course,
+              // The textarea shows her own marks, not the markup they became.
+              body: toSource(course.bodyHtml),
+              // In code they are CourseSessions; nothing Marianne reads says so.
+              dates,
+            }}
+          />
         </>
       )}
 
@@ -137,9 +140,16 @@ export default async function Page({
       )}
 
       {showing === "email" && (
-        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
-          Writing to the people on this one is the next thing being built.
-        </p>
+        <OfferingMessage
+          kind="course"
+          offeringId={course.id}
+          slug={course.slug}
+          subject={mail.draft.subject}
+          blocks={mail.draft.blocks}
+          attendees={attendees}
+          media={media}
+          sent={mail.sent}
+        />
       )}
     </>
   );

@@ -1,8 +1,8 @@
 import Link from "next/link";
+import OfferingMessage from "@/components/admin/OfferingMessage";
+import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
-import OfferingTabs, {
-  offeringTab,
-} from "@/components/admin/OfferingTabs";
+import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import WorkshopForm from "@/components/admin/WorkshopForm";
@@ -39,7 +39,10 @@ export default async function Page({
 
   if (!workshop) notFound();
 
-  const attendees = await attendingOffering("workshop", workshop.id);
+  const [attendees, mail] = await Promise.all([
+    attendingOffering("workshop", workshop.id),
+    offeringMessages("workshop", workshop.id),
+  ]);
 
   return (
     <>
@@ -100,19 +103,19 @@ export default async function Page({
 
       {showing === "editor" && (
         <>
-      <WorkshopForm
-        media={media}
-        venues={venues}
-        // Built from the STORED address, not from what is in the fields, so
-        // the link goes where the site currently sends people. Null while the
-        // place is not set yet, and the form then shows nothing.
-        mapUrl={mapSearchUrl(workshop)}
-        workshop={{
-          ...workshop,
-          // The textarea shows her own marks, not the markup they became.
-          body: toSource(workshop.bodyHtml),
-        }}
-      />
+          <WorkshopForm
+            media={media}
+            venues={venues}
+            // Built from the STORED address, not from what is in the fields, so
+            // the link goes where the site currently sends people. Null while the
+            // place is not set yet, and the form then shows nothing.
+            mapUrl={mapSearchUrl(workshop)}
+            workshop={{
+              ...workshop,
+              // The textarea shows her own marks, not the markup they became.
+              body: toSource(workshop.bodyHtml),
+            }}
+          />
         </>
       )}
 
@@ -121,9 +124,16 @@ export default async function Page({
       )}
 
       {showing === "email" && (
-        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
-          Writing to the people on this one is the next thing being built.
-        </p>
+        <OfferingMessage
+          kind="workshop"
+          offeringId={workshop.id}
+          slug={workshop.slug}
+          subject={mail.draft.subject}
+          blocks={mail.draft.blocks}
+          attendees={attendees}
+          media={media}
+          sent={mail.sent}
+        />
       )}
     </>
   );

@@ -227,6 +227,9 @@ model Workshop {
   images   WorkshopImage[]
   bookings Booking[]
 
+  /// Messages she has written to the people on this one.
+  messages OfferingMessage[]
+
   /// Both lists that exist — the public index and the portal's — read in date
   /// order, and both split on published.
   @@index([published, date])
@@ -344,6 +347,9 @@ model Course {
   images   CourseImage[]
   sessions CourseSession[]
   bookings Booking[]
+
+  /// Messages she has written to the people on this one.
+  messages OfferingMessage[]
 
   /// Both lists that will exist — the portal's and the public index — split on
   /// published.
@@ -613,6 +619,9 @@ model Service {
   images   ServiceImage[]
   requests ServiceRequest[]
   bookings Booking[]
+
+  /// Messages she has written to the people on this one.
+  messages OfferingMessage[]
 
   /// The portal's list and the public index, split on published.
   @@index([published])
@@ -1967,4 +1976,118 @@ model PagePicture {
   focalY     String?
 
   @@unique([page, state, key])
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OFFERING MAIL — writing to the people on one workshop, course or session
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// A message about ONE offering, to the people attached to it.
+///
+/// NOT A NEWSLETTER, AND THE DISTINCTION IS THE WHOLE MODEL. A letter is
+/// marketing: it goes to a list people joined on purpose, every copy carries a
+/// link that takes them off it, and the double opt-in is what makes sending it
+/// lawful. This is transactional: it goes to somebody who holds a place on a
+/// thing she is running, it carries NO unsubscribe link — unsubscribing from a
+/// day you have paid for is meaningless — and it never reads or writes
+/// `Subscriber`. Mixing the two would either send the letter to people who
+/// never opted in, or offer to take somebody off a list they were never on.
+///
+/// ONE OFFERING, and exactly one: the same three-nullable-keys shape `Booking`
+/// uses, for the same reason. A message belongs to the thing it is about.
+///
+/// THE LINE BETWEEN TRANSACTIONAL AND MARKETING IS CONTENT, NOT RECIPIENT, and
+/// she is the one writing. The screen says so; nothing here can enforce it.
+model OfferingMessage {
+  id Int @id @default(autoincrement())
+
+  workshopId Int?
+  workshop   Workshop? @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  courseId   Int?
+  course     Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  serviceId  Int?
+  service    Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  /// What it says in an inbox list.
+  subject String
+
+  /// Sent, or still being written. Once sent it is closed, for the reason a
+  /// letter is: the people it went to are holding a copy of what it said.
+  sentAt DateTime?
+
+  /// How many it was addressed to, frozen at send — the list it was sent from
+  /// grows and shrinks afterwards, and this is the number that was true.
+  recipientCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blocks OfferingMessageBlock[]
+  sends  OfferingMessageSend[]
+
+  @@index([workshopId])
+  @@index([courseId])
+  @@index([serviceId])
+}
+
+/// The parts a message is made of.
+///
+/// THE LETTER'S KINDS MINUS ONE. A letter can carry `offerings`, which pulls
+/// the live dates at send time; a message about one workshop has no use for a
+/// list of every workshop, and putting one in would turn a note about the room
+/// into an advertisement — which is the line this model exists to keep.
+enum OfferingMessageBlockKind {
+  heading
+  paragraph
+  image
+  button
+}
+
+model OfferingMessageBlock {
+  id        Int             @id @default(autoincrement())
+  messageId Int
+  message   OfferingMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  position Int
+  kind     OfferingMessageBlockKind
+
+  /// heading / paragraph: the words. button: the label.
+  text String?
+
+  /// image: the media basename. A letter needs the `.jpg` derivative — Outlook
+  /// for Windows renders neither AVIF nor WebP — and so does this.
+  imageBasename String?
+  caption       String?
+  alt           String?
+
+  /// button: where it goes.
+  href String?
+
+  @@unique([messageId, position])
+  @@index([messageId])
+}
+
+/// One person one message was addressed to, and what happened.
+///
+/// THE ADDRESS IS FROZEN ON THE ROW rather than read through a relation, for
+/// the reason `NewsletterSend` freezes it: the record of what was sent has to
+/// survive the booking being cancelled or the request being deleted.
+model OfferingMessageSend {
+  id        Int             @id @default(autoincrement())
+  messageId Int
+  message   OfferingMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  email String
+  name  String?
+
+  /// `booking-12` / `request-4` — which row on the offering this went to. Kept
+  /// so the record says who, not merely which address.
+  attendeeKey String
+
+  outcome NewsletterSendOutcome @default(pending)
+  error   String?
+  sentAt  DateTime?
+
+  @@unique([messageId, email])
+  @@index([messageId, outcome])
 }
