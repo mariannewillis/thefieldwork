@@ -961,12 +961,16 @@ try {
   // a test of the mechanism; `the band is now the height of the screen` is a
   // test of what she asked for. Measure the claim.
   await selectMade(page, madeId, /A section you added/);
-  const asBand = await (await preview(page))
+  const asBand = await (
+    await preview(page)
+  )
     .locator(`[data-section="${madeId}"]`)
     .evaluate((el) => el.getBoundingClientRect().height);
 
   await press(page, "The whole screen");
-  const filled = await (await preview(page))
+  const filled = await (
+    await preview(page)
+  )
     .locator(`[data-section="${madeId}"]`)
     .evaluate((el) => ({
       height: el.getBoundingClientRect().height,
@@ -986,12 +990,16 @@ try {
   // Half and most sit between the two, in the order she reads them.
   await selectMade(page, madeId, /A section you added/);
   await press(page, "Half the screen");
-  const half = await (await preview(page))
+  const half = await (
+    await preview(page)
+  )
     .locator(`[data-section="${madeId}"]`)
     .evaluate((el) => el.getBoundingClientRect().height);
   await selectMade(page, madeId, /A section you added/);
   await press(page, "Most of the screen");
-  const most = await (await preview(page))
+  const most = await (
+    await preview(page)
+  )
     .locator(`[data-section="${madeId}"]`)
     .evaluate((el) => el.getBoundingClientRect().height);
   ok(
@@ -1110,6 +1118,159 @@ try {
     "and what stays in frame once it crops is hers to choose",
     (await rowsOf(`SELECT "focusY" FROM "PageBlock" WHERE id=$1`, [picId]))[0]
       .focusY === 60,
+  );
+
+  // == A LIST OF LINES, AND THE TOOLBOX KEEPING WHAT SHE WROTE ==============
+  //
+  // "I just added a list of lines and didnt see any text reflect in the
+  // creator and when i clicked outside of the list of lines bit i could no
+  // longer reselect it", and then: "it seems like we have to click save or
+  // text doesnt show" (operator, 2026-08-20). Two faults, both about words
+  // going missing.
+  //
+  // ONE · `innerText` IS LAYOUT-AWARE. The bridge took `contenteditable` off
+  // the node BEFORE reading it back. `plaintext-only` carries
+  // `white-space: pre-wrap`, so a typed newline is a line break while she is
+  // typing and collapses to a SPACE the instant the attribute goes — so the
+  // read happened against a different rendering from the one on screen. Three
+  // lines came back as one. It would have done the same to the opening's three
+  // lines; nothing had ever typed two lines into anything.
+  //
+  // TWO · TWO WAYS OF WRITING, ONE OF WHICH LOST WORK. Typing on the page saved
+  // itself when the caret left. Typing in the toolbox waited for Save, so
+  // clicking anywhere else threw the sentence away while the preview beside it
+  // went on showing the old words.
+  console.log("\nA LIST OF LINES\n");
+
+  await page.goto(EDITOR);
+  await preview(page);
+  await selectMade(page, madeId, /A section you added/);
+
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${boxId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+    await page
+      .getByRole("button", { name: "A list of lines", exact: true })
+      .first()
+      .click();
+    await page.waitForTimeout(2200);
+  }
+
+  const listId = (
+    await rowsOf(
+      `SELECT id FROM "PageItem" WHERE "blockId"=$1 AND kind='bullets' ORDER BY id DESC`,
+      [boxId],
+    )
+  )[0].id;
+
+  {
+    const frame = await preview(page);
+    await frame.locator(`[data-item="${listId}"]`).click({ force: true });
+    await page.waitForTimeout(800);
+    await page.keyboard.type("First line");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("Second line");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("Third line");
+    await frame
+      .locator(`[data-block="${boxId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(2600);
+  }
+
+  ok(
+    "three lines typed on the page are stored as three lines",
+    (await rowsOf(`SELECT text FROM "PageItem" WHERE id=$1`, [listId]))[0]
+      .text === "First line\nSecond line\nThird line",
+    JSON.stringify(
+      (await rowsOf(`SELECT text FROM "PageItem" WHERE id=$1`, [listId]))[0],
+    ),
+  );
+
+  const drawn = await (await preview(page))
+    .locator(`[data-item="${listId}"]`)
+    .evaluate((el) => ({
+      spans: [...el.querySelectorAll("span")].map((one) => one.textContent),
+      height: Math.round(el.getBoundingClientRect().height),
+    }));
+  ok(
+    "and drawn as three, each on its own line",
+    drawn.spans.length === 3 && drawn.spans[2] === "Third line",
+    JSON.stringify(drawn),
+  );
+  ok(
+    "which gives it a real height, so it can be pressed again",
+    drawn.height > 40,
+    JSON.stringify(drawn),
+  );
+
+  {
+    const frame = await preview(page);
+    await frame.locator(`[data-item="${listId}"]`).click({ force: true });
+    await page.waitForTimeout(1200);
+  }
+  ok(
+    "pressing it again is the line again, not something else",
+    /this line/i.test(
+      await page.locator('aside[aria-label="The toolbox"]').innerText(),
+    ),
+  );
+
+  // Type in the toolbox and click somewhere else WITHOUT pressing Save.
+  await page.locator('aside[aria-label="The toolbox"] textarea').first().click();
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type("Alpha");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("Beta");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("Gamma");
+  await page
+    .locator('aside[aria-label="The toolbox"]')
+    .getByText("This line", { exact: true })
+    .click();
+  await page.waitForTimeout(2600);
+
+  ok(
+    "what she wrote in the toolbox is kept without pressing Save",
+    (await rowsOf(`SELECT text FROM "PageItem" WHERE id=$1`, [listId]))[0]
+      .text === "Alpha\nBeta\nGamma",
+    JSON.stringify(
+      (await rowsOf(`SELECT text FROM "PageItem" WHERE id=$1`, [listId]))[0],
+    ),
+  );
+  ok(
+    "and the page beside it is showing it",
+    JSON.stringify(
+      await (await preview(page))
+        .locator(`[data-item="${listId}"]`)
+        .evaluate((el) =>
+          [...el.querySelectorAll("span")].map((one) => one.textContent),
+        ),
+    ) === JSON.stringify(["Alpha", "Beta", "Gamma"]),
+  );
+
+  // Leaving a field she did not touch must not write a row for nothing.
+  {
+    const frame = await preview(page);
+    await frame.locator(`[data-item="${listId}"]`).click({ force: true });
+    await page.waitForTimeout(1200);
+  }
+  const untouched = await page
+    .locator('aside[aria-label="The toolbox"]')
+    .innerText();
+  await page.locator('aside[aria-label="The toolbox"] textarea').first().click();
+  await page
+    .locator('aside[aria-label="The toolbox"]')
+    .getByText("This line", { exact: true })
+    .click();
+  await page.waitForTimeout(1800);
+  ok(
+    "and leaving a field she did not type in changes nothing",
+    (await rowsOf(`SELECT text FROM "PageItem" WHERE id=$1`, [listId]))[0]
+      .text === "Alpha\nBeta\nGamma" && untouched.length > 0,
   );
 
   // ── out it goes ───────────────────────────────────────────────────────────

@@ -160,6 +160,32 @@ const BLOCK_KINDS = [
 ] as const;
 
 /**
+ * KEEP WHAT SHE WROTE WHEN SHE LEAVES THE FIELD (operator, 2026-08-20 — "it
+ * seems like we have to click save or text doesnt show it should automatically
+ * save and render what i wrote so text isnt lost when i click out of the tool
+ * box").
+ *
+ * Typing on the PAGE has always saved itself: the bridge writes back the moment
+ * the caret leaves. Typing in the TOOLBOX did not — it waited for Save, so
+ * clicking anywhere else threw the sentence away, and the preview beside it
+ * went on showing the old words as if nothing had been typed. Two ways of
+ * writing on one screen, one of which quietly loses work.
+ *
+ * ONLY WHEN IT CHANGED. Leaving a field she did not touch must not write a row,
+ * reload the frame and refresh the page for nothing — most blurs are her moving
+ * on, not editing.
+ *
+ * THE SAVE BUTTON STAYS. It is how she says "I have finished" when she wants to
+ * see the result without clicking away first, and taking it out would make a
+ * screen where nothing visibly commits.
+ */
+function keepOnBlur(changed: boolean, save: () => void) {
+  return () => {
+    if (changed) save();
+  };
+}
+
+/**
  * HOW MUCH OF THE SCREEN A SECTION SHE MADE TAKES.
  *
  * Four, because there are four answers to "how tall should this be" — and
@@ -975,6 +1001,9 @@ function TextSlotPanel(props: ToolboxProps & { slot: TextSlot }) {
   const multiline =
     slot.shape === "prose" || slot.shape === "lines" || slot.shape === "parts";
 
+  /** What Save would send — so leaving the field sends exactly the same thing. */
+  const saveWords = isLink ? `${label}\n${href}` : label;
+
   return (
     <>
       <Head eyebrow="These words" title={slot.label} note={slot.hint} />
@@ -986,6 +1015,9 @@ function TextSlotPanel(props: ToolboxProps & { slot: TextSlot }) {
             value={label}
             rows={slot.shape === "prose" ? 7 : 4}
             onChange={(event) => setLabel(event.target.value)}
+            onBlur={keepOnBlur(saveWords !== current, () =>
+              props.run("set-text", { key: slot.key, value: saveWords }),
+            )}
             className={`${FIELD} leading-relaxed`}
           />
         ) : (
@@ -993,6 +1025,9 @@ function TextSlotPanel(props: ToolboxProps & { slot: TextSlot }) {
             type="text"
             value={label}
             onChange={(event) => setLabel(event.target.value)}
+            onBlur={keepOnBlur(saveWords !== current, () =>
+              props.run("set-text", { key: slot.key, value: saveWords }),
+            )}
             className={FIELD}
           />
         )}
@@ -1080,6 +1115,13 @@ function PictureSlotPanel(props: ToolboxProps & { slot: PictureSlot }) {
           value={alt}
           rows={3}
           onChange={(event) => setAlt(event.target.value)}
+          onBlur={keepOnBlur(alt !== current.alt, () =>
+            props.run("set-picture", {
+              key: slot.key,
+              ref: current.ref,
+              alt,
+            }),
+          )}
           className={`${FIELD} leading-relaxed`}
         />
       </div>
@@ -1224,6 +1266,13 @@ function SectionPanel(props: ToolboxProps & { section: EditorSection }) {
                 value={alt}
                 rows={2}
                 onChange={(event) => setAlt(event.target.value)}
+                onBlur={keepOnBlur(alt !== (section.pictureAlt ?? ""), () =>
+                  props.run("set-section-picture", {
+                    section: String(section.id),
+                    ref: section.pictureRef ?? "",
+                    alt,
+                  }),
+                )}
                 className={`${FIELD} leading-relaxed`}
                 aria-label="What is in the photograph"
               />
@@ -1480,6 +1529,15 @@ function BlockPanel(props: ToolboxProps & { block: EditorBlock }) {
             value={alt}
             rows={2}
             onChange={(event) => setAlt(event.target.value)}
+            onBlur={keepOnBlur(
+              Boolean(block.pictureRef) && alt !== (block.pictureAlt ?? ""),
+              () =>
+                props.run("set-block-picture", {
+                  block: String(block.id),
+                  ref: block.pictureRef ?? "",
+                  alt,
+                }),
+            )}
             className={`${FIELD} leading-relaxed`}
             aria-label="What is in the picture"
           />
@@ -1641,6 +1699,16 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
     setHref(item.href ?? "");
   }, [item.text, item.href]);
 
+  const keepItem = keepOnBlur(
+    text !== item.text || href !== (item.href ?? ""),
+    () =>
+      void props.run("set-item", {
+        item: String(item.id),
+        value: text,
+        ...(wantsHref ? { href } : {}),
+      }),
+  );
+
   return (
     <>
       <Head
@@ -1664,6 +1732,7 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
             value={text}
             rows={item.kind === "paragraph" ? 6 : 4}
             onChange={(event) => setText(event.target.value)}
+            onBlur={keepItem}
             className={`${FIELD} leading-relaxed`}
           />
         ) : (
@@ -1671,6 +1740,7 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
             type="text"
             value={text}
             onChange={(event) => setText(event.target.value)}
+            onBlur={keepItem}
             className={FIELD}
           />
         )}

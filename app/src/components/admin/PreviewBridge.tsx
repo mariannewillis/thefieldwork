@@ -121,11 +121,28 @@ export default function PreviewBridge({
 
       const { node, before } = current;
       const shape = shapeOf(node);
+
+      /**
+       * READ IT BACK BEFORE TAKING `contenteditable` OFF (operator, 2026-08-20
+       * — a list of lines came back as one line).
+       *
+       * `innerText` is LAYOUT-AWARE: it reports what is rendered, not what is
+       * in the DOM. `contenteditable="plaintext-only"` carries
+       * `white-space: pre-wrap` from the UA stylesheet, so the newline she
+       * typed is a line break while she is typing — and the moment the
+       * attribute comes off, the element goes back to `white-space: normal`,
+       * where that same newline collapses to a SPACE. Reading afterwards
+       * therefore read a different string from the one on the screen, and
+       * every multi-line edit on the page lost its breaks: a list of lines
+       * became one line, and so would the opening's three.
+       *
+       * Nothing about the order was deliberate; it was just written this way.
+       */
+      const after = shape ? readBack(node, shape) : null;
+
       node.removeAttribute("contenteditable");
       node.classList.remove("is-typing");
-      if (!shape) return;
-
-      const after = readBack(node, shape);
+      if (after === null) return;
       if (after === before) return;
 
       if (node.dataset.slot) {
