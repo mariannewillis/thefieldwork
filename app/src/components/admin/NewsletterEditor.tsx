@@ -9,6 +9,7 @@ import {
 } from "@/app/(admin)/admin/newsletters/actions";
 import { useDraftGuard } from "@/components/admin/DraftGuard";
 import GalleryPicker from "@/components/admin/GalleryPicker";
+import PictureReachWarning from "@/components/admin/PictureReachWarning";
 import {
   FIELD,
   FIELD_BIG,
@@ -504,6 +505,7 @@ export default function NewsletterEditor({
                             here. Outlook shows neither of the two newer picture
                             formats the site itself uses.
                           </p>
+                          <PictureReachWarning />
                         </PicturePicker>
 
                         <label className="mt-6 block">

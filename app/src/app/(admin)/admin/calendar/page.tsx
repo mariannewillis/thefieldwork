@@ -288,8 +288,8 @@ export default async function Page({
               return (
                 <li
                   key={day.key}
-                  className={`min-h-[108px] border-b border-r border-pool-rule p-2 align-top ${
-                    chosen === day.key ? "bg-gold/15" : ""
+                  className={`group relative min-h-[108px] border-b border-r border-pool-rule p-2 align-top ${
+                    chosen === day.key ? "bg-gold/15" : "hover:bg-gold/[0.06]"
                   }`}
                 >
                   {/* PRESSING A DAY NARROWS THE LIST BELOW to that day
@@ -300,32 +300,60 @@ export default async function Page({
 
                       Pressing the SAME day again clears it, so the control that
                       narrows is the control that widens — she never has to find
-                      a separate "show everything". */}
-                  <p className={`${NOTE} ${isToday ? "text-action" : ""}`}>
-                    <Link
-                      href={
-                        chosen === day.key
-                          ? `/admin/calendar?month=${monthKey(year, monthNumber)}`
-                          : `/admin/calendar?month=${monthKey(year, monthNumber)}&day=${day.key}`
-                      }
-                      aria-label={
-                        chosen === day.key
-                          ? `${day.words} — showing only this day. Press to show the whole month.`
-                          : `${day.words} — press to show only this day below.`
-                      }
-                      aria-current={chosen === day.key ? "true" : undefined}
+                      a separate "show everything".
+
+                      THE WHOLE CELL IS THE CONTROL (operator, 2026-08-20). It
+                      was the two-digit date and nothing else — a 14px glyph in
+                      a corner of a 108px box — so pressing "a day" almost always
+                      landed on the cell and did nothing, and the list below went
+                      on showing the month while looking like it had been asked a
+                      question. The target a hand goes for is the square.
+
+                      IT IS A COVER RATHER THAN A WRAPPER because the entries in
+                      the cell are buttons of their own, and a button inside a
+                      link is invalid and behaves differently in every browser.
+                      The cover sits beneath them: pressing an entry opens that
+                      entry, pressing anywhere else in the square chooses the
+                      day. */}
+                  <Link
+                    href={
+                      chosen === day.key
+                        ? `/admin/calendar?month=${monthKey(year, monthNumber)}`
+                        : `/admin/calendar?month=${monthKey(year, monthNumber)}&day=${day.key}`
+                    }
+                    aria-label={
+                      chosen === day.key
+                        ? `${day.words} — showing only this day. Press to show the whole month.`
+                        : `${day.words} — press to show only this day below.`
+                    }
+                    aria-current={chosen === day.key ? "true" : undefined}
+                    className="absolute inset-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-action"
+                  />
+
+                  {/* Above the cover so it reads, and deaf to the mouse so the
+                      date is not a hole in the middle of the control. */}
+                  <p
+                    className={`pointer-events-none relative ${NOTE} ${
+                      isToday ? "text-action" : ""
+                    }`}
+                  >
+                    <span
                       className={
                         chosen === day.key
-                          ? "t border-b-2 border-gold text-gold"
-                          : "t hover:text-gold"
+                          ? "border-b-2 border-gold text-gold"
+                          : "group-hover:text-gold"
                       }
                     >
                       {Number(day.key.slice(-2))}
-                    </Link>
+                    </span>
                     {isToday && <span className="ml-2">today</span>}
                   </p>
 
-                  <ul className="m-0 mt-1 list-none space-y-1 p-0">
+                  {/* Deaf to the mouse as a list, so the gaps between entries
+                      fall through to the cover; each entry turns it back on for
+                      itself. A press an inch below the last entry is a press on
+                      the day, which is what it looks like. */}
+                  <ul className="pointer-events-none relative m-0 mt-1 list-none space-y-1 p-0">
                     {spans.map((span) => {
                       const entry = entryOf(span, day);
                       return (
@@ -379,7 +407,16 @@ export default async function Page({
             </p>
           </>
         ) : (
-          <ol className="m-0 list-none p-0">
+          /* Named, because it is the thing the calendar above it narrows and a
+             list that changes under a press should say what it is a list OF. */
+          <ol
+            aria-label={
+              chosen
+                ? "What is on, on the one day chosen above"
+                : "What is on this month"
+            }
+            className="m-0 list-none p-0"
+          >
             {busyDays.map((day) => (
               <li
                 key={day.key}

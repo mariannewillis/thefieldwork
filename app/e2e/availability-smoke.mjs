@@ -1192,6 +1192,100 @@ try {
     oneLine(monthText),
   );
 
+  // ── pressing a day narrows the list beneath ──────────────────────────────
+  //
+  // The control used to be the two-digit date alone — a 14px glyph in the
+  // corner of a 108px square — so a press on "a day" landed on the cell and did
+  // nothing, and the list below went on showing the whole month while looking
+  // like it had been asked a question (operator, 2026-08-20). What is checked
+  // here is the GEOMETRY as much as the filter: the cover has to be the size of
+  // the cell, and the press has to land somewhere a hand would actually go.
+  console.log("\n── one day, chosen ──\n");
+
+  await page.goto(`${BASE}/admin/calendar?month=2026-10`);
+
+  const cover = page.getByRole("link", { name: /Sunday 25 October/ });
+  ok("the 25th is a control", (await cover.count()) === 1);
+
+  // Scrolled to first: `mouse.click` takes a viewport coordinate and does not
+  // bring anything into view, and the last week of October sits below the fold.
+  await cover.scrollIntoViewIfNeeded();
+  const box = await cover.boundingBox();
+  ok(
+    "and it is the size of the square, not the size of the date",
+    Boolean(box) && box.height >= 100 && box.width >= 60,
+    box ? `${Math.round(box.width)}×${Math.round(box.height)}` : "no box",
+  );
+
+  // Low in the cell, well clear of the entries — where the empty part of a
+  // square is, and where the old target was not.
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height - 8);
+  await page
+    .waitForURL(/day=2026-10-25/, { timeout: 5000 })
+    .catch(() => undefined);
+
+  ok(
+    "pressing the empty part of the square chooses that day",
+    page.url().includes("day=2026-10-25"),
+    page.url(),
+  );
+
+  const narrowed = page.getByRole("list", {
+    name: "What is on, on the one day chosen above",
+  });
+  ok("the list beneath says it is narrowed", (await narrowed.count()) === 1);
+
+  const narrowedText = (await narrowed.count())
+    ? await narrowed.innerText()
+    : "";
+  ok(
+    "and holds the day that was pressed",
+    /Sunday 25 October/.test(narrowedText),
+    oneLine(narrowedText),
+  );
+  ok(
+    "and not one other day of the month",
+    !/(Saturday 24|Monday 26|Tuesday 27|Friday 23) October/.test(narrowedText),
+    oneLine(narrowedText),
+  );
+
+  // The entries are still their own controls — the cover sits BENEATH them, so
+  // a press on one opens it rather than re-choosing the day.
+  const entry = page
+    .getByRole("button", { name: /smoke-avail the whole Sunday/ })
+    .first();
+  await entry.click();
+  ok(
+    "an entry inside the square still opens itself rather than the day",
+    await page.locator("dialog[open]").first().isVisible(),
+  );
+  await page.keyboard.press("Escape");
+
+  // Pressing the same square again widens it back — the control that narrows
+  // is the control that widens.
+  await page.goto(`${BASE}/admin/calendar?month=2026-10&day=2026-10-25`);
+  const again = page.getByRole("link", { name: /Sunday 25 October/ });
+  await again.scrollIntoViewIfNeeded();
+  const againBox = await again.boundingBox();
+  await page.mouse.click(
+    againBox.x + againBox.width / 2,
+    againBox.y + againBox.height - 8,
+  );
+  await page
+    .waitForURL((url) => !url.search.includes("day="), { timeout: 5000 })
+    .catch(() => undefined);
+  ok(
+    "pressing it again gives the whole month back",
+    !page.url().includes("day="),
+    page.url(),
+  );
+  ok(
+    "and the list is the month's again",
+    (await page
+      .getByRole("list", { name: "What is on this month" })
+      .count()) === 1,
+  );
+
   await page.goto(`${BASE}/admin/availability`);
   const availText = await page.locator("main").innerText();
   ok(
@@ -1491,3 +1585,4 @@ try {
 
 console.log(`\n  ${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);
+

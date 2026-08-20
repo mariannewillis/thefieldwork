@@ -880,7 +880,9 @@ try {
   ok(
     "the row says at a glance that only she can open it",
     /only you/i.test(await page.locator("tbody").innerText()),
-    (await page.locator("tbody").innerText()).replace(/\s+/g, " ").slice(0, 160),
+    (await page.locator("tbody").innerText())
+      .replace(/\s+/g, " ")
+      .slice(0, 160),
   );
   await page.locator("tbody tr").first().click();
   await page.waitForSelector("dialog[open]", { timeout: 20_000 });
@@ -1038,7 +1040,9 @@ try {
   ok(
     "and the library says so at a glance",
     /anyone with the link/i.test(await page.locator("tbody").innerText()),
-    (await page.locator("tbody").innerText()).replace(/\s+/g, " ").slice(0, 200),
+    (await page.locator("tbody").innerText())
+      .replace(/\s+/g, " ")
+      .slice(0, 200),
   );
   await page
     .locator("tbody tr", { hasText: /smoke-media-handout/i })

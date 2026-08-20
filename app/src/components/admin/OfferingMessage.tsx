@@ -7,6 +7,8 @@ import {
   type MessageState,
 } from "@/app/(admin)/admin/offerings/message-actions";
 import GalleryPicker from "@/components/admin/GalleryPicker";
+import PictureReachWarning from "@/components/admin/PictureReachWarning";
+import { mediaSrc } from "@/components/admin/OfferingFormParts";
 import type { Attendee } from "@/lib/attending";
 
 /**
@@ -175,9 +177,29 @@ export default function OfferingMessage({
                   name={`block-${index}-image`}
                   value={block.imageBasename}
                 />
-                <p className="mt-2 fig font-mono text-[15px] text-ink-soft">
-                  {block.imageBasename || "None chosen yet"}
-                </p>
+                {/* THE PICTURE, NOT ITS FILENAME (operator, 2026-08-20). This
+                    said `aura-seated-figure` and nothing else, so choosing one
+                    looked exactly like choosing the wrong one, and the only way
+                    to find out which she had was to send it. A composer shows
+                    what is being composed. */}
+                {block.imageBasename ? (
+                  <figure className="mt-3 m-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={mediaSrc(block.imageBasename)}
+                      alt=""
+                      className="block h-auto w-full max-w-[280px] border border-pool-rule"
+                    />
+                    <figcaption className="mt-2 fig font-mono text-[15px] text-ink-soft">
+                      {block.imageBasename}
+                    </figcaption>
+                  </figure>
+                ) : (
+                  <p className="mt-2 fig font-mono text-[15px] text-ink-soft">
+                    None chosen yet
+                  </p>
+                )}
+                <PictureReachWarning />
                 <button
                   type="button"
                   onClick={() => setPicking(index)}

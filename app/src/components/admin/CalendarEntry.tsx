@@ -67,7 +67,11 @@ export default function CalendarEntry({
         aria-label={`${entry.label}, ${entry.clock}, ${entry.dayWords}. Open the details.`}
         className={
           variant === "grid"
-            ? "t block w-full text-left text-[14px] leading-snug text-ink hover:underline"
+            ? // `pointer-events-auto` turns the mouse back on for the entry
+              // alone: the cell around it is a link covering the whole square
+              // (the day-chooser), and the list holding these is deaf so that
+              // the gaps between them fall through to it.
+              "t pointer-events-auto block w-full text-left text-[14px] leading-snug text-ink hover:underline"
             : "t block w-full text-left"
         }
       >
