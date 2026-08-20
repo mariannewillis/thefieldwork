@@ -160,6 +160,24 @@ const BLOCK_KINDS = [
 ] as const;
 
 /**
+ * HOW MUCH OF THE SCREEN A SECTION SHE MADE TAKES.
+ *
+ * Four, because there are four answers to "how tall should this be" — and
+ * because the version this replaced was seven steps of a multiplier that never
+ * reached the size the question was about. The order is the order she reads
+ * them in: least room first.
+ */
+const TALL_CHOICES = [
+  { label: "A band", note: "As deep as the page makes a band." },
+  { label: "Half the screen", note: "Half of what somebody can see at once." },
+  { label: "Most of the screen", note: "Three quarters of it." },
+  {
+    label: "The whole screen",
+    note: "All of it — the band fills the screen, which is what a photograph worth showing wants.",
+  },
+] as const;
+
+/**
  * The frames a placed photograph can be cut to.
  *
  * "As it is" leads because it is the default and every picture already on a
@@ -1268,49 +1286,41 @@ function SectionPanel(props: ToolboxProps & { section: EditorSection }) {
               <span className={HINT}>
                 {section.tall === 0
                   ? "As deep as the page makes a band."
-                  : `${section.tall} step${section.tall === 1 ? "" : "s"} roomier than a band.`}
+                  : TALL_CHOICES[section.tall].note}
               </span>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  disabled={props.busy || section.tall <= 0}
-                  className={CHIP}
-                  onClick={() =>
-                    void props.run("tall-section", {
-                      section: String(section.id),
-                      step: String(section.tall - 1),
-                    })
-                  }
-                >
-                  &minus; Shorter
-                </button>
-                <button
-                  type="button"
-                  disabled={props.busy || section.tall >= 6}
-                  className={CHIP}
-                  onClick={() =>
-                    void props.run("tall-section", {
-                      section: String(section.id),
-                      step: String(section.tall + 1),
-                    })
-                  }
-                >
-                  + Taller
-                </button>
-                {section.tall !== 0 && (
+              {/* FOUR ANSWERS, NOT A PAIR OF STEPS (operator, 2026-08-20 —
+                  "I clicked taller a few times and it stops getting taller and
+                  nothing happens when i click").
+
+                  It was + Taller / − Shorter over seven steps of a padding
+                  multiplier: 405px to 648px on a 900px screen, and then the
+                  button greyed out with nothing saying why. Every press did
+                  something and none of it was what she wanted, which is the
+                  worst shape a control can have — it looks like it is working
+                  right up until it stops.
+
+                  A height is the decision she is making, and there are four
+                  answers to it. Each is one press, each is visibly different
+                  from its neighbour, and the one she is on is marked — so
+                  there is never a press that does nothing without saying so. */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {TALL_CHOICES.map((choice, step) => (
                   <button
+                    key={choice.label}
                     type="button"
-                    className={GHOST}
+                    disabled={props.busy}
+                    aria-pressed={section.tall === step}
+                    className={section.tall === step ? CHIP_ON : CHIP}
                     onClick={() =>
                       void props.run("tall-section", {
                         section: String(section.id),
-                        step: "0",
+                        step: String(step),
                       })
                     }
                   >
-                    Back to a band
+                    {choice.label}
                   </button>
-                )}
+                ))}
               </div>
 
               {section.hasPicture && (

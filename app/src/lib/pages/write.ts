@@ -539,11 +539,15 @@ export async function addBlock(
 }
 
 /**
- * STEPS TALLER, on a section she made.
+ * HOW MUCH OF THE SCREEN A SECTION SHE MADE TAKES.
  *
- * Bounded at both ends and multiplied rather than substituted, for the reason
- * `setTextSize` is: a step that cannot produce a broken band is a control she
- * can use without being able to hurt the page. Zero is the band as designed.
+ * Four answers — 0 a band, 1 half the screen, 2 most of it, 3 all of it —
+ * because there are four. The first version of this was seven steps of a
+ * padding multiplier that took a band from 405px to 648px on a 900px screen
+ * and then greyed out: every step was a real change and none of them was the
+ * change she was asking for (operator, 2026-08-20).
+ *
+ * Bounded, so there is no value here that produces a band which is broken.
  */
 export async function setSectionTall(
   page: string,
@@ -554,7 +558,7 @@ export async function setSectionTall(
     where: { id: sectionId, page, state: "draft", kind: "free" },
   });
   if (!section) return { ok: false, reason: GONE };
-  const tall = Math.max(0, Math.min(6, Math.round(step) || 0));
+  const tall = Math.max(0, Math.min(3, Math.round(step) || 0));
   await prisma.pageSection.update({ where: { id: sectionId }, data: { tall } });
   return OK;
 }

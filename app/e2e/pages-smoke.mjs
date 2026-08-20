@@ -948,30 +948,71 @@ try {
       .evaluate((el) => getComputedStyle(el).alignSelf)) === "center",
   );
 
-  // Room in the band, before a picture has anywhere to be.
+  // ROOM IN THE BAND — MEASURED AS HEIGHT, WHICH IS THE CLAIM.
+  //
+  // The first version of this control multiplied the band's PADDING in seven
+  // steps, and the first version of this assertion measured the padding. Both
+  // passed. Neither was the thing: six presses moved a band from 405px to
+  // 648px on a 900px screen and then the button greyed out with nothing saying
+  // why, so "make this tall enough to show a photograph" was answered with a
+  // fifth of a screen and a dead control (operator, 2026-08-20).
+  //
+  // The lesson is in the assertion as much as the code. `padding-top grew` is
+  // a test of the mechanism; `the band is now the height of the screen` is a
+  // test of what she asked for. Measure the claim.
   await selectMade(page, madeId, /A section you added/);
-  const bandBefore = await (
-    await preview(page)
-  )
+  const asBand = await (await preview(page))
     .locator(`[data-section="${madeId}"]`)
-    .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
-  await press(page, "+ Taller");
-  await press(page, "+ Taller");
-  const bandAfter = await (
-    await preview(page)
-  )
+    .evaluate((el) => el.getBoundingClientRect().height);
+
+  await press(page, "The whole screen");
+  const filled = await (await preview(page))
     .locator(`[data-section="${madeId}"]`)
-    .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
+    .evaluate((el) => ({
+      height: el.getBoundingClientRect().height,
+      screen: window.innerHeight,
+    }));
   ok(
-    "two steps taller is recorded",
+    "asking for the whole screen is recorded",
     (await rowsOf(`SELECT tall FROM "PageSection" WHERE id=$1`, [madeId]))[0]
-      .tall === 2,
+      .tall === 3,
   );
   ok(
-    "and the band really is deeper than it was",
-    bandAfter > bandBefore,
-    `${bandBefore} -> ${bandAfter}`,
+    "and the band really is the height of the screen, not a bit more padding",
+    Math.abs(filled.height - filled.screen) < 2 && filled.height > asBand,
+    `${asBand} -> ${filled.height} of ${filled.screen}`,
   );
+
+  // Half and most sit between the two, in the order she reads them.
+  await selectMade(page, madeId, /A section you added/);
+  await press(page, "Half the screen");
+  const half = await (await preview(page))
+    .locator(`[data-section="${madeId}"]`)
+    .evaluate((el) => el.getBoundingClientRect().height);
+  await selectMade(page, madeId, /A section you added/);
+  await press(page, "Most of the screen");
+  const most = await (await preview(page))
+    .locator(`[data-section="${madeId}"]`)
+    .evaluate((el) => el.getBoundingClientRect().height);
+  ok(
+    "each answer is visibly taller than the one before it",
+    asBand < half && half < most && most < filled.height,
+    `${asBand} < ${half} < ${most} < ${filled.height}`,
+  );
+
+  // NOT ONE DEAD CONTROL. The complaint was "nothing happens when i click",
+  // and a disabled button that does not say why is that complaint's cause.
+  await selectMade(page, madeId, /A section you added/);
+  ok(
+    "and nothing in the panel is a button that does nothing without saying so",
+    (await page
+      .locator('aside[aria-label="The toolbox"] button:disabled')
+      .count()) === 0,
+  );
+
+  // Back to a band, so what follows measures what it thinks it does.
+  await selectMade(page, madeId, /A section you added/);
+  await press(page, "A band");
 
   // A band is a letterbox cut out of a tall photograph, so where it looks is
   // hers. (This section already has one, chosen by eye further up.)
@@ -1113,7 +1154,7 @@ try {
   );
   ok(
     "publishing carries the height and the focus she set on the band",
-    liveCarried.some((row) => row.tall === 2 && row.section_focus === 40),
+    liveCarried.some((row) => row.tall === 0 && row.section_focus === 40),
     JSON.stringify(liveCarried),
   );
   ok(

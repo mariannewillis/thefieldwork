@@ -20,15 +20,27 @@
 
 .beat--free {
   align-items: center;
-  /* `--tall` is a MULTIPLIER she sets in bounded steps, defaulting to 1 —
-     exactly what `--k` is for text, applied to the room instead of the type
-     (operator, 2026-08-20: "we also need a way to increase the height of the
-     section so images display correctly"). Multiplying the clamp rather than
-     replacing it keeps the responsive behaviour: a band she made twice as
-     roomy is still shorter on a phone than on a desk, and there is no step
-     that produces a band which is broken — only one that is emptier. */
-  padding-top: calc(clamp(64px, 9vh, 120px) * var(--tall, 1));
-  padding-bottom: calc(clamp(64px, 9vh, 120px) * var(--tall, 1));
+  padding-top: clamp(64px, 9vh, 120px);
+  padding-bottom: clamp(64px, 9vh, 120px);
+
+  /* HOW MUCH OF THE SCREEN THE BAND TAKES, when she has asked for more than a
+     band (operator, 2026-08-20: "increase the height of the section so images
+     display correctly", and on the same breath, moving the background up and
+     down — both are about the PHOTOGRAPH BEHIND the band, which is the thing
+     a shallow band crops to a letterbox).
+
+     THE FIRST VERSION MULTIPLIED THE PADDING and it was the wrong lever. Six
+     presses took a band from 405px to 648px on a 900px screen and then the
+     control greyed out — so the answer to "make this tall enough to show a
+     photograph" was twenty per cent of a screen and a dead button. It grew,
+     but never to the size the question was about.
+
+     A height in `svh` is the decision she is actually making, and there are
+     four of them because there are four answers: a band, half the screen, most
+     of it, all of it. `min-height` rather than `height`, so a band with more
+     in it than the room allows still grows to hold it — nothing is ever cut
+     off by this control. */
+  min-height: var(--tall, 0);
 }
 
 /* Three columns, because there are three placements. A block lands in its own

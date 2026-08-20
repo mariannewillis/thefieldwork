@@ -100,6 +100,21 @@ function Plate({
  * React logged the mistake in the console while the page went on looking right.
  * `data-section-kind` is what `dataset.sectionKind` actually maps to.
  */
+/**
+ * The heights she can give a band, by the answer she chose.
+ *
+ * `svh` rather than `vh`: on a phone `vh` is the height the viewport has with
+ * the browser's own bars HIDDEN, so a 100vh band is taller than the screen
+ * until you scroll and the bars retract — a band that looks broken at exactly
+ * the moment it is first seen. `svh` is the small viewport, bars and all, and
+ * is what "the whole screen" means to somebody holding a phone.
+ */
+const TALL: Record<number, string> = {
+  1: "50svh",
+  2: "75svh",
+  3: "100svh",
+};
+
 function marks(editing: boolean, attrs: Record<string, string | number>) {
   if (!editing) return {};
   return Object.fromEntries(
@@ -751,16 +766,14 @@ export default function HomeBody({
             key={`${section.kind}-${section.kind === "beat" ? section.beatKey : section.id}`}
             className={`${frame.className}${section.hidden ? " is-hidden" : ""}`}
             id={frame.id}
-            /* HOW TALL SHE HAS MADE IT, as a multiplier on the height the band
-               sets itself rather than a height replacing it — the same bounded
-               step `--k` is for text. A band with a picture in it needs the
-               room before the picture has anywhere to be, and a step that
-               multiplies cannot produce a band that is broken, only a roomier
-               one (operator, 2026-08-20). Dropped entirely at 0, so a section
-               she has not touched carries no style attribute at all. */
+            /* HOW MUCH OF THE SCREEN SHE HAS GIVEN IT. Four answers, because
+               there are four — a band, half the screen, most of it, all of it —
+               and the reason it is a height rather than more padding is in
+               `sections.css`. Dropped entirely at 0, so a section she has not
+               touched carries no style attribute at all. */
             style={
               section.kind === "free" && section.tall > 0
-                ? ({ "--tall": 1 + section.tall * 0.25 } as CSSProperties)
+                ? ({ "--tall": TALL[section.tall] } as CSSProperties)
                 : undefined
             }
             {...marks(editing, {
