@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
+import { SITE_PAGES } from "@/content/pages";
 import { SITE_URL } from "@/content/site";
+import { hiddenKeys } from "@/lib/site-visibility";
 import { listPublishedCourses } from "@/lib/courses";
 import { listPublishedServices } from "@/lib/services";
 import { listPublishedWorkshops } from "@/lib/workshops";
@@ -14,13 +16,35 @@ import { listPublishedWorkshops } from "@/lib/workshops";
  * unpublished one never appears in either.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [workshops, courses, services] = await Promise.all([
+  const [workshops, courses, services, hidden] = await Promise.all([
     listPublishedWorkshops(),
     listPublishedCourses(),
     listPublishedServices(),
+    hiddenKeys(),
   ]);
 
-  return [
+  /**
+   * A PAGE SHE HAS TAKEN OFF IS NOT IN THE MAP (operator, 2026-08-20).
+   *
+   * A hidden page answers 404, so listing it invites a crawler to fetch
+   * something that is not there — and a sitemap full of 404s is the signal that
+   * teaches a crawler to trust the rest of it less.
+   *
+   * The whole-site switch is handled in `robots.ts` instead: there is nothing
+   * to map while every path answers with the same holding page, so it asks not
+   * to be crawled at all rather than offering an empty map.
+   *
+   * The three record-backed sections drop their CHILDREN with them. Hiding
+   * Workshops hides `/workshops/whatever` too — the layout enforces that, and a
+   * map that disagreed with the layout would be a second opinion about what is
+   * on the site.
+   */
+  const off = (href: string) => {
+    const page = SITE_PAGES.find((entry) => entry.href === href);
+    return page ? hidden.has(page.key) : false;
+  };
+
+  const entries: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
       lastModified: new Date(),
@@ -101,4 +125,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
   ];
+
+  // Matched by PREFIX so a section takes its own pages with it, exactly as the
+  // layout does when it decides what answers.
+  return entries.filter((entry) => {
+    const path = entry.url.slice(SITE_URL.length) || "/";
+    if (path === "/") return !off("/");
+    const section = `/${path.split("/")[1]}`;
+    return !off(section);
+  });
 }

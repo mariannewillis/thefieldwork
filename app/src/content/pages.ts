@@ -1,8 +1,14 @@
 /**
  * EVERY PAGE ON THE SITE, and which of them she can edit yet.
  *
- * The panel lists all of them (operator, 2026-08-18). The six that are not
- * wired say so plainly rather than opening onto an editor that half-works —
+ * The panel lists all of them (operator, 2026-08-18). `/subscribe` was missing
+ * from this list for two days and was therefore missing from the portal
+ * (operator, 2026-08-20 — "make sure all pages are covered, for example
+ * subscribe page has been left out"), which is exactly the failure the note
+ * below warns about: a page missing from here is a page she cannot find.
+ *
+ * The ones that are not wired say so plainly rather than opening onto an editor
+ * that half-works —
  * D-9, the portal shows no state it cannot read. A page missing from this list
  * would be a page she cannot find, so this is the list rather than a scan of
  * the routes directory: the routes directory also contains `/pay/<token>` and
@@ -79,6 +85,14 @@ export const SITE_PAGES: SitePage[] = [
     authoredIn: "src/content/workshops.ts",
   },
   {
+    key: "subscribe",
+    href: "/subscribe",
+    label: "The letter",
+    note: "Where somebody asks for the monthly letter. The letters themselves are written in Newsletter.",
+    editable: false,
+    authoredIn: "src/app/(site)/subscribe/page.tsx",
+  },
+  {
     key: "privacy",
     href: "/privacy",
     label: "Privacy",
@@ -90,3 +104,17 @@ export const SITE_PAGES: SitePage[] = [
 
 export const sitePage = (key: string) =>
   SITE_PAGES.find((page) => page.key === key) ?? null;
+
+/**
+ * "site" IS RESERVED and no page may use it.
+ *
+ * `SiteSwitch` holds one row per thing that can be taken off the site, and the
+ * whole site is one of those things — so a page keyed "site" would share a row
+ * with it and hiding one would hide the other. Checked here rather than
+ * commented, because the failure would be silent and confusing.
+ */
+if (SITE_PAGES.some((page) => page.key === "site")) {
+  throw new Error(
+    'A page may not be keyed "site" — that key belongs to the whole-site switch.',
+  );
+}

@@ -1,4 +1,6 @@
+import { SITE_PAGES } from "@/content/pages";
 import { siteFooter, siteNav } from "@/content/site";
+import { hiddenKeys } from "@/lib/site-visibility";
 import "./site-chrome.css";
 
 /**
@@ -44,7 +46,26 @@ export function SiteBrand({ className }: { className?: string } = {}) {
   );
 }
 
-export function SiteNav({
+/**
+ * A PAGE SHE HAS TAKEN OFF IS NOT ADVERTISED (operator, 2026-08-20).
+ *
+ * Hiding a page makes it answer 404, and leaving its name in the nav would
+ * leave the site pointing at its own hole — the one place a visitor is most
+ * likely to press, promising the one page that is not there. The link goes with
+ * the page.
+ *
+ * IT IS A LOOKUP, NOT A FILTER ON THE NAV LIST, because the nav is written in
+ * `content/site.ts` in her words and the switches are keyed by page. Matching
+ * on `href` joins them without either having to know about the other.
+ */
+async function offTheSite(): Promise<Set<string>> {
+  const hidden = await hiddenKeys();
+  return new Set(
+    SITE_PAGES.filter((page) => hidden.has(page.key)).map((page) => page.href),
+  );
+}
+
+export async function SiteNav({
   /**
    * Which entry this page IS, as its href. The home page passes nothing: it is
    * not one of the four sections, so none of them is marked.
@@ -53,22 +74,26 @@ export function SiteNav({
 }: {
   current?: string;
 } = {}) {
+  const off = await offTheSite();
+
   return (
     <header className="site-head">
       <SiteBrand />
       <nav className="site-head__nav" aria-label="Main">
-        {siteNav.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            // The gold marker is styled off this attribute, so a page cannot
-            // look current without also announcing it.
-            aria-current={item.href === current ? "page" : undefined}
-            className="site-head__link"
-          >
-            {item.label}
-          </a>
-        ))}
+        {siteNav
+          .filter((item) => !off.has(item.href))
+          .map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              // The gold marker is styled off this attribute, so a page cannot
+              // look current without also announcing it.
+              aria-current={item.href === current ? "page" : undefined}
+              className="site-head__link"
+            >
+              {item.label}
+            </a>
+          ))}
       </nav>
     </header>
   );
@@ -89,7 +114,9 @@ export function SiteNav({
  * behaviour this branch exists for and the reason all four of them landed
  * safely. Idle, not dead.
  */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const off = await offTheSite();
+
   return (
     <footer className="site-foot">
       {/* MUST be a direct child of .site-foot and MUST carry the class. The
@@ -116,17 +143,19 @@ export function SiteFooter() {
             <div key={col.heading}>
               <h3>{col.heading}</h3>
               <ul>
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    {link.href ? (
-                      <a href={link.href}>{link.label}</a>
-                    ) : (
-                      // No page to send anyone to yet. The words stay, the
-                      // link does not — see siteFooter in content/site.ts.
-                      <span className="site-foot__soon">{link.label}</span>
-                    )}
-                  </li>
-                ))}
+                {col.links
+                  .filter((link) => !link.href || !off.has(link.href))
+                  .map((link) => (
+                    <li key={link.label}>
+                      {link.href ? (
+                        <a href={link.href}>{link.label}</a>
+                      ) : (
+                        // No page to send anyone to yet. The words stay, the
+                        // link does not — see siteFooter in content/site.ts.
+                        <span className="site-foot__soon">{link.label}</span>
+                      )}
+                    </li>
+                  ))}
               </ul>
             </div>
           ))}

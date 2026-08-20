@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOT OPEN YET — the one page a visitor gets while the site is still hers.
+
+   ITS OWN STYLESHEET, AND THAT IS FORCED RATHER THAN CHOSEN. This page is
+   rendered by `(site)/layout.tsx`, which wraps BOTH families of page on this
+   site — the home page, styled entirely by `home.css`, and the interior pages,
+   styled by `workshops.css` (Tailwind). Those two must never load together:
+   Tailwind's preflight resets the margins `home.css` depends on, and both files
+   define `.pool` for different jobs. A layout cannot import either without
+   putting it on every route underneath it, so this page can borrow from
+   neither.
+
+   So it brings what it needs and nothing else, under names nothing else uses.
+   It is emitted into every route's chunk, which is a few hundred bytes for
+   markup that is absent from all but one of them — the price of the gate living
+   where it can see every path.
+
+   The palette is written out rather than read from custom properties, for the
+   same reason: the properties are defined in the two files this cannot load.
+   Six values, and the day they change this is one of the places to change.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.soon {
+  --soon-plum: #160712;
+  --soon-blush: #fbf3f1;
+  --soon-ink: #160712;
+  --soon-soft: #5a4356;
+  --soon-action: #c2187a;
+
+  position: relative;
+  min-height: 100svh;
+  background: var(--soon-plum);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(24px, 4vw, 48px);
+  overflow: hidden;
+}
+
+/* The photograph, held a long way back — it has objects and faces in it and
+   must never compete with the words in front of it. The same treatment
+   `page-field` gives every interior page, written out here. */
+.soon__field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
+  filter: brightness(0.46) saturate(0.92);
+}
+
+.soon__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(22, 7, 18, 0.55),
+    rgba(22, 7, 18, 0.82)
+  );
+}
+
+.soon__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The clearing: a hard-edged blush box. No radius and no shadow — the shape law
+   the whole site keeps, and the one curve on this site is her portrait. */
+.soon__pool {
+  background: var(--soon-blush);
+  color: var(--soon-ink);
+  width: min(640px, 100%);
+  margin: clamp(32px, 6vh, 72px) auto;
+  padding: clamp(32px, 5vw, 52px);
+  text-align: center;
+}
+
+.soon__eyebrow {
+  font-family: var(--font-body), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--soon-action);
+  margin: 0;
+}
+
+.soon__head {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(32px, 4.4vw, 46px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--soon-ink);
+  margin: clamp(16px, 2vw, 22px) 0 0;
+}
+
+.soon__body {
+  font-family: var(--font-body), sans-serif;
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--soon-soft);
+  max-width: 48ch;
+  margin: clamp(18px, 2vw, 24px) auto 0;
+}
+
+.soon__form {
+  margin-top: clamp(28px, 3.5vw, 40px);
+}
+
+/* The mark sits above the clearing, on the dark, exactly as it does on every
+   other page. `SiteBrand` brings its own stylesheet with it. */
+.soon__brand {
+  position: relative;
+  z-index: 2;
+}

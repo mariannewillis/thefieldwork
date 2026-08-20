@@ -1868,6 +1868,30 @@ enum PageItemKind {
 /// because each of the seven has a different shape. One ordering space is the
 /// whole point: a section she adds goes BETWEEN two beats, which is impossible
 /// if beats and her own sections are ordered separately.
+/// WHAT IS SHOWING, AND WHAT IS NOT (operator, 2026-08-20).
+///
+/// One row per thing that can be taken off the site, and exactly two kinds of
+/// thing: a page (`key` is its page key) and the whole site (`key` is "site" —
+/// the one reserved name, because no page may be called that).
+///
+/// ONE TABLE FOR BOTH because they are the same decision at two scales, and two
+/// tables would be two places to look when something has gone missing. A row is
+/// only written when she changes something: no row means showing, which is what
+/// everything was before this existed and what a page she has never touched
+/// should be.
+///
+/// THE SITE SWITCH IS NOT A DEPLOYMENT. "Coming soon" is for the weeks before
+/// she is ready — she needs the site built, reachable and hers to work on while
+/// nobody else can read it. Taking the whole thing down is not that, and the
+/// links already in somebody's inbox — a payment, a cancellation, an
+/// unsubscribe — go on working while it is on. See `lib/site-visibility.ts`.
+model SiteSwitch {
+  key    String  @id
+  hidden Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+}
+
 model PageSection {
   id Int @id @default(autoincrement())
 

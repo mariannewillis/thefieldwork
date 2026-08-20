@@ -1190,7 +1190,9 @@ try {
     ),
   );
 
-  const drawn = await (await preview(page))
+  const drawn = await (
+    await preview(page)
+  )
     .locator(`[data-item="${listId}"]`)
     .evaluate((el) => ({
       spans: [...el.querySelectorAll("span")].map((one) => one.textContent),
@@ -1220,7 +1222,10 @@ try {
   );
 
   // Type in the toolbox and click somewhere else WITHOUT pressing Save.
-  await page.locator('aside[aria-label="The toolbox"] textarea').first().click();
+  await page
+    .locator('aside[aria-label="The toolbox"] textarea')
+    .first()
+    .click();
   await page.keyboard.press("Control+A");
   await page.keyboard.type("Alpha");
   await page.keyboard.press("Enter");
@@ -1244,7 +1249,9 @@ try {
   ok(
     "and the page beside it is showing it",
     JSON.stringify(
-      await (await preview(page))
+      await (
+        await preview(page)
+      )
         .locator(`[data-item="${listId}"]`)
         .evaluate((el) =>
           [...el.querySelectorAll("span")].map((one) => one.textContent),
@@ -1261,7 +1268,10 @@ try {
   const untouched = await page
     .locator('aside[aria-label="The toolbox"]')
     .innerText();
-  await page.locator('aside[aria-label="The toolbox"] textarea').first().click();
+  await page
+    .locator('aside[aria-label="The toolbox"] textarea')
+    .first()
+    .click();
   await page
     .locator('aside[aria-label="The toolbox"]')
     .getByText("This line", { exact: true })
