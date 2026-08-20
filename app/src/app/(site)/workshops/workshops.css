@@ -287,6 +287,54 @@ input:focus-visible,
   padding-right: clamp(22px, 5.4vw, 92px);
 }
 
+/* ── THE PLUM WASH, ON ABOUT AND CONTACT TOO (operator, 2026-08-20) ────────
+ *
+ * "Give contact and about the same purple overlay as services courses
+ * workshops so only the home page differs in style making it pronounced."
+ *
+ * Those three pages sit on a FIXED photograph under `.page-scrim` — a plum
+ * gradient over the whole viewport — which is why they read as one world. About
+ * and Contact are drawn in the same stylesheet and the same vocabulary but had
+ * no scrim at all: their photographs are per-section, cropped inside each beat,
+ * and went straight from the filter to the words. Warm and brown where the
+ * others are plum, which made five pages look like two families.
+ *
+ * SO THE SCRIM COMES TO THE SECTION rather than the page. A fixed full-viewport
+ * one would sit over ONE photograph on those two, and they have several — the
+ * room, her portrait's frame, the hands. This is the same gradient, per beat,
+ * so each photograph gets the wash the index pages give theirs.
+ *
+ * `z-index: 1` puts it above `.plate` (0) and below every pool and word on the
+ * page (2), which is exactly where `.page-scrim` sits in its own stacking
+ * order. `pointer-events: none` because it is a colour and not a surface.
+ *
+ * ONLY THE HOME PAGE IS DIFFERENT NOW, and that is the point: it is the one
+ * page that should announce itself.
+ */
+/* THE PLATE IS LIT BACK UP UNDER THE WASH. The per-photograph `--b` values on
+   these two pages (0.42 on the room, 0.46 on the coat) were tuned for a plate
+   with NOTHING over it — putting a scrim on top of them darkened twice and the
+   photograph went to black, which is the same as having removed it. The index
+   pages hold their ground at 0.55 under this exact gradient, so these match it
+   rather than keeping numbers that were answering a different question. */
+.clearing .plate {
+  filter: brightness(0.62) saturate(1.08) contrast(1.03);
+}
+
+.clearing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(22 7 18 / 0.7) 0%,
+    rgb(22 7 18 / 0.88) 55%,
+    rgb(22 7 18 / 0.97) 100%
+  );
+}
+
 /* Her portrait, on the about page's diptych. A true circle is the only
    sanctioned curve in this system — the shape law is zero radius everywhere
    else — and it is lifted from the home page's `.heart__avatar` so the same

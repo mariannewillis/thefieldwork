@@ -75,28 +75,6 @@ export default async function Page({
         )}
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        That is the real list &mdash; everybody who has confirmed their address
-        by pressing the link in the message it was sent.
-        {waiting.length > 0 && (
-          <>
-            {" "}
-            {waiting.length === 1
-              ? "One more has asked and has not confirmed"
-              : `${waiting.length} more have asked and have not confirmed`}
-            ; they are not counted, and nothing is ever sent to them.
-          </>
-        )}
-      </p>
-
-      <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
-        People join by using the form on the site. There is no way to add
-        somebody from here, and that is on purpose: what makes this list lawful
-        to send to is that every address on it was confirmed by whoever owns it,
-        and a button in this portal that could put somebody on would make that
-        confirmation mean nothing.
-      </p>
-
       {/* PAGED, AND ONLY THIS ONE. The confirmed list is the one that grows —
           the other two are the exceptions, and a page of twelve under a list of
           three unconfirmed addresses is chrome answering a question nobody

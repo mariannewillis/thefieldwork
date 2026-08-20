@@ -361,10 +361,6 @@ export default async function Page({
       >
         Offerings
       </h1>
-      <p className="mt-4 max-w-[62ch] text-[19px] leading-relaxed text-plate-soft">
-        Three kinds, one list each. Open any line to change it. Whether a thing
-        is live on the site is marked on its own line.
-      </p>
 
       {/* All three kinds have something behind them now. */}
       <nav

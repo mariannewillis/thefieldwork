@@ -430,20 +430,31 @@ export function PicturePicker({
             Pick from your pictures
           </button>
 
-          <select
-            name={name}
-            aria-labelledby={`${name}-label`}
-            value={chosen}
-            onChange={(event) => setChosen(event.target.value)}
-            className={`${FIELD} w-auto min-w-[13rem] flex-1`}
-          >
-            <option value="">No picture</option>
-            {library.map((basename) => (
-              <option key={basename} value={basename}>
-                {basename.replace(/-/g, " ")}
-              </option>
-            ))}
-          </select>
+          {/* THE FIELD ITSELF IS HIDDEN, AND THE DROPDOWN IS GONE (operator,
+              2026-08-20 — "we dont need the drop down of pictures as we have
+              the choose a picture modal").
+
+              It was a `<select>` of every basename on the site with the hyphens
+              swapped for spaces — "marianne room aglow" — which asks her to
+              recognise a photograph from a filename while the picture itself is
+              two feet away in the browser. The modal shows the pictures. A list
+              of their names is a second, worse way to do the same thing, and it
+              grew a line every time she uploaded anything.
+
+              The input stays because the offering forms POST this value: three
+              forms rely on `name` being in the form data. Hidden, it does that
+              and nothing else. */}
+          <input type="hidden" name={name} value={chosen} />
+
+          {chosen && (
+            <button
+              type="button"
+              onClick={() => setChosen("")}
+              className="t min-h-[38px] py-1.5 text-[16px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink"
+            >
+              Take it away
+            </button>
+          )}
         </div>
         {refused && (
           <p

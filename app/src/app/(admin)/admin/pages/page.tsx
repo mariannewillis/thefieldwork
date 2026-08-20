@@ -55,11 +55,6 @@ export default async function PagesPanel() {
       >
         Pages
       </h1>
-      <p className="mt-4 max-w-[62ch] text-[19px] leading-relaxed text-plate-soft">
-        Open a page and you get the page itself, at its real width and in its
-        real type, with everything on it selectable. Change it as much as you
-        like &mdash; nothing reaches the site until you press Publish.
-      </p>
 
       {/* ── THE WHOLE SITE ─────────────────────────────────────────────────
           Above the pages, because it overrules every one of them: while this

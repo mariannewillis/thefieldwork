@@ -113,13 +113,6 @@ export default async function Page({
         )}
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        A letter saves as a draft the moment you start writing and goes to
-        nobody until you choose to send it. Once it has gone it closes: what
-        people are holding cannot be changed afterwards, so a letter you want to
-        write again is duplicated into a new draft rather than edited.
-      </p>
-
       <form action={createNewsletter} className="mt-8">
         <button
           type="submit"

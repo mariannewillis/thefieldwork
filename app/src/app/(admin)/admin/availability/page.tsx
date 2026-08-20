@@ -76,13 +76,6 @@ export default async function Page() {
         )}
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        These are set on each session rather than once for your whole week,
-        because they are not the same offer &mdash; an hour in the garden room
-        and a half-day you drive to need different notice and different hours.
-        Change any of them on the session itself.
-      </p>
-
       {services.length > 0 ? (
         <div className="pool on-pool mt-9 px-6 py-2 sm:px-8">
           <div className="overflow-x-auto">

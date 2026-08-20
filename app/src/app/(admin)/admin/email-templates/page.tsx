@@ -48,20 +48,6 @@ export default async function Page() {
         </span>
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        On each of these you can change three things &mdash; the subject line,
-        the opening, and the sign-off. Everything else is written by the app and
-        stays that way: the amount, the day, the room, the deadline, the booking
-        reference, and the links that cancel a place or pay for one. Nothing you
-        type can move them, break them or take them out.
-      </p>
-
-      <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
-        Leave a field empty and that message goes out in the app&rsquo;s own
-        words, which change to fit &mdash; a workshop, a course and a session
-        each get the sentence that is true for them.
-      </p>
-
       <ul className="mt-9 grid list-none gap-px border border-plate-rule/40 bg-plate-rule/40 p-0 sm:grid-cols-2 xl:grid-cols-3">
         {EMAIL_TEMPLATE_LIST.map((template) => (
           <li key={template.key} className="pool on-pool p-6">

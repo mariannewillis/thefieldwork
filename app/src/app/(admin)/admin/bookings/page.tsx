@@ -346,31 +346,34 @@ export default async function Page({
         )}
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        Approving sends them a link to pay and gives them 48 hours to use it.
-        Declining closes the request with a line you write. Nothing is charged
-        until they pay, and nothing you do here moves money.
-        {/* SAID HERE BECAUSE IT IS NO LONGER IN FRONT OF HER. An approved
-            request is under Answered now, so the one fact about it that is
-            still live — somebody is holding a working link — has to be said on
-            the tab she is actually looking at. */}
-        {awaiting.length > 0 && (
-          <>
-            {" "}
-            {awaiting.length === 1
-              ? "One person has a link and has not used it yet"
-              : `${awaiting.length} people have links they have not used yet`}
-            , under{" "}
-            <Link
-              href="/admin/bookings?show=archived"
-              className="text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
-            >
-              Answered
-            </Link>
-            .
-          </>
-        )}
-      </p>
+      {/* THE EXPLANATION IS GONE AND THE LIVE FACT STAYS (operator,
+          2026-08-20 — "get rid of the text after the heading").
+
+          What went was three sentences about what approving and declining do,
+          which she has read every day for a month. What is left only appears
+          when it is true: somebody is holding a link that still works, and
+          they are no longer in front of her because an approved request moves
+          to Answered. That is the screen saying something, not the screen
+          explaining itself. */}
+      {awaiting.length > 0 && (
+        <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
+          {
+            <>
+              {awaiting.length === 1
+                ? "One person has a link and has not used it yet"
+                : `${awaiting.length} people have links they have not used yet`}
+              , under{" "}
+              <Link
+                href="/admin/bookings?show=archived"
+                className="text-gold underline decoration-gold underline-offset-4 hover:text-plate-text hover:decoration-plate-text"
+              >
+                Answered
+              </Link>
+              .
+            </>
+          }
+        </p>
+      )}
 
       {/* TWO TABS, and the split is what she has answered rather than a column
           anybody sets. Links rather than buttons: the choice survives a reload,

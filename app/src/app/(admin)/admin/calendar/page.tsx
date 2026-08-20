@@ -217,13 +217,6 @@ export default async function Page({
         </span>
       </h1>
 
-      <p className="mt-6 max-w-[68ch] text-[19px] leading-relaxed text-plate-soft">
-        Everything here comes out of what people can be offered. A workshop, a
-        course date, a session somebody has paid for, a request holding its
-        time, and anything you have blocked yourself &mdash; if it is on this
-        page, nobody is being offered it.
-      </p>
-
       {/* ── the month, and the two either side ─────────────────────────── */}
       <nav
         className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3"

@@ -182,13 +182,6 @@ export default async function Page({
         )}
       </h1>
 
-      <p className="mt-5 max-w-[64ch] text-[19px] leading-relaxed text-plate-soft">
-        Every picture, film and document in one place &mdash; including
-        everything that was already on the site before this screen existed.
-        Anything you add on a workshop, a course, a session or a letter turns up
-        here as well; there is only ever one copy.
-      </p>
-
       {/* The tabs. `aria-current` rather than a class alone, so the current one
           is announced and not merely coloured. */}
       <nav
