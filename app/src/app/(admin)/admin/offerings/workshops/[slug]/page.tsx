@@ -1,4 +1,9 @@
 import Link from "next/link";
+import AttendingTable from "@/components/admin/AttendingTable";
+import OfferingTabs, {
+  offeringTab,
+} from "@/components/admin/OfferingTabs";
+import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import WorkshopForm from "@/components/admin/WorkshopForm";
 import { formatDayShort, formatMoney } from "@/lib/format";
@@ -18,10 +23,14 @@ import { getWorkshopBySlug } from "@/lib/workshops";
  */
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { slug } = await params;
+  const { tab } = await searchParams;
+  const showing = offeringTab(tab);
   const [workshop, media, venues] = await Promise.all([
     getWorkshopBySlug(slug),
     listMediaBasenames(),
@@ -29,6 +38,8 @@ export default async function Page({
   ]);
 
   if (!workshop) notFound();
+
+  const attendees = await attendingOffering("workshop", workshop.id);
 
   return (
     <>
@@ -79,8 +90,16 @@ export default async function Page({
             </Link>
           )}
         </div>
+        <OfferingTabs
+          base={`/admin/offerings/workshops/${workshop.slug}`}
+          current={showing}
+          attending={attendees.length}
+          kind="workshop"
+        />
       </section>
 
+      {showing === "editor" && (
+        <>
       <WorkshopForm
         media={media}
         venues={venues}
@@ -94,6 +113,18 @@ export default async function Page({
           body: toSource(workshop.bodyHtml),
         }}
       />
+        </>
+      )}
+
+      {showing === "attending" && (
+        <AttendingTable attendees={attendees} kind="workshop" />
+      )}
+
+      {showing === "email" && (
+        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
+          Writing to the people on this one is the next thing being built.
+        </p>
+      )}
     </>
   );
 }

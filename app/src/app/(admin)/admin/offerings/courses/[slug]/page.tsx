@@ -1,4 +1,9 @@
 import Link from "next/link";
+import AttendingTable from "@/components/admin/AttendingTable";
+import OfferingTabs, {
+  offeringTab,
+} from "@/components/admin/OfferingTabs";
+import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import CourseForm from "@/components/admin/CourseForm";
 import { getCourseBySlug } from "@/lib/courses";
@@ -20,10 +25,14 @@ import { listVenues } from "@/lib/venues";
  */
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { slug } = await params;
+  const { tab } = await searchParams;
+  const showing = offeringTab(tab);
   const [course, media, venues] = await Promise.all([
     getCourseBySlug(slug),
     listMediaBasenames(),
@@ -31,6 +40,8 @@ export default async function Page({
   ]);
 
   if (!course) notFound();
+
+  const attendees = await attendingOffering("course", course.id);
 
   const dates = course.sessions;
   const run =
@@ -93,8 +104,16 @@ export default async function Page({
             — anyone who has already booked keeps the terms they bought on.
           </p>
         )}
+        <OfferingTabs
+          base={`/admin/offerings/courses/${course.slug}`}
+          current={showing}
+          attending={attendees.length}
+          kind="course"
+        />
       </section>
 
+      {showing === "editor" && (
+        <>
       <CourseForm
         media={media}
         venues={venues}
@@ -110,6 +129,18 @@ export default async function Page({
           dates,
         }}
       />
+        </>
+      )}
+
+      {showing === "attending" && (
+        <AttendingTable attendees={attendees} kind="course" />
+      )}
+
+      {showing === "email" && (
+        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
+          Writing to the people on this one is the next thing being built.
+        </p>
+      )}
     </>
   );
 }

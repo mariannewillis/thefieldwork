@@ -1,4 +1,9 @@
 import Link from "next/link";
+import AttendingTable from "@/components/admin/AttendingTable";
+import OfferingTabs, {
+  offeringTab,
+} from "@/components/admin/OfferingTabs";
+import { askedForService } from "@/lib/attending";
 import { notFound } from "next/navigation";
 import ServiceForm from "@/components/admin/ServiceForm";
 import { formatDuration, formatMoney } from "@/lib/format";
@@ -18,10 +23,14 @@ import { listVenues } from "@/lib/venues";
  */
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { slug } = await params;
+  const { tab } = await searchParams;
+  const showing = offeringTab(tab);
   const [service, media, venues] = await Promise.all([
     getServiceBySlug(slug),
     listMediaBasenames(),
@@ -29,6 +38,8 @@ export default async function Page({
   ]);
 
   if (!service) notFound();
+
+  const attendees = await askedForService(service.id);
 
   const travels = service.location === "travels";
 
@@ -105,8 +116,16 @@ export default async function Page({
             Requests.
           </p>
         )}
+        <OfferingTabs
+          base={`/admin/offerings/services/${service.slug}`}
+          current={showing}
+          attending={attendees.length}
+          kind="service"
+        />
       </section>
 
+      {showing === "editor" && (
+        <>
       <ServiceForm
         media={media}
         venues={venues}
@@ -120,6 +139,18 @@ export default async function Page({
           body: toSource(service.bodyHtml),
         }}
       />
+        </>
+      )}
+
+      {showing === "attending" && (
+        <AttendingTable attendees={attendees} kind="service" />
+      )}
+
+      {showing === "email" && (
+        <p className="pool on-pool mt-7 max-w-[62ch] px-7 py-7 text-[19px] leading-relaxed text-ink">
+          Writing to the people on this one is the next thing being built.
+        </p>
+      )}
     </>
   );
 }

@@ -383,7 +383,9 @@ export function Documents({ rows }: { rows: LibraryRow[] }) {
                 row={row}
                 kindWords={kindWords(row.contentType)}
                 sizeWords={row.bytes ? sizeWords(row.bytes) : null}
-                arrived={row.addedAt ? `added ${row.addedAt}` : "already on the site"}
+                arrived={
+                  row.addedAt ? `added ${row.addedAt}` : "already on the site"
+                }
               >
                 <Remove row={row} />
               </DocumentLine>
