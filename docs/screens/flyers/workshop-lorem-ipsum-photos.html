@@ -3,37 +3,54 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Flyer — Lorem Ipsum, a workshop · The Field Work</title>
+<title>Flyer, three photographs — Lorem Ipsum, a workshop · The Field Work</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   A WORKSHOP FLYER — A5 portrait, for a noticeboard and a café windowsill.
+   A WORKSHOP FLYER, WITH ALL THREE OF HER PHOTOGRAPHS — A5 portrait.
 
-   THE SITE'S OWN GRAMMAR, NOT A POSTER TEMPLATE. The signature move on every
-   page of thefieldwork.co.uk is ONE hard-edged clearing cut out of a full-bleed
-   photograph under a plum wash: no radius, no shadow, no gradient behind type.
-   This is that move at 148×210mm. Somebody who has seen the site should know
-   this is the same practice before they read a word; somebody who has not
-   should meet the site already knowing what it looks like.
+   The sibling of `workshop-lorem-ipsum.html`, which uses one. Everything about
+   the type, the palette and the clearing is the same; what changes is that
+   three pictures have to live on one sheet without any of them being wallpaper.
 
-   THE THREE SIZES ARE THE THREE QUESTIONS, in the order they get asked across a
-   room: WHAT is it (the name), WHEN is it (the date), and then everything a
-   person needs once they have decided to care. A flyer read at three metres
-   answers the first two or it is wallpaper.
+   ── WHAT THE RESEARCH SAYS, AND WHAT IT RULED OUT ─────────────────────────
 
-   NO AVAILABILITY ON IT, deliberately. Paper cannot be revised: "8 places left"
-   is a lie by the following Tuesday, and a flyer that has lied once is not read
-   again. "A group of ten" is a fact about the workshop that stays true.
+   The obvious answer is three thumbnails in a row. It is also the documented
+   mistake: the most common failure in event-poster design is putting everything
+   at the same size, which leaves a viewer nothing to look at first. Three equal
+   47mm squares give three pictures that are each too small to read and a sheet
+   with no focal point.
 
-   THE QR IS A REAL ONE, generated for the page it points at rather than drawn
-   to look like one — error-correction level Q, so it still scans with a drawing
-   pin through a corner of it.
+   What the guidance actually asks for is ONE focal point with the rest arranged
+   around it, and asymmetric sizing — roughly a third against two-thirds — which
+   is what professional layouts use to get balance without symmetry. So the
+   three photographs are given three different jobs at three different sizes:
 
-   PRINTING: A5, no margins, background graphics on. `@page` sets the sheet, and
-   `print-color-adjust: exact` is what stops a printer helpfully dropping the
-   plum and leaving black type on white paper.
+     THE GROUND     her workshop happening — people in a circle, backlit.
+                    Full-bleed under the plum wash, so it is atmosphere rather
+                    than a picture: it says what kind of room this is before
+                    anybody reads a word, and never competes with the type.
+
+     THE DETAIL     the altar. 1.6 parts of the strip, and the largest thing on
+                    the sheet that is actually LOOKED at. It is the best of the
+                    three and it is the one that rewards close attention — the
+                    single detail a good piece of print earns a second look with.
+
+     THE PLACE      the room, laid out and empty. 1 part. It answers "what am I
+                    walking into" — which is the question that stops people
+                    coming — and it is at its own native shape, uncropped.
+
+   ── AND THE HIERARCHY OF TEXT IS UNCHANGED ────────────────────────────────
+
+   Event-poster order, which the research states plainly: the name largest, the
+   date and venue second, supporting detail medium, price and how-to-book clear
+   but never dominant. The strip sits BETWEEN the name and the date, so the eye
+   crosses it on the way down rather than stopping at it.
+
+   The name sits on the upper-left third of the sheet, where the guidance puts
+   the most crucial line.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @page { size: A5 portrait; margin: 0; }
@@ -57,7 +74,6 @@ html, body {
   font-family: "Source Sans 3", system-ui, sans-serif;
 }
 
-/* On screen the sheet sits on a desk; in print there is only the sheet. */
 body {
   display: flex;
   justify-content: center;
@@ -87,24 +103,20 @@ body {
   filter: brightness(0.62) saturate(1.08) contrast(1.03);
 }
 
-/* The plum wash — the same gradient the site lays over every interior page,
-   and what makes a photograph taken on a phone in a bright room belong to this
-   practice rather than to the phone. */
+/* HELD BACK HARDER THAN ON THE ONE-PICTURE FLYER. There, the ground was the
+   only photograph and had to carry; here it is one of three, and its job is to
+   be the room's atmosphere behind two pictures that are meant to be looked at.
+   A ground competing with the strip would give the sheet two focal points,
+   which is the same as none. */
 .wash {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgb(22 7 18 / 0.60) 0%,
-    /* EASED THROUGH THE MIDDLE, where the room is. This is the one photograph
-       of the thing being advertised — people sitting in a circle in a room with
-       bunting up — and at an even wash it went to a dark shape. The type that
-       crosses it here is display-sized and gold, which carries against a
-       lighter ground; the small type is all in the clearing below, where the
-       gradient is at its heaviest. */
-    rgb(22 7 18 / 0.52) 34%,
-    rgb(22 7 18 / 0.78) 62%,
-    rgb(22 7 18 / 0.96) 100%
+    rgb(22 7 18 / 0.70) 0%,
+    rgb(22 7 18 / 0.64) 30%,
+    rgb(22 7 18 / 0.88) 64%,
+    rgb(22 7 18 / 0.97) 100%
   );
 }
 
@@ -114,17 +126,18 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 14mm 12mm 12mm;
+  padding: 12mm 12mm 11mm;
 }
 
-/* `align-self` because the body is a flex COLUMN: without it the mark
-   stretches to the full width and reads as centred, which puts the practice's
-   name in the middle of a sheet whose every other line starts at the left. */
-.mark { height: 22mm; width: auto; align-self: flex-start; }
+.mark { height: 20mm; width: auto; align-self: flex-start; }
 
 /* ── what it is ─────────────────────────────────────────────────────────── */
 
-.top { margin-top: 13mm; }
+/* Tightened when the mark doubled (operator, 2026-08-20). An A5 sheet is a
+   fixed budget: 10mm of extra logo has to come from somewhere, and it comes
+   from the air above the eyebrow rather than from the photographs or from any
+   line of type. */
+.top { margin-top: 4mm; }
 
 .eyebrow {
   font-size: 8.4pt;
@@ -138,35 +151,80 @@ body {
 .name {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 400;
-  font-size: 40pt;
+  font-size: 36pt;
   line-height: 1;
   letter-spacing: -0.01em;
-  margin: 4mm 0 0;
+  margin: 3.5mm 0 0;
   color: var(--blush);
 }
 
 .line {
-  font-size: 11pt;
+  font-size: 10.4pt;
   line-height: 1.5;
   color: #e3d3dd;
-  margin: 5mm 0 0;
-  max-width: 34ch;
+  margin: 4mm 0 0;
+  max-width: 36ch;
 }
+
+/* ── the two photographs that are meant to be looked at ─────────────────── */
+
+/* 1.6 : 1 — the asymmetry the guidance calls for, and the reason the eye knows
+   which of the two to start with. A 1 : 1 pair would be two pictures having an
+   argument. The gap is 1.5mm of plum: enough to read as two frames, not enough
+   to read as a gallery wall. */
+.strip {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1.5mm;
+  /* THREE THINGS, AND IT NEEDED ALL THREE. Measured, not guessed: with only
+     `height` set, this box rendered 211px against the 117px it was asked for.
+
+       `flex: 0 0 36mm`     a flex child shrinks by default, and this one lost
+                            height while its grid rows kept theirs — so the
+                            photographs spilled out of the bottom and printed
+                            the date across the altar.
+       `grid-template-rows` `height: 100%` on the images resolves to AUTO
+                            against an auto-sized row, so each one fell back to
+                            its intrinsic height and inflated the row it was
+                            supposed to be filling. A definite row is what makes
+                            the percentage mean anything.
+       `min-height: 0`      a flex item will not go below its content by
+                            default, which would have let the images win anyway.
+  */
+  /* 33mm rather than 36: the three millimetres go to `margin-top: auto` above,
+     which is the air between the last line of her sentence and the top of the
+     photographs. Without it the strip butts against the type and reads as part
+     of the paragraph. */
+  flex: 0 0 33mm;
+  grid-template-rows: 33mm;
+  min-height: 0;
+}
+
+/* NO RADIUS, NO SHADOW, NO BORDER. The shape law the whole site keeps — the
+   only curve on this practice's material is her portrait, and it is not here. */
+.strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The altar is cropped to a wide band that keeps the candle and the cards; the
+   room is at very nearly its own shape and loses almost nothing, which is the
+   point of giving it the narrower column. */
+.strip .detail { object-position: 50% 52%; }
+.strip .place { object-position: 46% 50%; }
+
 
 /* ── when it is ─────────────────────────────────────────────────────────── */
 
-/* THE SECOND-BIGGEST THING ON THE SHEET, pushed to the foot of the plate by
-   `margin-top: auto` so it sits directly above the clearing however long the
-   name and the sentence turn out to be. */
-.when {
-  margin-top: auto;
-  padding-bottom: 6mm;
-}
+.when { padding-top: 4mm; padding-bottom: 4mm; }
 
 .day {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 400;
-  font-size: 26pt;
+  font-size: 24pt;
   line-height: 1.06;
   margin: 0;
   color: var(--gold);
@@ -174,20 +232,20 @@ body {
 
 .hours {
   font-family: "Azeret Mono", ui-monospace, monospace;
-  font-size: 10pt;
+  font-size: 9.4pt;
   letter-spacing: 0.02em;
   color: #e3d3dd;
-  margin: 2.5mm 0 0;
+  margin: 2mm 0 0;
 }
 
-/* ── the clearing: what a person needs once they care ───────────────────── */
+/* ── the clearing ───────────────────────────────────────────────────────── */
 
 .clearing {
   background: var(--blush);
   color: var(--ink);
-  padding: 7mm 8mm;
+  padding: 6mm 7mm;
   display: flex;
-  gap: 7mm;
+  gap: 6mm;
   align-items: flex-start;
 }
 
@@ -196,25 +254,25 @@ body {
 .fact {
   display: flex;
   gap: 3mm;
-  padding: 2.2mm 0;
+  padding: 1.8mm 0;
   border-bottom: 0.3mm solid var(--rule);
-  font-size: 10pt;
-  line-height: 1.35;
+  font-size: 9.6pt;
+  line-height: 1.32;
 }
 .fact:last-child { border-bottom: 0; }
 
 .fact dt {
-  flex: 0 0 18mm;
-  font-size: 7.6pt;
+  flex: 0 0 17mm;
+  font-size: 7.2pt;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  padding-top: 0.6mm;
+  padding-top: 0.5mm;
 }
 
 .fact dd { margin: 0; color: var(--ink); }
-.fact dd .quiet { display: block; color: var(--ink-soft); font-size: 9pt; }
+.fact dd .quiet { display: block; color: var(--ink-soft); font-size: 8.6pt; }
 
 .price {
   font-family: "Azeret Mono", ui-monospace, monospace;
@@ -223,52 +281,37 @@ body {
 
 /* ── the way in ─────────────────────────────────────────────────────────── */
 
-.way {
-  flex: 0 0 28mm;
-  text-align: center;
-}
+.way { flex: 0 0 25mm; text-align: center; }
 
-/* THE ONE MAGENTA ON THE SHEET. It is the site's action colour and it is spent
-   here, on the only thing this piece of paper is asking anybody to do. */
+/* The one magenta on the sheet, spent on the only thing it asks anybody to do. */
 .book {
-  font-size: 7.6pt;
+  font-size: 7.2pt;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--magenta);
-  margin: 0 0 2mm;
+  margin: 0 0 1.5mm;
 }
 
-.qr {
-  display: block;
-  width: 28mm;
-  height: 28mm;
-}
+.qr { display: block; width: 25mm; height: 25mm; }
 
-/* The quiet zone is part of the code, not padding around it: a QR with the
-   blush running to its edge is one a scanner has to work at. */
+/* The quiet zone is part of the code, not padding around it. */
 .qr rect { fill: var(--blush); }
 
-/* SAID IN WORDS AS WELL AS IN SQUARES. Not everybody photographs a poster, and
-   a flyer that can only be used by somebody holding a phone at the right
-   distance in the right light has locked out the person reading it on the way
-   past. */
 .address {
   font-family: "Azeret Mono", ui-monospace, monospace;
-  font-size: 6.6pt;
+  font-size: 6.2pt;
   line-height: 1.35;
   color: var(--ink-soft);
-  margin: 2mm 0 0;
-  /* BROKEN WHERE SHE WOULD BREAK IT, not wherever the box runs out. A wrapped
-     `lorem-` / `ipsum` reads as two words and gets typed as two. The line
-     breaks are in the markup instead. */
+  margin: 1.5mm 0 0;
+  /* Broken where she would break it rather than wherever the box runs out. */
   white-space: pre-line;
 }
 
 .foot {
-  margin-top: 5mm;
-  font-size: 8.6pt;
-  line-height: 1.5;
+  margin-top: 3.5mm;
+  font-size: 8.2pt;
+  line-height: 1.45;
   color: #c9b4c1;
 }
 
@@ -280,6 +323,7 @@ body {
 <body>
 
 <div class="sheet">
+  <!-- THE GROUND: her workshop happening. Atmosphere, not a picture. -->
   <img class="plate" src="../../../app/public/media/whatsapp-image-2026-08-07-at-16-45-48-2400.jpg" alt="" />
   <div class="wash"></div>
 
@@ -290,6 +334,14 @@ body {
       <p class="eyebrow">A workshop &middot; Frome</p>
       <h1 class="name">Lorem Ipsum</h1>
       <p class="line">Lorem ipsum is een opvultekst die ontwerpers en drukkers gebruiken om de opmaak te testen.</p>
+    </div>
+
+    <!-- THE DETAIL, then THE PLACE. 1.6 : 1, and in that order because the
+         first is the one that rewards looking and the second is the one that
+         answers "what am I walking into". -->
+    <div class="strip">
+      <img class="detail" src="../../../app/public/media/whatsapp-image-2026-08-07-at-16-46-13-1200.jpg" alt="The altar: a candle in a glass, a small Buddha, crystals and cards under fairy lights." />
+      <img class="place" src="../../../app/public/media/whatsapp-image-2026-08-07-at-16-46-47-1200.jpg" alt="The room laid out before anybody arrives: a kilim on the floor, sheepskins and cushions round it." />
     </div>
 
     <div class="when">
