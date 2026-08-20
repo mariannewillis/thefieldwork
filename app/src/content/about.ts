@@ -94,5 +94,4 @@ export const about = {
     askLabel: "Ask a question first",
     askHref: "/contact",
   },
-
 } as const;

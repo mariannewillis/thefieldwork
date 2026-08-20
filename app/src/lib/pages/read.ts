@@ -2,6 +2,7 @@ import type {
   PageAnchor,
   PageBlockKind,
   PageItemKind,
+  PagePictureShape,
   PageState,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -44,6 +45,8 @@ export type ResolvedItem = {
   kind: PageItemKind;
   /** Steps bigger or smaller than this kind of line is set at. 0 is authored. */
   size: number;
+  /** Which edge this one line is set to. Null follows the box it is in. */
+  align: PageAnchor | null;
   /** heading / paragraph / eyebrow / button / link: the words. */
   text: string;
   /** bullets: the same words, already split. */
@@ -56,6 +59,10 @@ export type ResolvedBlock = {
   kind: PageBlockKind;
   placement: PageAnchor;
   picture: { ref: string; alt: string } | null;
+  /** picture only: the frame it is cut to, and what stays in frame. */
+  shape: PagePictureShape;
+  focusX: number;
+  focusY: number;
   items: ResolvedItem[];
 };
 
@@ -79,6 +86,10 @@ export type ResolvedFree = {
   kind: "free";
   hidden: boolean;
   picture: { ref: string; alt: string } | null;
+  /** Where in the photograph the band is looking, top to bottom, 0–100. */
+  focusY: number;
+  /** Steps taller than the band sets itself, 0–6. */
+  tall: number;
   blocks: ResolvedBlock[];
 };
 
@@ -217,6 +228,8 @@ export async function readPage(
         row.imageRef === null
           ? null
           : { ref: row.imageRef, alt: row.imageAlt ?? "" },
+      focusY: row.focusY,
+      tall: row.tall,
       blocks: row.blocks.map((block) => ({
         id: block.id,
         kind: block.kind,
@@ -225,10 +238,14 @@ export async function readPage(
           block.imageRef === null
             ? null
             : { ref: block.imageRef, alt: block.imageAlt ?? "" },
+        shape: block.shape,
+        focusX: block.focusX,
+        focusY: block.focusY,
         items: block.items.map((item) => ({
           id: item.id,
           kind: item.kind,
           size: item.size,
+          align: item.align,
           text: item.text ?? "",
           lines: splitLines(item.text ?? ""),
           href: item.href,

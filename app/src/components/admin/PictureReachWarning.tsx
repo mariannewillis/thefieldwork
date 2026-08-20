@@ -23,9 +23,8 @@
  */
 export default function PictureReachWarning() {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-  const unreachable = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(
-    site,
-  );
+  const unreachable =
+    /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(site);
   if (!unreachable) return null;
 
   return (

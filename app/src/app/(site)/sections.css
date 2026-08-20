@@ -20,8 +20,15 @@
 
 .beat--free {
   align-items: center;
-  padding-top: clamp(64px, 9vh, 120px);
-  padding-bottom: clamp(64px, 9vh, 120px);
+  /* `--tall` is a MULTIPLIER she sets in bounded steps, defaulting to 1 —
+     exactly what `--k` is for text, applied to the room instead of the type
+     (operator, 2026-08-20: "we also need a way to increase the height of the
+     section so images display correctly"). Multiplying the clamp rather than
+     replacing it keeps the responsive behaviour: a band she made twice as
+     roomy is still shorter on a phone than on a desk, and there is no step
+     that produces a band which is broken — only one that is emptier. */
+  padding-top: calc(clamp(64px, 9vh, 120px) * var(--tall, 1));
+  padding-bottom: calc(clamp(64px, 9vh, 120px) * var(--tall, 1));
 }
 
 /* Three columns, because there are three placements. A block lands in its own
@@ -112,6 +119,28 @@
   text-decoration: none;
   border: 0;
 }
+/* THE SAME COLLISION `a.cta` ALREADY LOST ONCE (operator, 2026-08-20 — "I
+   created a button in the pages generator and I cant see the text unless its
+   in hover state").
+
+   `home.css` has `.pool a { color: var(--magenta-deep) }` for links inside a
+   clearing, and it is (0,1,1) to `.free__button`'s (0,1,0) — so a button she
+   puts in a box of words got the pool's LINK colour painted over its own, and
+   the label came out magenta on a magenta ground. Invisible until hover, when
+   the background turns plum and the magenta label appears out of nowhere.
+
+   `home.css` fixed exactly this for the composition's own button (see
+   "cta-contrast-fix" there) and the pages panel reintroduced it with a new
+   class. Same answer, so the two buttons stay one object: name the grounds the
+   button can sit on, which outranks the link rule on each of them. */
+.pool a.free__button,
+.onplate a.free__button,
+.crown a.free__button,
+a.free__button {
+  color: var(--blush);
+  text-decoration: none;
+}
+
 .free__button:hover,
 .free__button:focus-visible {
   background: var(--plum-900);
@@ -124,6 +153,46 @@
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* ── THE SHAPE SHE CUTS IT TO (operator, 2026-08-20) ────────────────────────
+ *
+ * `natural` is the picture's own shape, is the default, and needs no rule —
+ * every picture already on a page keeps what it was put there in.
+ *
+ * The other three CROP, which is why `object-fit: cover` comes with them: a
+ * square asked of a landscape photograph either crops or squashes, and
+ * squashing a photograph of a person is the one outcome nobody wants. What
+ * stays in frame is hers to choose — `--ox` / `--oy`, the same two properties
+ * the seven beats' plates have always used, which is why `Plate` needed
+ * nothing new to carry them.
+ *
+ * THE CIRCLE IS A DELIBERATE EXCEPTION to the shape law at the top of this
+ * file. The one curve on this site was her portrait; the operator asked for the
+ * circle by name in the brief that started the pages panel and again on
+ * 2026-08-20. A rule the owner of the site has overruled twice is a preference,
+ * not a law — and it is here because she chose it, not because the design
+ * drifted into it.
+ */
+.free__picture--rectangle,
+.free__picture--square,
+.free__picture--circle {
+  height: auto;
+  object-fit: cover;
+  object-position: var(--ox, 50%) var(--oy, 50%);
+}
+
+.free__picture--rectangle {
+  aspect-ratio: 3 / 2;
+}
+
+.free__picture--square {
+  aspect-ratio: 1 / 1;
+}
+
+.free__picture--circle {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
 }
 
 /* ── narrow ────────────────────────────────────────────────────────────────

@@ -16,13 +16,18 @@ import {
   deleteItem,
   deleteSection,
   moveSection,
+  setBlockFocus,
   setBlockPicture,
   setBlockPlacement,
+  setBlockShape,
   setHidden,
   setItem,
   setPicture,
   setSectionPicture,
+  setItemAlign,
   setItemSize,
+  setSectionFocus,
+  setSectionTall,
   setText,
   setTextSize,
   type Outcome,
@@ -131,6 +136,21 @@ async function dispatch(
       return settled(
         await setItemSize(page, num(form, "item"), Number(str(form, "step"))),
       );
+    /* An empty `align` is "follow the box", which is a value rather than a
+       missing one — so the control that sets an edge is the control that
+       clears it. */
+    case "align-item": {
+      const edge = str(form, "align");
+      return settled(
+        await setItemAlign(
+          page,
+          num(form, "item"),
+          edge === "left" || edge === "centre" || edge === "right"
+            ? edge
+            : null,
+        ),
+      );
+    }
 
     // ── sections ──────────────────────────────────────────────────────────
     case "hide":
@@ -168,6 +188,23 @@ async function dispatch(
       return settled(await setSectionPicture(page, num(form, "section"), null));
 
     // ── what is in a section ──────────────────────────────────────────────
+    case "tall-section":
+      return settled(
+        await setSectionTall(
+          page,
+          num(form, "section"),
+          Number(str(form, "step")),
+        ),
+      );
+    case "focus-section":
+      return settled(
+        await setSectionFocus(
+          page,
+          num(form, "section"),
+          Number(str(form, "percent")),
+        ),
+      );
+
     case "add-block": {
       const outcome = await addBlock(page, {
         sectionId: num(form, "section"),
@@ -192,6 +229,27 @@ async function dispatch(
           ref: str(form, "ref"),
           alt: str(form, "alt"),
         }),
+      );
+    case "shape-block": {
+      const shape = str(form, "shape");
+      return settled(
+        await setBlockShape(
+          page,
+          num(form, "block"),
+          shape === "rectangle" || shape === "square" || shape === "circle"
+            ? shape
+            : "natural",
+        ),
+      );
+    }
+    case "focus-block":
+      return settled(
+        await setBlockFocus(
+          page,
+          num(form, "block"),
+          str(form, "axis") === "x" ? "x" : "y",
+          Number(str(form, "percent")),
+        ),
       );
     case "delete-block":
       return settled(await deleteBlock(page, num(form, "block")));

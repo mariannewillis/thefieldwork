@@ -104,10 +104,7 @@ export default function SubscriberLine({
       </span>
 
       {/* Its own decisions, so its own clicks. */}
-      <span
-        onClick={(event) => event.stopPropagation()}
-        className="py-5"
-      >
+      <span onClick={(event) => event.stopPropagation()} className="py-5">
         <SubscriberActions id={person.id} who={who} pending={pending} />
       </span>
     </li>

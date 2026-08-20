@@ -843,6 +843,234 @@ try {
     String(await textRow("draft", "sacral.link")),
   );
 
+  // == SHE CAN SET AN EDGE, MAKE ROOM, AND CUT A PICTURE TO A SHAPE ==========
+  //
+  // Four controls the operator asked for on 2026-08-20, and one bug that came
+  // with the first of them: a button she put in a box of words was MAGENTA ON
+  // MAGENTA, because home.css's `.pool a` (0,1,1) outranks `.free__button`
+  // (0,1,0) and painted the label in its own background colour. Invisible until
+  // hover, when the ground turned plum and a label appeared out of nowhere.
+  // home.css had already lost this exact collision once with `a.cta` and fixed
+  // it the same way; the pages panel reintroduced it with a new class.
+  //
+  // EVERY ASSERTION HERE IS COMPUTED STYLE OR GEOMETRY, not a row in a table.
+  // A row saying `shape: circle` is not a circle, and the whole class of bug
+  // this section exists for is one where the data was right and the page was
+  // not.
+  console.log("\nAN EDGE, SOME ROOM, AND A SHAPE\n");
+
+  await page.goto(EDITOR);
+  await preview(page);
+
+  const boxId = blocks[0].id;
+  await selectMade(page, madeId, /A section you added/);
+
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${boxId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+    await page
+      .getByRole("button", { name: "Button", exact: true })
+      .first()
+      .click();
+    await page.waitForTimeout(2200);
+  }
+
+  const btnItem = (
+    await rowsOf(
+      `SELECT id FROM "PageItem" WHERE "blockId"=$1 AND kind='button' ORDER BY id DESC`,
+      [boxId],
+    )
+  )[0].id;
+
+  {
+    const frame = await preview(page);
+    const btn = frame
+      .locator(`[data-block="${boxId}"] [data-placeholder]`)
+      .last();
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
+    await page.waitForTimeout(700);
+    await page.keyboard.type("Book a session");
+    await frame
+      .locator(`[data-block="${boxId}"]`)
+      .click({ force: true, position: { x: 5, y: 5 } });
+    await page.waitForTimeout(2400);
+  }
+
+  const label = await (
+    await preview(page)
+  )
+    .locator(`[data-block="${boxId}"] .free__button`)
+    .evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { colour: cs.color, ground: cs.backgroundColor };
+    });
+  ok(
+    "a button's label is not painted in its own background colour",
+    label.colour !== label.ground,
+    JSON.stringify(label),
+  );
+  ok(
+    "it is the blush the composition's own button uses",
+    label.colour === "rgb(251, 243, 241)",
+    JSON.stringify(label),
+  );
+
+  // A line can be set to its own edge, and a BUTTON has to move by
+  // `align-self` -- it is inline-block in a flex column, so text-align on it
+  // moves nothing at all.
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${boxId}"] .free__button`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+    await page
+      .getByRole("button", { name: "Centre", exact: true })
+      .last()
+      .click();
+    await page.waitForTimeout(2200);
+  }
+  ok(
+    "a line can be set to an edge of its own",
+    (await rowsOf(`SELECT align FROM "PageItem" WHERE id=$1`, [btnItem]))[0]
+      .align === "centre",
+  );
+  ok(
+    "and a button actually moves, which text-align alone would not do",
+    (await (
+      await preview(page)
+    )
+      .locator(`[data-block="${boxId}"] .free__button`)
+      .evaluate((el) => getComputedStyle(el).alignSelf)) === "center",
+  );
+
+  // Room in the band, before a picture has anywhere to be.
+  await selectMade(page, madeId, /A section you added/);
+  const bandBefore = await (
+    await preview(page)
+  )
+    .locator(`[data-section="${madeId}"]`)
+    .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
+  await press(page, "+ Taller");
+  await press(page, "+ Taller");
+  const bandAfter = await (
+    await preview(page)
+  )
+    .locator(`[data-section="${madeId}"]`)
+    .evaluate((el) => parseFloat(getComputedStyle(el).paddingTop));
+  ok(
+    "two steps taller is recorded",
+    (await rowsOf(`SELECT tall FROM "PageSection" WHERE id=$1`, [madeId]))[0]
+      .tall === 2,
+  );
+  ok(
+    "and the band really is deeper than it was",
+    bandAfter > bandBefore,
+    `${bandBefore} -> ${bandAfter}`,
+  );
+
+  // A band is a letterbox cut out of a tall photograph, so where it looks is
+  // hers. (This section already has one, chosen by eye further up.)
+  await selectMade(page, madeId, /A section you added/);
+  await press(page, /Up$/);
+  ok(
+    "the band's photograph can be moved up",
+    (
+      await rowsOf(`SELECT "focusY" FROM "PageSection" WHERE id=$1`, [madeId])
+    )[0].focusY === 40,
+  );
+  ok(
+    "and the photograph is actually looking there",
+    (
+      await (
+        await preview(page)
+      )
+        .locator(`[data-section="${madeId}"] img.plate`)
+        .evaluate((el) => getComputedStyle(el).objectPosition)
+    ).includes("40%"),
+  );
+
+  // A picture cut to a shape -- and NOTHING offered until there is a picture,
+  // because three shapes for an empty box is a decision about nothing.
+  await selectMade(page, madeId, /A section you added/);
+  await page
+    .locator('[data-add-kind="picture"]')
+    .getByRole("button", { name: "Left" })
+    .click();
+  await page.waitForTimeout(2400);
+  const picId = (
+    await rowsOf(
+      `SELECT b.id FROM "PageBlock" b JOIN "PageSection" s ON s.id=b."sectionId"
+       WHERE s.id=$1 AND b.kind='picture' ORDER BY b.id DESC`,
+      [madeId],
+    )
+  )[0].id;
+
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${picId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+  }
+  ok(
+    "no shape is offered for a picture that has not been chosen yet",
+    !(
+      await page.locator('aside[aria-label="The toolbox"]').innerText()
+    ).includes("Its shape"),
+  );
+
+  await page.getByRole("button", { name: /Choose a picture/ }).click();
+  await page.locator('[role="dialog"]').waitFor({ timeout: 30_000 });
+  await page.locator('[role="dialog"] img').first().click({ force: true });
+  await page.waitForTimeout(2600);
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${picId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+    await page.getByRole("button", { name: "Circle", exact: true }).click();
+    await page.waitForTimeout(2400);
+  }
+  const round = await (
+    await preview(page)
+  )
+    .locator(`[data-block="${picId}"] img`)
+    .evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const box = el.getBoundingClientRect();
+      return {
+        radius: cs.borderRadius,
+        fit: cs.objectFit,
+        square: Math.abs(box.width - box.height) < 2,
+      };
+    });
+  ok(
+    "a picture cut to a circle is round, square-framed, and cropped rather than squashed",
+    round.radius === "50%" && round.fit === "cover" && round.square,
+    JSON.stringify(round),
+  );
+
+  {
+    const frame = await preview(page);
+    await frame
+      .locator(`[data-block="${picId}"] [data-handle="block"]`)
+      .click({ force: true });
+    await page.waitForTimeout(1200);
+    await page.getByRole("button", { name: /Down$/ }).first().click();
+    await page.waitForTimeout(2200);
+  }
+  ok(
+    "and what stays in frame once it crops is hers to choose",
+    (await rowsOf(`SELECT "focusY" FROM "PageBlock" WHERE id=$1`, [picId]))[0]
+      .focusY === 60,
+  );
+
   // ── out it goes ───────────────────────────────────────────────────────────
   await page.goto(EDITOR);
   await preview(page);
@@ -861,6 +1089,46 @@ try {
   await page.getByRole("button", { name: /^Publish$/ }).click();
   await page.getByRole("button", { name: /Yes, publish it/ }).click();
   await page.waitForTimeout(2500);
+
+  // PUBLISH HAS TO COPY EVERY COLUMN, and it did not.
+  //
+  // `PageItem.size` was already being dropped before any of the 2026-08-20
+  // controls existed: she made a line bigger, published, and the live page went
+  // out at the size she had not chosen — draft right, site wrong, difference
+  // one column, nothing anywhere saying so. Four more fields landed the same
+  // day, which would have been four more of exactly that.
+  //
+  // So this reads the LIVE rows and compares them to the draft ones, field by
+  // field, rather than looking at the page and being satisfied that the section
+  // arrived. A section that arrives with its shape and its height left behind
+  // has still arrived.
+  const liveCarried = await rowsOf(
+    `SELECT s.tall, s."focusY" AS section_focus,
+            b.shape, b."focusX" AS block_x, b."focusY" AS block_y,
+            i.size, i.align
+       FROM "PageSection" s
+       JOIN "PageBlock" b ON b."sectionId" = s.id
+       LEFT JOIN "PageItem" i ON i."blockId" = b.id
+      WHERE s.page = 'home' AND s.state = 'live' AND s.kind = 'free'`,
+  );
+  ok(
+    "publishing carries the height and the focus she set on the band",
+    liveCarried.some((row) => row.tall === 2 && row.section_focus === 40),
+    JSON.stringify(liveCarried),
+  );
+  ok(
+    "and the shape she cut the picture to, with what stays in frame",
+    liveCarried.some(
+      (row) =>
+        row.shape === "circle" && row.block_y === 60 && row.block_x === 50,
+    ),
+    JSON.stringify(liveCarried),
+  );
+  ok(
+    "and the edge she set one line to",
+    liveCarried.some((row) => row.align === "centre"),
+    JSON.stringify(liveCarried),
+  );
 
   const after = await publicHome();
   ok(

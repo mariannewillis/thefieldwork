@@ -2,6 +2,7 @@ import type {
   PageAnchor,
   PageBlockKind,
   PageItemKind,
+  PagePictureShape,
   Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -295,6 +296,27 @@ export async function setItemSize(
   return OK;
 }
 
+/**
+ * Which edge one line is set to — or NULL to follow the box it is in.
+ *
+ * Null is the answer almost always, and it is a real value here rather than a
+ * missing one: "follow the box" is a choice she can come back to, so the
+ * control that sets an edge is the control that clears it (operator,
+ * 2026-08-20).
+ */
+export async function setItemAlign(
+  page: string,
+  itemId: number,
+  align: PageAnchor | null,
+): Promise<Outcome> {
+  const item = await prisma.pageItem.findFirst({
+    where: { id: itemId, block: { section: { page, state: "draft" } } },
+  });
+  if (!item) return { ok: false, reason: GONE };
+  await prisma.pageItem.update({ where: { id: itemId }, data: { align } });
+  return OK;
+}
+
 // ── sections ─────────────────────────────────────────────────────────────────
 
 /**
@@ -514,6 +536,100 @@ export async function addBlock(
     });
     return { ok: true as const, id: created.id };
   });
+}
+
+/**
+ * STEPS TALLER, on a section she made.
+ *
+ * Bounded at both ends and multiplied rather than substituted, for the reason
+ * `setTextSize` is: a step that cannot produce a broken band is a control she
+ * can use without being able to hurt the page. Zero is the band as designed.
+ */
+export async function setSectionTall(
+  page: string,
+  sectionId: number,
+  step: number,
+): Promise<Outcome> {
+  const section = await prisma.pageSection.findFirst({
+    where: { id: sectionId, page, state: "draft", kind: "free" },
+  });
+  if (!section) return { ok: false, reason: GONE };
+  const tall = Math.max(0, Math.min(6, Math.round(step) || 0));
+  await prisma.pageSection.update({ where: { id: sectionId }, data: { tall } });
+  return OK;
+}
+
+/**
+ * WHERE IN THE PHOTOGRAPH the band is looking, top to bottom.
+ *
+ * A band is a letterbox cut out of a tall picture, so the thing worth seeing is
+ * very often not in the middle of it. 50 is the middle and is what every band
+ * did before this existed.
+ */
+export async function setSectionFocus(
+  page: string,
+  sectionId: number,
+  percent: number,
+): Promise<Outcome> {
+  const section = await prisma.pageSection.findFirst({
+    where: { id: sectionId, page, state: "draft", kind: "free" },
+  });
+  if (!section) return { ok: false, reason: GONE };
+  const focusY = clampPercent(percent);
+  await prisma.pageSection.update({
+    where: { id: sectionId },
+    data: { focusY },
+  });
+  return OK;
+}
+
+/** 0–100, in tens, so the control is a handful of steps and not a slider. */
+function clampPercent(value: number): number {
+  if (!Number.isFinite(value)) return 50;
+  return Math.max(0, Math.min(100, Math.round(value / 10) * 10));
+}
+
+/**
+ * The frame a placed photograph is cut to.
+ *
+ * `natural` crops nothing and is what every picture already on a page is, so
+ * choosing it is how she undoes the other three rather than a state she has to
+ * be talked out of.
+ */
+export async function setBlockShape(
+  page: string,
+  blockId: number,
+  shape: PagePictureShape,
+): Promise<Outcome> {
+  const block = await findBlock(page, blockId);
+  if (!block) return { ok: false, reason: GONE };
+  if (block.kind !== "picture") {
+    return { ok: false, reason: "That is not a picture." };
+  }
+  await prisma.pageBlock.update({ where: { id: blockId }, data: { shape } });
+  return OK;
+}
+
+/** What stays in frame once a shape crops it. */
+export async function setBlockFocus(
+  page: string,
+  blockId: number,
+  axis: "x" | "y",
+  percent: number,
+): Promise<Outcome> {
+  const block = await findBlock(page, blockId);
+  if (!block) return { ok: false, reason: GONE };
+  if (block.kind !== "picture") {
+    return { ok: false, reason: "That is not a picture." };
+  }
+  await prisma.pageBlock.update({
+    where: { id: blockId },
+    data:
+      axis === "x"
+        ? { focusX: clampPercent(percent) }
+        : { focusY: clampPercent(percent) },
+  });
+  return OK;
 }
 
 export async function setBlockPlacement(

@@ -277,6 +277,17 @@ export async function publishPage(page: string): Promise<PublishResult> {
           hidden: section.hidden,
           imageRef: section.imageRef,
           imageAlt: section.imageAlt,
+          /* EVERY FIELD, NOT THE ONES THAT EXISTED WHEN THIS WAS WRITTEN.
+             `size` was already being dropped here before 2026-08-20: a line
+             she made bigger went out at the size she had not chosen, and
+             nothing said so — the draft looked right, the live page was wrong,
+             and the difference was one column. Adding four more fields to the
+             model without adding them here would have made four more of those.
+
+             This is the copy that has to be TOTAL, and the honest way to keep
+             it so is to add to it in the same commit that adds to the schema. */
+          focusY: section.focusY,
+          tall: section.tall,
           blocks: {
             create: section.blocks.map((block, blockPosition) => ({
               position: blockPosition,
@@ -284,12 +295,17 @@ export async function publishPage(page: string): Promise<PublishResult> {
               placement: block.placement,
               imageRef: block.imageRef,
               imageAlt: block.imageAlt,
+              shape: block.shape,
+              focusX: block.focusX,
+              focusY: block.focusY,
               items: {
                 create: block.items.map((item, itemPosition) => ({
                   position: itemPosition,
                   kind: item.kind,
                   text: item.text,
                   href: item.href,
+                  size: item.size,
+                  align: item.align,
                 })),
               },
             })),
@@ -371,6 +387,17 @@ export async function discardDraft(page: string): Promise<void> {
           hidden: section.hidden,
           imageRef: section.imageRef,
           imageAlt: section.imageAlt,
+          /* EVERY FIELD, NOT THE ONES THAT EXISTED WHEN THIS WAS WRITTEN.
+             `size` was already being dropped here before 2026-08-20: a line
+             she made bigger went out at the size she had not chosen, and
+             nothing said so — the draft looked right, the live page was wrong,
+             and the difference was one column. Adding four more fields to the
+             model without adding them here would have made four more of those.
+
+             This is the copy that has to be TOTAL, and the honest way to keep
+             it so is to add to it in the same commit that adds to the schema. */
+          focusY: section.focusY,
+          tall: section.tall,
           blocks: {
             create: section.blocks.map((block, blockPosition) => ({
               position: blockPosition,
@@ -378,12 +405,17 @@ export async function discardDraft(page: string): Promise<void> {
               placement: block.placement,
               imageRef: block.imageRef,
               imageAlt: block.imageAlt,
+              shape: block.shape,
+              focusX: block.focusX,
+              focusY: block.focusY,
               items: {
                 create: block.items.map((item, itemPosition) => ({
                   position: itemPosition,
                   kind: item.kind,
                   text: item.text,
                   href: item.href,
+                  size: item.size,
+                  align: item.align,
                 })),
               },
             })),

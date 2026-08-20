@@ -1784,6 +1784,29 @@ enum PageBlockKind {
   picture
 }
 
+/// THE FRAME A PLACED PHOTOGRAPH IS CUT TO.
+///
+/// `natural` is the picture's own shape and the default, so every picture
+/// already on a page keeps the shape it was put there in.
+///
+/// The circle is a DELIBERATE exception to the shape law. `sections.css` says
+/// the one curve on this site is her portrait and it stays the only one, and
+/// that is still the composition's rule — but the pages panel is hers, the
+/// operator asked for the circle by name in the brief that started it and again
+/// on 2026-08-20, and a rule the owner of the site has overruled twice is a
+/// preference rather than a law. It is here because she chose it, not because
+/// the design drifted.
+enum PagePictureShape {
+  /// However tall the photograph is. Crops nothing.
+  natural
+  /// 3:2 landscape.
+  rectangle
+  /// 1:1.
+  square
+  /// 1:1, and round.
+  circle
+}
+
 /// The kinds of line that go inside a clearing or on a plate.
 ///
 /// The same kinds the newsletter editor offers, plus the eyebrow the page uses
@@ -1853,6 +1876,20 @@ model PageSection {
   imageRef String?
   imageAlt String?
 
+  /// free only: WHERE IN THE PHOTOGRAPH the band is looking, top to bottom, as
+  /// a percentage. 50 is the middle and is what every band did before this
+  /// existed. A band is a letterbox cut out of a tall picture, so the thing
+  /// worth seeing is very often not in the middle of it (operator, 2026-08-20).
+  /// It is `object-position`'s Y and nothing more — the picture is not touched.
+  focusY Int @default(50)
+
+  /// free only: STEPS TALLER than the band sets itself, 0 to 6. The same
+  /// bounded-step idea as `PageText.size`, and for the same reason: it cannot
+  /// produce a band that is broken, only one that is roomier. A section holding
+  /// a picture needs the room before the picture has anywhere to be
+  /// (operator, 2026-08-20).
+  tall Int @default(0)
+
   blocks PageBlock[]
 
   @@unique([page, state, beatKey])
@@ -1877,6 +1914,17 @@ model PageBlock {
   /// picture only. Basename and alt, as above.
   imageRef String?
   imageAlt String?
+
+  /// picture only: the frame it is cut to. `natural` is the picture's own
+  /// shape and is what every one of them was before this existed, so nothing
+  /// already placed moves.
+  shape PagePictureShape @default(natural)
+
+  /// picture only: what stays in frame when the shape crops it, as
+  /// percentages. Meaningless on `natural`, which crops nothing, and harmless
+  /// there. `object-position` again — one idea, used twice.
+  focusX Int @default(50)
+  focusY Int @default(50)
 
   items PageItem[]
 
@@ -1903,6 +1951,13 @@ model PageItem {
   /// Steps bigger or smaller than the size this kind of line is set at. Same
   /// meaning and same reasons as `PageText.size`.
   size Int @default(0)
+
+  /// Which edge this one line is set to, when it should not follow the box it
+  /// is in. NULL is the answer almost always — the box's own placement decides,
+  /// which is what every line did before this existed — and setting it is for
+  /// the one heading she wants centred over left-set paragraphs
+  /// (operator, 2026-08-20).
+  align PageAnchor?
 
   @@index([blockId, position])
 }

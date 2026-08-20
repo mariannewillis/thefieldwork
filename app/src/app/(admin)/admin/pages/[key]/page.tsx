@@ -81,6 +81,10 @@ export default async function PageEditorScreen({
         note: BEATS.find((b) => b.key === section.beatKey)?.note ?? "",
         hidden: section.hidden,
         hasPicture: false,
+        // The seven are bespoke compositions; height and focus are hers to set
+        // on the sections she made, and meaningless on these.
+        tall: 0,
+        focusY: 50,
       });
       for (const slot of TEXT_SLOTS) {
         if (slot.beat !== section.beatKey) continue;
@@ -104,6 +108,8 @@ export default async function PageEditorScreen({
       hasPicture: section.picture !== null,
       pictureRef: section.picture?.ref,
       pictureAlt: section.picture?.alt,
+      tall: section.tall,
+      focusY: section.focusY,
     });
 
     for (const block of section.blocks) {
@@ -114,6 +120,9 @@ export default async function PageEditorScreen({
         placement: block.placement,
         pictureRef: block.picture?.ref,
         pictureAlt: block.picture?.alt,
+        shape: block.shape,
+        focusX: block.focusX,
+        focusY: block.focusY,
       };
       for (const item of block.items) {
         items[item.id] = {
@@ -123,6 +132,7 @@ export default async function PageEditorScreen({
           text: item.text,
           href: item.href,
           size: item.size,
+          align: item.align,
         };
       }
     }

@@ -475,6 +475,22 @@ function Item({
   item: ResolvedBlock["items"][number];
   editing: boolean;
 }) {
+  /**
+   * WHICH EDGE THIS ONE LINE IS SET TO (operator, 2026-08-20).
+   *
+   * Null almost always: the box's own placement decides, which is what every
+   * line did before this existed and what keeps a box reading as a box. It is
+   * set for the exception — the one heading she wants centred over paragraphs
+   * that stay left — and `centre` is spelled the way the rest of this schema
+   * spells it while CSS spells it `center`, which is the one place the two
+   * vocabularies have to be translated.
+   */
+  const edge = item.align
+    ? ({
+        textAlign: item.align === "centre" ? "center" : item.align,
+      } as CSSProperties)
+    : undefined;
+
   if (!item.text.trim()) {
     if (!editing) return null;
     return (
@@ -490,14 +506,26 @@ function Item({
 
   switch (item.kind) {
     case "eyebrow":
-      return <p className="eyebrow">{item.text}</p>;
+      return (
+        <p className="eyebrow" style={edge}>
+          {item.text}
+        </p>
+      );
     case "heading":
-      return <p className="disp free__heading">{item.text}</p>;
+      return (
+        <p className="disp free__heading" style={edge}>
+          {item.text}
+        </p>
+      );
     case "paragraph":
-      return <p className="body">{item.text}</p>;
+      return (
+        <p className="body" style={edge}>
+          {item.text}
+        </p>
+      );
     case "bullets":
       return (
-        <p className="disp free__lines">
+        <p className="disp free__lines" style={edge}>
           {item.lines.map((line) => (
             <span key={line}>{line}</span>
           ))}
@@ -505,13 +533,28 @@ function Item({
       );
     case "link":
       return (
-        <a className="link" href={item.href ?? "/"}>
+        <a className="link" href={item.href ?? "/"} style={edge}>
           {item.text}
         </a>
       );
+    /* A button is inline-block in a flex column, so `text-align` on it moves
+       nothing — the thing that moves it is `align-self`, on the button itself.
+       Same control in the panel, different property underneath, because what
+       she asked for is "put it in the middle" and not "set its text-align". */
     case "button":
       return (
-        <a className="free__button" href={item.href ?? "/"}>
+        <a
+          className="free__button"
+          href={item.href ?? "/"}
+          style={
+            item.align
+              ? ({
+                  alignSelf:
+                    item.align === "centre" ? "center" : `flex-${item.align}`,
+                } as CSSProperties)
+              : undefined
+          }
+        >
           {item.text}
         </a>
       );
@@ -543,7 +586,12 @@ function FreeSection({
             alt: section.picture.alt,
             brightness: null,
             focalX: null,
-            focalY: null,
+            // A band is a letterbox cut out of a tall photograph, so what is
+            // worth seeing is very often not in the middle of it. This is the
+            // same `--oy` the seven beats' own plates have always had — she
+            // gets the control the composition already used (operator,
+            // 2026-08-20).
+            focalY: section.focusY === 50 ? null : `${section.focusY}%`,
           }}
         />
       )}
@@ -585,10 +633,15 @@ function FreeSection({
                           ref: block.picture.ref,
                           alt: block.picture.alt,
                           brightness: null,
-                          focalX: null,
-                          focalY: null,
+                          // Meaningless on `natural`, which crops nothing, and
+                          // harmless there — so it is passed unconditionally
+                          // rather than branched on the shape.
+                          focalX:
+                            block.focusX === 50 ? null : `${block.focusX}%`,
+                          focalY:
+                            block.focusY === 50 ? null : `${block.focusY}%`,
                         }}
-                        className="free__picture"
+                        className={`free__picture free__picture--${block.shape}`}
                       />
                     ) : editing ? (
                       // Same reason as an empty line: a picture with nothing in
@@ -698,6 +751,18 @@ export default function HomeBody({
             key={`${section.kind}-${section.kind === "beat" ? section.beatKey : section.id}`}
             className={`${frame.className}${section.hidden ? " is-hidden" : ""}`}
             id={frame.id}
+            /* HOW TALL SHE HAS MADE IT, as a multiplier on the height the band
+               sets itself rather than a height replacing it — the same bounded
+               step `--k` is for text. A band with a picture in it needs the
+               room before the picture has anywhere to be, and a step that
+               multiplies cannot produce a band that is broken, only a roomier
+               one (operator, 2026-08-20). Dropped entirely at 0, so a section
+               she has not touched carries no style attribute at all. */
+            style={
+              section.kind === "free" && section.tall > 0
+                ? ({ "--tall": 1 + section.tall * 0.25 } as CSSProperties)
+                : undefined
+            }
             {...marks(editing, {
               section: section.id,
               "section-kind": section.kind,

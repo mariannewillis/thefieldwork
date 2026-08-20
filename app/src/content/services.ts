@@ -42,7 +42,6 @@ export const servicesIndex = {
     insteadHref: "/workshops",
     insteadAfter: ", which are the same work in a room with other people.",
   },
-
 } as const;
 
 export const serviceDetail = {

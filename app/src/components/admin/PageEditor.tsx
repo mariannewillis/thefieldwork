@@ -61,6 +61,9 @@ export type EditorSection = {
   hasPicture: boolean;
   pictureRef?: string;
   pictureAlt?: string;
+  /** free only: steps taller than the band sets itself, and where it looks. */
+  tall: number;
+  focusY: number;
 };
 
 export type EditorBlock = {
@@ -70,6 +73,10 @@ export type EditorBlock = {
   placement: string;
   pictureRef?: string;
   pictureAlt?: string;
+  /** picture only: the frame it is cut to, and what stays in frame. */
+  shape: string;
+  focusX: number;
+  focusY: number;
 };
 
 export type EditorItem = {
@@ -80,6 +87,8 @@ export type EditorItem = {
   href: string | null;
   /** Steps bigger or smaller than this kind of line is set at. */
   size: number;
+  /** The edge this one line is set to. Null follows the box it is in. */
+  align: "left" | "centre" | "right" | null;
 };
 
 type Props = {
@@ -150,6 +159,21 @@ const BLOCK_KINDS = [
   },
 ] as const;
 
+/**
+ * The frames a placed photograph can be cut to.
+ *
+ * "As it is" leads because it is the default and every picture already on a
+ * page is one. The circle is here because the operator asked for it by name —
+ * see the note on `PagePictureShape` in the schema for why that overrules the
+ * site's one-curve rule rather than drifting past it.
+ */
+const PICTURE_SHAPES = [
+  { value: "natural", label: "As it is" },
+  { value: "rectangle", label: "Rectangle" },
+  { value: "square", label: "Square" },
+  { value: "circle", label: "Circle" },
+] as const;
+
 /** The kinds of line, in the order she is most likely to want them. */
 const ITEM_KINDS = [
   { value: "heading", label: "Heading" },
@@ -170,6 +194,119 @@ const ITEM_KINDS = [
  * paragraph under it — and the range is bounded at both ends, so there is no
  * step that makes anything unreadable.
  */
+/**
+ * WHICH EDGE ONE LINE IS SET TO (operator, 2026-08-20).
+ *
+ * "Follow the box" is the fourth chip rather than an absence, because it is a
+ * choice she comes back to: having centred a heading over left-set paragraphs,
+ * the way to undo it has to be as findable as the way she did it. A control
+ * that can only be set is a control that traps her.
+ */
+function EdgeRow({
+  align,
+  busy,
+  onSet,
+}: {
+  align: "left" | "centre" | "right" | null;
+  busy: boolean;
+  onSet: (next: "left" | "centre" | "right" | "") => void;
+}) {
+  const OPTIONS = [
+    { value: "", label: "Follow the box" },
+    { value: "left", label: "Left" },
+    { value: "centre", label: "Centre" },
+    { value: "right", label: "Right" },
+  ] as const;
+
+  return (
+    <div className="mt-5">
+      <span className={LABEL}>Set to</span>
+      <span className={HINT}>
+        {align === null
+          ? "Wherever the box it is in sits."
+          : "This line only — the rest of the box is unchanged."}
+      </span>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            disabled={busy}
+            aria-pressed={(align ?? "") === option.value}
+            className={
+              (align ?? "") === option.value ? `${CHIP} border-ink` : CHIP
+            }
+            onClick={() => onSet(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A PERCENTAGE, IN TENS, AS A ROW OF STEPS — never a slider.
+ *
+ * A slider is a control that has to be dragged accurately in a panel beside a
+ * page that redraws on every change; two presses and looking at the result is
+ * both easier to aim and easier to undo. Tens are as fine as this needs to be:
+ * the difference between 40% and 45% of a photograph is not a decision anybody
+ * makes on purpose.
+ */
+function FocusRow({
+  label,
+  hint,
+  value,
+  busy,
+  lower,
+  higher,
+  onSet,
+}: {
+  label: string;
+  hint: string;
+  value: number;
+  busy: boolean;
+  /** What 0 means, in her words — "Top" or "Left". */
+  lower: string;
+  /** And 100 — "Bottom" or "Right". */
+  higher: string;
+  onSet: (next: number) => void;
+}) {
+  return (
+    <div className="mt-5">
+      <span className={LABEL}>{label}</span>
+      <span className={HINT}>
+        {value === 50 ? hint : `${value}% from the ${lower.toLowerCase()}.`}
+      </span>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={busy || value <= 0}
+          className={CHIP}
+          onClick={() => onSet(value - 10)}
+        >
+          &uarr; {lower}
+        </button>
+        <button
+          type="button"
+          disabled={busy || value >= 100}
+          className={CHIP}
+          onClick={() => onSet(value + 10)}
+        >
+          &darr; {higher}
+        </button>
+        {value !== 50 && (
+          <button type="button" className={GHOST} onClick={() => onSet(50)}>
+            Back to the middle
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SizeRow({
   step,
   busy,
@@ -1119,6 +1256,82 @@ function SectionPanel(props: ToolboxProps & { section: EditorSection }) {
             </div>
           </div>
 
+          {/* HOW MUCH ROOM THE BAND HAS, and where in the photograph it is
+              looking. Both are on the section rather than on what is in it,
+              because both are properties of the band: a picture placed in a
+              band that is too shallow has nowhere to be, and a letterbox cut
+              out of a tall photograph very often misses the thing worth seeing
+              (operator, 2026-08-20). */}
+          {section.kind === "free" && (
+            <div className="mt-7 border-t border-pool-rule pt-5">
+              <span className={LABEL}>How tall it is</span>
+              <span className={HINT}>
+                {section.tall === 0
+                  ? "As deep as the page makes a band."
+                  : `${section.tall} step${section.tall === 1 ? "" : "s"} roomier than a band.`}
+              </span>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={props.busy || section.tall <= 0}
+                  className={CHIP}
+                  onClick={() =>
+                    void props.run("tall-section", {
+                      section: String(section.id),
+                      step: String(section.tall - 1),
+                    })
+                  }
+                >
+                  &minus; Shorter
+                </button>
+                <button
+                  type="button"
+                  disabled={props.busy || section.tall >= 6}
+                  className={CHIP}
+                  onClick={() =>
+                    void props.run("tall-section", {
+                      section: String(section.id),
+                      step: String(section.tall + 1),
+                    })
+                  }
+                >
+                  + Taller
+                </button>
+                {section.tall !== 0 && (
+                  <button
+                    type="button"
+                    className={GHOST}
+                    onClick={() =>
+                      void props.run("tall-section", {
+                        section: String(section.id),
+                        step: "0",
+                      })
+                    }
+                  >
+                    Back to a band
+                  </button>
+                )}
+              </div>
+
+              {section.hasPicture && (
+                <FocusRow
+                  label="Where the photograph sits"
+                  hint="The middle of it, which is where a band looks by default."
+                  value={section.focusY}
+                  busy={props.busy}
+                  lower="Up"
+                  higher="Down"
+                  onSet={(next) =>
+                    void props.run("focus-section", {
+                      section: String(section.id),
+                      percent: String(next),
+                    })
+                  }
+                />
+              )}
+            </div>
+          )}
+
           {/* ── what goes in it ────────────────────────────────────────── */}
           <div className="mt-7 border-t border-pool-rule pt-5">
             <span className={LABEL}>Put something in it</span>
@@ -1291,6 +1504,80 @@ function BlockPanel(props: ToolboxProps & { block: EditorBlock }) {
               </button>
             )}
           </div>
+
+          {/* THE SHAPE SHE CUTS IT TO, and what stays in frame once it does
+              (operator, 2026-08-20). Only shown once there IS a picture: three
+              shapes offered for nothing is a decision about an empty box.
+
+              "As it is" first, because it is the default and every picture
+              already placed is one — and because it is how she undoes the
+              other three rather than a state she has to be talked out of. */}
+          {block.pictureRef && (
+            <>
+              <div className="mt-6">
+                <span className={LABEL}>Its shape</span>
+                <span className={HINT}>
+                  {block.shape === "natural"
+                    ? "However tall the photograph is. Nothing is cut off."
+                    : "The photograph is cut to fit — choose what stays in frame below."}
+                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {PICTURE_SHAPES.map((shape) => (
+                    <button
+                      key={shape.value}
+                      type="button"
+                      disabled={props.busy}
+                      aria-pressed={block.shape === shape.value}
+                      className={block.shape === shape.value ? CHIP_ON : CHIP}
+                      onClick={() =>
+                        void props.run("shape-block", {
+                          block: String(block.id),
+                          shape: shape.value,
+                        })
+                      }
+                    >
+                      {shape.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {block.shape !== "natural" && (
+                <>
+                  <FocusRow
+                    label="What stays in frame, up and down"
+                    hint="The middle of it."
+                    value={block.focusY}
+                    busy={props.busy}
+                    lower="Up"
+                    higher="Down"
+                    onSet={(next) =>
+                      void props.run("focus-block", {
+                        block: String(block.id),
+                        axis: "y",
+                        percent: String(next),
+                      })
+                    }
+                  />
+                  <FocusRow
+                    label="And across"
+                    hint="The middle of it."
+                    value={block.focusX}
+                    busy={props.busy}
+                    lower="Left"
+                    higher="Right"
+                    onSet={(next) =>
+                      void props.run("focus-block", {
+                        block: String(block.id),
+                        axis: "x",
+                        percent: String(next),
+                      })
+                    }
+                  />
+                </>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <div className="mt-6">
@@ -1395,6 +1682,17 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
           void props.run("size-item", {
             item: String(item.id),
             step: String(next),
+          })
+        }
+      />
+
+      <EdgeRow
+        align={item.align}
+        busy={props.busy}
+        onSet={(next) =>
+          void props.run("align-item", {
+            item: String(item.id),
+            align: next,
           })
         }
       />

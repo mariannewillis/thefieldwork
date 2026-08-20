@@ -1585,4 +1585,3 @@ try {
 
 console.log(`\n  ${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);
-
