@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/site/JsonLd";
 import PageField from "@/components/site/PageField";
+import { breadcrumbs, graph, practice, serviceObject } from "@/lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import FilmEmbed from "@/components/site/FilmEmbed";
 import PhotoRail from "@/components/site/PhotoRail";
@@ -74,6 +76,31 @@ export async function generateMetadata({
     title: `${service.name} — The Field Work`,
     description: service.summary,
     alternates: { canonical: `/services/${service.slug}` },
+    /**
+     * ITS OWN PHOTOGRAPH, not the site's.
+     *
+     * A share of one service should show that service. The root layout's
+     * altar picture is the fallback for everything that has none of its own,
+     * and inheriting it here would mean every service she has ever run
+     * shares as the same image — which is the same as having no image, with
+     * extra steps.
+     */
+    openGraph: {
+      type: "article",
+      url: `/services/${service.slug}`,
+      title: `${service.name} — The Field Work`,
+      description: service.summary,
+      ...(service.heroImage
+        ? {
+            images: [
+              {
+                url: `/media/${service.heroImage}-1200.jpg`,
+                alt: service.heroAlt ?? "",
+              },
+            ],
+          }
+        : {}),
+    },
   };
 }
 
@@ -278,6 +305,25 @@ export default async function Page({
 
   return (
     <>
+      {/* A `Service` and not an `Event`: a one-to-one hour has no date — it is
+          arranged — and an Event would need a `startDate` it does not have. */}
+      <JsonLd
+        json={graph(
+          practice(),
+          serviceObject({
+            slug: service.slug,
+            name: service.name,
+            summary: service.summary,
+            priceGBP: service.priceGBP,
+            durationMinutes: service.durationMinutes,
+            heroImage: service.heroImage,
+          }),
+          breadcrumbs([
+            { name: "Sessions", path: "/services" },
+            { name: service.name, path: `/services/${service.slug}` },
+          ]),
+        )}
+      />
       {/* A PHOTOGRAPH, so it takes the photograph's treatment (operator,
           2026-08-19). It was `abstract` — brightness 0.92 and mirrored — which
           was tuned for the abstract that used to be here and has nothing to

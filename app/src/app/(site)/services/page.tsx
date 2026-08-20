@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/site/JsonLd";
 import PageField from "@/components/site/PageField";
+import { breadcrumbs, graph, itemList, practice } from "@/lib/seo/jsonld";
+import { CANONICAL_SITE_URL } from "@/content/site";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { servicesIndex } from "@/content/services";
 import { formatDuration, formatMoney } from "@/lib/format";
@@ -110,6 +113,19 @@ export default async function Page() {
 
   return (
     <>
+      {/* THE LIST, AND WHO RUNS IT. Each entry is a bare url rather than a
+          repeat of the service's own facts: those are on its own page, in full,
+          and stating them twice is two places for them to disagree. */}
+      <JsonLd
+        json={graph(
+          practice(),
+          itemList(
+            "One-to-one sessions",
+            services.map((one) => `${CANONICAL_SITE_URL}/services/${one.slug}`),
+          ),
+          breadcrumbs([{ name: "Sessions", path: "/services" }]),
+        )}
+      />
       <PageField src={servicesIndex.plate.src} />
 
       <a

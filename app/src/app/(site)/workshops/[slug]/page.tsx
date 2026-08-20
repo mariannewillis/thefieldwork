@@ -6,7 +6,9 @@ import FilmEmbed from "@/components/site/FilmEmbed";
 import PhotoRail from "@/components/site/PhotoRail";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { workshopDetail } from "@/content/workshops";
+import JsonLd from "@/components/site/JsonLd";
 import { placesLeft, placesSold } from "@/lib/bookings";
+import { breadcrumbs, graph, practice, workshopEvent } from "@/lib/seo/jsonld";
 import { parseFilm } from "@/lib/film";
 import {
   formatDayLong,
@@ -59,6 +61,31 @@ export async function generateMetadata({
     title: `${workshop.name} — The Field Work`,
     description: workshop.summary,
     alternates: { canonical: `/workshops/${workshop.slug}` },
+    /**
+     * ITS OWN PHOTOGRAPH, not the site's.
+     *
+     * A share of one workshop should show that workshop. The root layout's
+     * altar picture is the fallback for everything that has none of its own,
+     * and inheriting it here would mean every workshop she has ever run
+     * shares as the same image — which is the same as having no image, with
+     * extra steps.
+     */
+    openGraph: {
+      type: "article",
+      url: `/workshops/${workshop.slug}`,
+      title: `${workshop.name} — The Field Work`,
+      description: workshop.summary,
+      ...(workshop.heroImage
+        ? {
+            images: [
+              {
+                url: `/media/${workshop.heroImage}-1200.jpg`,
+                alt: workshop.heroAlt ?? "",
+              },
+            ],
+          }
+        : {}),
+    },
   };
 }
 
@@ -90,6 +117,35 @@ export default async function Page({
 
   return (
     <>
+      {/* WHAT A MACHINE READS. An `Event` with the date, the place, the
+          price and whether there are places left — which is the question an
+          assistant is actually being asked when somebody says "is there an aura
+          healing workshop in Frome this month". Every value is the one the page
+          below renders; see `lib/seo/jsonld.ts` for what is deliberately NOT
+          claimed. */}
+      <JsonLd
+        json={graph(
+          practice(),
+          workshopEvent({
+            slug: workshop.slug,
+            name: workshop.name,
+            summary: workshop.summary,
+            date: workshop.date,
+            startTime: workshop.startTime,
+            endTime: workshop.endTime,
+            priceGBP: workshop.priceGBP,
+            placesLeft: past ? 0 : left,
+            heroImage: workshop.heroImage,
+            venueName: workshop.venueName,
+            addressLines: workshop.addressLines,
+            postcode: workshop.postcode,
+          }),
+          breadcrumbs([
+            { name: "Workshops", path: "/workshops" },
+            { name: workshop.name, path: `/workshops/${workshop.slug}` },
+          ]),
+        )}
+      />
       {/* A PHOTOGRAPH, so it takes the photograph's treatment (operator,
           2026-08-19). It was `abstract` — brightness 0.92 and mirrored — which
           was tuned for the abstract that used to be here and has nothing to

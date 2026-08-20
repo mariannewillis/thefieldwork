@@ -3,6 +3,7 @@ import OfferingMessage from "@/components/admin/OfferingMessage";
 import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
 import FlyerTab from "@/components/admin/FlyerTab";
+import OfferingSeo from "@/components/admin/OfferingSeo";
 import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { attendingOffering } from "@/lib/attending";
 import { notFound } from "next/navigation";
@@ -132,6 +133,24 @@ export default async function Page({
               // In code they are CourseSessions; nothing Marianne reads says so.
               dates,
             }}
+          />
+
+          {/* WHAT A MACHINE IS TOLD, said where the fields that decide it are.
+              All of it is generated from the row above — there is nothing to
+              fill in — which is exactly why it is worth showing: a thing that
+              happens silently is a thing she cannot check. */}
+          <OfferingSeo
+            kind="course"
+            slug={course.slug}
+            name={course.name}
+            summary={course.summary}
+            heroImage={course.heroImage}
+            published={course.published}
+            when={
+              course.sessions.length > 0
+                ? `${course.sessions.length} ${course.sessions.length === 1 ? "session" : "sessions"}, from ${formatDayShort(course.sessions[0].date)}`
+                : null
+            }
           />
         </>
       )}

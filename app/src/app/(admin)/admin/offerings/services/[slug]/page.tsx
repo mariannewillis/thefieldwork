@@ -3,6 +3,7 @@ import OfferingMessage from "@/components/admin/OfferingMessage";
 import { offeringMessages } from "@/lib/offering-messages";
 import AttendingTable from "@/components/admin/AttendingTable";
 import FlyerTab from "@/components/admin/FlyerTab";
+import OfferingSeo from "@/components/admin/OfferingSeo";
 import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { askedForService } from "@/lib/attending";
 import { notFound } from "next/navigation";
@@ -142,6 +143,19 @@ export default async function Page({
               // The textarea shows her own marks, not the markup they became.
               body: toSource(service.bodyHtml),
             }}
+          />
+
+          {/* WHAT A MACHINE IS TOLD, said where the fields that decide it are.
+              All of it is generated from the row above — there is nothing to
+              fill in — which is exactly why it is worth showing: a thing that
+              happens silently is a thing she cannot check. */}
+          <OfferingSeo
+            kind="service"
+            slug={service.slug}
+            name={service.name}
+            summary={service.summary}
+            heroImage={service.heroImage}
+            published={service.published}
           />
         </>
       )}

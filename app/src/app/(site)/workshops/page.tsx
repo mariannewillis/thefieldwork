@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/site/JsonLd";
 import PageField from "@/components/site/PageField";
+import { breadcrumbs, graph, itemList, practice } from "@/lib/seo/jsonld";
+import { CANONICAL_SITE_URL } from "@/content/site";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { workshopsIndex } from "@/content/workshops";
 import { placesLeft, placesSoldByWorkshop } from "@/lib/bookings";
@@ -112,6 +115,21 @@ export default async function Page() {
 
   return (
     <>
+      {/* THE LIST, AND WHO RUNS IT. Each entry is a bare url rather than a
+          repeat of the workshop's own facts: those are on its own page, in full,
+          and stating them twice is two places for them to disagree. */}
+      <JsonLd
+        json={graph(
+          practice(),
+          itemList(
+            "Workshops in Frome",
+            workshops.map(
+              (one) => `${CANONICAL_SITE_URL}/workshops/${one.slug}`,
+            ),
+          ),
+          breadcrumbs([{ name: "Workshops", path: "/workshops" }]),
+        )}
+      />
       <PageField src={workshopsIndex.plate.src} />
 
       <a

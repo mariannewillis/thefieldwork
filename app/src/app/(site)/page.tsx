@@ -1,4 +1,6 @@
 import HomeBody from "@/components/site/HomeBody";
+import JsonLd from "@/components/site/JsonLd";
+import { graph, practice, website } from "@/lib/seo/jsonld";
 import { home } from "@/content/home";
 import { homeLedger } from "@/lib/pages/home-ledger";
 import { HOME, readPage } from "@/lib/pages/read";
@@ -23,10 +25,18 @@ export default async function HomePage() {
   ]);
 
   return (
-    <HomeBody
-      page={page}
-      rowsByLabel={rowsByLabel}
-      groups={home.schedule.groups}
-    />
+    <>
+      {/* THE PRACTICE, DESCRIBED ONCE, on the page every other page points at.
+          `WebSite` alongside it is what lets a search engine treat the whole
+          site as one entity rather than as nine unrelated documents — the
+          `publisher` reference below is the join. */}
+      <JsonLd json={graph(practice(), website())} />
+
+      <HomeBody
+        page={page}
+        rowsByLabel={rowsByLabel}
+        groups={home.schedule.groups}
+      />
+    </>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/site/JsonLd";
 import PageField from "@/components/site/PageField";
+import { breadcrumbs, courseObject, graph, practice } from "@/lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import CoursePanel from "@/components/site/CoursePanel";
 import FilmEmbed from "@/components/site/FilmEmbed";
@@ -58,6 +60,31 @@ export async function generateMetadata({
     title: `${course.name} — The Field Work`,
     description: course.summary,
     alternates: { canonical: `/courses/${course.slug}` },
+    /**
+     * ITS OWN PHOTOGRAPH, not the site's.
+     *
+     * A share of one course should show that course. The root layout's
+     * altar picture is the fallback for everything that has none of its own,
+     * and inheriting it here would mean every course she has ever run
+     * shares as the same image — which is the same as having no image, with
+     * extra steps.
+     */
+    openGraph: {
+      type: "article",
+      url: `/courses/${course.slug}`,
+      title: `${course.name} — The Field Work`,
+      description: course.summary,
+      ...(course.heroImage
+        ? {
+            images: [
+              {
+                url: `/media/${course.heroImage}-1200.jpg`,
+                alt: course.heroAlt ?? "",
+              },
+            ],
+          }
+        : {}),
+    },
   };
 }
 
@@ -148,6 +175,34 @@ export default async function Page({
 
   return (
     <>
+      {/* A `Course` with one `CourseInstance`, not six separate events: a run
+          of dates is ONE thing somebody signs up to, and there is no way to buy
+          one date of it. */}
+      <JsonLd
+        json={graph(
+          practice(),
+          courseObject({
+            slug: course.slug,
+            name: course.name,
+            summary: course.summary,
+            priceGBP: course.priceGBP,
+            placesLeft: left,
+            heroImage: course.heroImage,
+            venueName: course.venueName,
+            addressLines: course.addressLines,
+            postcode: course.postcode,
+            sessions: course.sessions.map((session) => ({
+              date: session.date,
+              startTime: session.startTime,
+              endTime: session.endTime,
+            })),
+          }),
+          breadcrumbs([
+            { name: "Courses", path: "/courses" },
+            { name: course.name, path: `/courses/${course.slug}` },
+          ]),
+        )}
+      />
       {/* A PHOTOGRAPH, so it takes the photograph's treatment (operator,
           2026-08-19). It was `abstract` — brightness 0.92 and mirrored — which
           was tuned for the abstract that used to be here and has nothing to
