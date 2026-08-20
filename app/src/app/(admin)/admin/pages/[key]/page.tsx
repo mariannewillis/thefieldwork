@@ -133,6 +133,7 @@ export default async function PageEditorScreen({
           href: item.href,
           size: item.size,
           align: item.align,
+          tone: item.tone,
         };
       }
     }

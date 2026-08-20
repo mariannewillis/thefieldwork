@@ -506,6 +506,30 @@ function Item({
       } as CSSProperties)
     : undefined;
 
+  /**
+   * WHICH ACCENT COLOUR SHE CHOSE, or nothing at all if she did not.
+   *
+   * `auto` emits nothing rather than re-stating the ground's own colour: a line
+   * she has not chosen a colour for keeps behaving exactly as it did before
+   * this existed, including if the ground under it changes.
+   *
+   * INLINE, AND NOT A CLASS. The first attempt was `.free__tone--gold`, which
+   * is (0,1,0) against `.ink .eyebrow`'s (0,2,0) — so a gold line inside a box
+   * of words rendered pink, which is the very bug this was built to fix. The
+   * fix is not a more specific selector: the ground rules are a legitimate
+   * default and there are three of them (`.ink`, `.onplate`, `.free__plain`),
+   * so beating them by selector means writing her choice three times and
+   * writing it again the day a fourth ground appears. Her choice is the most
+   * specific thing there is about this line, so it is stated on the line.
+   *
+   * The VALUES stay in the stylesheet's custom properties, so the palette is
+   * still defined in exactly one place.
+   */
+  const tone =
+    item.tone === "auto"
+      ? undefined
+      : { color: `var(--${item.tone === "pink" ? "magenta-deep" : "gold"})` };
+
   if (!item.text.trim()) {
     if (!editing) return null;
     return (
@@ -522,13 +546,13 @@ function Item({
   switch (item.kind) {
     case "eyebrow":
       return (
-        <p className="eyebrow" style={edge}>
+        <p className="eyebrow" style={{ ...edge, ...tone }}>
           {item.text}
         </p>
       );
     case "heading":
       return (
-        <p className="disp free__heading" style={edge}>
+        <p className="disp free__heading" style={{ ...edge, ...tone }}>
           {item.text}
         </p>
       );

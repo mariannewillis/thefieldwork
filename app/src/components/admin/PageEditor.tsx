@@ -89,6 +89,8 @@ export type EditorItem = {
   size: number;
   /** The edge this one line is set to. Null follows the box it is in. */
   align: "left" | "centre" | "right" | null;
+  /** Which accent colour it is in. */
+  tone: "auto" | "pink" | "gold";
 };
 
 type Props = {
@@ -218,14 +220,38 @@ const PICTURE_SHAPES = [
   { value: "circle", label: "Circle" },
 ] as const;
 
-/** The kinds of line, in the order she is most likely to want them. */
+/**
+ * The kinds of line, in the order she is most likely to want them.
+ *
+ * TWO SMALL LINES, NOT ONE (operator, 2026-08-20 — "small gold line create a
+ * pink line"). There was one button called "Small gold line" and it produced a
+ * PINK line whenever it was put in a box of words, because which accent colour
+ * a small line came out in was decided entirely by the ground under it and
+ * never by her. Two buttons, each doing what it says, and the colour arrives
+ * with the line rather than being a second decision after it appears.
+ */
 const ITEM_KINDS = [
-  { value: "heading", label: "Heading" },
-  { value: "paragraph", label: "Paragraph" },
-  { value: "bullets", label: "A list of lines" },
-  { value: "eyebrow", label: "Small gold line" },
-  { value: "link", label: "Link" },
-  { value: "button", label: "Button" },
+  { value: "heading", label: "Heading", tone: "auto" },
+  { value: "paragraph", label: "Paragraph", tone: "auto" },
+  { value: "bullets", label: "A list of lines", tone: "auto" },
+  { value: "eyebrow", label: "Pink line", tone: "pink" },
+  { value: "eyebrow", label: "Gold line", tone: "gold" },
+  { value: "link", label: "Link", tone: "auto" },
+  { value: "button", label: "Button", tone: "auto" },
+] as const;
+
+/**
+ * WHICH ACCENT COLOUR A LINE IS IN, once it is on the page.
+ *
+ * Offered on the two kinds it means something for — the small line and the
+ * heading. "As the page sets it" is the fourth-wall answer and the default:
+ * whatever the ground gives it, which is what every line did before she could
+ * choose, and what a line put on a photograph should keep doing.
+ */
+const TONES = [
+  { value: "auto", label: "As the page sets it" },
+  { value: "pink", label: "Pink" },
+  { value: "gold", label: "Gold" },
 ] as const;
 
 /**
@@ -1653,13 +1679,14 @@ function BlockPanel(props: ToolboxProps & { block: EditorBlock }) {
           <div className="mt-2 flex flex-wrap gap-2">
             {ITEM_KINDS.map((item) => (
               <button
-                key={item.value}
+                key={item.label}
                 type="button"
                 className={CHIP}
                 onClick={() =>
                   void props.run("add-item", {
                     block: String(block.id),
                     kind: item.value,
+                    tone: item.tone,
                   })
                 }
               >
@@ -1689,7 +1716,13 @@ function BlockPanel(props: ToolboxProps & { block: EditorBlock }) {
 
 function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
   const { item } = props;
-  const kind = ITEM_KINDS.find((one) => one.value === item.kind);
+  // Two entries share the `eyebrow` kind and differ only in colour, so the one
+  // that names this line is the one whose colour it is actually in.
+  const kind =
+    ITEM_KINDS.find(
+      (one) => one.value === item.kind && one.tone === item.tone,
+    ) ?? ITEM_KINDS.find((one) => one.value === item.kind);
+  const tinted = item.kind === "eyebrow" || item.kind === "heading";
   const wantsHref = item.kind === "link" || item.kind === "button";
 
   const [text, setText] = useState(item.text);
@@ -1765,6 +1798,40 @@ function ItemPanel(props: ToolboxProps & { item: EditorItem }) {
           })
         }
       />
+
+      {/* THE COLOUR, ON THE TWO KINDS IT MEANS SOMETHING FOR. A heading set to
+          pink is how the composition's own "Nothing was cured. The bracing for
+          it stopped." is made, and there was no way to ask for it before
+          (operator, 2026-08-20). */}
+      {tinted && (
+        <div className="mt-5">
+          <span className={LABEL}>Its colour</span>
+          <span className={HINT}>
+            {item.tone === "auto"
+              ? "Whichever the page gives it — pink in a box of words, gold on a photograph."
+              : "This line only, wherever it ends up."}
+          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {TONES.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                disabled={props.busy}
+                aria-pressed={item.tone === option.value}
+                className={item.tone === option.value ? CHIP_ON : CHIP}
+                onClick={() =>
+                  void props.run("tone-item", {
+                    item: String(item.id),
+                    tone: option.value,
+                  })
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <EdgeRow
         align={item.align}

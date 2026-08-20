@@ -1784,6 +1784,26 @@ enum PageBlockKind {
   picture
 }
 
+/// THE TWO ACCENT COLOURS, NAMED (operator, 2026-08-20).
+///
+/// The site has exactly two and always has: the gold and the deep magenta. Which
+/// one a small line came out in was decided ENTIRELY by what it was sitting on —
+/// `.ink .eyebrow` is magenta, `.onplate .eyebrow` is gold — so the toolbox's
+/// "Small gold line" produced a PINK line whenever it was put in a box of words,
+/// which is most of the time. The colour was never hers to choose and the label
+/// was wrong about what it did.
+///
+/// `auto` is that old behaviour and stays the default, so nothing already on a
+/// page moves. The other two say which colour she meant, wherever it sits.
+enum PageItemTone {
+  /// Whatever the ground gives it. What every line was before this existed.
+  auto
+  /// The deep magenta.
+  pink
+  /// The gold.
+  gold
+}
+
 /// THE FRAME A PLACED PHOTOGRAPH IS CUT TO.
 ///
 /// `natural` is the picture's own shape and the default, so every picture
@@ -1958,6 +1978,11 @@ model PageItem {
   /// the one heading she wants centred over left-set paragraphs
   /// (operator, 2026-08-20).
   align PageAnchor?
+
+  /// Which of the site's two accent colours this line is in. `auto` is the
+  /// colour the ground it sits on gives it, and is what every line was before
+  /// this existed.
+  tone PageItemTone @default(auto)
 
   @@index([blockId, position])
 }

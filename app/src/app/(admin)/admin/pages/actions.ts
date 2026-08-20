@@ -26,6 +26,7 @@ import {
   setSectionPicture,
   setItemAlign,
   setItemSize,
+  setItemTone,
   setSectionFocus,
   setSectionTall,
   setText,
@@ -139,6 +140,16 @@ async function dispatch(
     /* An empty `align` is "follow the box", which is a value rather than a
        missing one — so the control that sets an edge is the control that
        clears it. */
+    case "tone-item": {
+      const tone = str(form, "tone");
+      return settled(
+        await setItemTone(
+          page,
+          num(form, "item"),
+          tone === "pink" || tone === "gold" ? tone : "auto",
+        ),
+      );
+    }
     case "align-item": {
       const edge = str(form, "align");
       return settled(
@@ -256,9 +267,11 @@ async function dispatch(
 
     // ── the lines inside a box ────────────────────────────────────────────
     case "add-item": {
+      const asked = str(form, "tone");
       const outcome = await addItem(page, {
         blockId: num(form, "block"),
         kind: str(form, "kind") as PageItemKind,
+        tone: asked === "pink" || asked === "gold" ? asked : "auto",
       });
       return outcome.ok
         ? { error: null, done: outcome.id }

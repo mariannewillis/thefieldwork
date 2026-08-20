@@ -2,6 +2,7 @@ import type {
   PageAnchor,
   PageBlockKind,
   PageItemKind,
+  PageItemTone,
   PagePictureShape,
   Prisma,
 } from "@prisma/client";
@@ -304,6 +305,26 @@ export async function setItemSize(
  * control that sets an edge is the control that clears it (operator,
  * 2026-08-20).
  */
+/**
+ * WHICH ACCENT COLOUR ONE LINE IS IN.
+ *
+ * `auto` is the colour the ground gives it — magenta in a box of words, gold on
+ * a photograph — and is what every line was before she could choose. The other
+ * two hold whichever she meant wherever the line ends up.
+ */
+export async function setItemTone(
+  page: string,
+  itemId: number,
+  tone: PageItemTone,
+): Promise<Outcome> {
+  const item = await prisma.pageItem.findFirst({
+    where: { id: itemId, block: { section: { page, state: "draft" } } },
+  });
+  if (!item) return { ok: false, reason: GONE };
+  await prisma.pageItem.update({ where: { id: itemId }, data: { tone } });
+  return OK;
+}
+
 export async function setItemAlign(
   page: string,
   itemId: number,
@@ -686,7 +707,7 @@ export async function deleteBlock(
 
 export async function addItem(
   page: string,
-  input: { blockId: number; kind: PageItemKind },
+  input: { blockId: number; kind: PageItemKind; tone?: PageItemTone },
 ): Promise<{ ok: true; id: number } | { ok: false; reason: string }> {
   const block = await findBlock(page, input.blockId);
   if (!block) return { ok: false, reason: GONE };
@@ -704,6 +725,10 @@ export async function addItem(
       blockId: input.blockId,
       position: (last?.position ?? -1) + 1,
       kind: input.kind,
+      // The toolbox offers a pink line and a gold line as two things to press,
+      // because that is how she thinks of them — so the colour arrives with the
+      // line rather than being a second decision after it appears.
+      tone: input.tone ?? "auto",
       text: "",
       href: input.kind === "link" || input.kind === "button" ? "/" : null,
     },

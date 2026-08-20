@@ -2,6 +2,7 @@ import type {
   PageAnchor,
   PageBlockKind,
   PageItemKind,
+  PageItemTone,
   PagePictureShape,
   PageState,
 } from "@prisma/client";
@@ -47,6 +48,8 @@ export type ResolvedItem = {
   size: number;
   /** Which edge this one line is set to. Null follows the box it is in. */
   align: PageAnchor | null;
+  /** Which accent colour it is in. `auto` is whatever the ground gives it. */
+  tone: PageItemTone;
   /** heading / paragraph / eyebrow / button / link: the words. */
   text: string;
   /** bullets: the same words, already split. */
@@ -246,6 +249,7 @@ export async function readPage(
           kind: item.kind,
           size: item.size,
           align: item.align,
+          tone: item.tone,
           text: item.text ?? "",
           lines: splitLines(item.text ?? ""),
           href: item.href,
