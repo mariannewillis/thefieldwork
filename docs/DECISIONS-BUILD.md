@@ -3443,3 +3443,74 @@ while three people drift a month behind.
 Exercised by `e2e/instalments-smoke.mjs` — 18 claims, its own server, its own
 course, and an assertion over the whole run's log that not one message was
 addressed to her.
+
+---
+
+## D-37 · Three ways to pay, ticked; and the deposit stops being the plan's first instalment (2026-08-21)
+
+> "I am just setting up a course and the facts are a bit confusing."
+
+He was right, and the confusion was in the model rather than in the labels. The
+course form had a **deposit** field and a **paid in N payments** field, with no
+way to say whether either was on offer — a figure typed in a box WAS the offer —
+and setting both silently made the deposit the first of the N. So a course could
+not say "either £150 now and the rest in October, or six of £105"; the two
+arrangements were welded into one.
+
+**They are three separate offers now, each with a tick, and a buyer picks one.**
+
+| Tick             | What it is                                                        | Interest |
+| ---------------- | ----------------------------------------------------------------- | -------- |
+| All of it at once | The whole price at the checkout. The default, and the fallback.   | never    |
+| A deposit         | Part now, the rest by a day she sets. Two payments.               | never    |
+| In parts          | The price divided evenly, the FIRST taken at the checkout.        | optional |
+
+**Interest belongs to the plan alone.** A balance six weeks out is a held place;
+six payments over five months is credit, and only the second is a thing to
+charge for. It is stored in basis points — 550 is 5.5% — for the reason every
+money figure here is an integer, and added ONCE to the whole before anything is
+divided, so the total the page quotes and the parts in the database cannot
+drift. When it is more than nothing the page says so in those words:
+
+> £630 in all — £30 more than paying at once. Paying in parts costs a little
+> more than paying at once. The difference is here rather than in the small print.
+
+**Paying in full cannot vanish.** Untick everything and the course is still
+buyable at its price. A published page with no working button is worse than one
+that offers a single way, and an arrangement that expires — a deposit whose
+balance day has been — falls BACK to the price rather than through it. That case
+is not hypothetical: her own `ifr-course` had a balance day five days past, and
+the first cut of the migration left it offering nothing but a plan.
+
+**One function does the sums, and three callers use it.** `chargeForChoice` is
+behind the figure on the page, the `unit_amount` on the checkout, and the
+cross-check in the webhook. It lives in `lib/instalments-shape.ts` with no
+imports at all, because the browser needs it too and the module that reads the
+database is `server-only`. Two implementations of one sum is precisely how a
+page offers £105 and a card is charged £100.
+
+### Three real bugs the work turned up
+
+1. **A plan got no pay link.** The link was issued on `balanceDueAt` — which a
+   deposit has and a plan does not — so everybody paying in parts would have had
+   a plan and no way to pay it, and her reminder would have linked to nothing.
+   The honest test is the arithmetic one: was less taken than the booking is for?
+2. **An unstamped session would have been read as paid in full.** Every Checkout
+   Session in flight on the day this deploys carries no `payment` key. Defaulting
+   those to "full" would record a £240 course as settled on an £80 deposit — no
+   link, no balance ever asked for, and a ledger saying she had been paid. They
+   are read off the AMOUNT instead, under the lock, against the course's own
+   figures.
+3. **The email preview 500'd.** `as unknown as BookingWithOffering` is what let
+   a sample without the new relation typecheck.
+
+### And the controls are drawn rather than accented
+
+The browser's own radios arrived as filled dark discs whether or not they were
+selected — so the one thing a radio exists to say was the one thing it did not
+say — and `accent-color` could not fix it, because the variable it named does
+not exist on either surface (the token is `--color-ink`). The inputs are still
+the inputs, `sr-only` and fully keyboard-operable; only the ring is ours.
+
+Exercised by `e2e/pay-ways-smoke.mjs` — 31 claims, its own server on 3110, no
+real Stripe (signed synthetic events) and no real mail.

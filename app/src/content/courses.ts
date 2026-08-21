@@ -118,6 +118,21 @@ export const courseDetail = {
       "The link to pay the rest is in your confirmation email, and it works from the day you book. If the balance is not paid by that date the place is released.",
     /** A course with no deposit. One payment, and it says so. */
     paidInFullNote: "The whole price is taken when you book.",
+
+    /** ── WHEN THERE IS MORE THAN ONE WAY TO PAY (operator, 2026-08-21) ────
+        The heading over the choice, and the label on each way. Named for what
+        the buyer is deciding, not for the mechanism: "how you would like to
+        pay" and not "payment options". */
+    waysLabel: "How you would like to pay",
+    fullWay: "All of it now",
+    depositWay: "A deposit now",
+    planWay: "In parts",
+    /** Said once, under a plan, and only when it actually costs more. */
+    planInterestNote:
+      "Paying in parts costs a little more than paying at once. The difference is here rather than in the small print.",
+    /** Under a plan, whatever the interest. */
+    planNote:
+      "The first payment is taken now. A link to pay each of the others is in your confirmation email and works from the day you book.",
   },
 } as const;
 

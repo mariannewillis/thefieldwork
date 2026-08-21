@@ -203,6 +203,31 @@ export function confirmationEmail(
   const owed = outstandingPence(booking);
   const some = places(booking.places);
 
+  /**
+   * ON A PLAN, THE EMAIL SAYS DIFFERENT THINGS (operator, 2026-08-21).
+   *
+   * The confirmation was written when a deposit was the only way to owe
+   * anything later, so it says "deposit paid" and "if the balance is not paid
+   * by that date the place is released". Both are wrong for somebody paying in
+   * six parts: they paid a SIXTH, not a deposit, there is no single date, and
+   * releasing the place is a consequence attached to `balanceDueAt` — which a
+   * plan does not have. Inventing one in an email would be inventing a rule she
+   * never set.
+   *
+   * So the plan gets its own three lines: what was taken, what is left, and
+   * when each of the rest falls due. The dates are read off the ROWS, which are
+   * the agreement, rather than recomputed from the course.
+   */
+  const plan = booking.instalments;
+  const onPlan = plan.length > 1;
+  const toCome = plan.filter((part) => part.paidAt === null);
+  const planLines = onPlan
+    ? toCome.map(
+        (part) =>
+          `${formatMoney(part.amountPence)} on ${formatDayLong(part.dueAt)}`,
+      )
+    : [];
+
   const slots = resolveSlots(
     "bookingConfirmation",
     wording,
@@ -244,11 +269,15 @@ export function confirmationEmail(
       ...(owed > 0
         ? [
             `${some} · ${formatMoney(booking.totalPence)} for the whole run`,
-            `${formatMoney(paidPence(booking))} deposit paid`,
+            onPlan
+              ? `${formatMoney(paidPence(booking))} paid — payment 1 of ${plan.length}`
+              : `${formatMoney(paidPence(booking))} deposit paid`,
             `${formatMoney(owed)} still to pay${
               booking.balanceDueAt
                 ? `, by ${formatDayLong(booking.balanceDueAt)}`
-                : ""
+                : onPlan
+                  ? `, in ${toCome.length} ${toCome.length === 1 ? "payment" : "payments"}`
+                  : ""
             }`,
           ]
         : offering.kind === "service"
@@ -262,16 +291,33 @@ export function confirmationEmail(
             "",
             balanceLink(tokens.balance),
             "",
-            `${formatMoney(owed)} is due${
-              booking.balanceDueAt
-                ? ` by ${formatDayLong(booking.balanceDueAt)}`
-                : ""
-            }. The link works from today — pay it whenever you like, and it will`,
-            "tell you if it has already been paid. Your place is held until then.",
-            "",
-            "If the balance is not paid by that date the place is released, and",
-            "somebody else can take it.",
-            "",
+            ...(onPlan
+              ? [
+                  // THE ROWS, NOT A SENTENCE ABOUT THEM. Somebody paying in
+                  // parts is owed the actual dates in writing on the day they
+                  // agree to it, not a rule they have to apply themselves.
+                  "The rest of your plan:",
+                  "",
+                  ...planLines.map((line) => `  ${line}`),
+                  "",
+                  "The one link above pays whichever is due when you open it —",
+                  "it never takes more than that, and it will tell you if there",
+                  "is nothing owing yet. Marianne will send a reminder if one",
+                  "goes past its date.",
+                  "",
+                ]
+              : [
+                  `${formatMoney(owed)} is due${
+                    booking.balanceDueAt
+                      ? ` by ${formatDayLong(booking.balanceDueAt)}`
+                      : ""
+                  }. The link works from today — pay it whenever you like, and it will`,
+                  "tell you if it has already been paid. Your place is held until then.",
+                  "",
+                  "If the balance is not paid by that date the place is released, and",
+                  "somebody else can take it.",
+                  "",
+                ]),
           ]
         : []),
       "IF YOU CANNOT COME",
@@ -348,12 +394,18 @@ export function confirmationEmail(
                       copy(
                         `${some} · ${formatMoney(booking.totalPence)} for the whole run`,
                       ),
-                      copy(`${formatMoney(paidPence(booking))} deposit paid`),
+                      copy(
+                        onPlan
+                          ? `${formatMoney(paidPence(booking))} paid — payment 1 of ${plan.length}`
+                          : `${formatMoney(paidPence(booking))} deposit paid`,
+                      ),
                       copyOnPlate(
                         `*${formatMoney(owed)} still to pay*${
                           booking.balanceDueAt
                             ? `, by ${formatDayLong(booking.balanceDueAt)}`
-                            : ""
+                            : onPlan
+                              ? `, in ${toCome.length} ${toCome.length === 1 ? "payment" : "payments"}`
+                              : ""
                         }`,
                       ),
                     ],
@@ -382,26 +434,44 @@ export function confirmationEmail(
                   { kind: "eyebrow", text: "Paying the rest" },
                   {
                     kind: "button",
-                    label: "Pay the balance",
+                    label: onPlan ? "Pay the next one" : "Pay the balance",
                     href: balanceLink(tokens.balance),
                   },
                   { kind: "rule" },
-                  {
-                    kind: "paragraph",
-                    text: copy(
-                      `${formatMoney(owed)} is due${
-                        booking.balanceDueAt
-                          ? ` by *${formatDayLong(booking.balanceDueAt)}*`
-                          : ""
-                      }. The link works from today — pay it whenever you like, and it will tell you if it has already been paid. Your place is held until then.`,
-                    ),
-                  },
-                  {
-                    kind: "paragraph",
-                    text: copy(
-                      "If the balance is not paid by that date the place is released, and somebody else can take it.",
-                    ),
-                  },
+                  ...(onPlan
+                    ? ([
+                        // THE DATES THEMSELVES, in the email they keep. A plan
+                        // described only as "five more payments" is a plan
+                        // somebody has to take notes about.
+                        {
+                          kind: "lines",
+                          lines: planLines.map((line) => copy(line)),
+                        },
+                        {
+                          kind: "paragraph",
+                          text: copy(
+                            "The one link above pays whichever is due when you open it — it never takes more than that, and it will tell you if there is nothing owing yet. Marianne will send a reminder if one goes past its date.",
+                          ),
+                        },
+                      ] as Block[])
+                    : ([
+                        {
+                          kind: "paragraph",
+                          text: copy(
+                            `${formatMoney(owed)} is due${
+                              booking.balanceDueAt
+                                ? ` by *${formatDayLong(booking.balanceDueAt)}*`
+                                : ""
+                            }. The link works from today — pay it whenever you like, and it will tell you if it has already been paid. Your place is held until then.`,
+                          ),
+                        },
+                        {
+                          kind: "paragraph",
+                          text: copy(
+                            "If the balance is not paid by that date the place is released, and somebody else can take it.",
+                          ),
+                        },
+                      ] as Block[])),
                 ] as Block[],
               },
             ]

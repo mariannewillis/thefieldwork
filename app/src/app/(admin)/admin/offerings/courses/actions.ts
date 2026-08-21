@@ -201,9 +201,27 @@ export async function saveCourse(
   const everyDaysWanted = Number(
     (values.instalmentEveryDays ?? "30").trim() || "30",
   );
+
+  /**
+   * THE THREE WAYS TO PAY, AS SHE TICKED THEM (operator, 2026-08-21).
+   *
+   * An unticked checkbox posts NOTHING — that is how checkboxes work — so
+   * absence is "off" and the presence of the key is "on". Every course saved
+   * from this form therefore says what it offers, explicitly, and there is no
+   * state where a figure in a field silently becomes an offer.
+   *
+   * A TICK IS ONLY VALIDATED WHEN IT IS ON. Unticking a way is not a reason to
+   * complain about the fields under it: they stay filled in so the arrangement
+   * can come back next term without being retyped, and the save simply stops
+   * asking whether they make sense.
+   */
+  const payInFull = values.payInFull === "on";
+  const depositOffered = values.depositOffered === "on";
+  const planOffered = values.planOffered === "on";
+
   if (depositSource && depositPence === null) {
     errors.deposit =
-      "Write the deposit in numbers, like 60 — or leave it empty to take the whole price at once.";
+      "Write the deposit in numbers, like 60 — or leave it empty.";
   } else if (
     depositPence !== null &&
     pricePence !== null &&
@@ -211,6 +229,47 @@ export async function saveCourse(
   ) {
     errors.deposit =
       "A deposit is part of the price, so it cannot be more than the price.";
+  } else if (depositOffered && !depositPence) {
+    errors.deposit =
+      "This course offers a deposit, so it needs a figure. Put one in, or untick the deposit above.";
+  }
+
+  if (planOffered && !(instalmentsWanted >= 2 && instalmentsWanted <= 12)) {
+    // TWO AT LEAST. One payment is paying in full, which is its own tick — and
+    // a "plan" of one would put a buyer through a plan-shaped checkout to be
+    // charged the whole price.
+    errors.instalments =
+      "A plan is between 2 and 12 payments. One payment is paying in full, which is the tick above.";
+  }
+  if (planOffered && !(everyDaysWanted >= 7 && everyDaysWanted <= 90)) {
+    errors.instalments =
+      "Payments go between 7 and 90 days apart. 30 is what people mean by monthly.";
+  }
+
+  /**
+   * INTEREST, TYPED AS A PERCENTAGE AND STORED IN BASIS POINTS.
+   *
+   * "5.5" becomes 550, the same move the deposit makes with pounds and pence,
+   * and for the same reason: money arithmetic on a float is an argument waiting
+   * to happen, and this one would be an argument about somebody's money.
+   *
+   * CAPPED AT 100%. Not a legal opinion — a typo guard. Somebody who means 5
+   * and types 500 should be stopped by the form rather than by a client's
+   * email, and a course that genuinely doubles in price on a plan is not a
+   * thing this portal is for.
+   */
+  const interestSource = (values.planInterest ?? "").trim().replace(/%$/, "");
+  let planInterestBps = 0;
+  if (interestSource) {
+    if (!/^\d+(\.\d{1,2})?$/.test(interestSource)) {
+      errors.planInterest =
+        "Write the interest as a number of percent, like 5 or 5.5 — or leave it empty for none.";
+    } else if (Number(interestSource) > 100) {
+      errors.planInterest =
+        "That is more than 100%, which would more than double the price. Check the figure.";
+    } else {
+      planInterestBps = Math.round(Number(interestSource) * 100);
+    }
   }
 
   // When the rest is due. HERS, per course, beside the deposit it belongs to —
@@ -286,9 +345,13 @@ export async function saveCourse(
   // disagree, because that is a mistake she can see and fix now. The half that
   // is simply not filled in yet is a draft, and drafts are allowed until she
   // tries to put one on the site.
-  if (balanceDueAt && !depositPence) {
+  if (depositOffered && !balanceDueAt && !errors.deposit) {
+    // THE DATE IS HALF THE ARRANGEMENT. A deposit with no day for the rest is
+    // a checkout that takes part of the price and never asks for the rest, so
+    // it is refused at the save rather than at the publish — this is a mistake
+    // she can see and fix now.
     errors.balanceDueAt =
-      "There is no deposit on this course, so there is nothing left to be due later. Either put a deposit in above, or clear this date and the whole price is taken at once.";
+      "A deposit needs a day the rest is due by, or nothing ever asks for it. Put a date in — on or before the first date of the run.";
   }
   if (balanceDueAt && run.length > 0 && balanceDueAt > run[0].date) {
     // The run's first date is the ceiling, not the last: money owed for a
@@ -315,13 +378,6 @@ export async function saveCourse(
     if (run.length === 0) {
       errors.run =
         "A course is a run of dates, and this one has none. Put the dates in below — a course with nothing in the diary is a draft, not a page.";
-    }
-    // A deposit with no date to settle by is an arrangement with no second
-    // half: the checkout would take part of the price and nothing would ever
-    // ask for the rest. So it is not a thing that can go on sale.
-    if (depositPence && !balanceDueAt && !errors.balanceDueAt) {
-      errors.balanceDueAt =
-        "A deposit needs a day the rest is due by, or nothing ever asks for it. Put a date in — on or before the first date of the run.";
     }
     for (const one of run) {
       if (one.title) continue;
@@ -391,10 +447,26 @@ export async function saveCourse(
     // £0" are the same arrangement, and one of the two spellings would
     // eventually be read as the other.
     depositGBP: depositPence || null,
-    // And the date goes with it. Taking the deposit off clears the date rather
-    // than leaving it behind, because a day the rest is due on a course that
-    // takes the whole price at once is a fact about nothing.
+    // AND THE DATE STAYS WITH IT, whether or not the deposit is on offer.
+    // Untick "a deposit" for a term and the figure and the day are both still
+    // there when it comes back — `waysToPay` reads the TICK, not the fields, so
+    // a filled-in field that is not ticked offers nothing and costs nothing.
+    // (Before the ticks existed, a figure in this field WAS the offer, so
+    // clearing the date was the only way to withdraw it.)
     balanceDueAt: depositPence ? balanceDueAt : null,
+
+    /**
+     * WHICH WAYS THIS COURSE OFFERS (operator, 2026-08-21).
+     *
+     * Stored as she ticked them, with one correction the form cannot make: if
+     * she ticks nothing at all, paying in full goes back on. A published course
+     * that cannot be paid for in any way is a page with a dead button on it,
+     * and the honest fallback is its own price.
+     */
+    payInFull: payInFull || (!depositOffered && !planOffered),
+    depositOffered,
+    planOffered,
+    planInterestBps,
     /**
      * HOW MANY PAYMENTS, AND HOW FAR APART (operator, 2026-08-21).
      *

@@ -99,6 +99,13 @@ function sampleWorkshopBooking(
       },
     ],
     ...over,
+    /**
+     * THE PLAN, EMPTY. A sample without this reached `booking.instalments.length`
+     * as undefined and 500'd the whole template preview — which is the cost of
+     * `as unknown as`, and the reason it is worth naming here: the cast was
+     * what let a missing relation typecheck.
+     */
+    instalments: [],
   } as unknown as BookingWithOffering;
 }
 
@@ -166,6 +173,13 @@ function sampleCourseBooking(
       },
     ],
     ...over,
+    /**
+     * THE PLAN, EMPTY. A sample without this reached `booking.instalments.length`
+     * as undefined and 500'd the whole template preview — which is the cost of
+     * `as unknown as`, and the reason it is worth naming here: the cast was
+     * what let a missing relation typecheck.
+     */
+    instalments: [],
   } as unknown as BookingWithOffering;
 }
 

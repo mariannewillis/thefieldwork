@@ -2,11 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { SITE_URL } from "@/content/site";
-import {
-  coursePlacesSold,
-  depositStillOffered,
-  placesLeft,
-} from "@/lib/bookings";
+import { coursePlacesSold, offeredWays, placesLeft } from "@/lib/bookings";
+import { chargeForChoice, type PayChoice } from "@/lib/instalments-shape";
 import { runShape } from "@/lib/course-run";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { isPast } from "@/lib/format";
@@ -32,12 +29,17 @@ import {
  * — nothing at this end can, because neither of them has paid yet — and that
  * is what the second check, under a lock in the webhook, is for.
  *
- * WHAT IS CHARGED IS THE DEPOSIT WHEN THERE IS ONE (D-23). A course with no
- * deposit charges the whole price and is settled in one payment, exactly as a
- * workshop is. The rest, when there is a rest, is asked for by a link in the
- * confirmation email rather than by a second checkout opened now: nothing here
- * runs on a schedule, and a link the buyer already holds needs no scheduler to
- * be correct.
+ * WHAT IS CHARGED IS WHAT THE BUYER CHOSE, of the ways this course offers
+ * (operator, 2026-08-21). Three things now arrive from the browser rather than
+ * two, and the third is trusted exactly as little as the others: the choice is
+ * checked against `offeredWays` — the same function the panel drew its buttons
+ * from and the webhook applies again under its lock — and a choice the course
+ * does not offer is refused rather than quietly downgraded, because somebody
+ * who picked a plan and was charged the lot has a complaint, not a checkout.
+ *
+ * The rest, whichever way they chose, is asked for by a link the buyer already
+ * holds rather than by a second checkout opened now: nothing here runs on a
+ * schedule, and a link needs no scheduler to be correct.
  */
 
 export type CheckoutState = { error: string | null };
@@ -87,31 +89,74 @@ export async function startCourseCheckout(
     };
   }
 
-  // ONE RULE, USED IN THREE PLACES. `depositStillOffered` is the same function
-  // the webhook applies under its lock and the panel draws from; the figure the
-  // card is charged and the figure the booking is recorded with cannot come
+  // ── WHICH WAY THEY CHOSE ────────────────────────────────────────────────
+  //
+  // ONE RULE, USED IN THREE PLACES. `offeredWays` is the same function the
+  // panel drew its buttons from and the webhook applies again under its lock;
+  // the figure on the button and the figure the card is charged cannot come
   // apart, because there is only one test.
-  const takingDeposit = depositStillOffered(course);
-  const unitAmount = takingDeposit
-    ? (course.depositGBP as number)
-    : course.priceGBP;
+  const wanted = String(formData.get("payment") ?? "full");
+  const ways = offeredWays(course);
+  if (wanted !== "full" && wanted !== "deposit" && wanted !== "plan") {
+    return { error: "Choose how you would like to pay." };
+  }
+  const choice: PayChoice = wanted;
+
+  if (!ways.includes(choice)) {
+    // The page was open while she changed the course, or the deposit's day
+    // passed between the load and the press. Said plainly and charged nothing
+    // — the alternative is taking the whole price from somebody who asked to
+    // pay a sixth of it.
+    return {
+      error:
+        choice === "deposit"
+          ? "That course is no longer taking a deposit. Nothing has been charged — reload the page for the ways to pay it does take."
+          : "That course is no longer offering a payment plan. Nothing has been charged — reload the page for the ways to pay it does take.",
+    };
+  }
+
+  const money = chargeForChoice({
+    choice,
+    pricePence: course.priceGBP,
+    places: asked,
+    depositPence: course.depositGBP,
+    parts: course.instalments,
+    interestBps: course.planInterestBps,
+  });
+
+  // A PLAN'S SHARE IS FOR THE WHOLE BOOKING, not for one place: the rounding
+  // penny lives on the last part of the plan and does not divide by places. So
+  // its line is a single item that says what it is, where a full price and a
+  // deposit stay per-place and keep the quantity Stripe shows on its own page.
+  const line =
+    choice === "plan"
+      ? {
+          quantity: 1,
+          price_data: {
+            currency: "gbp" as const,
+            unit_amount: money.chargePence,
+            product_data: {
+              name: `${course.name} — payment 1 of ${course.instalments}`,
+              description: `${asked} ${asked === 1 ? "place" : "places"} · ${run.words} · ${run.span}`,
+            },
+          },
+        }
+      : {
+          quantity: asked,
+          price_data: {
+            currency: "gbp" as const,
+            unit_amount: Math.round(money.chargePence / asked),
+            product_data: {
+              name:
+                choice === "deposit" ? `${course.name} — deposit` : course.name,
+              description: `${run.words} · ${run.span} · ${course.venueName}`,
+            },
+          },
+        };
 
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
-    line_items: [
-      {
-        quantity: asked,
-        price_data: {
-          currency: "gbp",
-          // PENCE, straight from the row.
-          unit_amount: unitAmount,
-          product_data: {
-            name: takingDeposit ? `${course.name} — deposit` : course.name,
-            description: `${run.words} · ${run.span} · ${course.venueName}`,
-          },
-        },
-      },
-    ],
+    line_items: [line],
     // The buyer's name comes back with the billing address, and their email
     // Stripe always collects. Asking for either on our own page would be
     // asking twice, and the panel as approved does not ask at all.
@@ -121,11 +166,12 @@ export async function startCourseCheckout(
     // What the webhook needs to turn a payment into a place, and which site
     // opened it (D-19). The name is carried too, so the rare payment for a
     // course that has since been taken down can still be written about in
-    // words.
+    // words. `payment` is the way they chose — checked again at the far end.
     metadata: {
       courseId: String(course.id),
       offeringName: course.name,
       places: String(asked),
+      payment: choice,
       [SITE_METADATA_KEY]: thisSite,
     },
   });

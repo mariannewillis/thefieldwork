@@ -23,6 +23,7 @@ import {
   confirmationEmail,
   sendBookingMail,
 } from "@/lib/email/bookings";
+import type { PayChoice } from "@/lib/instalments-shape";
 import { loadWording } from "@/lib/email/templates";
 import { confirmServicePayment } from "@/lib/service-requests";
 import {
@@ -192,6 +193,23 @@ export async function POST(request: Request): Promise<Response> {
     "an offering";
   const places = Number(session.metadata?.places);
 
+  /**
+   * WHICH OF THE THREE WAYS TO PAY the buyer chose, as the checkout stamped it.
+   *
+   * NULL when there is no usable stamp — a session opened before this key
+   * existed, a workshop, a value somebody put there by hand. Deliberately not
+   * defaulted to "full" here: an unstamped session that paid a DEPOSIT would
+   * then be written down as settled, and nothing would ever ask for the rest.
+   * `confirmPaidBooking` reads those off the amount instead, under its lock,
+   * where the course's own figures are.
+   *
+   * NOT trusted even when it is present: the same lock checks it against what
+   * the course actually offers before a row is written.
+   */
+  const asked = session.metadata?.payment;
+  const choice: PayChoice | null =
+    asked === "deposit" || asked === "plan" || asked === "full" ? asked : null;
+
   const offering =
     Number.isInteger(workshopId) && workshopId > 0
       ? ({ kind: "workshop", id: workshopId } as const)
@@ -220,6 +238,7 @@ export async function POST(request: Request): Promise<Response> {
     eventType: event.type,
     offering,
     places,
+    choice,
     amountPence,
     currency,
     buyerName: session.customer_details?.name?.trim() || "Someone",

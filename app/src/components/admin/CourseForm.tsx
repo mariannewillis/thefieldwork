@@ -9,6 +9,7 @@ import {
   refundDeadline,
   toDateInputValue,
 } from "@/lib/format";
+import { planParts, planTotalPence } from "@/lib/instalments-shape";
 import { MAX_IMAGES, NO_ATTEMPT_YET, slugify } from "@/lib/offering-rules";
 import DeleteCourse from "./DeleteCourse";
 import {
@@ -67,6 +68,10 @@ export type CourseFormValues = {
   /** How many payments she will take, and how many days apart. */
   instalments: number;
   instalmentEveryDays: number;
+  payInFull: boolean;
+  depositOffered: boolean;
+  planOffered: boolean;
+  planInterestBps: number;
   /** The day the rest is due. Null when there is no deposit. */
   balanceDueAt: Date | null;
   refundDays: number;
@@ -170,6 +175,44 @@ export default function CourseForm({
   const [everyDays, setEveryDays] = useState(
     kept("instalmentEveryDays", String(course?.instalmentEveryDays ?? 30)),
   );
+  /**
+   * THE THREE TICKS (operator, 2026-08-21).
+   *
+   * "The facts are a bit confusing" — because the first cut had a deposit field
+   * and a number-of-payments field with no way to say whether either was on
+   * offer, and setting both silently made the deposit the first instalment.
+   * They are three separate OFFERS now, ticked, and a buyer picks one.
+   *
+   * The fields for a way she has not ticked stay ON THE PAGE and keep their
+   * values — unticking hides nothing and forgets nothing, so an arrangement
+   * turned off for a month can be turned back on without being retyped.
+   */
+  //
+  // A REJECTED SAVE MUST COME BACK TICKED THE WAY SHE LEFT IT. An unticked box
+  // posts nothing, so "she unticked it" and "she has not submitted at all" are
+  // the same absence in `state.values`; `attempt` is what tells them apart. It
+  // is bumped on every bounce and the form remounts on it, so this initialiser
+  // runs again with the right answer. Without it, a form sent back for a
+  // missing date would come back with her ticks reset to the saved course's.
+  const ticked = (name: string, stored: boolean) =>
+    state.attempt > 0 ? state.values[name] === "on" : stored;
+
+  const [payInFull, setPayInFull] = useState(() =>
+    ticked("payInFull", course?.payInFull ?? true),
+  );
+  const [depositOffered, setDepositOffered] = useState(() =>
+    ticked("depositOffered", course?.depositOffered ?? false),
+  );
+  const [planOffered, setPlanOffered] = useState(() =>
+    ticked("planOffered", course?.planOffered ?? false),
+  );
+  const [interest, setInterest] = useState(
+    kept(
+      "planInterest",
+      course?.planInterestBps ? String(course.planInterestBps / 100) : "",
+    ),
+  );
+
   const [balanceDueAt, setBalanceDueAt] = useState(
     kept(
       "balanceDueAt",
@@ -290,55 +333,80 @@ export default function CourseForm({
   };
   const priceNow = pounds(price);
   const depositNow = pounds(deposit);
-  const depositWords = !depositNow
-    ? "No deposit — the whole price is taken when somebody books, the way a workshop is."
-    : priceNow && depositNow > priceNow
-      ? "That deposit is more than the price. A deposit is part of the price, not on top of it."
-      : !balanceDueAt
-        ? "A deposit needs a day the rest is due by, or nothing ever asks for it. This one cannot go on the site until it has one."
-        : priceNow
-          ? `Which takes £${depositNow} at booking, and £${(priceNow - depositNow).toFixed(2).replace(/\.00$/, "")} by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`
-          : `Which takes £${depositNow} at booking, and the rest by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`;
+  const money = (pence: number) =>
+    `£${(pence / 100).toFixed(2).replace(/\.00$/, "")}`;
+
+  const depositWords = !depositOffered
+    ? null
+    : !depositNow
+      ? "Put a deposit in, or this way to pay does nothing."
+      : priceNow && depositNow >= priceNow
+        ? "That deposit is the price or more. A deposit is part of the price, not on top of it."
+        : !balanceDueAt
+          ? "A deposit needs a day the rest is due by, or nothing ever asks for it. This one cannot go on the site until it has one."
+          : priceNow
+            ? `£${depositNow} at booking, and £${(priceNow - depositNow).toFixed(2).replace(/\.00$/, "")} by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`
+            : `£${depositNow} at booking, and the rest by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`;
 
   /**
    * THE PLAN, IN WORDS, AS SHE TYPES IT.
    *
-   * Worked out here rather than only at booking, for the reason `depositWords`
-   * above is: a plan she cannot see before saving is a plan she finds out about
-   * from a client. "Four payments — £30 at booking, then three of £30, the last
-   * on 19 November" is a sentence she can check.
+   * Worked out here rather than only at booking: a plan she cannot see before
+   * saving is a plan she finds out about from a client. "Six payments of £110 —
+   * £660 in all, £60 more than the price. Booked today, the last would fall on
+   * 12 February" is a sentence she can check against what she meant.
    *
-   * The arithmetic is `planFor`'s, restated in the browser because that one is
-   * `server-only` — it reaches the database. The two must agree, and
-   * instalments-smoke checks a plan written at booking against the sentence
-   * this shows.
+   * THE ARITHMETIC IS IMPORTED, not restated. The browser copy and the booking
+   * copy used to be two expressions of the same sums, which is how a form
+   * promises £100 and a card is charged £110; they are now one function in
+   * `instalments-shape.ts` that this and the checkout and the webhook all call.
    */
   const parts = Math.max(1, Math.round(Number(instalments) || 1));
   const gap = Math.max(1, Math.round(Number(everyDays) || 30));
+  const interestBps = (() => {
+    const figure = Number(String(interest).replace(/[%\s]/g, ""));
+    return Number.isFinite(figure) && figure > 0 ? Math.round(figure * 100) : 0;
+  })();
+
   const planWords = (() => {
-    if (parts <= 1 || !priceNow) return null;
-    const totalPence = Math.round(priceNow * 100);
-    const depositPence =
-      depositNow === null
-        ? Math.floor(totalPence / parts)
-        : Math.round(depositNow * 100);
-    if (depositPence > totalPence) return null;
-    const each = Math.floor((totalPence - depositPence) / (parts - 1));
-    const last = totalPence - depositPence - each * (parts - 2);
-    const money = (pence: number) =>
-      `£${(pence / 100).toFixed(2).replace(/\.00$/, "")}`;
+    if (!planOffered) return null;
+    if (parts < 2)
+      return "A plan needs at least two payments. One payment is paying in full, which is its own tick above.";
+    if (!priceNow) return null;
+
+    const price = Math.round(priceNow * 100);
+    const total = planTotalPence(price, interestBps);
+    const all = planParts(total, parts);
+    const rest = all.slice(1);
+    const last = rest[rest.length - 1];
+    const evenly = rest.every((one) => one === last);
+
     const lastDay = new Date();
     lastDay.setDate(lastDay.getDate() + gap * (parts - 1));
-    const evenly = each === last;
-    // HOW MANY ARE AT THE EVEN FIGURE — which is one fewer than the number
-    // that follow the deposit whenever the last one carries the rounding. The
-    // first version said "3 of £399.86 and a last of £399.88" for a plan of
-    // four, describing four payments after the deposit when there are three.
-    const evens = evenly ? parts - 1 : parts - 2;
-    const rest = evenly
-      ? `${evens === 1 ? "one more of" : `${evens} more of`} ${money(each)}`
-      : `${evens === 1 ? "one of" : `${evens} of`} ${money(each)} and a last of ${money(last)}`;
-    return `${parts} payments — ${money(depositPence)} at booking, then ${rest}, one every ${gap} days. Booked today, the last would fall on ${formatDayLong(lastDay)}.`;
+
+    const following = evenly
+      ? `${rest.length === 1 ? "one more of" : `${rest.length} more of`} ${money(last)}`
+      : `${rest.length - 1 === 1 ? "one of" : `${rest.length - 1} of`} ${money(rest[0])} and a last of ${money(last)}`;
+
+    const extra = total - price;
+    const cost =
+      extra > 0
+        ? ` ${money(total)} in all — ${money(extra)} more than the price, which the page says in those words.`
+        : "";
+
+    return `${money(all[0])} at the checkout, then ${following}, one every ${gap} days.${cost} Booked today, the last would fall on ${formatDayLong(lastDay)}.`;
+  })();
+
+  /** What a buyer will actually be offered, said back to her in one line. */
+  const offerWords = (() => {
+    const on: string[] = [];
+    if (payInFull) on.push("all of it at once");
+    if (depositOffered && depositNow && balanceDueAt) on.push("a deposit");
+    if (planOffered && parts >= 2) on.push(`${parts} payments`);
+    if (on.length === 0)
+      return "Nothing is ticked, so the page will take the whole price. Tick one of these to offer more than that.";
+    if (on.length === 1) return `A buyer is offered one way to pay: ${on[0]}.`;
+    return `A buyer chooses between ${on.slice(0, -1).join(", ")} and ${on[on.length - 1]}.`;
   })();
 
   // Counted back from the FIRST date, because a course is bought once and so
@@ -602,66 +670,223 @@ export default function CourseForm({
               </div>
             </div>
 
-            <div className="mt-7 grid gap-6 sm:grid-cols-2">
-              <div>
-                <label className="block">
-                  <span className={LABEL}>Deposit</span>
-                  <span className="flex items-baseline gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="fig font-mono text-[24px] text-ink-soft"
+            {/* ══ WAYS TO PAY (operator, 2026-08-21) ══════════════════════
+                THREE OFFERS, TICKED, AND A BUYER PICKS ONE. The first cut had
+                a deposit field beside a number-of-payments field with no way to
+                say whether either was on offer — and setting both silently made
+                the deposit the first instalment, which is what made this
+                section confusing to fill in. They are alternatives now, and
+                each carries its own fields under its own tick.
+
+                THE FIELDS DO NOT DISAPPEAR when a tick comes off. They dim and
+                stop being asked for; the figures stay where she typed them, so
+                an arrangement turned off for a month can be turned back on
+                without being retyped. */}
+            <fieldset className="mt-9 border-t border-pool-rule pt-7">
+              <legend className="sr-only">Ways to pay</legend>
+              <p className={LABEL}>Ways to pay</p>
+              <p className={HELP}>
+                Tick what somebody may choose at the checkout. They pick one.
+              </p>
+
+              {/* ── all of it at once ─────────────────────────────────── */}
+              <label className="mt-5 flex items-baseline gap-4">
+                {/* Drawn, not accented — see CoursePanel for why: the
+                    browser control did not read as ticked or unticked here,
+                    and `accent-color` named a variable this surface does not
+                    define. The input keeps every keyboard behaviour. */}
+                <input
+                  type="checkbox"
+                  name="payInFull"
+                  checked={payInFull}
+                  onChange={(event) => setPayInFull(event.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={`mt-[3px] grid h-[19px] w-[19px] shrink-0 place-items-center border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action ${
+                    payInFull ? "border-ink bg-ink" : "border-pool-rule"
+                  }`}
+                >
+                  {payInFull && (
+                    <svg
+                      viewBox="0 0 12 10"
+                      className="h-[11px] w-[13px]"
+                      fill="none"
+                      stroke="var(--color-pool)"
+                      strokeWidth="2"
+                      strokeLinecap="square"
                     >
-                      &pound;
-                    </span>
-                    <input
-                      name="deposit"
-                      type="text"
-                      inputMode="decimal"
-                      value={deposit}
-                      onChange={(event) => setDeposit(event.target.value)}
-                      className={`${FIELD_FIG} text-[26px]`}
-                    />
+                      <path d="M1 5l3.4 3.4L11 1.6" />
+                    </svg>
+                  )}
+                </span>
+                <span>
+                  <span className="text-[19px] font-semibold text-ink">
+                    All of it at once
                   </span>
-                </label>
-                <p className={HELP}>
-                  What is taken when somebody books. Leave it empty to take the
-                  whole price at once, the way a workshop does.
-                </p>
-                <FieldError error={state.errors.deposit} />
+                  <span className="mt-1 block text-[16px] leading-relaxed text-ink-soft">
+                    The whole price when they book, the way a workshop is. With
+                    nothing ticked this is what happens anyway &mdash; a course
+                    nobody can pay for would be worse than one with a single
+                    way.
+                  </span>
+                </span>
+              </label>
+
+              {/* ── a deposit ─────────────────────────────────────────── */}
+              <label className="mt-6 flex items-baseline gap-4">
+                {/* Drawn, not accented — see CoursePanel for why: the
+                    browser control did not read as ticked or unticked here,
+                    and `accent-color` named a variable this surface does not
+                    define. The input keeps every keyboard behaviour. */}
+                <input
+                  type="checkbox"
+                  name="depositOffered"
+                  checked={depositOffered}
+                  onChange={(event) => setDepositOffered(event.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={`mt-[3px] grid h-[19px] w-[19px] shrink-0 place-items-center border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action ${
+                    depositOffered ? "border-ink bg-ink" : "border-pool-rule"
+                  }`}
+                >
+                  {depositOffered && (
+                    <svg
+                      viewBox="0 0 12 10"
+                      className="h-[11px] w-[13px]"
+                      fill="none"
+                      stroke="var(--color-pool)"
+                      strokeWidth="2"
+                      strokeLinecap="square"
+                    >
+                      <path d="M1 5l3.4 3.4L11 1.6" />
+                    </svg>
+                  )}
+                </span>
+                <span>
+                  <span className="text-[19px] font-semibold text-ink">
+                    A deposit, the rest by a date
+                  </span>
+                  <span className="mt-1 block text-[16px] leading-relaxed text-ink-soft">
+                    Part now to hold the place, the rest by a day you set. Two
+                    payments, and never any interest.
+                  </span>
+                </span>
+              </label>
+
+              <div
+                className={`ml-9 mt-4 grid gap-6 sm:grid-cols-2 ${depositOffered ? "" : "opacity-45"}`}
+              >
+                <div>
+                  <label className="block">
+                    <span className={LABEL}>Deposit</span>
+                    <span className="flex items-baseline gap-2">
+                      <span
+                        aria-hidden="true"
+                        className="fig font-mono text-[24px] text-ink-soft"
+                      >
+                        &pound;
+                      </span>
+                      <input
+                        name="deposit"
+                        type="text"
+                        inputMode="decimal"
+                        value={deposit}
+                        disabled={!depositOffered}
+                        onChange={(event) => setDeposit(event.target.value)}
+                        className={`${FIELD_FIG} text-[26px]`}
+                      />
+                    </span>
+                  </label>
+                  <FieldError error={state.errors.deposit} />
+                </div>
+
+                <div>
+                  <label className="block">
+                    <span className={LABEL}>The rest is due by</span>
+                    <input
+                      name="balanceDueAt"
+                      type="date"
+                      value={balanceDueAt}
+                      disabled={!depositOffered}
+                      onChange={(event) => setBalanceDueAt(event.target.value)}
+                      className={`${FIELD_FIG} text-[21px]`}
+                    />
+                  </label>
+                  {/* YOUR DATE, not a rule this decided for you. There is
+                      deliberately no second place in the portal where a payment
+                      date can be set. */}
+                  <p className={HELP}>
+                    On or before the first date of the run. A link to pay the
+                    rest goes out with the confirmation and works from the day
+                    they book.
+                  </p>
+                  <FieldError error={state.errors.balanceDueAt} />
+                </div>
               </div>
 
-              <div>
-                <label className="block">
-                  <span className={LABEL}>The rest is due by</span>
-                  <input
-                    name="balanceDueAt"
-                    type="date"
-                    value={balanceDueAt}
-                    onChange={(event) => setBalanceDueAt(event.target.value)}
-                    className={`${FIELD_FIG} text-[21px]`}
-                  />
-                </label>
-                {/* YOUR DATE, not a rule this decided for you. It is beside the
-                    deposit because the two are one arrangement, and there is
-                    deliberately no second place in the portal where a payment
-                    date can be set. */}
-                <p className={HELP}>
-                  Your date, per course &mdash; on or before the first date of
-                  the run. A link to pay the rest goes out with the confirmation
-                  and works from the day they book.
+              {depositOffered && depositWords && (
+                <p className="ml-9 mt-3 max-w-[52rem] font-display text-[21px] leading-snug text-ink">
+                  {depositWords}
                 </p>
-                <FieldError error={state.errors.balanceDueAt} />
-              </div>
-            </div>
+              )}
 
-            {/* ── HOW MANY PAYMENTS (operator, 2026-08-21) ───────────────
-                Beside the deposit because it is the same arrangement: the
-                deposit is the FIRST payment and this says how many follow it.
-                Two is what a course with a deposit has always been, so the
-                default changes nothing for a course she has already made. */}
-            <div className="mt-7 grid gap-6 sm:grid-cols-2">
-              <div>
-                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              {/* ── in parts ──────────────────────────────────────────── */}
+              <label className="mt-7 flex items-baseline gap-4">
+                {/* Drawn, not accented — see CoursePanel for why: the
+                    browser control did not read as ticked or unticked here,
+                    and `accent-color` named a variable this surface does not
+                    define. The input keeps every keyboard behaviour. */}
+                <input
+                  type="checkbox"
+                  name="planOffered"
+                  checked={planOffered}
+                  onChange={(event) => setPlanOffered(event.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className={`mt-[3px] grid h-[19px] w-[19px] shrink-0 place-items-center border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action ${
+                    planOffered ? "border-ink bg-ink" : "border-pool-rule"
+                  }`}
+                >
+                  {planOffered && (
+                    <svg
+                      viewBox="0 0 12 10"
+                      className="h-[11px] w-[13px]"
+                      fill="none"
+                      stroke="var(--color-pool)"
+                      strokeWidth="2"
+                      strokeLinecap="square"
+                    >
+                      <path d="M1 5l3.4 3.4L11 1.6" />
+                    </svg>
+                  )}
+                </span>
+                <span>
+                  <span className="text-[19px] font-semibold text-ink">
+                    In parts
+                  </span>
+                  <span className="mt-1 block text-[16px] leading-relaxed text-ink-soft">
+                    The price divided evenly. The FIRST part is taken at the
+                    checkout &mdash; six payments means a sixth now and five to
+                    come. This is not the deposit above; they are alternatives.
+                  </span>
+                </span>
+              </label>
+
+              <div className={`ml-9 mt-4 ${planOffered ? "" : "opacity-45"}`}>
+                {/* ONE LINE, READ AS A SENTENCE — "paid in 6 payments, one
+                    every 30 days, with 5% on top". The three numbers belong to
+                    one arrangement and stacking them into three labelled
+                    fields would make her assemble the sentence herself. The
+                    widths are pinned with `!` because FIELD_FIG carries
+                    `w-full`, which wins on Tailwind's own ordering however
+                    late `w-[5rem]` appears in the string. */}
+                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
                   <label className={LABEL} htmlFor="instalments">
                     Paid in
                   </label>
@@ -669,14 +894,15 @@ export default function CourseForm({
                     id="instalments"
                     name="instalments"
                     type="number"
-                    min={1}
+                    min={2}
                     max={12}
                     value={instalments}
+                    disabled={!planOffered}
                     onChange={(event) => setInstalments(event.target.value)}
-                    className={`${FIELD_FIG} w-[5rem] text-[26px]`}
+                    className={`${FIELD_FIG} !w-[5rem] text-[26px]`}
                   />
                   <span className="text-[19px] text-ink-soft">
-                    payment{instalments === "1" ? "" : "s"}, one every
+                    payments, one every
                   </span>
                   <input
                     id="instalmentEveryDays"
@@ -685,29 +911,46 @@ export default function CourseForm({
                     min={7}
                     max={90}
                     value={everyDays}
+                    disabled={!planOffered}
                     onChange={(event) => setEveryDays(event.target.value)}
-                    className={`${FIELD_FIG} w-[5rem] text-[26px]`}
-                    disabled={instalments === "1"}
+                    className={`${FIELD_FIG} !w-[5rem] text-[26px]`}
                   />
-                  <span className="text-[19px] text-ink-soft">days</span>
+                  <span className="text-[19px] text-ink-soft">days, with</span>
+                  <input
+                    id="planInterest"
+                    name="planInterest"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0"
+                    value={interest}
+                    disabled={!planOffered}
+                    onChange={(event) => setInterest(event.target.value)}
+                    className={`${FIELD_FIG} !w-[5rem] text-[26px]`}
+                  />
+                  <span className="text-[19px] text-ink-soft">% on top</span>
                 </p>
                 <p className={HELP}>
-                  One is the whole price when they book. The deposit above is
-                  the first of however many you set here, and the rest are
-                  divided evenly &mdash; a reminder with a link to pay goes out
-                  from Bookings when one falls due.
+                  Leave the percentage empty and paying in parts costs exactly
+                  what the course costs. Put one in and the page says, in those
+                  words, that it costs more than paying at once &mdash; nobody
+                  finds that out from their bank.
                 </p>
                 <FieldError error={state.errors.instalments} />
+                <FieldError error={state.errors.planInterest} />
               </div>
-            </div>
 
-            {/* The consequence of the fields above and the dates below, worked
-                out as she types — the same move the refund line makes. "£80" and
-                "then £160 by 3 October" are different questions, and she is
-                answering the second. */}
-            <p className="mt-4 max-w-[62rem] font-display text-[24px] leading-tight text-ink">
-              {depositWords}
-            </p>
+              {planOffered && planWords && (
+                <p className="ml-9 mt-3 max-w-[52rem] font-display text-[21px] leading-snug text-ink">
+                  {planWords}
+                </p>
+              )}
+
+              {/* WHAT A BUYER WILL SEE, said back in one line — the answer to
+                  the question the three ticks are actually asking. */}
+              <p className="mt-7 max-w-[62rem] border-l-2 border-gold pl-5 font-display text-[24px] leading-tight text-ink">
+                {offerWords}
+              </p>
+            </fieldset>
 
             {/* THE PLAN ITSELF, SPELLED OUT, before anybody is on it. A plan
                 she cannot see before saving is a plan she finds out about from

@@ -526,11 +526,18 @@ try {
       !body.includes("Type never reads Service"),
     oneLine(body),
   );
+  // THREE TABS SINCE 2026-08-21. Owing joined Upcoming and Past when payment
+  // plans landed, and it CUTS ACROSS them rather than sitting beside them — a
+  // payment can be late on a course that has already started, so filing it
+  // under Past would hide the one thing she needs to chase. It is always drawn,
+  // with a count of nought when nobody owes anything, so this stays a fixed
+  // number rather than a figure that depends on the data.
   ok(
-    "there are two tabs and ONE table — the other tab holds the other one",
+    "there are three tabs and ONE table — the others hold the other rows",
     (await page.locator("#upcoming-table").count()) === 1 &&
       (await page.locator("#archive-table").count()) === 0 &&
-      (await page.locator('nav[aria-label="Which bookings"] a').count()) === 2,
+      (await page.locator('nav[aria-label="Which bookings"] a').count()) === 3,
+    `${await page.locator('nav[aria-label="Which bookings"] a').count()} tabs`,
   );
   ok(
     "a day still to come is on Upcoming, which is the tab she lands on",

@@ -208,9 +208,16 @@ async function makeCourse({
     `INSERT INTO "Course"
        (slug, name, summary, "bodyHtml", "venueName", "addressLines", postcode,
         "gettingThere", capacity, "priceGBP", "depositGBP", "balanceDueAt",
-        "refundDays", published, "heroImage", "heroAlt", "updatedAt")
+        "refundDays", "depositOffered", published, "heroImage", "heroAlt", "updatedAt")
      VALUES ($1,$2,$3,$4,'The Garden Room','Fromefield\nFrome','BA11 2QN',
-             'Step-free from the pavement.',$5,$6,$7,$8,$9,true,
+             'Step-free from the pavement.',$5,$6,$7,$8,$9,
+             -- SINCE 2026-08-21 A DEPOSIT IS AN OFFER SHE TICKS, not a figure
+             -- sitting in a column: waysToPay reads the tick. This fixture
+             -- predates the tick and wrote only the figure, so every deposit
+             -- claim below began failing against a course that no longer
+             -- offered one. The tick follows the figure here, which is exactly
+             -- what the migration did to her real courses.
+             $10, true,
              'work-wide-the-room','The room, empty.', now())
      RETURNING id`,
     [
@@ -223,6 +230,7 @@ async function makeCourse({
       depositPence,
       balanceDueOffset === null ? null : day(balanceDueOffset),
       refundDays,
+      depositPence !== null,
     ],
   );
   const id = rows[0].id;
@@ -606,14 +614,30 @@ try {
     mainPage.includes("2 places left of 3"),
     mainPage.split("\n").find((line) => line.includes("left of")) ?? "",
   );
+  // SINCE 2026-08-21 THE DEPOSIT IS A CHOICE, NOT THE ONLY BUTTON. A course
+  // that offers both shows the price first and the deposit beside it, which is
+  // what the operator asked for ("pay in 1 enabled as default… if a client
+  // selects deposit they pay the deposit at checkout"). The claim is unchanged
+  // — the deposit is offered, with the rest and its date beside it — and it is
+  // now checked by PICKING it, which is stronger than reading a button that had
+  // no alternative to be.
   ok(
-    "and the panel offers the deposit, with the rest and its date beside it",
-    (await page
-      .getByRole("button", { name: /Pay the deposit · £80/ })
-      .count()) === 1 &&
-      mainPage.includes("£160") &&
+    "the panel offers the deposit, with the rest and its date beside it",
+    mainPage.includes("\u00a380") &&
+      mainPage.includes("\u00a3160") &&
       mainPage.includes(dayWords(20)),
     mainPage.split("\n").slice(-14).join(" | "),
+  );
+  await page.locator("#book").getByText("A deposit now").click();
+  ok(
+    "and choosing it puts the deposit on the button, not the price",
+    (await page
+      .getByRole("button", { name: /Pay the deposit/ })
+      .count()) === 1 &&
+      (await page.locator('#book button[type="submit"]').innerText()).includes(
+        "\u00a380",
+      ),
+    await page.locator('#book button[type="submit"]').innerText(),
   );
 
   // ── the balance link ──────────────────────────────────────────────────────

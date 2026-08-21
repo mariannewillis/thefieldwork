@@ -6,6 +6,8 @@ import FlyerTab from "@/components/admin/FlyerTab";
 import OfferingSeo from "@/components/admin/OfferingSeo";
 import OfferingTabs, { offeringTab } from "@/components/admin/OfferingTabs";
 import { attendingOffering } from "@/lib/attending";
+import { offeredWays } from "@/lib/bookings";
+import type { PayChoice } from "@/lib/instalments-shape";
 import { notFound } from "next/navigation";
 import CourseForm from "@/components/admin/CourseForm";
 import { getCourseBySlug } from "@/lib/courses";
@@ -102,11 +104,24 @@ export default async function Page({
         {course.published && (
           <p className="mt-4 max-w-[68ch] text-[17px] leading-relaxed text-plate-soft">
             This one is live and places can be bought.{" "}
-            {course.depositGBP && course.balanceDueAt
-              ? `A deposit of ${formatMoney(course.depositGBP)} is taken at booking and the rest is due by ${formatDayShort(course.balanceDueAt)}.`
-              : "The whole price is taken when somebody books."}{" "}
-            Changing the price or the deposit changes what the NEXT person pays
-            — anyone who has already booked keeps the terms they bought on.
+            {(() => {
+              // WHAT A BUYER IS ACTUALLY OFFERED, from the same function the
+              // page and the checkout read — so this line cannot say "a deposit
+              // is taken" about a course whose deposit day has been.
+              const ways = offeredWays(course);
+              const said = ways.map((way: PayChoice) =>
+                way === "deposit"
+                  ? `a deposit of ${formatMoney(course.depositGBP as number)} with the rest by ${formatDayShort(course.balanceDueAt as Date)}`
+                  : way === "plan"
+                    ? `${course.instalments} payments${course.planInterestBps > 0 ? ` with ${course.planInterestBps / 100}% on top` : ""}, one every ${course.instalmentEveryDays} days`
+                    : "the whole price at once",
+              );
+              return said.length === 1
+                ? `They pay ${said[0]}.`
+                : `They choose between ${said.slice(0, -1).join(", ")} and ${said[said.length - 1]}.`;
+            })()}{" "}
+            Changing any of it changes what the NEXT person pays — anyone who
+            has already booked keeps the terms they bought on.
           </p>
         )}
         <OfferingTabs

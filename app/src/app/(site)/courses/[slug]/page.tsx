@@ -8,11 +8,7 @@ import FilmEmbed from "@/components/site/FilmEmbed";
 import PhotoRail from "@/components/site/PhotoRail";
 import { SiteFooter, SiteNav } from "@/components/site/SiteChrome";
 import { courseDetail } from "@/content/courses";
-import {
-  coursePlacesSold,
-  depositStillOffered,
-  placesLeft,
-} from "@/lib/bookings";
+import { coursePlacesSold, offeredWays, placesLeft } from "@/lib/bookings";
 import { capitalise, runShape, spellCount } from "@/lib/course-run";
 import { getPublishedCourseBySlug } from "@/lib/courses";
 import { parseFilm } from "@/lib/film";
@@ -521,14 +517,24 @@ export default async function Page({
             depositPence={course.depositGBP}
             refundDays={course.refundDays}
             refundDeadline={deadline ? formatDayLong(deadline) : null}
+            // WHICH WAYS, worked out on the server by the same function the
+            // checkout validates against and the webhook applies under its
+            // lock. The panel draws a button per way and knows no rule of its
+            // own — that is what stops the page offering something the
+            // checkout will refuse.
+            ways={offeredWays(course)}
             balanceDueOn={
               // Null once the balance day has been: the deposit arrangement
-              // ends on its own date and the whole price is taken from then on,
-              // which is what the checkout will do (see depositStillOffered).
-              depositStillOffered(course)
-                ? formatDayLong(course.balanceDueAt as Date)
+              // ends on its own date, `offeredWays` drops it, and the page
+              // stops mentioning it — with nothing running and nothing to
+              // switch off.
+              course.balanceDueAt && offeredWays(course).includes("deposit")
+                ? formatDayLong(course.balanceDueAt)
                 : null
             }
+            parts={course.instalments}
+            everyDays={course.instalmentEveryDays}
+            interestBps={course.planInterestBps}
             canBuy={paymentsConfigured()}
             isFinished={finished}
           />

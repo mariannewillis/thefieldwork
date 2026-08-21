@@ -1,6 +1,7 @@
 import "server-only";
 import { withOffering } from "@/lib/bookings";
 import { prisma } from "@/lib/db";
+import { startOfDay } from "@/lib/instalments-shape";
 
 /**
  * PAYING FOR A COURSE IN PARTS.
@@ -25,16 +26,27 @@ import { prisma } from "@/lib/db";
  * next month's money this month; the pay link uses this number, not that one.
  */
 
-/** A day at midnight in her timezone, which is what a `@db.Date` column holds. */
-function today(now = new Date()): Date {
-  const key = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/London",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-  return new Date(`${key}T00:00:00.000Z`);
-}
+/**
+ * THE SUMS LIVE IN `instalments-shape.ts` and are re-exported here.
+ *
+ * The course form has to show Marianne a plan before anybody is on one, and the
+ * course page has to show a buyer the same numbers before they press anything —
+ * both are client components, and this module reads the database. So the pure
+ * arithmetic sits in a module with no imports at all and both sides use the one
+ * copy. What is left below is everything that needs a database or a clock.
+ */
+export {
+  addDays,
+  INTEREST_SCALE,
+  type PayChoice,
+  type PayOffer,
+  planExtraPence,
+  planFor,
+  planParts,
+  planTotalPence,
+  startOfDay,
+  waysToPay,
+} from "@/lib/instalments-shape";
 
 export type PlannedInstalment = {
   number: number;
@@ -43,61 +55,6 @@ export type PlannedInstalment = {
   paidAt: Date | null;
   remindedAt: Date | null;
 };
-
-/**
- * THE PLAN A BOOKING WOULD BE PUT ON, worked out from the course as it stands.
- *
- * Called ONCE, when the booking is made; the rows it returns are then the
- * record. It is exported so the course form can show her the plan before
- * anybody is on it — "four payments of £75, the last on 12 December" is a
- * sentence she can check, and a plan she cannot see before saving is a plan she
- * finds out about from a client.
- *
- * THE ROUNDING GOES ON THE LAST ONE. £100 in three is 33.33, 33.33, 33.34 — so
- * the parts always sum to exactly what was agreed and nobody is ever asked for
- * a penny more or less. Putting the odd penny on the FIRST would make the
- * deposit disagree with the deposit she typed.
- */
-export function planFor(input: {
-  totalPence: number;
-  depositPence: number | null;
-  instalments: number;
-  everyDays: number;
-  from: Date;
-}): { number: number; amountPence: number; dueAt: Date }[] {
-  const count = Math.max(1, Math.round(input.instalments));
-  const start = today(input.from);
-
-  if (count === 1) {
-    return [{ number: 1, amountPence: input.totalPence, dueAt: start }];
-  }
-
-  // The deposit is the first payment. With none set, the total simply divides.
-  const deposit = input.depositPence ?? Math.floor(input.totalPence / count);
-  const rest = input.totalPence - deposit;
-  const each = Math.floor(rest / (count - 1));
-
-  const plan = [{ number: 1, amountPence: deposit, dueAt: start }];
-  for (let number = 2; number <= count; number++) {
-    const last = number === count;
-    plan.push({
-      number,
-      // Everything not yet allocated goes on the last, which is what makes the
-      // parts sum exactly.
-      amountPence: last
-        ? input.totalPence - deposit - each * (count - 2)
-        : each,
-      dueAt: addDays(start, input.everyDays * (number - 1)),
-    });
-  }
-  return plan;
-}
-
-function addDays(from: Date, days: number): Date {
-  const out = new Date(from);
-  out.setUTCDate(out.getUTCDate() + days);
-  return out;
-}
 
 /**
  * WHAT THEY ARE BEING ASKED FOR TODAY.
@@ -115,7 +72,7 @@ export function dueNowPence(
   instalments: PlannedInstalment[],
   now = new Date(),
 ): number {
-  const day = today(now);
+  const day = startOfDay(now);
   return instalments
     .filter((one) => one.paidAt === null && one.dueAt <= day)
     .reduce((total, one) => total + one.amountPence, 0);
@@ -150,7 +107,7 @@ export function overdueDays(
   instalments: PlannedInstalment[],
   now = new Date(),
 ): number {
-  const day = today(now);
+  const day = startOfDay(now);
   const late = instalments
     .filter((one) => one.paidAt === null && one.dueAt < day)
     .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())[0];

@@ -7,6 +7,13 @@ import {
 } from "@/app/(site)/courses/actions";
 import { courseDetail } from "@/content/courses";
 import { formatMoney } from "@/lib/format";
+import {
+  chargeForChoice,
+  type PayChoice,
+  planExtraPence,
+  planParts,
+  planTotalPence,
+} from "@/lib/instalments-shape";
 
 /**
  * The one blush pool on a course's page.
@@ -16,12 +23,18 @@ import { formatMoney } from "@/lib/format";
  * cancellation terms underneath — because the moment somebody is deciding to
  * spend £240 is the moment they want to know what happens if they cannot come.
  *
- * WHAT A COURSE HAS THAT A WORKSHOP DOES NOT is the deposit, and it is the one
- * thing this panel says differently. When the course carries one, the button
- * charges it and the panel says in the same breath what is left and when it is
- * due — never "£80" on its own, which reads as the price. When it does not, the
- * whole price is taken at once and the panel says so, so that "£240 for the
- * whole run" and "£240 now" are not two figures somebody has to reconcile.
+ * WHAT A COURSE HAS THAT A WORKSHOP DOES NOT is more than one way to pay for
+ * it, and that is the one thing this panel says differently (operator,
+ * 2026-08-21). Marianne ticks which ways a course offers; this draws one line
+ * per way with BOTH of its figures — what is taken now and what is left — so
+ * that "£240 for the whole run" and "£80 now" are never two numbers somebody
+ * has to reconcile, and a smaller figure is never sitting alone where a price
+ * goes.
+ *
+ * IT KNOWS NO RULE OF ITS OWN. `ways` arrives worked out by the same function
+ * the checkout validates against and the webhook applies under its lock, so
+ * this cannot offer something the checkout will refuse. With one way it says
+ * what will happen; with two or three it asks.
  *
  * FOUR STATES, decided by facts rather than by a flag:
  *
@@ -41,6 +54,10 @@ export default function CoursePanel({
   placesLeft,
   pricePence,
   depositPence,
+  ways,
+  parts,
+  everyDays,
+  interestBps,
   refundDays,
   refundDeadline,
   balanceDueOn,
@@ -54,6 +71,13 @@ export default function CoursePanel({
   pricePence: number;
   /** PENCE per place, or null when the whole price is taken at once. */
   depositPence: number | null;
+  /** Which of the three this course offers, decided on the server. */
+  ways: PayChoice[];
+  /** How many payments the plan is in, when there is one. */
+  parts: number;
+  everyDays: number;
+  /** Interest on the plan, in basis points. 0 means the plan costs the price. */
+  interestBps: number;
   refundDays: number;
   /** Already written out, e.g. "Saturday 6 September". Null means no refund. */
   refundDeadline: string | null;
@@ -78,12 +102,70 @@ export default function CoursePanel({
   const max = Math.max(1, placesLeft);
   const chosen = Math.min(places, max);
 
-  // A deposit is only a deposit when there is a date to owe the rest by. The
-  // server applies the same rule; drawing a different one here would put a
-  // figure on the button that is not what the card is charged.
-  const onDeposit = depositPence !== null && balanceDueOn !== null;
-  const dueNow = (onDeposit ? (depositPence as number) : pricePence) * chosen;
-  const dueLater = pricePence * chosen - dueNow;
+  /**
+   * WHICH WAY THEY HAVE PICKED. The first one offered, until they say
+   * otherwise — and the first is `full` wherever it is offered, because being
+   * defaulted onto a plan is being defaulted into owing money.
+   */
+  const offered = ways.length > 0 ? ways : (["full"] as PayChoice[]);
+  const [choice, setChoice] = useState<PayChoice>(offered[0]);
+  const picked = offered.includes(choice) ? choice : offered[0];
+
+  // THE SAME SUM THE CHECKOUT USES, imported rather than rewritten. Two
+  // implementations of this is how a page offers £110 and a card gets charged
+  // £100 — so the figure under the button and the figure on the card come out
+  // of one function, called here with the numbers the server sent.
+  const money = (way: PayChoice) =>
+    chargeForChoice({
+      choice: way,
+      pricePence,
+      places: chosen,
+      depositPence,
+      parts,
+      interestBps,
+    });
+
+  const mine = money(picked);
+  const extra = planExtraPence(pricePence * chosen, interestBps);
+
+  const wayLabel: Record<PayChoice, string> = {
+    full: panel.fullWay,
+    deposit: panel.depositWay,
+    plan: panel.planWay,
+  };
+
+  /**
+   * The second line under each way — what is left, and when.
+   *
+   * THE PLAN'S LINE IS BUILT FROM THE ACTUAL PARTS, not from a division. The
+   * rounding penny lives on the last one, so "five more of £100" would be two
+   * pence short of the truth on some totals — and the one figure a person
+   * checks against their bank statement is the one they were told. When the
+   * last differs it is named separately.
+   */
+  const wayLater = (way: PayChoice): string => {
+    const sums = money(way);
+    if (way === "full") return "Nothing after that.";
+    if (way === "deposit")
+      return `${formatMoney(sums.laterPence)} by ${balanceDueOn}`;
+
+    const all = planParts(
+      planTotalPence(pricePence * chosen, interestBps),
+      parts,
+    );
+    const rest = all.slice(1);
+    const last = rest[rest.length - 1];
+    const evenly = rest.slice(0, -1);
+    const same = evenly.every((one) => one === evenly[0]);
+
+    if (rest.length === 1) {
+      return `then ${formatMoney(last)} in ${everyDays} days`;
+    }
+    if (same && evenly[0] === last) {
+      return `then ${rest.length} more of ${formatMoney(last)}, one every ${everyDays} days`;
+    }
+    return `then ${evenly.length} of ${formatMoney(evenly[0])} and a last of ${formatMoney(last)}, one every ${everyDays} days`;
+  };
 
   return (
     <aside id="book" className="lg:pt-20" aria-labelledby="book-h">
@@ -221,25 +303,148 @@ export default function CoursePanel({
                 )}
               </div>
 
-              {/* THE TWO FIGURES, TOGETHER. Never the deposit on its own: a
-                  figure smaller than the price, drawn where a price goes, is
-                  read as the price. */}
-              {onDeposit ? (
+              {/* ── HOW THEY WOULD LIKE TO PAY ─────────────────────────
+                  THE TWO FIGURES ARE ALWAYS TOGETHER. Never a deposit or a
+                  first instalment on its own: a figure smaller than the price,
+                  drawn where a price goes, is read AS the price, and a person
+                  who thought a course cost £100 finds out otherwise from their
+                  bank. So every way carries what is taken now and what is left
+                  on the same card.
+
+                  Radios and not a dropdown: three options a person is choosing
+                  between with money on each of them should all be visible at
+                  once. With one way there is nothing to choose, and it says
+                  what will happen instead of asking. */}
+              <input type="hidden" name="payment" value={picked} />
+
+              {offered.length > 1 ? (
+                <fieldset className="mt-7">
+                  <legend className="fig font-mono text-[14px] uppercase tracking-[0.14em] text-ink-soft">
+                    {panel.waysLabel}
+                  </legend>
+                  <div className="mt-3 space-y-2">
+                    {offered.map((way) => {
+                      const on = way === picked;
+                      return (
+                        <label
+                          key={way}
+                          className={`flex cursor-pointer items-baseline gap-4 border px-5 py-4 ${
+                            on
+                              ? "border-ink bg-ink/[0.04]"
+                              : "border-pool-rule hover:border-ink/40"
+                          }`}
+                        >
+                          {/* DRAWN RATHER THAN ACCENTED. The browser's own
+                              radio arrived here as a filled dark disc whether
+                              or not it was selected — so the one thing the
+                              control exists to say, which of three it is, was
+                              the one thing it did not say — and `accent-color`
+                              could not fix it (the variable it named does not
+                              exist on this surface; the token is
+                              `--color-ink`). The input still IS the radio and
+                              keeps every keyboard behaviour; only its skin is
+                              ours, and the ring below is what a person reads.
+
+                              `sr-only` and not `hidden`: a hidden input is
+                              unfocusable, which would take arrow-key selection
+                              away from anybody not using a mouse. */}
+                          <input
+                            type="radio"
+                            name="way"
+                            value={way}
+                            checked={on}
+                            onChange={() => setChoice(way)}
+                            className="peer sr-only"
+                          />
+                          <span
+                            aria-hidden="true"
+                            className={`mt-[3px] grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-action ${
+                              on ? "border-ink" : "border-pool-rule"
+                            }`}
+                          >
+                            {on && (
+                              <span className="block h-[9px] w-[9px] rounded-full bg-ink" />
+                            )}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-baseline justify-between gap-x-4">
+                              <span className="text-[17px] font-semibold text-ink">
+                                {wayLabel[way]}
+                              </span>
+                              <span className="fig font-mono text-[19px] text-ink">
+                                {formatMoney(money(way).chargePence)}
+                                <span className="text-[14px] text-ink-soft">
+                                  {" "}
+                                  now
+                                </span>
+                              </span>
+                            </span>
+                            <span className="mt-1 block text-[15px] leading-relaxed text-ink-soft">
+                              {wayLater(way)}
+                            </span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {picked === "plan" && (
+                    <>
+                      {extra > 0 && (
+                        <p className="mt-3 text-[15px] leading-relaxed text-ink">
+                          {formatMoney(mine.totalPence)} in all &mdash;{" "}
+                          {formatMoney(extra)} more than paying at once.{" "}
+                          {panel.planInterestNote}
+                        </p>
+                      )}
+                      <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                        {panel.planNote}
+                      </p>
+                    </>
+                  )}
+                  {picked === "deposit" && (
+                    <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                      {panel.balanceNote}
+                    </p>
+                  )}
+                </fieldset>
+              ) : picked === "deposit" ? (
                 <div className="mt-7 border-l-2 border-gold pl-5">
                   <p className="fig font-mono text-[19px] text-ink">
-                    {formatMoney(dueNow)}{" "}
+                    {formatMoney(mine.chargePence)}{" "}
                     <span className="text-[15px] text-ink-soft">
                       {panel.depositLabel.toLowerCase()}, now
                     </span>
                   </p>
                   <p className="mt-1 fig font-mono text-[19px] text-ink">
-                    {formatMoney(dueLater)}{" "}
+                    {formatMoney(mine.laterPence)}{" "}
                     <span className="text-[15px] text-ink-soft">
                       {panel.depositNote} {balanceDueOn}
                     </span>
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
                     {panel.balanceNote}
+                  </p>
+                </div>
+              ) : picked === "plan" ? (
+                <div className="mt-7 border-l-2 border-gold pl-5">
+                  <p className="fig font-mono text-[19px] text-ink">
+                    {formatMoney(mine.chargePence)}{" "}
+                    <span className="text-[15px] text-ink-soft">
+                      now, the first of {parts}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-[15px] leading-relaxed text-ink">
+                    {wayLater("plan")}
+                  </p>
+                  {extra > 0 && (
+                    <p className="mt-2 text-[15px] leading-relaxed text-ink">
+                      {formatMoney(mine.totalPence)} in all &mdash;{" "}
+                      {formatMoney(extra)} more than paying at once.
+                    </p>
+                  )}
+                  <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                    {panel.planNote}
                   </p>
                 </div>
               ) : (
@@ -255,11 +460,16 @@ export default function CoursePanel({
                     disabled={pending}
                     className="t mt-7 min-h-[56px] w-full bg-action px-6 text-[19px] font-semibold text-pool hover:bg-ink disabled:opacity-60"
                   >
+                    {/* THE FIGURE ON THE BUTTON IS WHAT THE CARD IS CHARGED,
+                        never the price and never the total — it is the last
+                        thing read before a card is typed. */}
                     {pending
                       ? panel.onTheWay
-                      : onDeposit
-                        ? `Pay the deposit · ${formatMoney(dueNow)}`
-                        : `Book ${chosen} ${chosen === 1 ? "place" : "places"} · ${formatMoney(dueNow)}`}
+                      : picked === "deposit"
+                        ? `Pay the deposit · ${formatMoney(mine.chargePence)}`
+                        : picked === "plan"
+                          ? `Pay the first of ${parts} · ${formatMoney(mine.chargePence)}`
+                          : `Book ${chosen} ${chosen === 1 ? "place" : "places"} · ${formatMoney(mine.chargePence)}`}
                   </button>
 
                   {state.error && (

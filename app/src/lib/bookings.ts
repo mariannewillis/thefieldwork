@@ -15,7 +15,12 @@ import { SITE_URL } from "@/content/site";
 import { prisma } from "@/lib/db";
 import { formatDayLong, isPast, refundDeadline } from "@/lib/format";
 import { stripe } from "@/lib/stripe";
-import { planFor } from "@/lib/instalments";
+import {
+  chargeForChoice,
+  type PayChoice,
+  planFor,
+  waysToPay,
+} from "@/lib/instalments-shape";
 
 /**
  * Places, money and the links in the emails.
@@ -656,11 +661,25 @@ export type ConfirmResult =
 
 /** What the checkout charged, and therefore which kind of payment this is. */
 type FirstPayment = {
-  kind: "deposit" | "full";
-  /** PENCE, for every place — what the whole booking will cost in the end. */
+  kind: "deposit" | "full" | "instalment";
+  /** Which of the three the buyer chose, AFTER it was checked against the course. */
+  choice: PayChoice;
+  /**
+   * PENCE, for every place — what the whole booking will cost in the end.
+   * On a plan that is the plan total, interest included: what is owed is what
+   * was agreed, and every screen that asks reads this one number.
+   */
   totalPence: number;
-  /** The day the rest is due. Null when this payment settles it. */
+  /**
+   * PENCE — what the card should have been charged NOW. Not the same as
+   * `totalPence` on two of the three ways, which is the entire point of
+   * carrying both.
+   */
+  chargePence: number;
+  /** The day the rest is due. Null except on a deposit. */
   balanceDueAt: Date | null;
+  /** How many payments the plan is in. Zero when this is not a plan. */
+  parts: number;
 };
 
 /**
@@ -707,6 +726,17 @@ export async function confirmPaidBooking(input: {
   eventType: string;
   offering: { kind: "workshop" | "course"; id: number };
   places: number;
+  /**
+   * WHICH OF THE THREE WAYS the buyer picked, as it was stamped on the checkout
+   * session. From a browser, therefore not trusted: checked against what the
+   * course actually offers, under the lock, before a single row is written.
+   * A workshop has one way and passes "full".
+   *
+   * NULL WHEN THE SESSION CARRIES NO STAMP — every session opened before this
+   * key existed, and any made by hand. Those are read off the AMOUNT instead;
+   * see `firstPaymentFor`.
+   */
+  choice: PayChoice | null;
   amountPence: number;
   currency: string;
   buyerName: string;
@@ -748,17 +778,39 @@ export async function confirmPaidBooking(input: {
         };
       }
 
-      const first = firstPaymentFor(found, input.places);
-      const charged =
-        first.kind === "deposit"
-          ? (found.depositGBP as number) * input.places
-          : first.totalPence;
+      const first = firstPaymentFor(
+        found,
+        input.places,
+        input.choice,
+        input.amountPence,
+      );
 
-      if (charged !== input.amountPence) {
+      if (first.chargePence !== input.amountPence) {
         console.warn(
-          `[bookings] session ${input.stripeSessionId} paid ${input.amountPence} but ${input.places} place(s) at the current price is ${charged}. The price was probably edited mid-checkout. Recording what was paid.`,
+          `[bookings] session ${input.stripeSessionId} paid ${input.amountPence} but ${input.places} place(s) paid as "${first.choice}" at the current figures is ${first.chargePence}. The course was probably edited mid-checkout. Recording what was paid.`,
         );
       }
+      if (input.choice !== null && first.choice !== input.choice) {
+        // Not an error and not a refund: the card has already been charged, and
+        // the honest thing is to write down what the course could actually
+        // honour. Loud, because it means somebody was shown an offer that had
+        // gone by the time they pressed it.
+        console.warn(
+          `[bookings] session ${input.stripeSessionId} asked to pay as "${input.choice}" but the course no longer offers it. Recorded as "${first.choice}".`,
+        );
+      }
+
+      /**
+       * IS ANYTHING OWED AFTER TODAY? — and therefore is there a link to pay it.
+       *
+       * `first.balanceDueAt` was the test, and it was the right one while a
+       * deposit was the only way to owe anything later. A PLAN HAS NO BALANCE
+       * DAY — it has five of them, on rows — so that test issued no pay link to
+       * anybody on a plan, and their reminder would have had nothing to link
+       * to. The honest question is the arithmetic one: was less taken than the
+       * booking is for?
+       */
+      const owesLater = first.chargePence < first.totalPence;
 
       const sold =
         (await soldFor(tx, input.offering.kind, [input.offering.id])).get(
@@ -778,7 +830,7 @@ export async function confirmPaidBooking(input: {
           // A booking that never got its place owes nothing and is about to be
           // refunded, so it carries no due date and no link to pay one.
           balanceDueAt: hasRoom ? first.balanceDueAt : null,
-          balanceTokenHash: hasRoom && first.balanceDueAt ? balance.hash : null,
+          balanceTokenHash: hasRoom && owesLater ? balance.hash : null,
           paidAt: input.paidAt,
           cancellationTokenHash: cancel.hash,
           payments: {
@@ -811,21 +863,20 @@ export async function confirmPaidBooking(input: {
        * `balanceDueAt` above has always followed. This is the same rule for the
        * whole schedule rather than for one balance.
        *
-       * ONLY WHEN THERE IS SOMETHING TO SCHEDULE. A workshop is paid at once
-       * and a course paid in full has nothing following it, so both write no
-       * rows — and an empty schedule is how "nothing is owed later" is spelled
-       * everywhere that reads it. A booking with no place is about to be
-       * refunded and owes nothing at all.
+       * ONLY FOR A PLAN. A workshop is paid at once, a course paid in full has
+       * nothing following it, and a DEPOSIT is not a plan — it is one balance
+       * on one day, which `balanceDueAt` and the pay link have always carried
+       * between them. An empty schedule is how "this is not being paid in
+       * parts" is spelled everywhere that reads it. A booking with no place is
+       * about to be refunded and owes nothing at all.
        *
        * THE FIRST INSTALMENT IS MARKED PAID HERE, by the payment that has just
-       * landed. It is the deposit; the money is already in.
+       * landed — it is the share taken at the checkout, and the money is in.
        */
-      if (hasRoom && found.instalments > 1) {
+      if (hasRoom && first.choice === "plan") {
         const plan = planFor({
           totalPence: first.totalPence,
-          depositPence:
-            found.depositGBP === null ? null : found.depositGBP * input.places,
-          instalments: found.instalments,
+          parts: first.parts,
           everyDays: found.instalmentEveryDays,
           from: input.paidAt,
         });
@@ -856,7 +907,7 @@ export async function confirmPaidBooking(input: {
             outcome: "confirmed" as const,
             booking,
             cancelToken: cancel.token,
-            balanceToken: first.balanceDueAt ? balance.token : null,
+            balanceToken: owesLater ? balance.token : null,
           }
         : { outcome: "noPlace" as const, booking };
     });
@@ -882,9 +933,16 @@ type LockedOffering = {
   priceGBP: number;
   depositGBP: number | null;
   balanceDueAt: Date | null;
-  /// How many payments she will take for it. A workshop is always 1.
+  /// How many payments the plan is in. A workshop has no plan and reads 1.
   instalments: number;
   instalmentEveryDays: number;
+  /// The three ticks and the interest, read under the same lock as the price —
+  /// so what the webhook writes down cannot be decided from a stale copy of
+  /// what the course offered when the checkout was opened.
+  payInFull: boolean;
+  depositOffered: boolean;
+  planOffered: boolean;
+  planInterestBps: number;
 };
 
 async function lockOffering(
@@ -905,6 +963,10 @@ async function lockOffering(
           balanceDueAt: null,
           instalments: 1,
           instalmentEveryDays: 30,
+          payInFull: true,
+          depositOffered: false,
+          planOffered: false,
+          planInterestBps: 0,
         }
       : null;
   }
@@ -917,65 +979,164 @@ async function lockOffering(
       balanceDueAt: Date | null;
       instalments: number;
       instalmentEveryDays: number;
+      payInFull: boolean;
+      depositOffered: boolean;
+      planOffered: boolean;
+      planInterestBps: number;
     }[]
-  >`SELECT capacity, "priceGBP", "depositGBP", "balanceDueAt", instalments, "instalmentEveryDays" FROM "Course" WHERE id = ${offering.id} FOR UPDATE`;
+  >`SELECT capacity, "priceGBP", "depositGBP", "balanceDueAt", instalments, "instalmentEveryDays", "payInFull", "depositOffered", "planOffered", "planInterestBps" FROM "Course" WHERE id = ${offering.id} FOR UPDATE`;
   return rows[0] ?? null;
 }
 
 /**
- * Whether a course is still being sold on its deposit.
+ * WHICH WAYS THIS COURSE CAN ACTUALLY BE PAID FOR, right now.
  *
- * THE DATE HAS TO BE IN FRONT OF US. A course whose balance day has already
- * been still has a deposit figure on it — Marianne set it in June and the run
- * is in October — and taking that deposit now would write a booking that is
- * overdue the instant it exists: lapsed before the confirmation email lands,
- * and the place released the same second it was bought. So the deposit
- * arrangement simply ends on its own date, and the whole price is taken at once
- * from then on. That is the same shape as everything else here — a consequence
- * of a date, with nothing running and nothing to switch off.
+ * The one place the question is answered. The course page draws the buttons
+ * from it, the checkout validates the buyer's choice against it, and the
+ * webhook applies it again under the lock — three copies of this test is how a
+ * page offers £80 and a card gets charged £240.
  *
- * Exported because the checkout and the panel have to draw the same conclusion
- * as the webhook. Three copies of this test is how a page offers £80 and a card
- * gets charged £240.
+ * The rule itself lives in `instalments-shape.ts::waysToPay` so the panel can
+ * run it in the browser too; this wrapper is what turns a course row (or a
+ * locked one) into its arguments, including the one fact the pure function
+ * cannot work out for itself — whether the balance day has been.
+ *
+ * A DEPOSIT ARRANGEMENT ENDS ON ITS OWN DATE. A course whose balance day has
+ * passed still has a deposit figure on it — she set it in June and the run is
+ * in October — and taking that deposit now would write a booking overdue the
+ * instant it exists: lapsed before the confirmation email lands, the place
+ * released the same second it was bought. So the offer simply expires, with
+ * nothing running and nothing to switch off, and the course falls back to its
+ * price.
  */
-export function depositStillOffered(
+export function offeredWays(
   course: {
+    priceGBP: number;
     depositGBP: number | null;
     balanceDueAt: Date | null;
-    priceGBP: number;
+    instalments: number;
+    payInFull: boolean;
+    depositOffered: boolean;
+    planOffered: boolean;
   },
   now = new Date(),
-): boolean {
-  return Boolean(
-    course.depositGBP &&
-    course.depositGBP < course.priceGBP &&
-    course.balanceDueAt &&
-    !isPast(course.balanceDueAt, now),
-  );
+): PayChoice[] {
+  return waysToPay({
+    pricePence: course.priceGBP,
+    depositPence: course.depositGBP,
+    balanceDueAt: course.balanceDueAt,
+    instalments: course.instalments,
+    payInFull: course.payInFull,
+    depositOffered: course.depositOffered,
+    planOffered: course.planOffered,
+    isPast: course.balanceDueAt ? isPast(course.balanceDueAt, now) : false,
+  });
 }
 
 /**
- * Which kind of payment the checkout just took, and what it leaves behind.
+ * Whether a course is still being sold on its deposit. Kept as its own name
+ * because "is this course on a deposit" is a question three screens ask in
+ * those words, and `offeredWays(...).includes("deposit")` reads as plumbing.
+ */
+export function depositStillOffered(
+  course: {
+    priceGBP: number;
+    depositGBP: number | null;
+    balanceDueAt: Date | null;
+    instalments: number;
+    payInFull: boolean;
+    depositOffered: boolean;
+    planOffered: boolean;
+  },
+  now = new Date(),
+): boolean {
+  return offeredWays(course, now).includes("deposit");
+}
+
+/**
+ * WHAT THE CHECKOUT TAKES FOR THE WAY THEY CHOSE, and what it leaves behind.
  *
- * A deposit is only a deposit when there is something left to owe and a day
- * still ahead of us to owe it by: a "deposit" equal to the whole price is the
- * whole price, and writing either case down as a two-payment arrangement would
- * put a balance link in an email with nothing behind it.
+ * The choice arrives from Stripe's metadata, which is to say from a browser,
+ * and is therefore checked against `offeredWays` before it is honoured — a
+ * request to pay one sixth of a course that offers no plan falls back to the
+ * whole price rather than being taken at face value. Falling back and not
+ * failing, because by the time this runs a card has already been charged; the
+ * job here is to write down truthfully what was paid for.
+ *
+ * THE THREE ARE ALTERNATIVES. A deposit is not the first instalment of a plan
+ * and a plan has no deposit — that conflation is what made the course form
+ * unfillable, and it is resolved here by giving each way its own arithmetic.
  */
 function firstPaymentFor(
   offering: LockedOffering,
   places: number,
+  wanted: PayChoice | null,
+  amountPence: number,
 ): FirstPayment {
-  const totalPence = offering.priceGBP * places;
+  const ways = offeredWays(offering);
 
-  if (depositStillOffered(offering)) {
-    return {
-      kind: "deposit",
-      totalPence,
-      balanceDueAt: offering.balanceDueAt as Date,
-    };
-  }
-  return { kind: "full", totalPence, balanceDueAt: null };
+  /**
+   * AN UNSTAMPED SESSION IS READ OFF WHAT WAS PAID.
+   *
+   * `wanted` is null for every Checkout Session opened before the `payment`
+   * key existed — which is every session in flight on the day this deploys,
+   * live for about a day each — and for anything made by hand in the Stripe
+   * dashboard. Defaulting those to "full" would record a £240 course as settled
+   * when £80 was taken: the buyer would get no link to pay the rest, the
+   * balance would never be asked for, and the ledger would say she had been
+   * paid. That is the worst wrong answer available here.
+   *
+   * So the amount decides. Exactly one offered way charges what actually
+   * arrived, in the overwhelming majority of cases; ambiguity resolves to the
+   * one that leaves the MOST outstanding, because a booking that says too much
+   * is owed gets corrected by the next payment, and one that says too little is
+   * never corrected at all.
+   */
+  const resolved: PayChoice | null =
+    wanted ??
+    ways.find(
+      (way) =>
+        chargeForChoice({
+          choice: way,
+          pricePence: offering.priceGBP,
+          places,
+          depositPence: offering.depositGBP,
+          parts: Math.max(2, Math.round(offering.instalments)),
+          interestBps: offering.planInterestBps,
+        }).chargePence === amountPence && way !== "full",
+    ) ??
+    null;
+
+  const choice: PayChoice =
+    resolved !== null && ways.includes(resolved) ? resolved : "full";
+  const parts =
+    choice === "plan" ? Math.max(2, Math.round(offering.instalments)) : 0;
+
+  const money = chargeForChoice({
+    choice,
+    pricePence: offering.priceGBP,
+    places,
+    depositPence: offering.depositGBP,
+    parts,
+    interestBps: offering.planInterestBps,
+  });
+
+  return {
+    kind:
+      choice === "deposit"
+        ? "deposit"
+        : choice === "plan"
+          ? "instalment"
+          : "full",
+    choice,
+    // On a plan this is the plan TOTAL, interest included: what is owed is what
+    // was agreed, and every screen that asks what is outstanding gets the right
+    // answer without knowing interest exists. On the other two it is the price.
+    totalPence: money.totalPence,
+    chargePence: money.chargePence,
+    balanceDueAt: choice === "deposit" ? (offering.balanceDueAt as Date) : null,
+    parts,
+  };
 }
 
 // ── the balance arrives ──────────────────────────────────────────────────────

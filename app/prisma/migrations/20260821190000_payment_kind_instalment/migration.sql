@@ -1,0 +1,11 @@
+-- A PLAN'S SHARE IS ITS OWN KIND OF PAYMENT (operator, 2026-08-21).
+--
+-- The ledger had `deposit | balance | full`. A payment plan's first share is
+-- none of those: it is not a deposit, because a deposit is part-now-rest-by-a-
+-- day and is the buyer's OTHER option, and recording one as the other would
+-- blur in the ledger the exact distinction the checkout now makes.
+--
+-- IF NOT EXISTS because ALTER TYPE ... ADD VALUE is not transactional the way
+-- the rest of a migration is, and a half-applied migration re-run should not
+-- die on the value it already added.
+ALTER TYPE "PaymentKind" ADD VALUE IF NOT EXISTS 'instalment';

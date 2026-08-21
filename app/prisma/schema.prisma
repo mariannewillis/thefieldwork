@@ -309,17 +309,58 @@ model Course {
   /// through the relation.
   balanceDueAt DateTime? @db.Date
 
-  /// HOW MANY PAYMENTS SHE WILL TAKE FOR IT (operator, 2026-08-21).
+  /// ── THE THREE WAYS TO PAY, AND WHICH THIS ONE OFFERS ────────────────────
   ///
-  /// 1 is the whole price at booking. 2 is the deposit and one balance, which
-  /// is what this app did before there was a number here — so an existing
-  /// course with a deposit reads as 2 and behaves exactly as it always has.
-  /// 4 is a deposit and three more.
+  /// Ticked by her, per course (operator, 2026-08-21). They are three separate
+  /// OFFERS a buyer chooses between at the checkout, not one arrangement:
   ///
-  /// THE FIRST PAYMENT IS ALWAYS THE DEPOSIT and is taken at the moment of
-  /// booking; `instalments` counts it. What is split is the rest, evenly, with
-  /// the rounding going on the LAST one so no payment is ever a penny short of
-  /// what was agreed.
+  ///   payInFull       the whole price, at the checkout. The default, and the
+  ///                   fallback — a course offering nothing else is still
+  ///                   buyable at its price, because a published course nobody
+  ///                   can pay for is worse than one that offers a single way.
+  ///   depositOffered  `depositGBP` now, the rest by `balanceDueAt`. Two
+  ///                   payments, never interest-bearing: a balance six weeks
+  ///                   out is a held place, not credit.
+  ///   planOffered     the price divided into `instalments`, the first at the
+  ///                   checkout and the rest every `instalmentEveryDays`. The
+  ///                   only one that may carry interest.
+  ///
+  /// A TICK IS AN INTENTION AND NOT A FACT. A deposit ticked with no figure on
+  /// it, or with a balance day already behind us, is not an offer — what is
+  /// actually true is decided in ONE place, `lib/instalments-shape.ts::waysToPay`,
+  /// which the page, the checkout and the webhook all read. Three copies of
+  /// that test is how a page offers £80 and a card gets charged £240.
+  payInFull      Boolean @default(true)
+  depositOffered Boolean @default(false)
+  planOffered    Boolean @default(false)
+
+  /// INTEREST ON THE PLAN, IN BASIS POINTS. 550 is 5.5%; 0 — the default —
+  /// means the plan costs exactly what the course costs.
+  ///
+  /// An integer for the reason every money figure here is an integer: 5.5 in a
+  /// float column, multiplied by a price, is a rounding argument waiting to
+  /// happen, and this one would be an argument about somebody's money. The form
+  /// takes "5.5" and stores 550, the same move the deposit makes with pounds.
+  ///
+  /// APPLIED ONCE, to the whole, before anything is divided — so the total the
+  /// page quotes and the parts the database holds cannot drift apart.
+  /// Deposits never touch it.
+  planInterestBps Int @default(0)
+
+  /// HOW MANY PAYMENTS THE PLAN IS IN (operator, 2026-08-21).
+  ///
+  /// Read only when `planOffered` is ticked, and at least 2 when it is — a plan
+  /// of one is paying in full, which is its own tick.
+  ///
+  /// EVERY PART IS THE SAME SHARE, including the first: six payments on a £600
+  /// course is £100 at the checkout and five more of £100. The deposit is NOT
+  /// the first of them — that was the first cut of this and it is what made the
+  /// course form confusing to fill in, because ticking both meant the deposit
+  /// silently became one sixth. The two are alternatives a buyer chooses
+  /// between.
+  ///
+  /// The rounding goes on the LAST part, so the parts always sum to exactly
+  /// what was quoted.
   instalments Int @default(1)
 
   /// Days between payments. 30 is "once a month" as she says it.
@@ -1112,9 +1153,21 @@ model Booking {
 /// Payment plans of n instalments are NOT this — they would need an ordering
 /// and a schedule, and neither exists here.
 enum PaymentKind {
+  /// Part paid at the checkout, with the rest owed by one day. A deposit and
+  /// nothing else — a plan's first share is `instalment`, because the two are
+  /// different arrangements and the ledger should not blur them.
   deposit
+
+  /// The rest of a deposit arrangement, arriving through the pay link.
   balance
+
+  /// The whole price, at the checkout. Every workshop, and a course bought
+  /// outright.
   full
+
+  /// One share of a payment plan — the first taken at the checkout, the rest
+  /// through the pay link (operator, 2026-08-21).
+  instalment
 }
 
 /// Money that actually arrived.
