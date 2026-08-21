@@ -23,6 +23,24 @@ next-env.d.ts
 # reach the real Resend key. The script deletes it; this is for when it does not.
 # The wildcard also covers any .smoke-*.png / .smoke-*.mjs left behind by a run.
 .smoke-*
+
+# ── AND EVERY OTHER THROWAWAY COPY OF THE APP ────────────────────────────────
+# `.smoke-*` above covered the suites' copies and nothing else, so
+# `app/.shots-media-app` — a screenshot probe's copy of the whole app, made by
+# e2e/_tmp-media-shots.mjs — was committed and pushed: 370 files of a stale
+# duplicate `src/`. It cost real confusion. The Replit agent reading the
+# repository concluded the new application "is stored in an
+# app/.shots-media-app/ snapshot rather than the deployed app/ root" and built
+# a merge plan around it.
+#
+# So: any dot-directory that ends in `-app`, and the scratch prefixes the
+# probes use. A copy of the application is never a thing to commit.
+.*-app/
+.rehearsal/
+_tmp-*
+_probe*
+_shot-*
+_d[0-9]*-tmp*
 .storage/
 *.log
 .DS_Store
