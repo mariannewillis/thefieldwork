@@ -151,6 +151,17 @@
   color: #e3d3dd;
   margin: 4mm 0 0;
   max-width: 36ch;
+
+  /* HER LINE BREAKS ARE HERS (operator, 2026-08-21 — she wrote three bullet
+     lines in the editor and the flyer printed them as one run-on sentence).
+
+     HTML collapses a newline to a space, which is right for prose and wrong for
+     a list: the textarea she types into keeps her breaks, the preview beside it
+     did not, and the two disagreed about what she had written. `pre-line` keeps
+     the breaks and still collapses runs of spaces, so a stray double space does
+     not become a gap on the paper. */
+  white-space: pre-line;
+
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;

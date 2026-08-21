@@ -48,14 +48,37 @@ const GHOST =
   "t min-h-[38px] py-1.5 text-[16px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink";
 
 /**
- * Roughly what fits in the sentence under the name before the sheet clips it.
- *
- * A measured guess rather than an exact one: four lines of 36 characters is
- * ~144, and the point of the number is to warn her BEFORE the clip rather than
- * to police her to the character. Erring low means she is told about a sentence
- * that only just fits, which is the harmless direction to be wrong in.
+ * HOW MANY LINES THE SHEET GIVES THE SENTENCE, by how many photographs are on
+ * it. The same numbers as `.flyer__blurb`'s clamps in `flyer.css`; they are
+ * stated twice because one is what the paper does and one is what she is told,
+ * and the alternative is a stylesheet reaching into a React component.
  */
-const BLURB_FITS = 140;
+function blurbLines(pictures: number): number {
+  if (pictures === 0) return 6;
+  if (pictures <= 3) return 4;
+  if (pictures <= 6) return 2;
+  return 1;
+}
+
+/**
+ * ROUGHLY HOW MANY LINES SHE HAS WRITTEN.
+ *
+ * COUNTED BY LINE AND NOT BY CHARACTER, which is the version this replaced: it
+ * warned above 140 characters, so four short bullet lines — well under that —
+ * were clipped to one on the sheet with nothing said (operator, 2026-08-21).
+ * Her line breaks are kept on the paper now, which means they cost lines, which
+ * means the count that matters is lines.
+ *
+ * 36 characters is the measure `.flyer__blurb` is set to, and an empty line
+ * still takes one. A wrong guess here is harmless in the low direction — she is
+ * told about a sentence that only just fits — and that is the direction the
+ * rounding takes it.
+ */
+function linesOf(text: string): number {
+  return text
+    .split(/\r?\n/)
+    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / 36)), 0);
+}
 
 export default function FlyerEditor({
   flyer,
@@ -153,6 +176,9 @@ export default function FlyerEditor({
     requestAnimationFrame(() => form.current?.requestSubmit());
   };
 
+  /** What the sheet will give the sentence, at the number of pictures she has. */
+  const allowed = blurbLines(chosen.length);
+
   return (
     <form ref={form} action={save} className="pool on-pool px-7 py-7">
       <input type="hidden" name="kind" value={flyer.kind} />
@@ -232,7 +258,7 @@ export default function FlyerEditor({
             she cannot see on the preview is a line that is not on the paper
             either. She should find that out here rather than from a hundred
             printed sheets. */}
-        {text.blurb.trim().length > BLURB_FITS && (
+        {linesOf(text.blurb.trim()) > allowed && (
           <p
             role="note"
             className="mt-4 max-w-[46ch] border-l-2 border-pool-error pl-4 text-[15px] leading-relaxed text-ink-soft"
@@ -240,10 +266,11 @@ export default function FlyerEditor({
             <strong className="font-semibold text-ink">
               This is longer than the sheet has room for.
             </strong>{" "}
-            The flyer shows a few lines of it and the rest is cut off &mdash;
-            look at the sheet beside this and you will see where it stops. A
-            flyer is read across a room; the page it points at is where the long
-            version belongs.
+            With {chosen.length === 0 ? "no photographs" : chosen.length === 1 ? "one photograph" : `${chosen.length} photographs`} on
+            it the flyer shows {allowed === 1 ? "one line" : `${allowed} lines`}{" "}
+            and cuts the rest &mdash; look at the sheet beside this and you will
+            see where it stops. Fewer photographs gives the words more room, and
+            the page it points at is where the long version belongs.
           </p>
         )}
 
