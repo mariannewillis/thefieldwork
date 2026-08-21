@@ -15,6 +15,20 @@ import { isHidden, WHOLE_SITE } from "@/lib/site-visibility";
  * it only works if the crawler is allowed to look. Access control is the job
  * of authentication, not of a text file asking politely.
  */
+/**
+ * READ FRESH, NOT FROZEN AT BUILD (2026-08-21, found while preparing the deploy).
+ *
+ * This asks the database whether the whole-site switch is up, and Next
+ * PRERENDERED it — so the answer would have been whatever was true on the day
+ * the site was published, and flipping the switch would have changed every page
+ * on the site except the one file that tells crawlers to stay away. The gate
+ * would be up and robots.txt would still be inviting them in.
+ *
+ * `llms.txt` already had this; these two did not. One query on a file crawlers
+ * fetch a handful of times a day is not a load worth caching away.
+ */
+export const dynamic = "force-dynamic";
+
 export default async function robots(): Promise<MetadataRoute.Robots> {
   /**
    * A SITE THAT IS NOT OPEN YET ASKS NOT TO BE READ (operator, 2026-08-20).

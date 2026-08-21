@@ -15,6 +15,22 @@ import { listPublishedWorkshops } from "@/lib/workshops";
  * sitemap cannot drift: one she takes off the site leaves both at once. An
  * unpublished one never appears in either.
  */
+/**
+ * REBUILT HOURLY, NOT FROZEN AT BUILD (2026-08-21, found while preparing the
+ * deploy).
+ *
+ * Next prerendered this, which would have meant the map listed exactly the
+ * workshops, courses and services that existed on the day the site was
+ * published — and nothing she added afterwards would have been in it until
+ * somebody redeployed. A sitemap that never learns about new pages is worse
+ * than no sitemap, because it is the file a crawler trusts to be current.
+ *
+ * An hour rather than every request: this is four queries, and no crawler needs
+ * a map that is sixty seconds old. `robots.ts` is force-dynamic instead,
+ * because the whole-site switch has to reach it at once.
+ */
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [workshops, courses, services, hidden] = await Promise.all([
     listPublishedWorkshops(),

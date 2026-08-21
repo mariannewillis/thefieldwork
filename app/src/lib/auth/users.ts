@@ -29,7 +29,26 @@ export const DEFAULT_USERNAME =
  * below: we correct our own past guesses, never a name someone chose.
  */
 const PREVIOUSLY_SEEDED_USERNAMES = ["mariannevwillis"];
-export const DEFAULT_PASSWORD = "test1234";
+/**
+ * THE TEMPORARY PASSWORD HER ACCOUNT IS CREATED WITH.
+ *
+ * `test1234` on a laptop, and it should be: this account is created lazily by
+ * the first login attempt, and on a development machine the person making that
+ * attempt is the person building the site.
+ *
+ * ON A PUBLIC DEPLOYMENT IT IS A FRONT DOOR (2026-08-21, found while preparing
+ * the deploy). The account does not exist until somebody tries to log in — so
+ * on a fresh production database, the FIRST person to open /admin/login and
+ * type her address with this password is let in and becomes her. The password
+ * is in a public repository. The window is "from the moment the site answers
+ * until Marianne first signs in", which could be days.
+ *
+ * So a deployment sets `ADMIN_INITIAL_PASSWORD` to something nobody can read
+ * off GitHub. It is still marked `mustChangePassword`, so it survives exactly
+ * one sign-in; this closes the window before it, not after.
+ */
+export const DEFAULT_PASSWORD =
+  process.env.ADMIN_INITIAL_PASSWORD?.trim() || "test1234";
 
 /**
  * Her email address. Reset links go here, so it has to be a mailbox she
