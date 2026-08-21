@@ -631,9 +631,8 @@ try {
   await page.locator("#book").getByText("A deposit now").click();
   ok(
     "and choosing it puts the deposit on the button, not the price",
-    (await page
-      .getByRole("button", { name: /Pay the deposit/ })
-      .count()) === 1 &&
+    (await page.getByRole("button", { name: /Pay the deposit/ }).count()) ===
+      1 &&
       (await page.locator('#book button[type="submit"]').innerText()).includes(
         "\u00a380",
       ),
