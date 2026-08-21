@@ -6,6 +6,8 @@ import {
 } from "next/font/google";
 import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
+import OverdueNotice from "@/components/admin/OverdueNotice";
+import { owing, overdueWords } from "@/lib/instalments";
 import { unseenCounts } from "@/lib/unseen";
 import { getSession } from "@/lib/auth/server";
 import "./admin.css";
@@ -61,6 +63,13 @@ export default async function AdminLayout({
 
   const unseen = await unseenCounts();
 
+  // How late the furthest behind is — the one fact the notice needs beyond the
+  // count, and only asked for when there IS something late.
+  const latest =
+    unseen.overdue > 0
+      ? Math.max(0, ...(await owing()).map((row) => row.overdueDays))
+      : 0;
+
   // The temporary password opens the sign-in form and nothing else. Enforced
   // here rather than only after login, so it cannot be stepped around by
   // navigating straight to a section.
@@ -72,6 +81,14 @@ export default async function AdminLayout({
           each screen, because the point of a badge is that she sees it without
           opening the screen it belongs to. */}
       <AdminShell username={session.username} unseen={unseen}>
+        {/* WHAT SHE IS TOLD ON ARRIVAL, above whichever screen she opened
+            (operator, 2026-08-21). In the LAYOUT rather than on one screen,
+            because the point of it is that she is told without having to go to
+            Bookings — which is the thing she would only do if she already knew.
+
+            It draws nothing when nothing is late, so the cost on an ordinary
+            day is one count that the rail was making anyway. */}
+        <OverdueNotice count={unseen.overdue} oldest={overdueWords(latest)} />
         {children}
       </AdminShell>
     </div>

@@ -64,6 +64,9 @@ export type CourseFormValues = {
   priceGBP: number;
   /** Pence, or null when the whole price is taken at once. */
   depositGBP: number | null;
+  /** How many payments she will take, and how many days apart. */
+  instalments: number;
+  instalmentEveryDays: number;
   /** The day the rest is due. Null when there is no deposit. */
   balanceDueAt: Date | null;
   refundDays: number;
@@ -160,6 +163,12 @@ export default function CourseForm({
   );
   const [deposit, setDeposit] = useState(
     kept("deposit", course?.depositGBP ? String(course.depositGBP / 100) : ""),
+  );
+  const [instalments, setInstalments] = useState(
+    kept("instalments", String(course?.instalments ?? 1)),
+  );
+  const [everyDays, setEveryDays] = useState(
+    kept("instalmentEveryDays", String(course?.instalmentEveryDays ?? 30)),
   );
   const [balanceDueAt, setBalanceDueAt] = useState(
     kept(
@@ -290,6 +299,47 @@ export default function CourseForm({
         : priceNow
           ? `Which takes £${depositNow} at booking, and £${(priceNow - depositNow).toFixed(2).replace(/\.00$/, "")} by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`
           : `Which takes £${depositNow} at booking, and the rest by ${formatDayLong(asDate(balanceDueAt))}. If that is not paid, the place is released.`;
+
+  /**
+   * THE PLAN, IN WORDS, AS SHE TYPES IT.
+   *
+   * Worked out here rather than only at booking, for the reason `depositWords`
+   * above is: a plan she cannot see before saving is a plan she finds out about
+   * from a client. "Four payments — £30 at booking, then three of £30, the last
+   * on 19 November" is a sentence she can check.
+   *
+   * The arithmetic is `planFor`'s, restated in the browser because that one is
+   * `server-only` — it reaches the database. The two must agree, and
+   * instalments-smoke checks a plan written at booking against the sentence
+   * this shows.
+   */
+  const parts = Math.max(1, Math.round(Number(instalments) || 1));
+  const gap = Math.max(1, Math.round(Number(everyDays) || 30));
+  const planWords = (() => {
+    if (parts <= 1 || !priceNow) return null;
+    const totalPence = Math.round(priceNow * 100);
+    const depositPence =
+      depositNow === null
+        ? Math.floor(totalPence / parts)
+        : Math.round(depositNow * 100);
+    if (depositPence > totalPence) return null;
+    const each = Math.floor((totalPence - depositPence) / (parts - 1));
+    const last = totalPence - depositPence - each * (parts - 2);
+    const money = (pence: number) =>
+      `£${(pence / 100).toFixed(2).replace(/\.00$/, "")}`;
+    const lastDay = new Date();
+    lastDay.setDate(lastDay.getDate() + gap * (parts - 1));
+    const evenly = each === last;
+    // HOW MANY ARE AT THE EVEN FIGURE — which is one fewer than the number
+    // that follow the deposit whenever the last one carries the rounding. The
+    // first version said "3 of £399.86 and a last of £399.88" for a plan of
+    // four, describing four payments after the deposit when there are three.
+    const evens = evenly ? parts - 1 : parts - 2;
+    const rest = evenly
+      ? `${evens === 1 ? "one more of" : `${evens} more of`} ${money(each)}`
+      : `${evens === 1 ? "one of" : `${evens} of`} ${money(each)} and a last of ${money(last)}`;
+    return `${parts} payments — ${money(depositPence)} at booking, then ${rest}, one every ${gap} days. Booked today, the last would fall on ${formatDayLong(lastDay)}.`;
+  })();
 
   // Counted back from the FIRST date, because a course is bought once and so
   // is cancelled once.
@@ -604,13 +654,69 @@ export default function CourseForm({
               </div>
             </div>
 
-            {/* The consequence of the two fields above and the dates below,
-                worked out as she types — the same move the refund line makes.
-                "£80" and "then £160 by 3 October" are different questions, and
-                she is answering the second. */}
+            {/* ── HOW MANY PAYMENTS (operator, 2026-08-21) ───────────────
+                Beside the deposit because it is the same arrangement: the
+                deposit is the FIRST payment and this says how many follow it.
+                Two is what a course with a deposit has always been, so the
+                default changes nothing for a course she has already made. */}
+            <div className="mt-7 grid gap-6 sm:grid-cols-2">
+              <div>
+                <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <label className={LABEL} htmlFor="instalments">
+                    Paid in
+                  </label>
+                  <input
+                    id="instalments"
+                    name="instalments"
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={instalments}
+                    onChange={(event) => setInstalments(event.target.value)}
+                    className={`${FIELD_FIG} w-[5rem] text-[26px]`}
+                  />
+                  <span className="text-[19px] text-ink-soft">
+                    payment{instalments === "1" ? "" : "s"}, one every
+                  </span>
+                  <input
+                    id="instalmentEveryDays"
+                    name="instalmentEveryDays"
+                    type="number"
+                    min={7}
+                    max={90}
+                    value={everyDays}
+                    onChange={(event) => setEveryDays(event.target.value)}
+                    className={`${FIELD_FIG} w-[5rem] text-[26px]`}
+                    disabled={instalments === "1"}
+                  />
+                  <span className="text-[19px] text-ink-soft">days</span>
+                </p>
+                <p className={HELP}>
+                  One is the whole price when they book. The deposit above is
+                  the first of however many you set here, and the rest are
+                  divided evenly &mdash; a reminder with a link to pay goes out
+                  from Bookings when one falls due.
+                </p>
+                <FieldError error={state.errors.instalments} />
+              </div>
+            </div>
+
+            {/* The consequence of the fields above and the dates below, worked
+                out as she types — the same move the refund line makes. "£80" and
+                "then £160 by 3 October" are different questions, and she is
+                answering the second. */}
             <p className="mt-4 max-w-[62rem] font-display text-[24px] leading-tight text-ink">
               {depositWords}
             </p>
+
+            {/* THE PLAN ITSELF, SPELLED OUT, before anybody is on it. A plan
+                she cannot see before saving is a plan she finds out about from
+                a client. */}
+            {planWords && (
+              <p className="mt-2 max-w-[62rem] text-[19px] leading-relaxed text-ink-soft">
+                {planWords}
+              </p>
+            )}
 
             <div className="mt-7">
               <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

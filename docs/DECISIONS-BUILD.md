@@ -3394,3 +3394,52 @@ whether it was the thing that had been asked for. **A test written from the
 build's shape can only ever confirm the build's shape.** The reports that
 mattered were all of the form "I did the obvious thing and nothing happened",
 which is exactly what a suite written from the outside would have caught.
+
+---
+
+## D-36 · Paying a course in parts: the plan is written once, the link charges only what is due, and nothing pretends a machine chased anybody (2026-08-21)
+
+He asked for deposits and instalments on courses, a way to see who is behind,
+and a reminder she can send. Four decisions carry the feature.
+
+**The plan is written AT BOOKING and never recomputed.** `Instalment` rows are
+created inside the same transaction as the booking, from the course as it stood
+that day. If she later changes a course from four payments to six, nobody
+already on a plan moves — their agreement was made on a day and the rows are
+that agreement. This is the one place in the build that deliberately breaks
+D-25's derive-don't-store rule, and it breaks it because the alternative is a
+price that changes under somebody who already said yes.
+
+**The pay link charges what is DUE, not what is OUTSTANDING.** This was the
+money bug the feature could most easily have shipped: `/pay` already knew how to
+take the balance, and reusing it would have asked somebody four weeks into a
+plan for the whole remaining £90 instead of the £30 that had come due. So
+`dueNowPence` is what the link charges, and pressing it between payments charges
+nothing and names the day the next one falls:
+
+> The next payment on this one is not due until Friday 12 September.
+
+**Late is DERIVED and said in words.** No `isOverdue` column: a row is late when
+`dueAt` is behind today and `paidAt` is null, which is true the morning it
+becomes true with nothing needing to have run. And it is reported the way she
+would say it — "two weeks late", not a date to subtract from. The single stored
+exception is `remindedAt`, and only because "did I already chase this person"
+cannot be derived from anything else.
+
+**Nothing in this application runs on a timer, and the interface says so.** He
+described a reminder going out automatically at four weeks. Nothing here can do
+that — there is no scheduler, no cron, no queue — and building a screen that
+implied otherwise would have been the dishonest version. What CAN be relied on
+is that she opens the portal. So the notice waits on whatever screen she opens,
+the rail carries the count, the list filters to exactly those people, and each
+row sends its reminder in one press. The notice says, in as many words,
+*Nothing has been sent to them automatically.* When a scheduler does land, it
+calls the same function the button calls.
+
+The dismissal is `sessionStorage` and lasts one visit. A notice that could be
+put away for good is one she closes in a hurry on a Tuesday and never sees again
+while three people drift a month behind.
+
+Exercised by `e2e/instalments-smoke.mjs` — 18 claims, its own server, its own
+course, and an assertion over the whole run's log that not one message was
+addressed to her.

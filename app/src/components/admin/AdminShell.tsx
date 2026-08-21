@@ -130,7 +130,16 @@ function RailBody({
             item={item}
             pathname={pathname}
             unseen={
-              UNSEEN_BY_HREF[item.href] ? unseen[UNSEEN_BY_HREF[item.href]] : 0
+              UNSEEN_BY_HREF[item.href]
+                ? unseen[UNSEEN_BY_HREF[item.href]] +
+                  // MONEY THAT HAS NOT ARRIVED, added to Bookings' own count
+                  // (operator, 2026-08-21). One number on one entry: two badges
+                  // side by side on one rail item is a puzzle, and the screen
+                  // behind it says which is which the moment she opens it.
+                  (item.href === "/admin/workshop-bookings"
+                    ? unseen.overdue
+                    : 0)
+                : 0
             }
             onNavigate={onNavigate}
           />

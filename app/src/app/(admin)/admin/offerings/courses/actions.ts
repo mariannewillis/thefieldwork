@@ -197,6 +197,10 @@ export async function saveCourse(
   // and so does 0, which is the same sentence written with a number.
   const depositSource = (values.deposit ?? "").trim();
   const depositPence = depositSource ? parsePence(depositSource) : null;
+  const instalmentsWanted = Number((values.instalments ?? "1").trim() || "1");
+  const everyDaysWanted = Number(
+    (values.instalmentEveryDays ?? "30").trim() || "30",
+  );
   if (depositSource && depositPence === null) {
     errors.deposit =
       "Write the deposit in numbers, like 60 — or leave it empty to take the whole price at once.";
@@ -391,6 +395,25 @@ export async function saveCourse(
     // than leaving it behind, because a day the rest is due on a course that
     // takes the whole price at once is a fact about nothing.
     balanceDueAt: depositPence ? balanceDueAt : null,
+    /**
+     * HOW MANY PAYMENTS, AND HOW FAR APART (operator, 2026-08-21).
+     *
+     * Bounded here rather than trusted from the form: the browser's `min` and
+     * `max` are a courtesy that saves a round trip, and a number posted without
+     * them has to be refused just the same. Twelve is the ceiling because a
+     * plan longer than a year is a different arrangement — a subscription —
+     * and this is not one.
+     *
+     * CHANGING IT MOVES NOBODY. Plans already written are the agreements
+     * already made; this is the plan the NEXT person will be put on. That is
+     * the same rule `balanceDueAt` follows and it is why the schedule is rows
+     * on the booking rather than a sum done against the course.
+     */
+    instalments: Math.max(1, Math.min(12, Math.round(instalmentsWanted) || 1)),
+    instalmentEveryDays: Math.max(
+      7,
+      Math.min(90, Math.round(everyDaysWanted) || 30),
+    ),
     refundDays: refundDays as number,
     // Kept even when the whole day is taken, for the reason a workshop's are:
     // unticking the toggle next week should find the figures she set.

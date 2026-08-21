@@ -16,6 +16,13 @@ export type UnseenCounts = {
   requests: number;
   bookings: number;
   subscribers: number;
+  /**
+   * Bookings with a payment past its day. NOT a "have you looked" count — it
+   * clears when the money arrives, not when she opens the screen — which is
+   * why the rail adds it to `bookings` rather than drawing a second badge: one
+   * number on one entry, and the screen behind it says which is which.
+   */
+  overdue: number;
 };
 
 /** Which rail entry each count belongs to, by href. */

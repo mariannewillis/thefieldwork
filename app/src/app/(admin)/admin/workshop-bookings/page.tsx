@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import OwingTable from "@/components/admin/OwingTable";
 import { owing, overdueWords } from "@/lib/instalments";
 import { markAllBookingsSeen } from "@/app/(admin)/admin/workshop-bookings/actions";
 import BookingLine from "@/components/admin/BookingLine";
@@ -553,6 +554,15 @@ export default async function Page({
           count={archived.length}
           current={showingPast}
         />
+        {/* THE THIRD TAB CUTS ACROSS THE OTHER TWO (operator, 2026-08-21). A
+            payment can be overdue on a course that has already started, so
+            filing it under Past would hide the one thing she needs to chase. */}
+        <Tab
+          href={`/admin/workshop-bookings?show=owing${filtered ? `&kind=${filtered}` : ""}`}
+          label="Owing"
+          count={owingRows.length}
+          current={showingOwing}
+        />
         {unseen > 0 && (
           <span className="ml-auto flex flex-wrap items-baseline gap-x-4">
             <span className="fig font-mono text-[15px] uppercase tracking-[0.14em] text-action">
@@ -647,7 +657,48 @@ export default async function Page({
             )}
       </div>
 
-      {showingPast ? (
+      {showingOwing ? (
+        <section className="mt-6" aria-label="Bookings with a payment due">
+          <OwingTable
+            rows={owingRows.map((row) => {
+              const offering = offeringOf(row.booking);
+              const paid = row.booking.instalments.filter(
+                (one) => one.paidAt !== null,
+              ).length;
+              return {
+                id: row.booking.id,
+                who: row.booking.buyerName,
+                email: row.booking.buyerEmail,
+                what: offering.name,
+                href:
+                  offering.kind === "course"
+                    ? `/admin/offerings/courses/${offering.slug}`
+                    : null,
+                duePence: row.duePence,
+                remainingPence: row.remainingPence,
+                overdueDays: row.overdueDays,
+                overdueWords: overdueWords(row.overdueDays),
+                dueWords: row.next
+                  ? `due ${formatDayShort(row.next.dueAt)}`
+                  : "",
+                which: `${Math.min(paid + 1, row.booking.instalments.length)} of ${row.booking.instalments.length}`,
+                remindedWords: row.next?.remindedAt
+                  ? `reminded ${formatDayShort(row.next.remindedAt)}`
+                  : null,
+              };
+            })}
+            // EVERY FIGURE FORMATTED ON THE SERVER, by the one function that
+            // formats every price in this app. A client component doing its own
+            // sum is how a table comes to disagree with the ledger beside it.
+            money={Object.fromEntries(
+              owingRows.flatMap((row) => [
+                [row.duePence, formatMoney(row.duePence)],
+                [row.remainingPence, formatMoney(row.remainingPence)],
+              ]),
+            )}
+          />
+        </section>
+      ) : showingPast ? (
         <section className="mt-6" aria-label="Bookings whose day has been">
           {archived.length === 0 ? (
             <Empty
