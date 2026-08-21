@@ -28,12 +28,39 @@ export default function FlyerSheet({
   /** Made server-side. Null if the address would not encode at all. */
   qr: Qr | null;
 }) {
-  const three = flyer.layout === "three" && (flyer.detail || flyer.place);
-  const strip = [flyer.detail, flyer.place].filter(Boolean) as string[];
+  /**
+   * THE COUNT DECIDES THE SHAPE (operator, 2026-08-21).
+   *
+   * One band, an asymmetric pair, a pair with a third beneath, three across,
+   * four across — the arrangement changes with the number rather than the same
+   * tile repeating, because pictures at the SAME size with no focal point is
+   * the documented failure of event-poster layout. The rules are in
+   * `flyer.css`; this only says which one applies.
+   */
+  const pictures = flyer.pictures;
+  const shape =
+    pictures.length === 0
+      ? "none"
+      : pictures.length <= 3
+        ? String(pictures.length)
+        : pictures.length <= 6
+          ? "few"
+          : "many";
+
+  // What the type and the wash key off: whether there ARE pictures, and how
+  // much room they are taking from everything else.
+  const room =
+    pictures.length === 0
+      ? "none"
+      : shape === "1" || shape === "2" || shape === "3"
+        ? "pictures"
+        : shape;
 
   return (
-    <div className={`flyer ${three ? "flyer--three" : "flyer--one"}`}>
-      {flyer.ground ? (
+    <div
+      className={`flyer flyer--${room}${pictures.length > 0 ? " flyer--pictures" : ""}`}
+    >
+      {flyer.ground && flyer.showGround ? (
         // The six derivatives the media pipeline emits, AVIF first — the same
         // choice every photograph on the site gets. A bare 2400 JPEG stretched
         // over a page is what made the detail pages look low quality (D-6).
@@ -77,26 +104,12 @@ export default function FlyerSheet({
           {flyer.blurb && <p className="flyer__blurb">{flyer.blurb}</p>}
         </div>
 
-        {three && (
-          <div
-            className={`flyer__strip${strip.length === 1 ? " flyer__strip--single" : ""}`}
-          >
-            {flyer.detail && (
+        {pictures.length > 0 && (
+          <div className={`flyer__strip flyer__strip--${shape}`}>
+            {pictures.map((ref) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className="flyer__detail"
-                src={`/media/${flyer.detail}-1200.jpg`}
-                alt=""
-              />
-            )}
-            {flyer.place && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className="flyer__place"
-                src={`/media/${flyer.place}-1200.jpg`}
-                alt=""
-              />
-            )}
+              <img key={ref} src={`/media/${ref}-1200.jpg`} alt="" />
+            ))}
           </div>
         )}
 

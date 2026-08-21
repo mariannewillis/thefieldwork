@@ -47,29 +47,21 @@ const CHIP_ON =
 const GHOST =
   "t min-h-[38px] py-1.5 text-[16px] text-ink-soft underline decoration-pool-rule underline-offset-4 hover:text-ink";
 
-/** What each of the three photographs is FOR, said where she chooses it. */
-const PICTURES = [
-  {
-    name: "groundRef",
-    label: "Behind everything",
-    hint: "The whole sheet, under the plum. It is atmosphere rather than a picture — nothing on it needs to be legible.",
-  },
-  {
-    name: "detailRef",
-    label: "The large one",
-    hint: "The one worth looking at. It is the biggest thing on the sheet anybody actually looks AT.",
-  },
-  {
-    name: "placeRef",
-    label: "The small one",
-    hint: "The room. It answers “what am I walking into”, which is the question that stops people coming.",
-  },
-] as const;
+/**
+ * Roughly what fits in the sentence under the name before the sheet clips it.
+ *
+ * A measured guess rather than an exact one: four lines of 36 characters is
+ * ~144, and the point of the number is to warn her BEFORE the clip rather than
+ * to police her to the character. Erring low means she is told about a sentence
+ * that only just fits, which is the harmless direction to be wrong in.
+ */
+const BLURB_FITS = 140;
 
 export default function FlyerEditor({
   flyer,
   own,
   library,
+  ownCount,
   printHref,
   qrModuleMm,
 }: {
@@ -81,10 +73,12 @@ export default function FlyerEditor({
     blurb: string;
     footnote: string;
     groundRef: string;
-    detailRef: string;
-    placeRef: string;
+    /** The two the sheet would show if she had chosen none. */
+    pictures: string[];
   };
   library: string[];
+  /** How many pictures the offering itself has, for the sentence above. */
+  ownCount: number;
   printHref: string;
   /** Millimetres per module on the printed code. Null when there is no code. */
   qrModuleMm: number | null;
@@ -92,17 +86,14 @@ export default function FlyerEditor({
   const [state, save, saving] = useActionState(saveFlyer, NOTHING);
   const [resetState, reset] = useActionState(resetFlyer, NOTHING);
 
-  const [layout, setLayout] = useState(flyer.layout);
+  const [chosen, setChosen] = useState<string[]>(flyer.pictures);
+  const [ground, setGround] = useState(flyer.ground ?? "");
+  const [showGround, setShowGround] = useState(flyer.showGround);
   const [text, setText] = useState({
     eyebrow: flyer.eyebrow,
     headline: flyer.headline,
     blurb: flyer.blurb,
     footnote: flyer.footnote,
-  });
-  const [pictures, setPictures] = useState({
-    groundRef: flyer.ground ?? "",
-    detailRef: flyer.detail ?? "",
-    placeRef: flyer.place ?? "",
   });
   const [focus, setFocus] = useState(flyer.groundFocus);
   const [picking, setPicking] = useState<string | null>(null);
@@ -115,29 +106,28 @@ export default function FlyerEditor({
   // The panel is redrawn from the server after every save, so it has to be told
   // when the thing it is showing changed underneath it.
   useEffect(() => {
-    setLayout(flyer.layout);
+    setChosen(flyer.pictures);
+    setGround(flyer.ground ?? "");
+    setShowGround(flyer.showGround);
     setText({
       eyebrow: flyer.eyebrow,
       headline: flyer.headline,
       blurb: flyer.blurb,
       footnote: flyer.footnote,
     });
-    setPictures({
-      groundRef: flyer.ground ?? "",
-      detailRef: flyer.detail ?? "",
-      placeRef: flyer.place ?? "",
-    });
     setFocus(flyer.groundFocus);
+    // `pictures` by its content: a new array with the same refs is the same
+    // choice, and depending on the reference alone would reset her list on
+    // every save.
   }, [
-    flyer.layout,
     flyer.eyebrow,
     flyer.headline,
     flyer.blurb,
     flyer.footnote,
     flyer.ground,
-    flyer.detail,
-    flyer.place,
+    flyer.showGround,
     flyer.groundFocus,
+    flyer.pictures.join(","),
   ]);
 
   /**
@@ -185,38 +175,6 @@ export default function FlyerEditor({
         and the flyer says that instead; empty a box and it goes back to the
         offering&rsquo;s own words.
       </p>
-
-      {/* ── how many photographs ──────────────────────────────────────── */}
-      <div className="mt-7 border-t border-pool-rule pt-5">
-        <span className={LABEL}>How it is laid out</span>
-        <span className={HINT}>
-          Two shapes rather than a number, because three pictures at the same
-          size is the one thing a flyer must not do.
-        </span>
-        <input type="hidden" name="layout" value={layout} />
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(
-            [
-              { value: "one", label: "One photograph" },
-              { value: "three", label: "Three photographs" },
-            ] as const
-          ).map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              disabled={saving}
-              aria-pressed={layout === option.value}
-              className={layout === option.value ? CHIP_ON : CHIP}
-              onClick={() => {
-                setLayout(option.value);
-                submit();
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* ── the words ─────────────────────────────────────────────────── */}
       <div className="mt-7 border-t border-pool-rule pt-5">
@@ -269,6 +227,26 @@ export default function FlyerEditor({
           </label>
         ))}
 
+        {/* SAID WHEN IT IS TRUE, not as a character counter on every field. The
+            sheet clips what will not fit — A5 is a fixed budget — and a line
+            she cannot see on the preview is a line that is not on the paper
+            either. She should find that out here rather than from a hundred
+            printed sheets. */}
+        {text.blurb.trim().length > BLURB_FITS && (
+          <p
+            role="note"
+            className="mt-4 max-w-[46ch] border-l-2 border-pool-error pl-4 text-[15px] leading-relaxed text-ink-soft"
+          >
+            <strong className="font-semibold text-ink">
+              This is longer than the sheet has room for.
+            </strong>{" "}
+            The flyer shows a few lines of it and the rest is cut off &mdash;
+            look at the sheet beside this and you will see where it stops. A
+            flyer is read across a room; the page it points at is where the long
+            version belongs.
+          </p>
+        )}
+
         <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-ink-soft">
           The date, the address, the price and the number of places are not here
           &mdash; they are read off the offering every time, so a flyer can
@@ -279,91 +257,178 @@ export default function FlyerEditor({
       {/* ── the photographs ───────────────────────────────────────────── */}
       <div className="mt-7 border-t border-pool-rule pt-5">
         <span className={LABEL}>The photographs</span>
+        <span className={HINT}>
+          {ownCount === 0
+            ? "This one has no pictures of its own yet. Add some to it and they appear here."
+            : `Choose as many of this one's ${ownCount} as you like. The sheet arranges them by how many there are — one fills the width, two sit large-and-small, and a handful become a run across it.`}
+        </span>
 
-        {PICTURES.filter(
-          (one) => layout === "three" || one.name === "groundRef",
-        ).map((one) => (
-          <div key={one.name} className="mt-5">
-            <p className="fig font-mono text-[15px] text-ink-soft">
-              {one.label}
+        <input type="hidden" name="pictures" value={chosen.join(",")} />
+
+        {chosen.length > 0 ? (
+          <>
+            {/* IN THE ORDER SHE PICKED THEM, and the first one says so: it is
+                the one the eye starts on wherever the arrangement has a large
+                frame, so which is first is a real decision rather than an
+                accident of the grid. */}
+            <ul className="mt-4 grid list-none grid-cols-3 gap-2 p-0 sm:grid-cols-4">
+              {chosen.map((ref, index) => (
+                <li key={ref} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={mediaSrc(ref)}
+                    alt=""
+                    className="block aspect-[4/3] w-full border border-pool-rule object-cover"
+                  />
+                  {index === 0 && (
+                    <span className="absolute left-1 top-1 bg-ink/70 px-2 py-0.5 fig font-mono text-[13px] uppercase tracking-[0.14em] text-pool">
+                      First
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`Take ${ref.replace(/-/g, " ")} off the flyer`}
+                    onClick={() => {
+                      setChosen((now) => now.filter((one) => one !== ref));
+                      submit();
+                    }}
+                    className="t absolute right-1 top-1 flex h-8 w-8 items-center justify-center bg-ink/60 text-[16px] text-pool hover:bg-action"
+                  >
+                    &times;
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 fig font-mono text-[15px] text-ink-soft">
+              {chosen.length === 1
+                ? "One photograph"
+                : `${chosen.length} photographs`}
             </p>
-            <p className="mt-1 max-w-[42ch] text-[15px] leading-snug text-ink-soft">
-              {one.hint}
-            </p>
+          </>
+        ) : (
+          <p className="mt-4 text-[17px] text-ink-soft">
+            None on it &mdash; the sheet is the words on the background.
+          </p>
+        )}
 
-            <input type="hidden" name={one.name} value={pictures[one.name]} />
-            <input
-              type="hidden"
-              name={`${one.name}-own`}
-              value={own[one.name]}
-            />
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button
+            type="button"
+            className={CHIP}
+            onClick={() => setPicking("chosen")}
+            disabled={library.length === 0}
+          >
+            {chosen.length > 0 ? "Choose again" : "Choose photographs"}
+          </button>
+          {chosen.length > 0 && (
+            <button
+              type="button"
+              className={GHOST}
+              onClick={() => {
+                setChosen([]);
+                submit();
+              }}
+            >
+              Take them all off
+            </button>
+          )}
+        </div>
+      </div>
 
-            {pictures[one.name] ? (
-              <figure className="m-0 mt-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={mediaSrc(pictures[one.name])}
-                  alt=""
-                  className="block h-auto w-full max-w-[220px] border border-pool-rule"
-                />
-              </figure>
+      {/* ── the one behind everything ─────────────────────────────────── */}
+      <div className="mt-7 border-t border-pool-rule pt-5">
+        <span className={LABEL}>Behind everything</span>
+        <span className={HINT}>
+          Not one of the photographs above &mdash; it is the ground they sit on,
+          under the plum, and nothing on it needs to be legible.
+        </span>
+
+        <input
+          type="hidden"
+          name="showGround"
+          value={showGround ? "true" : "false"}
+        />
+        <input type="hidden" name="groundRef" value={ground} />
+        <input type="hidden" name="groundRef-own" value={own.groundRef} />
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {(
+            [
+              { value: true, label: "A photograph" },
+              { value: false, label: "Plum, with no photograph" },
+            ] as const
+          ).map((option) => (
+            <button
+              key={String(option.value)}
+              type="button"
+              disabled={saving}
+              aria-pressed={showGround === option.value}
+              className={showGround === option.value ? CHIP_ON : CHIP}
+              onClick={() => {
+                setShowGround(option.value);
+                submit();
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {showGround && (
+          <>
+            {ground ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={mediaSrc(ground)}
+                alt=""
+                className="mt-4 block h-auto w-full max-w-[220px] border border-pool-rule"
+              />
             ) : (
-              <p className="mt-3 text-[15px] text-ink-soft">None chosen yet.</p>
+              <p className="mt-4 text-[17px] text-ink-soft">None chosen yet.</p>
             )}
 
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <button
                 type="button"
                 className={CHIP}
-                onClick={() => setPicking(one.name)}
+                onClick={() => setPicking("ground")}
+                disabled={library.length === 0}
               >
-                {pictures[one.name] ? "Choose another" : "Choose a picture"}
+                {ground ? "Choose another" : "Choose a photograph"}
               </button>
-              {pictures[one.name] && (
-                <button
-                  type="button"
-                  className={GHOST}
-                  onClick={() => {
-                    setPictures((now) => ({ ...now, [one.name]: "" }));
-                    submit();
-                  }}
-                >
-                  Take it away
-                </button>
-              )}
             </div>
-          </div>
-        ))}
 
-        {/* WHERE THE GROUND IS LOOKING. A flyer is a tall crop of a landscape
-            photograph, so what is worth seeing is very often not in the middle
-            of it — the same control, and the same reasoning, as a band on the
-            pages panel. */}
-        <div className="mt-6">
-          <span className={LABEL}>Where the photograph sits</span>
-          <span className={HINT}>
-            {focus === 50
-              ? "The middle of it."
-              : `${focus}% from the top of the photograph.`}
-          </span>
-          <input type="hidden" name="groundFocus" value={focus} />
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {([-10, 10] as const).map((step) => (
-              <button
-                key={step}
-                type="button"
-                disabled={saving || focus + step < 0 || focus + step > 100}
-                className={CHIP}
-                onClick={() => {
-                  setFocus((now) => Math.max(0, Math.min(100, now + step)));
-                  submit();
-                }}
-              >
-                {step < 0 ? "↑ Up" : "↓ Down"}
-              </button>
-            ))}
-          </div>
-        </div>
+            {/* WHERE IT IS LOOKING. A flyer is a tall crop of a landscape
+                photograph, so what is worth seeing is very often not in the
+                middle of it — the same control, and the same reasoning, as a
+                band on the pages panel. */}
+            <div className="mt-5">
+              <span className={LABEL}>Where it sits</span>
+              <span className={HINT}>
+                {focus === 50
+                  ? "The middle of it."
+                  : `${focus}% from the top of the photograph.`}
+              </span>
+              <input type="hidden" name="groundFocus" value={focus} />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {([-10, 10] as const).map((step) => (
+                  <button
+                    key={step}
+                    type="button"
+                    disabled={saving || focus + step < 0 || focus + step > 100}
+                    className={CHIP}
+                    onClick={() => {
+                      setFocus((now) => Math.max(0, Math.min(100, now + step)));
+                      submit();
+                    }}
+                  >
+                    {step < 0 ? "↑ Up" : "↓ Down"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── printing it ───────────────────────────────────────────────── */}
@@ -440,8 +505,12 @@ export default function FlyerEditor({
         </p>
       )}
 
+      {/* ONE PICKER, TWO JOBS, and `multiple` is the difference. The list takes
+          as many as she ticks; the ground takes one and closes on the press,
+          because a background is a single decision. */}
       <GalleryPicker
         kind="picture"
+        multiple={picking === "chosen"}
         assets={library.map((ref) => ({
           kind: "picture" as const,
           ref,
@@ -450,12 +519,14 @@ export default function FlyerEditor({
           bytes: null,
         }))}
         open={picking !== null}
-        chosen={picking ? [pictures[picking as keyof typeof pictures]] : []}
+        chosen={picking === "chosen" ? chosen : ground ? [ground] : []}
         onClose={() => setPicking(null)}
         onPick={(refs) => {
-          if (!picking || !refs[0]) return;
-          const name = picking;
-          setPictures((now) => ({ ...now, [name]: refs[0] }));
+          if (picking === "chosen") {
+            setChosen(refs);
+          } else if (refs[0]) {
+            setGround(refs[0]);
+          }
           setPicking(null);
           submit();
         }}

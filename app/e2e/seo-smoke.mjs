@@ -520,8 +520,14 @@ try {
     const objects = structured(html);
     const event = of(objects, "Event");
 
-    ok("it is on the site the moment it is published", html.includes("An evening of clearing"));
-    ok("and a machine is told it is an Event, with nobody asked to do anything", Boolean(event));
+    ok(
+      "it is on the site the moment it is published",
+      html.includes("An evening of clearing"),
+    );
+    ok(
+      "and a machine is told it is an Event, with nobody asked to do anything",
+      Boolean(event),
+    );
     ok(
       "with its date, its place and its price, all from the row she filled in",
       event?.startDate === `${dayKey(made.date)}T19:00` &&

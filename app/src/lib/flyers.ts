@@ -1,5 +1,4 @@
 import "server-only";
-import type { FlyerLayout } from "@prisma/client";
 import { CANONICAL_SITE_URL } from "@/content/site";
 import { prisma } from "@/lib/db";
 import { formatDayLong, formatDuration, formatMoney } from "@/lib/format";
@@ -30,7 +29,6 @@ export type FlyerKind = "workshop" | "course" | "service";
 export type ResolvedFlyer = {
   kind: FlyerKind;
   slug: string;
-  layout: FlyerLayout;
 
   /** The four lines, resolved. */
   eyebrow: string;
@@ -51,11 +49,24 @@ export type ResolvedFlyer = {
   roomNote: string;
   price: string;
 
-  /** The photographs, as media basenames. Null where she has none. */
+  /**
+   * THE PHOTOGRAPH BEHIND EVERYTHING, and whether there is one at all.
+   *
+   * It is not one of the pictures she chooses — it is the ground they sit on —
+   * so it has its own switch (operator, 2026-08-21). Off gives a plum sheet,
+   * which is the right answer for a flyer that is mostly photographs already.
+   */
   ground: string | null;
-  detail: string | null;
-  place: string | null;
+  showGround: boolean;
   groundFocus: number;
+
+  /**
+   * THE PICTURES ON THE SHEET, in the order she picked them, however many.
+   *
+   * How they are ARRANGED is the composition's decision and lives in
+   * `flyer.css`; how many there are is hers.
+   */
+  pictures: string[];
 
   /** What the QR points at, and what is printed under it. */
   url: string;
@@ -79,8 +90,20 @@ export type ResolvedFlyer = {
   ownBlurb: string;
   ownFootnote: string;
   ownGround: string | null;
-  ownDetail: string | null;
-  ownPlace: string | null;
+  /** The two the sheet would show if she had chosen none. */
+  ownPictures: string[];
+
+  /**
+   * EVERY PICTURE ON THIS OFFERING — its hero and its gallery, in order.
+   *
+   * The flyer's pickers offer THESE and not the whole media library. A course
+   * with twelve pictures had her hunting its twelve among the site's thirty to
+   * choose the three that go on its flyer, which is backwards: a flyer for a
+   * course is made of that course's pictures, and one she wants that is not on
+   * it yet belongs on the course first — where it does the page some good too
+   * (operator, 2026-08-21).
+   */
+  gallery: string[];
 };
 
 /**
@@ -246,14 +269,13 @@ type Source = {
   kind: FlyerKind;
   slug: string;
   row: {
-    layout: FlyerLayout;
     eyebrow: string | null;
     headline: string | null;
     blurb: string | null;
     footnote: string | null;
     groundRef: string | null;
-    detailRef: string | null;
-    placeRef: string | null;
+    showGround: boolean;
+    pictures: string[];
     groundFocus: number;
   } | null;
   name: string;
@@ -274,15 +296,23 @@ function resolve(source: Source): ResolvedFlyer {
   const row = source.row;
 
   const ground = row?.groundRef ?? source.hero;
-  // The strip's two are the gallery's first two that are NOT already the
-  // ground. Showing the same photograph twice on one sheet is the mistake this
-  // saves her from making without her having to notice it.
-  const rest = source.gallery.filter((ref) => ref !== ground);
-  const detail = row?.detailRef ?? rest[0] ?? null;
-  const place = row?.placeRef ?? rest[1] ?? null;
-  // The same list against the offering's OWN hero, which is what "her own two"
-  // means when she has changed the ground to something else.
+
+  /**
+   * WHAT IS ON THE SHEET WHEN SHE HAS NOT SAID.
+   *
+   * The gallery's first two that are not already the ground — showing the same
+   * photograph twice on one sheet is a mistake this saves her from making
+   * without her having to notice it.
+   *
+   * TWO, because two is what the composition was designed around and a flyer
+   * she has never opened should look like the one that was agreed. Once she
+   * opens it, `pictures` is authoritative INCLUDING when it is empty: an empty
+   * list means she took them all off, which is a real thing to want and not the
+   * same as never having chosen.
+   */
   const ownRest = source.gallery.filter((ref) => ref !== source.hero);
+  const defaults = source.gallery.filter((ref) => ref !== ground).slice(0, 2);
+  const pictures = row ? row.pictures : defaults;
 
   const address = [
     ...(source.addressLines ?? "")
@@ -308,7 +338,6 @@ function resolve(source: Source): ResolvedFlyer {
   return {
     kind: source.kind,
     slug: source.slug,
-    layout: row?.layout ?? "one",
     eyebrow: row?.eyebrow ?? ownEyebrow,
     headline: row?.headline ?? source.name,
     blurb: row?.blurb ?? source.summary,
@@ -321,9 +350,9 @@ function resolve(source: Source): ResolvedFlyer {
     roomNote,
     price: source.price,
     ground,
-    detail,
-    place,
+    showGround: row?.showGround ?? true,
     groundFocus: row?.groundFocus ?? 38,
+    pictures,
     // ALWAYS THE CANONICAL DOMAIN, never `SITE_URL`. A flyer is printed and
     // handed to somebody: a QR that resolved to `localhost:3000` because it was
     // made on her laptop is a piece of paper that does not work, and unlike a
@@ -336,10 +365,18 @@ function resolve(source: Source): ResolvedFlyer {
     ownBlurb: source.summary,
     ownFootnote: REASSURANCE,
     ownGround: source.hero,
-    // The strip's defaults are worked out ABOVE against the resolved ground, so
-    // that "her own" means the same two pictures the sheet would have shown.
-    ownDetail: ownRest[0] ?? null,
-    ownPlace: ownRest[1] ?? null,
+    // Worked out against the offering's OWN hero, so "her own two" means the
+    // pair the sheet would show if she had changed nothing at all.
+    ownPictures: ownRest.slice(0, 2),
+
+    // Hero first, because it is the one she chose to lead with, then the rail
+    // in her order. Deduped: the hero is usually the first of the gallery too,
+    // and offering the same photograph twice in a picker is a picker that
+    // looks broken.
+    gallery: [
+      ...(source.hero ? [source.hero] : []),
+      ...source.gallery.filter((ref) => ref !== source.hero),
+    ],
   };
 }
 

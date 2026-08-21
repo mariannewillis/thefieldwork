@@ -78,8 +78,25 @@ export async function saveFlyer(
     return chosen === own ? null : chosen;
   };
 
-  const layout =
-    String(form.get("layout") ?? "one") === "three" ? "three" : "one";
+  /**
+   * THE PICTURES, IN THE ORDER SHE PICKED THEM.
+   *
+   * Posted as one field of comma-separated basenames rather than as repeated
+   * inputs, because ORDER is the whole of what the sheet reads from this: the
+   * first is the one the eye starts on. `getAll` on repeated inputs preserves
+   * document order too, but a list she can reorder is a list whose DOM order
+   * changes under her — one string that says exactly what she meant is the
+   * thing that cannot be got wrong.
+   *
+   * Filtered against the offering's own pictures by the caller; anything that
+   * is not a basename shape is dropped here rather than trusted.
+   */
+  const pictures = String(form.get("pictures") ?? "")
+    .split(",")
+    .map((ref) => ref.trim())
+    .filter((ref) => /^[a-z0-9][a-z0-9-]*$/.test(ref));
+
+  const showGround = String(form.get("showGround")) !== "false";
 
   const focus = Number(String(form.get("groundFocus") ?? "38"));
   const groundFocus = Number.isFinite(focus)
@@ -87,14 +104,13 @@ export async function saveFlyer(
     : 38;
 
   const data = {
-    layout,
     eyebrow: override("eyebrow"),
     headline: override("headline"),
     blurb: override("blurb"),
     footnote: override("footnote"),
     groundRef: picture("groundRef"),
-    detailRef: picture("detailRef"),
-    placeRef: picture("placeRef"),
+    showGround,
+    pictures,
     groundFocus,
   } as const;
 

@@ -72,7 +72,7 @@
   );
 }
 
-.flyer--three .flyer__wash {
+.flyer--pictures .flyer__wash {
   background: linear-gradient(
     180deg,
     rgb(22 7 18 / 0.7) 0%,
@@ -108,7 +108,7 @@
   margin-top: 4mm;
 }
 
-.flyer--one .flyer__top {
+.flyer--none .flyer__top {
   margin-top: 8mm;
 }
 
@@ -131,25 +131,79 @@
   color: var(--blush);
 }
 
-.flyer--one .flyer__name {
+.flyer--none .flyer__name {
   font-size: 40pt;
 }
 
+/* BOUNDED, BECAUSE THE SHEET IS. A5 is a fixed budget and every other block on
+   it has a fixed size, so a long sentence here is the one thing that can push
+   the foot of the page off the bottom — and `.flyer` clips, so what falls off
+   is not spilled onto a second page, it is GONE. Measured before this was
+   added: a 260-character blurb pushed 5.6mm off the sheet and took the
+   reassurance line ("nobody touches you") with it, silently, on paper.
+
+   Four lines, and the editor says so when it is clamping. Truncation she is
+   told about is what every print tool does; truncation she is not told about is
+   a piece of paper that quietly disagrees with the screen she approved it on. */
 .flyer__blurb {
   font-size: 10.4pt;
   line-height: 1.5;
   color: #e3d3dd;
   margin: 4mm 0 0;
   max-width: 36ch;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
 }
 
-/* ── the two photographs that are meant to be looked at ─────────────────── */
+/* THE BLURB GIVES UP LINES AS THE STRIP TAKES THEM. A5 is a fixed budget and
+   every other block on the sheet is a fixed size, so this is the one that has
+   to yield — and yielding LINES is better than yielding the footnote, which is
+   what happened before any of this was bounded: the reassurance sentence fell
+   off the bottom of the paper, silently. */
+.flyer--none .flyer__blurb {
+  -webkit-line-clamp: 6;
+}
 
-/* 1.6 : 1 — the asymmetry the research calls for, and the reason the eye knows
-   which of the two to start with. A 1 : 1 pair would be two pictures having an
-   argument. The gap is 1.5mm of plum: two frames, not a gallery wall.
+.flyer--few .flyer__blurb {
+  -webkit-line-clamp: 2;
+}
 
-   THREE THINGS SIZE IT, and it needed all three — measured, not guessed. With
+.flyer--many .flyer__blurb {
+  -webkit-line-clamp: 1;
+}
+
+/* ── the photographs she chose ──────────────────────────────────────────── */
+
+/* HOWEVER MANY SHE PICKED (operator, 2026-08-21). It was two, fixed, which made
+   "how many pictures" the schema's decision rather than hers — a course with
+   twelve could put two of them on its own flyer.
+   
+   THE COMPOSITION STILL DECIDES THE ARRANGEMENT, and that is the part worth
+   getting right: the research behind `docs/screens/flyers/` is that pictures at
+   the SAME size with no focal point is the documented failure of event-poster
+   layout. So the count changes the shape rather than just repeating a tile:
+   
+     1     one band, the full width. Nothing to compare it to.
+     2     1.6 : 1 — the asymmetry that tells the eye where to start.
+     3     the same pair, with the third under the narrow one.
+     4-6   three across. At this point the GROUP is the device: a run of
+           pictures reads as a body of work rather than as competing cards,
+           which is a different thing from three cards pretending to be equal.
+     7-12  four across, same reasoning, smaller.
+   
+   THE STRIP'S HEIGHT GROWS WITH THE ROWS but is capped, because A5 is a fixed
+   budget and the date, the clearing and the footnote all have to fit under it.
+   The blurb gives up lines as the strip takes them — see `.flyer__blurb`. */
+.flyer__strip {
+  margin-top: auto;
+  display: grid;
+  gap: 1.5mm;
+  min-height: 0;
+}
+
+/* THREE THINGS SIZE IT, and it needed all three — measured, not guessed. With
    only a height set it rendered 211px against the 117px asked for, and printed
    the date across the altar:
 
@@ -160,20 +214,42 @@
                           height and inflated the row it was meant to fill.
      min-height: 0        a flex item will not go below its content, which would
                           have let the images win regardless. */
-.flyer__strip {
-  margin-top: auto;
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 1.5mm;
-  flex: 0 0 33mm;
+.flyer__strip--1 {
+  grid-template-columns: 1fr;
   grid-template-rows: 33mm;
-  min-height: 0;
+  flex: 0 0 33mm;
 }
 
-/* One of the two missing is not a hole: the one that is there takes the width.
-   She may have a detail and no picture of the room. */
-.flyer__strip--single {
-  grid-template-columns: 1fr;
+.flyer__strip--2 {
+  grid-template-columns: 1.6fr 1fr;
+  grid-template-rows: 33mm;
+  flex: 0 0 33mm;
+}
+
+/* The pair, with the third under the narrow one — so the large picture keeps
+   its place as the thing looked at first. */
+.flyer__strip--3 {
+  grid-template-columns: 1.6fr 1fr;
+  grid-template-rows: 21mm 21mm;
+  flex: 0 0 43.5mm;
+}
+
+.flyer__strip--3 > :first-child {
+  grid-row: span 2;
+}
+
+.flyer__strip--few {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 22mm;
+  flex: 0 0 auto;
+  max-height: 69mm;
+}
+
+.flyer__strip--many {
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 18mm;
+  flex: 0 0 auto;
+  max-height: 74mm;
 }
 
 /* NO RADIUS, NO SHADOW, NO BORDER — the shape law the whole site keeps. */
@@ -182,13 +258,13 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  min-height: 0;
 }
 
-.flyer__detail {
-  object-position: 50% 52%;
-}
-.flyer__place {
-  object-position: 46% 50%;
+/* The first is the one the eye starts on wherever it can be told apart, so it
+   gets the crop that keeps a subject rather than the middle of the frame. */
+.flyer__strip img:first-child {
+  object-position: 50% 45%;
 }
 
 /* ── when it is ─────────────────────────────────────────────────────────── */
@@ -198,7 +274,7 @@
   padding-bottom: 4mm;
 }
 
-.flyer--one .flyer__when {
+.flyer--none .flyer__when {
   margin-top: auto;
   padding-top: 0;
   padding-bottom: 6mm;
@@ -213,7 +289,7 @@
   color: var(--gold);
 }
 
-.flyer--one .flyer__day {
+.flyer--none .flyer__day {
   font-size: 26pt;
 }
 

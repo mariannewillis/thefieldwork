@@ -1877,22 +1877,6 @@ enum PageItemKind {
 /// because each of the seven has a different shape. One ordering space is the
 /// whole point: a section she adds goes BETWEEN two beats, which is impossible
 /// if beats and her own sections are ordered separately.
-/// HOW MANY PHOTOGRAPHS THE FLYER USES, and therefore which composition it is.
-///
-/// Two, because there are two answers rather than a range. The research behind
-/// `docs/screens/flyers/` is plain that three pictures at the same size is the
-/// documented failure of event-poster design, so this does not offer "however
-/// many she has" — it offers the two shapes that work.
-enum FlyerLayout {
-  /// One photograph, full bleed, under the plum wash. Everything else sits on
-  /// it. The quiet one, and the right answer when she has one good picture.
-  one
-  /// The same ground, plus a strip of two — one large and one small, 1.6 : 1 —
-  /// between the name and the date. For when she has a detail worth looking at
-  /// and a picture of the room.
-  three
-}
-
 /// A FLYER FOR ONE OFFERING — the OVERRIDES, and nothing else.
 ///
 /// The same model the pages panel uses, and for the same reason: every field
@@ -1921,8 +1905,6 @@ model Flyer {
   serviceId  Int?      @unique
   service    Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
-  layout FlyerLayout @default(one)
-
   /// The four lines she can rewrite. Null on each means the offering's own —
   /// its name, its summary — or, for the two the offering has no field for,
   /// the sentence the site itself uses.
@@ -1931,11 +1913,31 @@ model Flyer {
   blurb    String?
   footnote String?
 
-  /// The three pictures, as media basenames. Null means the offering's own: its
-  /// hero for the ground, and the first two of its gallery for the strip.
+  /// The photograph behind everything, as a media basename. Null means the
+  /// offering's own hero.
   groundRef String?
-  detailRef String?
-  placeRef  String?
+
+  /// WHETHER THERE IS ONE AT ALL (operator, 2026-08-21). The background is not
+  /// one of the pictures she chooses — it is the ground they sit on — so it has
+  /// its own switch. Off gives a plum sheet, which is the right answer for a
+  /// flyer that is mostly photographs already.
+  showGround Boolean @default(true)
+
+  /// THE PICTURES ON THE SHEET, in the order she picked them, as many as she
+  /// likes (operator, 2026-08-21 — "if she selects 12 we should space 12 of
+  /// them appropriately").
+  ///
+  /// AN ARRAY AND NOT TWO COLUMNS. It was `detailRef` + `placeRef`, which made
+  /// "how many pictures" a schema decision rather than hers: a course with
+  /// twelve photographs could put two of them on its own flyer. The COMPOSITION
+  /// still decides how they are arranged — see `flyer.css` — but how many there
+  /// are is hers.
+  ///
+  /// EMPTY IS DIFFERENT FROM UNSET. `[]` means she has taken them all off and
+  /// wants the sheet without any; there is no null here to mean "the
+  /// offering's own", because the default is worked out in `lib/flyers.ts`
+  /// where every other default lives.
+  pictures String[]
 
   /// WHERE IN THE GROUND PHOTOGRAPH the sheet is looking, top to bottom, as a
   /// percentage. A flyer is a tall crop of a landscape photograph, so what is

@@ -24,12 +24,23 @@ export default async function FlyerTab({
   kind: FlyerKind;
   slug: string;
 }) {
-  const [flyer, library] = await Promise.all([
-    readFlyer(kind, slug),
-    listMediaBasenames(),
-  ]);
-
+  const flyer = await readFlyer(kind, slug);
   if (!flyer) return null;
+
+  /**
+   * THIS OFFERING'S OWN PICTURES, and the whole library only when it has none.
+   *
+   * A course with twelve photographs had her choosing the flyer's three from
+   * the site's thirty (operator, 2026-08-21). A flyer for a course is made of
+   * that course's pictures; one she wants that is not on it yet belongs on the
+   * course first, where it also does the page some good.
+   *
+   * The fallback exists because a picker with nothing in it is a dead end: a
+   * brand-new offering with no pictures should still be able to put one on its
+   * flyer while she decides what goes on the page.
+   */
+  const library =
+    flyer.gallery.length > 0 ? flyer.gallery : await listMediaBasenames();
 
   const qr = await makeQr(flyer.url);
 
@@ -51,10 +62,10 @@ export default async function FlyerTab({
             blurb: flyer.ownBlurb,
             footnote: flyer.ownFootnote,
             groundRef: flyer.ownGround ?? "",
-            detailRef: flyer.ownDetail ?? "",
-            placeRef: flyer.ownPlace ?? "",
+            pictures: flyer.ownPictures,
           }}
           library={library}
+          ownCount={flyer.gallery.length}
           printHref={`/admin/offerings/${kind}s/${slug}/flyer`}
           qrModuleMm={qr?.moduleMm ?? null}
         />
