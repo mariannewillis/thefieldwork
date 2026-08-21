@@ -77,7 +77,10 @@ function blurbLines(pictures: number): number {
 function linesOf(text: string): number {
   return text
     .split(/\r?\n/)
-    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / 36)), 0);
+    .reduce(
+      (total, line) => total + Math.max(1, Math.ceil(line.length / 36)),
+      0,
+    );
 }
 
 export default function FlyerEditor({
@@ -266,11 +269,17 @@ export default function FlyerEditor({
             <strong className="font-semibold text-ink">
               This is longer than the sheet has room for.
             </strong>{" "}
-            With {chosen.length === 0 ? "no photographs" : chosen.length === 1 ? "one photograph" : `${chosen.length} photographs`} on
-            it the flyer shows {allowed === 1 ? "one line" : `${allowed} lines`}{" "}
-            and cuts the rest &mdash; look at the sheet beside this and you will
-            see where it stops. Fewer photographs gives the words more room, and
-            the page it points at is where the long version belongs.
+            With{" "}
+            {chosen.length === 0
+              ? "no photographs"
+              : chosen.length === 1
+                ? "one photograph"
+                : `${chosen.length} photographs`}{" "}
+            on it the flyer shows{" "}
+            {allowed === 1 ? "one line" : `${allowed} lines`} and cuts the rest
+            &mdash; look at the sheet beside this and you will see where it
+            stops. Fewer photographs gives the words more room, and the page it
+            points at is where the long version belongs.
           </p>
         )}
 

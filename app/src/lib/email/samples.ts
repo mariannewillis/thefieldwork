@@ -1,7 +1,9 @@
+import { SITE_URL } from "@/content/site";
 import "server-only";
 import type { BookingWithOffering } from "@/lib/bookings";
 import {
   balancePaidEmail,
+  paymentReminderEmail,
   cancellationEmail,
   cannotHonourEmail,
   confirmationEmail,
@@ -204,6 +206,15 @@ export function sampleMessages(wording: Wording): Record<TemplateKey, Mail> {
     ),
 
     balancePaid: balancePaidEmail(sampleCourseBooking(), wording),
+
+    // A plan two payments in, with the third a fortnight late — which is the
+    // state she will actually be looking at when she reaches for this one.
+    paymentReminder: paymentReminderEmail(
+      sampleCourseBooking(),
+      { amountPence: 7500, dueAt: moment("2026-09-12T00:00:00Z") },
+      `${SITE_URL}/pay/9f4c2ab7d1sample`,
+      wording,
+    ),
 
     cancellation: cancellationEmail(
       sampleWorkshopBooking({

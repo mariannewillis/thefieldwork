@@ -4,6 +4,7 @@ import type {
   Booking,
   Course,
   CourseSession,
+  Instalment,
   Payment,
   Prisma,
   Service,
@@ -14,6 +15,7 @@ import { SITE_URL } from "@/content/site";
 import { prisma } from "@/lib/db";
 import { formatDayLong, isPast, refundDeadline } from "@/lib/format";
 import { stripe } from "@/lib/stripe";
+import { planFor } from "@/lib/instalments";
 
 /**
  * Places, money and the links in the emails.
@@ -64,6 +66,8 @@ export type BookingWithOffering = Booking & {
   service: Service | null;
   serviceRequest: ServiceRequest | null;
   payments: Payment[];
+  /** The plan it is being paid on. Empty on a workshop, which is paid at once. */
+  instalments: Instalment[];
 };
 
 /**
@@ -79,6 +83,12 @@ export const withOffering = {
   service: true,
   serviceRequest: true,
   payments: { orderBy: { paidAt: "asc" } },
+  /// THE PLAN, EVERYWHERE A BOOKING IS READ. What is due today is a question
+  /// asked by the pay link, the ledger, the rail's count and the notice on
+  /// arrival, and a booking loaded without its schedule cannot answer it —
+  /// which is how one of those four comes to disagree with the other three.
+  /// Empty on a workshop, which is paid at once.
+  instalments: { orderBy: { number: "asc" } },
 } satisfies Prisma.BookingInclude;
 
 /** One date of the thing that was bought. A workshop has one; a course has its run. */
@@ -793,6 +803,49 @@ export async function confirmPaidBooking(input: {
         include: withOffering,
       });
 
+      /**
+       * THE PLAN, WRITTEN ONCE AND NEVER RECOMPUTED.
+       *
+       * The rows ARE the agreement: a plan Marianne edits next month must not
+       * move a date somebody already bought on, which is the rule
+       * `balanceDueAt` above has always followed. This is the same rule for the
+       * whole schedule rather than for one balance.
+       *
+       * ONLY WHEN THERE IS SOMETHING TO SCHEDULE. A workshop is paid at once
+       * and a course paid in full has nothing following it, so both write no
+       * rows — and an empty schedule is how "nothing is owed later" is spelled
+       * everywhere that reads it. A booking with no place is about to be
+       * refunded and owes nothing at all.
+       *
+       * THE FIRST INSTALMENT IS MARKED PAID HERE, by the payment that has just
+       * landed. It is the deposit; the money is already in.
+       */
+      if (hasRoom && found.instalments > 1) {
+        const plan = planFor({
+          totalPence: first.totalPence,
+          depositPence:
+            found.depositGBP === null ? null : found.depositGBP * input.places,
+          instalments: found.instalments,
+          everyDays: found.instalmentEveryDays,
+          from: input.paidAt,
+        });
+
+        const paid = booking.payments[0];
+        for (const part of plan) {
+          await tx.instalment.create({
+            data: {
+              bookingId: booking.id,
+              number: part.number,
+              amountPence: part.amountPence,
+              dueAt: part.dueAt,
+              ...(part.number === 1
+                ? { paidAt: input.paidAt, paymentId: paid?.id ?? null }
+                : {}),
+            },
+          });
+        }
+      }
+
       await tx.stripeEvent.update({
         where: { id: input.eventId },
         data: { outcome: hasRoom ? "booked" : "noPlace" },
@@ -829,6 +882,9 @@ type LockedOffering = {
   priceGBP: number;
   depositGBP: number | null;
   balanceDueAt: Date | null;
+  /// How many payments she will take for it. A workshop is always 1.
+  instalments: number;
+  instalmentEveryDays: number;
 };
 
 async function lockOffering(
@@ -841,8 +897,16 @@ async function lockOffering(
     >`SELECT capacity, "priceGBP" FROM "Workshop" WHERE id = ${offering.id} FOR UPDATE`;
     const row = rows[0];
     // A workshop is paid at once and always has been (D-7), so it has no
-    // deposit column to read and never carries a balance.
-    return row ? { ...row, depositGBP: null, balanceDueAt: null } : null;
+    // deposit column to read, never carries a balance, and is a plan of one.
+    return row
+      ? {
+          ...row,
+          depositGBP: null,
+          balanceDueAt: null,
+          instalments: 1,
+          instalmentEveryDays: 30,
+        }
+      : null;
   }
 
   const rows = await tx.$queryRaw<
@@ -851,8 +915,10 @@ async function lockOffering(
       priceGBP: number;
       depositGBP: number | null;
       balanceDueAt: Date | null;
+      instalments: number;
+      instalmentEveryDays: number;
     }[]
-  >`SELECT capacity, "priceGBP", "depositGBP", "balanceDueAt" FROM "Course" WHERE id = ${offering.id} FOR UPDATE`;
+  >`SELECT capacity, "priceGBP", "depositGBP", "balanceDueAt", instalments, "instalmentEveryDays" FROM "Course" WHERE id = ${offering.id} FOR UPDATE`;
   return rows[0] ?? null;
 }
 

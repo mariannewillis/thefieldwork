@@ -42,6 +42,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   "sessionApproved",
   "sessionDeclined",
   "passwordReset",
+  "paymentReminder",
 ] as const;
 
 export type TemplateKey = (typeof EMAIL_TEMPLATE_KEYS)[number];
@@ -352,6 +353,42 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, TemplateSpec> = {
     locked: [
       "The note you typed on the request — that is the message, whole",
       "The link back to the page they asked from",
+    ],
+  },
+
+  /**
+   * THE REMINDER FOR A PAYMENT IN A PLAN (operator, 2026-08-21).
+   *
+   * Editable like the other nine, because it is the message on this site most
+   * likely to need her own voice: it is the only one that asks somebody for
+   * money they have not sent, and the difference between a nudge and a demand
+   * is entirely in the wording. The app's own words err toward the nudge.
+   *
+   * WHAT IS LOCKED is the part she must not be able to get wrong — the amount,
+   * the day it was due, and the link that takes the payment. A reminder naming
+   * a figure she typed is a reminder that can ask for the wrong money.
+   */
+  paymentReminder: {
+    key: "paymentReminder",
+    label: "Payment reminder",
+    sentWhen:
+      "When you send a reminder from Bookings, to somebody with a payment due on a plan.",
+    seed: {
+      subject: "A payment on {{offering}}",
+      opening:
+        "This is a note about {{offering}} — the next payment on it was due on {{due}}, and it has not come through yet.",
+      signOff:
+        "If you have already sent it, or if something has changed, just reply to this — Marianne reads these herself.",
+    },
+    placeholders: [
+      { token: "offering", what: "What it is for", sample: "IFR course" },
+      { token: "due", what: "The day it was due", sample: "12 September" },
+      { token: "amount", what: "What is due", sample: "£75" },
+    ],
+    locked: [
+      "The amount due and the day it was due",
+      "The link that takes the payment",
+      "That nothing is charged until they press it",
     ],
   },
 

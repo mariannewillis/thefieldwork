@@ -11,6 +11,8 @@ import {
   outstandingPence,
   placesLeft,
 } from "@/lib/bookings";
+import { formatDayLong } from "@/lib/format";
+import { dueNowPence, nextDue } from "@/lib/instalments";
 import {
   approvalState,
   factsOf,
@@ -73,7 +75,37 @@ export async function payBalance(
   }
 
   const offering = offeringOf(booking);
-  const owed = outstandingPence(booking);
+
+  /**
+   * WHAT THEY ARE BEING ASKED FOR TODAY, WHICH IS NOT WHAT THEY STILL OWE.
+   *
+   * On a plan of four, two payments in, they owe two more and are being asked
+   * for one. `outstandingPence` is the first of those and charging it here
+   * would take next month's money this month — the single worst thing a link in
+   * somebody's inbox could do.
+   *
+   * A booking with NO PLAN falls back to the outstanding balance, which is the
+   * same number: every workshop, and every course bought before instalments
+   * existed, has no `Instalment` rows and one balance to settle. The two agree
+   * for exactly the cases that used to be the only cases.
+   */
+  const owed =
+    booking.instalments.length > 0
+      ? dueNowPence(booking.instalments)
+      : outstandingPence(booking);
+
+  if (owed <= 0) {
+    // A plan with nothing due YET is not the same as a plan that is settled —
+    // the guard above catches settled. This is somebody pressing an old link
+    // between payments, and the honest answer names the day rather than
+    // charging them early.
+    const next = nextDue(booking.instalments);
+    return {
+      error: next
+        ? `The next payment on this one is not due until ${formatDayLong(next.dueAt)}. Nothing has been charged — the link will work from that day.`
+        : "There is nothing to pay on this one just now. Nothing has been charged.",
+    };
+  }
 
   // A place whose balance went unpaid stopped counting the day after it was
   // due, so paying now is asking for it back — which is only ours to give

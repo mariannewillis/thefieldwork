@@ -601,6 +601,96 @@ export type CancelledBy = "buyer" | "marianne";
  * nothing else, and quoting the whole price here would promise money that never
  * arrived.
  */
+/**
+ * A REMINDER THAT A PAYMENT ON A PLAN HAS NOT COME (operator, 2026-08-21).
+ *
+ * ONE PAYMENT, NAMED, and never "you owe money". A plan of four is four
+ * separate asks and a person two payments in is not in arrears on the whole
+ * course — they are late on one. Saying the amount and the day it was due is
+ * the difference between a nudge and a demand, and it is also the only version
+ * a person can act on without going and looking something up.
+ *
+ * THE LINK IS THE ONE THEY ALREADY HAVE. `/pay/<token>` does not expire and now
+ * charges what is due TODAY rather than the whole outstanding balance, so a
+ * reminder cannot become an instruction to pay the rest of the year early.
+ *
+ * NOTHING IS SAID ABOUT LOSING THE PLACE. The place-releasing rule belongs to
+ * `balanceDueAt` and a plan is not that; inventing a consequence in a reminder
+ * would be inventing a policy she has not set.
+ */
+export function paymentReminderEmail(
+  booking: BookingWithOffering,
+  due: { amountPence: number; dueAt: Date },
+  payUrl: string,
+  wording: Wording = {},
+): Mail {
+  const offering = offeringOf(booking);
+  const slots = resolveSlots(
+    "paymentReminder",
+    wording,
+    {
+      subject: `A payment on ${offering.name}`,
+      opening: `This is a note about ${offering.name} — the next payment on it was due on ${formatDayLong(due.dueAt)}, and it has not come through yet.`,
+      signOff:
+        "If you have already sent it, or if something has changed, just reply to this — Marianne reads these herself.",
+    },
+    {
+      ...bookingFacts(booking),
+      due: formatDayLong(due.dueAt),
+      amount: formatMoney(due.amountPence),
+    },
+  );
+
+  return {
+    to: booking.buyerEmail,
+    subject: slots.subject,
+    text: [
+      slots.opening.text,
+      "",
+      `${formatMoney(due.amountPence)}, due ${formatDayLong(due.dueAt)}.`,
+      "",
+      "Pay it here — nothing is charged until you press the button on that page:",
+      payUrl,
+      ...(slots.signOff ? ["", slots.signOff.text] : []),
+    ].join("\n"),
+    html: renderLetter({
+      subject: slots.subject,
+      preheader: `${formatMoney(due.amountPence)} was due on ${formatDayLong(due.dueAt)}. Reference ${bookingReference(booking.id)}.`,
+      mastheadLabel: "A payment due",
+      sections: [
+        {
+          ground: "pool",
+          blocks: openingBlocks(slots.opening, 30),
+        },
+        {
+          ground: "plate",
+          blocks: [
+            { kind: "eyebrow", text: "Due" },
+            { kind: "figure", amount: formatMoney(due.amountPence) },
+            {
+              kind: "note",
+              text: plain(`Was due ${formatDayLong(due.dueAt)}`),
+            },
+            {
+              kind: "button",
+              label: `Pay ${formatMoney(due.amountPence)}`,
+              href: payUrl,
+            },
+            {
+              kind: "reference",
+              text: `Reference ${bookingReference(booking.id)}`,
+            },
+          ],
+        },
+        ...(slots.signOff
+          ? [{ ground: "pool" as const, blocks: signOffBlocks(slots.signOff) }]
+          : []),
+      ],
+      why: `You are getting this because you booked a place on ${offering.name}. It is about that booking, not a mailing list.`,
+    }),
+  };
+}
+
 export function cancellationEmail(
   booking: BookingWithOffering,
   by: CancelledBy = "buyer",

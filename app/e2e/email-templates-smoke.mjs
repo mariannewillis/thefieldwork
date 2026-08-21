@@ -292,13 +292,34 @@ try {
     "Session approved",
     "Session declined",
     "Password reset",
+    "Payment reminder",
   ]) {
     ok(`  …including ${label}`, index.includes(label));
   }
+  // WHAT IS NOT HERS TO CHANGE IS SAID ON EACH TEMPLATE, not on the index.
+  //
+  // The index used to carry it in a standfirst, and that went with every other
+  // standfirst in the portal on 2026-08-20 — she had read them all a hundred
+  // times. It was never the right home for it either: "the booking reference"
+  // is locked on the messages that HAVE one, and the list differs per template,
+  // so the place to say it is beside the fields it constrains. Checked there,
+  // below, on every one of them.
   ok(
-    "and it says what is NOT hers to change",
-    index.includes("booking reference") && index.includes("cancel a place"),
+    "the index is a list of the messages and not a paragraph about them",
+    index.includes("Payment reminder"),
   );
+  {
+    // On the template itself, beside the fields it constrains.
+    await page.goto(`${BASE}/admin/email-templates/bookingConfirmation`);
+    const one = await page.locator("main").innerText();
+    ok(
+      "and each template says what is NOT hers to change, where the fields are",
+      /Locked\s*—\s*written by the app/i.test(one) &&
+        one.includes("booking reference"),
+      one.replace(/\s+/g, " ").slice(0, 160),
+    );
+    await page.goto(`${BASE}/admin/email-templates`);
+  }
   await page.setViewportSize({ width: 1680, height: 1200 });
   await page.screenshot({
     path: join(SHOTS, "index.png"),

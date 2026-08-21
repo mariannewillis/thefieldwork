@@ -309,6 +309,28 @@ model Course {
   /// through the relation.
   balanceDueAt DateTime? @db.Date
 
+  /// HOW MANY PAYMENTS SHE WILL TAKE FOR IT (operator, 2026-08-21).
+  ///
+  /// 1 is the whole price at booking. 2 is the deposit and one balance, which
+  /// is what this app did before there was a number here — so an existing
+  /// course with a deposit reads as 2 and behaves exactly as it always has.
+  /// 4 is a deposit and three more.
+  ///
+  /// THE FIRST PAYMENT IS ALWAYS THE DEPOSIT and is taken at the moment of
+  /// booking; `instalments` counts it. What is split is the rest, evenly, with
+  /// the rounding going on the LAST one so no payment is ever a penny short of
+  /// what was agreed.
+  instalments Int @default(1)
+
+  /// Days between payments. 30 is "once a month" as she says it.
+  ///
+  /// DAYS AND NOT MONTHS, because a month is not a length: a course bought on
+  /// the 31st has no 31st to be due on in four of them, and every rule for what
+  /// happens then is a rule somebody has to remember. Thirty days is a
+  /// duration, it is the same every time, and it is what a person means when
+  /// they say "monthly" about four payments.
+  instalmentEveryDays Int @default(30)
+
   /// Days before the FIRST date that the run is still refundable in full. A
   /// course is bought once, so it is cancelled once.
   refundDays Int @default(14)
@@ -1069,6 +1091,10 @@ model Booking {
 
   payments Payment[]
 
+  /// The plan this booking is being paid on. Empty on a workshop,
+  /// which is paid at once.
+  instalments Instalment[]
+
   /// Places sold is `sum(places) where status = paid` for one offering, less
   /// anything lapsed, and it is read on every public workshop and course page.
   /// A service has no capacity — one-to-one means one — so its index is here to
@@ -1102,6 +1128,60 @@ enum PaymentKind {
 /// amounts; what is outstanding is the booking's total less that sum; whether
 /// the money has gone back is whether every one of them carries a refund. None
 /// of it is a boolean anybody has to remember to update.
+/// ONE PAYMENT IN A PLAN, and when it is due.
+///
+/// WRITTEN AT BOOKING AND NEVER RECOMPUTED, for the reason `Booking.
+/// balanceDueAt` gives: a plan Marianne changes next month must not move a date
+/// somebody already bought on. The rows are the agreement, made once.
+///
+/// A WORKSHOP HAS NONE. It is paid at once, so there is nothing to schedule,
+/// and an empty schedule is how "nothing is owed later" is spelled.
+///
+/// WHAT IS OVERDUE IS DERIVED FROM THESE, never stored — the same rule the rest
+/// of this app keeps (D-25, holding and lapsing are derived, never swept).
+/// Nothing runs on a schedule here, so a `paidAt` written by a sweep would be a
+/// column that is right only as often as somebody remembers to run it.
+model Instalment {
+  id        Int     @id @default(autoincrement())
+  bookingId Int
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  /// 1-based. Number 1 is the deposit, taken at the moment of booking.
+  number Int
+
+  /// PENCE. The rounding goes on the LAST one, so the parts always sum to the
+  /// total and nobody is ever asked for a penny more or less than was agreed.
+  amountPence Int
+
+  /// The day it is due. Number 1 is due the day the booking was made.
+  dueAt DateTime @db.Date
+
+  /// When a payment covered it. Null while it is outstanding.
+  ///
+  /// This one IS stored rather than derived, and it is the exception that
+  /// proves the rule: money arrives from Stripe against a session, and which
+  /// instalment that session was FOR is a fact about the moment it arrived
+  /// rather than something re-derivable from amounts afterwards — two £50
+  /// payments on a four-part plan are not distinguishable by sum alone.
+  paidAt DateTime?
+
+  /// The payment that covered it, when one did.
+  paymentId Int?     @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  /// When a reminder for THIS one was last sent. Null until one has been.
+  ///
+  /// Per instalment rather than per booking, because "have they been reminded"
+  /// is a question about one payment: a plan of four is four separate asks and
+  /// a single column would say yes to all of them after the first.
+  remindedAt DateTime?
+
+  @@unique([bookingId, number])
+  @@index([bookingId])
+  /// What the overdue count reads: unpaid, and due before today.
+  @@index([paidAt, dueAt])
+}
+
 model Payment {
   id        Int     @id @default(autoincrement())
   bookingId Int
@@ -1142,6 +1222,9 @@ model Payment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  /// The instalment this payment settled, when it settled one.
+  instalment Instalment?
 
   /// A booking has at most one deposit, one balance and one full payment.
   /// The kinds are the arrangement, so two of a kind is not a thing that can

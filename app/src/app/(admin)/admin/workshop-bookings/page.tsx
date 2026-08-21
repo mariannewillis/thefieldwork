@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { owing, overdueWords } from "@/lib/instalments";
 import { markAllBookingsSeen } from "@/app/(admin)/admin/workshop-bookings/actions";
 import BookingLine from "@/components/admin/BookingLine";
 import MarkAllSeen from "@/components/admin/MarkAllSeen";
@@ -378,9 +379,19 @@ export default async function Page({
   searchParams: Promise<{ show?: string; kind?: string; page?: string }>;
 }) {
   const { show, kind, page: pageParam } = await searchParams;
-  // The two tabs (operator, 2026-08-19). Upcoming is the default, because a
-  // booking she has to do something about is always one that has not happened.
+  // The tabs (operator, 2026-08-19). Upcoming is the default, because a booking
+  // she has to do something about is always one that has not happened.
   const showingPast = show === "past";
+
+  /**
+   * AND A THIRD, FOR MONEY THAT HAS NOT ARRIVED (operator, 2026-08-21).
+   *
+   * It cuts ACROSS the other two rather than sitting beside them: a payment can
+   * be overdue on a course that has already started, so filing it under Past
+   * would hide the one thing she needs to chase. What this tab holds is
+   * everybody with something to pay, whenever their course is.
+   */
+  const showingOwing = show === "owing";
 
   // WHICH KIND, or all of them (operator, 2026-08-19). A query value rather
   // than client state, for the same reason the tabs are links: it survives a
@@ -420,6 +431,20 @@ export default async function Page({
   const archived = all
     .filter((booking) => !stillToCome(booking) && ofKind(booking))
     .sort((a, b) => dateOf(b) - dateOf(a) || b.id - a.id);
+
+  /**
+   * EVERYBODY WITH SOMETHING TO PAY, whenever their course is.
+   *
+   * LATE FIRST, and the latest of the late at the top — the order she would put
+   * them in herself, because the top of this list is a list of phone calls.
+   */
+  const owingRows = (await owing())
+    .filter((row) => ofKind(row.booking))
+    .sort(
+      (a, b) =>
+        b.overdueDays - a.overdueDays ||
+        (a.next?.dueAt.getTime() ?? 0) - (b.next?.dueAt.getTime() ?? 0),
+    );
 
   // THE TAB'S WHOLE POPULATION, before the kind filter, so the number beside
   // each filter is the number of rows that filter will actually produce on the
